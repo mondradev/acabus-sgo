@@ -64,7 +64,7 @@
             this.restartReplicaButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(623, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(831, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -103,9 +103,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.resultTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.resultTable.Location = new System.Drawing.Point(12, 252);
+            this.resultTable.Location = new System.Drawing.Point(16, 368);
+            this.resultTable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.resultTable.Name = "resultTable";
-            this.resultTable.Size = new System.Drawing.Size(599, 152);
+            this.resultTable.Size = new System.Drawing.Size(799, 222);
             this.resultTable.TabIndex = 1;
             // 
             // statusStrip1
@@ -113,22 +114,23 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.currentTaskLabel,
             this.taskProgressBar});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 407);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 598);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(623, 22);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(831, 29);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // currentTaskLabel
             // 
             this.currentTaskLabel.Name = "currentTaskLabel";
-            this.currentTaskLabel.Size = new System.Drawing.Size(122, 17);
+            this.currentTaskLabel.Size = new System.Drawing.Size(122, 24);
             this.currentTaskLabel.Text = "Tarea actual: Ninguna";
             // 
             // taskProgressBar
             // 
             this.taskProgressBar.Name = "taskProgressBar";
-            this.taskProgressBar.Size = new System.Drawing.Size(300, 16);
+            this.taskProgressBar.Size = new System.Drawing.Size(400, 23);
             // 
             // valTable
             // 
@@ -136,9 +138,10 @@
             this.valTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.NoEcon,
             this.ValPending});
-            this.valTable.Location = new System.Drawing.Point(12, 52);
+            this.valTable.Location = new System.Drawing.Point(16, 76);
+            this.valTable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.valTable.Name = "valTable";
-            this.valTable.Size = new System.Drawing.Size(257, 173);
+            this.valTable.Size = new System.Drawing.Size(343, 253);
             this.valTable.TabIndex = 3;
             // 
             // NoEcon
@@ -158,9 +161,10 @@
             this.badCountersTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.badCountersTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn1});
-            this.badCountersTable.Location = new System.Drawing.Point(275, 52);
+            this.badCountersTable.Location = new System.Drawing.Point(367, 76);
+            this.badCountersTable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.badCountersTable.Name = "badCountersTable";
-            this.badCountersTable.Size = new System.Drawing.Size(158, 173);
+            this.badCountersTable.Size = new System.Drawing.Size(211, 253);
             this.badCountersTable.TabIndex = 4;
             // 
             // dataGridViewTextBoxColumn1
@@ -174,9 +178,10 @@
             this.deathCounterButton.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.deathCounterButton.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn2});
-            this.deathCounterButton.Location = new System.Drawing.Point(439, 52);
+            this.deathCounterButton.Location = new System.Drawing.Point(585, 76);
+            this.deathCounterButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.deathCounterButton.Name = "deathCounterButton";
-            this.deathCounterButton.Size = new System.Drawing.Size(172, 173);
+            this.deathCounterButton.Size = new System.Drawing.Size(229, 253);
             this.deathCounterButton.TabIndex = 5;
             // 
             // dataGridViewTextBoxColumn2
@@ -188,44 +193,48 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 232);
+            this.label1.Location = new System.Drawing.Point(17, 339);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(123, 13);
+            this.label1.Size = new System.Drawing.Size(167, 19);
             this.label1.TabIndex = 6;
             this.label1.Text = "Resultados de consultas";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 36);
+            this.label2.Location = new System.Drawing.Point(16, 53);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(122, 13);
+            this.label2.Size = new System.Drawing.Size(167, 19);
             this.label2.TabIndex = 7;
             this.label2.Text = "Validaciones pendientes";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(272, 36);
+            this.label3.Location = new System.Drawing.Point(363, 53);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(105, 13);
+            this.label3.Size = new System.Drawing.Size(142, 19);
             this.label3.TabIndex = 8;
             this.label3.Text = "Contadores en ceros";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(436, 36);
+            this.label4.Location = new System.Drawing.Point(581, 53);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(176, 13);
+            this.label4.Size = new System.Drawing.Size(241, 19);
             this.label4.TabIndex = 9;
             this.label4.Text = "Contadores menor que validaciones";
             // 
             // DailyTask
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(623, 429);
+            this.ClientSize = new System.Drawing.Size(831, 627);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -236,6 +245,9 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.resultTable);
             this.Controls.Add(this.toolStrip1);
+            this.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "DailyTask";
             this.Text = "DailyTask";
             this.toolStrip1.ResumeLayout(false);

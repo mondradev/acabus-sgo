@@ -41,6 +41,21 @@ namespace ACABUS_Control_de_operacion {
         private bool _connected;
 
         /// <summary>
+        /// Obtiene el tamaño del buffer de datos.
+        /// </summary>
+        private const int BUFFER_SIZE = 1024;
+
+        /// <summary>
+        /// Patrón de inicio de la respuesta.
+        /// </summary>
+        private const string PATTERN_I = "<<i<<";
+
+        /// <summary>
+        /// Patrón del final de la respuesta.
+        /// </summary>
+        private const string PATTERN_F = ">>f>>";
+
+        /// <summary>
         /// Crea una instancia de una conexión por SSH a un equipo remoto especificando 
         /// la ruta de acceso y sus credenciales para la autenticación.
         /// </summary>
@@ -79,82 +94,140 @@ namespace ACABUS_Control_de_operacion {
         /// <returns>Respuesta de la terminal del equipo remoto al de ejecutar el comando.</returns>
         public String SendCommand(String command) {
 
-            /// TODO Por corregir proceso de envío de comandos y lectura de respuesta
+            // Variable local para obtener la respuesta del flujo
+            String response;
 
-            String buffer;
-            int nbytes = 0;
+            // Variable local que indica el tamaño de la respuesta
+            int responseSize = 0;
+
+            // Variable local donde construiremos la respuesta obtenida del comando
             StringBuilder responseBuilder = new StringBuilder();
 
-            try {
-                nbytes = readResponse(out buffer);
-                if (nbytes < 0)
-                    throw new Exception("Error al leer desde buffer");
+            // Variable local donde llevaremos el numero de intentos
+            int time = 0;
 
-                command = command.Insert(0, "echo -n '$I$'; ");
-                command = command + " ; echo -n '$F$' \n";
-                nbytes = command.Length;
+            // Número máximo de intentos
+            int timeMax = 5;
 
-                this._session.Write(command);
+            // Intentamos leer los datos que tenga el flujo actualmente para descartarlos
+            responseSize = readResponse(out response);
 
-                while (!responseBuilder.ToString().Contains("$F$") && this._session.ShellConnected
-                    && this._session.ShellOpened) {
-                    nbytes = readResponse(out buffer);
-                    if (nbytes < 0)
-                        throw new Exception("Error al leer desde buffer");
-                    if (nbytes > 0) {
-                        buffer = buffer.Substring(buffer.IndexOf(command) + command.Length);
-                        responseBuilder.Append(buffer);
-                    }
+            // Preparamos el comando para ejecutar una salida limpia
+            command = command.Insert(0, String.Format("echo -n '{0}' ; ", PATTERN_I));
+            command = String.Format("{0}; echo -n '{1}'", command, PATTERN_F);
+
+            // Escribimos el comando a ejecutar en el equipo remoto
+            this._session.WriteLine(command);
+
+            while (time < timeMax) {
+
+                // Intentamos leer
+                responseSize = readResponse(out response);
+                // Si el tamaño de la respuesta es cero, intentamos leer de nuevo
+                if (responseSize == 0) {
+                    time++;
+                    continue;
+                }
+                // Si es mayor a cero,  
+                if (responseSize > 0) {
+                    // Construimos la respuesta
+                    responseBuilder.Append(response);
+
+                    // Si ya leimos el final de la respuesta, terminamos los intentos
+                    if (response.Contains(PATTERN_F))
+                        break;
                 }
             }
-            catch (Exception ex) {
-                throw ex;
+
+
+            response = responseBuilder.ToString();
+
+            // Removemos el comando escrito en el buffer de ser necesario
+            response = response.Contains(String.Format("'{0}'", PATTERN_F))
+                ? response.Substring(response.IndexOf(String.Format("'{0}'", PATTERN_F)) + PATTERN_F.Length + 2)
+                : response;
+
+            if (response.Contains(PATTERN_F)) {
+                response = response.Substring(response.LastIndexOf(PATTERN_I) + PATTERN_I.Length);
+                response = response.Contains(String.Format("\r\n{0}", PATTERN_F)) ?
+                    response.Substring(0, response.LastIndexOf("\r\n" + PATTERN_F))
+                    : response.Substring(0, response.LastIndexOf(PATTERN_F));
             }
-            String response = responseBuilder.ToString();
-            if (response.Length > 0) {
-                response = response.Substring(response.IndexOf("$I$") + 3);
-                response = response.Substring(0, response.IndexOf("\r\n$F$"));
-            }
-            Console.WriteLine(String.Format("{0}: Listo", this.Host));
+            Console.WriteLine(String.Format("{0}: Listo, Respuesta: {1}", this.Host, response));
             return response;
         }
 
         /// <summary>
-        /// Realiza la lectura del enlace del SSH con un tiempo limite definido por la propiedad
-        /// TimeOut. Cuando se agota el tiempo este devuelve lo obtenido.
+        /// Intenta la lectura del flujo de datos SSH antes que se agote el tiempo de espera
+        /// definido por la propiedad TimeOut.
         /// </summary>
         /// <param name="response">Varible donde se devolverá la respuesta.</param>
         /// <returns>El número de bytes leidos.</returns>
         private int readResponse(out String response) {
+            // Indica si ocurrió un error en la lectura
+            bool isError = false;
 
-            /// Corregir logica de lectura de respuesta del flujo SSH
-
+            // Variable local donde construiremos la respuesta obtenida del flujo de datos SSH 
             StringBuilder responseBuilder = new StringBuilder();
+
+            // Variable local que controla el temporizador de espera de lectura
             int timer = 0;
+
+            // Declaración e implementación del hilo para la lectura del flujo de datos SSH
             Thread threadSshRead = new Thread(() => {
+
+                // Flujo de datos del SSH
+                Stream sshStream = this._session.IO;
+
+                // Buffer bytes
+                byte[] buffer = new byte[BUFFER_SIZE];
+
+                // Tamaño de la respuesta en bytes
+                int responseSize = 0;
+
+                // Indica si ya ha recibido datos
                 bool receive = false;
+
+                // Comienza el intento de lectura del flujo de datos
                 while (true) {
-                    Byte[] buffer = new Byte[1024];
-                    int nbytes = 0;
-                    nbytes = this._session.IO.Read(buffer, 0, buffer.Length);
-                    if (nbytes > 0) {
-                        receive = true;
-                        responseBuilder.Append(Encoding.UTF8.GetString(buffer, 0, nbytes));
-                        timer = 0;
-                    }
-                    if (nbytes < 0 || (nbytes == 0 && receive)) {
+                    timer = 0; // Iniciamos el temporizador en 0
+                    responseSize = sshStream.Read(buffer, 0, BUFFER_SIZE); // Intentamos leer
+                    if (responseSize < 0) { // Si es menor a cero el tamaño de la respuesta 
                         timer = TimeOut;
-                        return;
+                        isError = true;
+                        return; // Terminamos la lectura
                     }
+                    if (responseSize > 0) { // Si es mayor a cero
+                        receive = true; // Marcamos que ya estamos recibiendo datos
+                        responseBuilder.Append(Encoding.UTF8.GetString(buffer, 0, responseSize)); // Añadimos a la respuesta
+                        continue; // Continuamos en el bucle para intentar leer más de nuevo
+                    }
+                    if (responseSize == 0 && receive) // Si ya recibimos datos anteriormente pero esta ocasion no
+                        break; // Terminamos los intentos de leer más datos
                 }
+
             });
+
+            // Ejecución del hilo de lectura del flujo de datos de SSH
             threadSshRead.Start();
+
+            // Ejecutamos un temporizador que se reinicia cada vez que se lee de nuevo
+            // Si la variable local se vuelve mayor que el tiempo de espera, termina el temporizador
             while (timer < TimeOut) {
-                Thread.Sleep(1);
-                timer++;
+                Thread.Sleep(1); // Esperamos un milisegundo
+                timer++; // Incrementamos el tiempo del temporizador en 1ms
             }
+            // Al terminar el tiempo detenemos el hilo para evitar la espera infinita
             threadSshRead.Abort();
+
+            // Si el tamaño de la respuesta es menor a cero, lanzamos una excepción.
+            if (isError)
+                throw new IOException(String.Format("Error: Al leer el flujo de datos SSH, Host: {0}", this.Host)); // Lanzamos una excepcion de E/S
+
+            // Elegimos como respuesta todo lo que se recuperó del flujo de datos
             response = responseBuilder.ToString();
+
+            // Devolvemos la respuesta
             return response.Length;
         }
 
