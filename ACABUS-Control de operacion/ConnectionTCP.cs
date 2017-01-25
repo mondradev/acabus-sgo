@@ -24,12 +24,12 @@ namespace ACABUS_Control_de_operacion
                     {
                         pr = ping.Send(strIP);
                         if (pr.Status == IPStatus.Success)
-                            break;
+                            return true;
                     }
                     return false;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
