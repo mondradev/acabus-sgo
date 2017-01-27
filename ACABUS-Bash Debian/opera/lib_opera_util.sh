@@ -2,7 +2,7 @@
 # ----------------------------------------------------
 # ||            Libería de utilería                 ||
 # ||                                                ||
-# ||    2017/01/25                          v1.0    ||
+# ||    2017/01/26                          v1.1    ||
 # ||    Javier de Jesús Flores Mondragón            ||
 # ||    Operadora de transporte integral            ||
 # ----------------------------------------------------
@@ -124,6 +124,19 @@ function log() {
     if [[ readyLog -eq 0 ]]; then return 0; fi
     dateNow="$(date +"%Y/%m/%d") $(date +"%H:%M:%S")"
     echo "$dateNow $1" >> "$DIR_RESULTS/$LOG_FILENAME"
+}
+
+# Permite enviar a bitacora cada linea leida en el argumento
+# @param $1 Contenido multilinea
+function lineToLog() {
+    log "<< $2"
+    bkpIFS=$IFS
+    IFS=$'\n'
+    for line in $1
+    do
+        log "<< $line"
+    done
+    IFS=$bkpIFS
 }
 
 # Verificar log

@@ -2,7 +2,7 @@
 # ----------------------------------------------------
 # ||            Libería de Base de datos            ||
 # ||                                                ||
-# ||    2017/01/25                          v1.0    ||
+# ||    2017/01/26                          v1.1    ||
 # ||    Javier de Jesús Flores Mondragón            ||
 # ||    Operadora de transporte integral            ||
 # ----------------------------------------------------
@@ -32,8 +32,7 @@ function backup() {
     PGPASSWORD=$DB_PASS $PG_PATH/pg_dump -i -h $DB_HOST -p $DB_PORT -U $DB_USER -F c -b -v -f "$bkp_filename" $2 2> /dev/null
     if [[ $? -eq 0 ]]; then
         log "<< Backup creado y guardado en $bkp_filename"
-        echo "Backup guardado en: $PWD"
-        echo "Archivo backup: $bkp_filename"
+        echo "Archivo backup guardado: $PWD/$bkp_filename"
         return 0
     else
         log "<< Ocurrio un error al generar el backup"
@@ -49,19 +48,16 @@ function backup() {
 # @param $3 Nombre de la base de datos
 function queryExport() {
     dbName=$3
-    dateNow="$(date +"%Y%m%d")"
-    filePathToExport="$DIR_RESULTS/$2$(echo "_")$dateNow$(echo ".rpt.csv")"
+    filePathToExport="$DIR_RESULTS/$2$(echo ".rpt.csv")"
     psqlCommand="\copy ($1) TO '$filePathToExport' CSV HEADER"
     echo "Realizando consulta y exportando resultado -> $2$(echo "...")"
-    PGPASSWORD=$DB_PASS \
-    $PG_PATH/psql -U $DB_USER -h $DB_HOST -p $DB_PORT -d $dbName -c "$psqlCommand"
+    query "$psqlCommand" $3
     if [[ $? -ne 0 ]]; then
         echo "Ocurrió un error al exportar"
-        log "<< Error al generar el CSV de la consulta [ $1 ]"
         return 1
     else
         echo "$filePathToExport generado..."
-        log "<< Consulta [ $(echo $1) ] ejecutada y resultado exportado a $filePathToExport"
+        log "<< Resultado exportado a $filePathToExport"
         return 0
     fi
 }

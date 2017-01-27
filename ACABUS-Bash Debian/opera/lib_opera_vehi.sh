@@ -3,7 +3,7 @@
 # ||            Script de verificación              ||
 # ||                de vehículos                    ||
 # ||                                                ||
-# ||    2017/01/26                          v0.9    ||
+# ||    2017/01/27                          v1.0    ||
 # ||    Javier de Jesús Flores Mondragón            ||
 # ||    Operadora de transporte integral            ||
 # ----------------------------------------------------
@@ -43,48 +43,159 @@ function getNoEcon() {
     return 0
 }
 
+FILE_UPDATE_ENVI="update_envi.sql"
+
 # Crea un back up de la base de datos de un vehiculos
 # con solo ingresar el nombre del dispositivo
 # @param $1 Nombre de la base de datos
 # @param $2 Nombre del equipo
 function createBackup() {
-    title "Backup de base de datos $2"
-    for line in $(showAllTrans)
-    do
-	    log "<< $line"
-    done
-    for line in $(showTrans)
-    do
-	    log "<< $line"
-    done
+    title "Backup de base de datos $2"  
+    echo "Deteniendo RN GPS..."
+    killall -s KILL rn_gps &>/dev/null
+    sleep 1
+    reportAcceCont $NO_ECON  
+    echo "Espere, preparando información..."
+    lastdaysTrans=$(showAllTrans | grep "[Val|Cont|Loc|Asgn_turn|Turn|Asgn_Ruta]")
+    lineToLog "$lastdaysTrans" "Ultimos 10 días de transacciones"
     backup $2 $1
     if [ $? -ne 1 ]; then 
         createTar $2
+        if [ $? -ne 1 ]; then
+            read -p "Desea actualizar las tablas de sitm_envi ? (s/n): " response
+            if [[ "$response" == "" ]]; then return 1; fi
+            if [[ "$response" == "s" || "$response" == "S" ]]; then
+                echo "Actualizando sitm_envi, espere..."
+                result=$(queryFromFile "$FILE_UPDATE_ENVI" $DB_NAME)
+                if [[ $? -eq 0 ]]; then
+                    echo "Actualización de sitm_envi correcta"
+                    log "<< Fin de actualización de sitm_envi.*.bol_envi=true"
+                else
+                    echo "Ocurrió un error al actualizar"
+                    log "<< Error al actualizar sitm_envi"
+                fi
+            fi
+        fi
     fi
+    here="$PWD"
+    echo  "Iniciando RN GPS..."
+    cd /home/teknei/.teknei_startup/rn
+    sudo -u tkn_gsm ./rn_gps_startup.sh &>/tmp/tkn_rn_gps.log &
+    cd "$here"
+    echo "Listo..."
     pause
 }
-
 
 # Indica cuantas transacciones estan pendientes por
 # replicar.
 function showAllTrans() {
-    query "SELECT date(fch_acce_sali)||' Val: '||count(*)
+    # Validaciones
+    query "SELECT date(fch_acce_sali)||' Val_Disp: '||count(*)
         FROM sitm_disp.sbop_acce_sali
-	    WHERE date(fch_acce_sali) BETWEEN (date(NOW())-7) AND date(NOW())
+	    WHERE date(fch_acce_sali) BETWEEN (date(NOW())-10) AND date(NOW())
         GROUP BY date(fch_acce_sali)
-        ORDER BY date(fch_acce_sali) DESC" $DB_NAME | grep 'Val:'
+        ORDER BY date(fch_acce_sali) ASC" $DB_NAME | grep 'Val_Disp:'
+    query "SELECT date(fch_envi)||' Val_Envi: '||count(*)
+        FROM sitm_envi.sbop_acce_sali
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Val_Envi:'
+    query "SELECT date(fch_envi)||' Val_Pend_Envi: '||count(*)
+        FROM sitm_envi.sbop_acce_sali
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+            AND bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Val_Pend_Envi:'
 
-    query "SELECT date(fch_cont_acce)' Conteos: '||count(*)
+    # Conteos
+    query "SELECT date(fch_cont_acce)||' Cont_Disp: '||count(*)
         FROM sitm_disp.sbop_cont_acce
-	    WHERE date(fch_cont_acce) BETWEEN (date(NOW())-7) AND date(NOW())
+	    WHERE date(fch_cont_acce) BETWEEN (date(NOW())-10) AND date(NOW())
         GROUP BY date(fch_cont_acce)
-        ORDER BY date(fch_cont_acce) DESC" $DB_NAME | grep 'Conteos:'
+        ORDER BY date(fch_cont_acce) ASC" $DB_NAME | grep 'Cont_Disp:'
+    query "SELECT date(fch_envi)||' Cont_Envi: '||count(*)
+        FROM sitm_envi.sbop_cont_acce
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Cont_Envi:'
+    query "SELECT date(fch_envi)||' Cont_Pend_Envi: '||count(*)
+        FROM sitm_envi.sbop_cont_acce
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+            AND bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Cont_Pend_Envi:'
 
-	query "SELECT date(fch_crea)||' Localización: '||count(*)
+    # Localización
+    query "SELECT date(fch_crea)||' Loca_Disp: '||count(*)
         FROM sitm_disp.sfmo_hist_rece_nave
-	    WHERE date(fch_crea) BETWEEN (date(NOW())-7) AND date(NOW())
+	    WHERE date(fch_crea) BETWEEN (date(NOW())-10) AND date(NOW())
         GROUP BY date(fch_crea)
-        ORDER BY date(fch_crea) DESC" $DB_NAME | grep 'Localización:'
+        ORDER BY date(fch_crea) ASC" $DB_NAME | grep 'Loca_Disp:'
+    query "SELECT date(fch_envi)||' Loca_Envi: '||count(*)
+        FROM sitm_envi.sfmo_hist_rece_nave
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Loca_Envi:'
+    query "SELECT date(fch_envi)||' Loca_Pend_Envi: '||count(*)
+        FROM sitm_envi.sfmo_hist_rece_nave
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+            AND bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Loca_Pend_Envi:'
+
+	# Asignación de turnos
+    query "SELECT date(fch_crea)||' Asgn_turn_Disp: '||count(*)
+        FROM sitm_disp.sbop_asgn_turn
+	    WHERE date(fch_crea) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_crea)
+        ORDER BY date(fch_crea) ASC" $DB_NAME | grep 'Asgn_turn_Disp:'
+    query "SELECT date(fch_envi)||' Asgn_turn_Envi: '||count(*)
+        FROM sitm_envi.sbop_asgn_turn
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Asgn_turn_Envi:'
+    query "SELECT date(fch_envi)||' Asgn_turn_Pend_Envi: '||count(*)
+        FROM sitm_envi.sbop_asgn_turn
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+            AND bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Asgn_turn_Pend_Envi:'
+
+    # Turnos
+    query "SELECT date(fch_crea)||' Turn_Disp: '||count(*)
+        FROM sitm_disp.sbop_turn
+	    WHERE date(fch_crea) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_crea)
+        ORDER BY date(fch_crea) ASC" $DB_NAME | grep 'Turn_Disp:'
+    query "SELECT date(fch_envi)||' Turn_Envi: '||count(*)
+        FROM sitm_envi.sbop_turn
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Turn_Envi:'
+    query "SELECT date(fch_envi)||' Turn_Pend_Envi: '||count(*)
+        FROM sitm_envi.sbop_turn
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+            AND bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Turn_Pend_Envi:'
+
+    # Asignación de ruta
+    query "SELECT date(fch_crea)||' Asgn_Ruta_Disp: '||count(*)
+        FROM sitm_disp.sfru_asgn
+	    WHERE date(fch_crea) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_crea)
+        ORDER BY date(fch_crea) ASC" $DB_NAME | grep 'Asgn_Ruta_Disp:'
+    query "SELECT date(fch_envi)||' Asgn_Ruta_Envi: '||count(*)
+        FROM sitm_envi.sfru_asgn
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Asgn_Ruta_Envi:'
+    query "SELECT date(fch_envi)||' Asgn_Ruta_Pend_Envi: '||count(*)
+        FROM sitm_envi.sfru_asgn
+	    WHERE date(fch_envi) BETWEEN (date(NOW())-10) AND date(NOW())
+            AND bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi) ASC" $DB_NAME | grep 'Asgn_Ruta_Pend_Envi:'
 }
 
 # Indica cuantas transacciones estan pendientes por
@@ -92,11 +203,11 @@ function showAllTrans() {
 # @param $1 Nombre del equipo
 function showTrans() {
     title "Transacciones pendientes $1"
-    query "SELECT date(fch_envi)||' Val: '||count(*)
+    query "SELECT date(fch_envi)||' Validaciones: '||count(*)
         FROM sitm_envi.sbop_acce_sali
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
-        ORDER BY date(fch_envi)" $DB_NAME | grep 'Val:'
+        ORDER BY date(fch_envi)" $DB_NAME | grep 'Validaciones:'
     query "SELECT date(fch_envi)||' Conteos: '||count(*)
         FROM sitm_envi.sbop_cont_acce
         WHERE bol_envi=false
@@ -107,6 +218,21 @@ function showTrans() {
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
         ORDER BY date(fch_envi)" $DB_NAME | grep 'Localización:'
+    query "SELECT date(fch_envi)||' Asignación Turnos: '||count(*)
+        FROM sitm_envi.sbop_asgn_turn
+        WHERE bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi)" $DB_NAME | grep 'Asignación Turnos:'
+    query "SELECT date(fch_envi)||' Turnos: '||count(*)
+        FROM sitm_envi.sbop_turn
+        WHERE bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi)" $DB_NAME | grep 'Turnos:'
+    query "SELECT date(fch_envi)||' Asignación Ruta: '||count(*)
+        FROM sitm_envi.sfru_asgn
+        WHERE bol_envi=false
+        GROUP BY date(fch_envi)
+        ORDER BY date(fch_envi)" $DB_NAME | grep 'Asignación Ruta:'    
 }
 
 
@@ -156,42 +282,17 @@ function validateConnection() {
     pause
 }
 
+SQL_FILE_NAME="report_query.sql"
+
 # Crea un reporte de las validaciones y conteos replicados
 # @param $1 Fecha de inicio del reporte
 # @param $2 Fecha final del reporte
 # @param $3 Número economico del vehiculo
 function reportAcceCont() {
-    title "Reporte de conteos y transacciones $1 al $2 $3"
+    sqlFile=$(cat "$SQL_FILE_NAME")
     rm -rf $DIR_RESULTS/trx_cont_nave_*.rpt.csv
-    filename="trx_cont_nave_$3$(echo _)$1_$2"
-    queryExport "SELECT FECHA, SUM(VAL_PEND) AS VAL_PEND, SUM(VAL_TOTAL) AS VAL_TOTAL,
-                    SUM(CONT_PEND) AS CONT_PEND, SUM(CONT_TOTAL) AS CONT_TOTAL
-            FROM (
-                SELECT DATE(FCH_ENVI) AS FECHA, COUNT(*) AS VAL_PEND, 0 AS VAL_TOTAL,
-                    0 AS CONT_PEND, 0 AS CONT_TOTAL
-                FROM SITM_ENVI.SBOP_ACCE_SALI
-                WHERE BOL_ENVI=FALSE
-                GROUP BY DATE(FCH_ENVI)
-                UNION
-                SELECT DATE(FCH_ACCE_SALI) AS FECHA, 0 AS VAL_PEND, COUNT(*) AS VAL_TOTAL,
-                    0 AS CONT_PEND, 0 AS CONT_TOTAL
-                FROM SITM_DISP.SBOP_ACCE_SALI
-                GROUP BY DATE(FCH_ACCE_SALI)
-                UNION
-                SELECT DATE(FCH_ENVI) AS FECHA, 0 AS VAL_PEND, 0 AS VAL_TOTAL,
-                    COUNT(*) AS CONT_PEND, 0 AS CONT_TOTAL
-                FROM SITM_ENVI.SBOP_CONT_ACCE
-                WHERE BOL_ENVI=FALSE
-                GROUP BY DATE(FCH_ENVI)
-                UNION
-                SELECT DATE(FCH_CONT_ACCE) AS FECHA, 0 AS VAL_PEND, 0 AS VAL_TOTAL,
-                    0 AS CONT_PEND, COUNT(*) AS CONT_TOTAL
-                FROM SITM_DISP.SBOP_CONT_ACCE
-                GROUP BY DATE(FCH_CONT_ACCE)
-            ) AS V
-            WHERE FECHA BETWEEN DATE('$1') AND DATE('$2')
-            GROUP BY DATE(V.FECHA)
-            ORDER BY V.FECHA" "$filename" $DB_NAME
+    filename="data_$1"
+    queryExport "$sqlFile" "$filename" $DB_NAME
 }
 
 # Muestra el log del DB Backup
@@ -235,7 +336,7 @@ LOG_FILENAME="log_$NO_ECON$(echo _)$(date +"%Y%m%d").log"
 readyLog=1
 log "Iniciando Opera Bus v0.9 $NO_ECON"
 opcMain=0
-while [ "$opcMain" != "15" ]
+while [ "$opcMain" != "16" ]
 do
 	# Menú de funcionamiento de consultas
 	title "Opera script para Vehiculos $NO_ECON"
@@ -251,12 +352,13 @@ do
         "[Contadores]" \
         "Verificar contador en base de datos" \
         "[Replica]" \
-        "Valicaciones y conteos pendientes" \
+        "Transacciones pendientes" \
         "DB Backup LOG" \
         "Looking LOG" \
 	    "[SALTO]" \
         "[Otras funciones]" \
         "Crear backup SITM" \
+        "Actualizar lista negra" \
         "Apagar PC" \
         "Reiniciar PC"
 	read -p "Opcion: " -e opcMain
@@ -280,16 +382,11 @@ do
                 pause ;;
             10) showDBBackuplog 1 ;;
             11) showLookingLog 1 ;;
-            12)
-                updateBackList
-                now=$(date +"%Y-%m-%d")
-                dateIni="2016-01-01"
-                dateFin="$now"
-            	reportAcceCont $dateIni $dateFin $NO_ECON
-                createBackup $DB_NAME $NO_ECON ;;
-            13) shutdownNow ;;
-            14) rebootPC ;;
-	        15) exit 0 ;;
+            12) createBackup $DB_NAME $NO_ECON ;;
+            13) updateBackList ;;
+            14) shutdownNow ;;
+            15) rebootPC ;;
+	        16) exit 0 ;;
 	        *) ;;
 	    esac
 	else
