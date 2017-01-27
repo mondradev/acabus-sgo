@@ -1,14 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ACABUS_Control_de_operacion {
@@ -33,6 +26,12 @@ namespace ACABUS_Control_de_operacion {
             this.resultTable.Columns.Add("lastSend", "Último enviado");
             this.resultTable.Columns.Add("countTran", "Transacciones pendientes");
             this.resultTable.Columns.Add("timeoutReplica", "Tiempo sin replicar");
+
+            this.taskProgressBar.Maximum = Trunk.Trunks[0].CountDevices();
+            this.taskProgressBar.Value = 0;
+
+            this.currentTaskLabel.Text = "Tarea actual: Verificando réplica";
+
             foreach (Trunk trunk in Trunk.Trunks)
                 foreach (Station station in trunk.Stations)
                     foreach (Device entry in station.Devices) {
@@ -50,11 +49,15 @@ namespace ACABUS_Control_de_operacion {
                                     TimeSpan dif = lastTran - lastTranSend;
                                     row.Cells[1].Value = lastTran.ToString();
                                     row.Cells[2].Value = lastTranSend.ToString();
-                                    row.Cells[3].Value = response[0];
+                                    row.Cells[3].Value = response[0].Trim();
                                     row.Cells[4].Value = dif.ToString();
                                     if (dif > TimeSpan.Parse("00:10:00.000")) {
                                         this._replicaDown.Add(entry);
                                     }
+                                    this.BeginInvoke(new Action(delegate {
+                                        this.taskProgressBar.Value++;
+                                        Trace.WriteLine(String.Format("Progreso: {0}%", (int)((float)this.taskProgressBar.Value / (float)this.taskProgressBar.Maximum * 100)));
+                                    }));
                                 }
                                 catch (Exception) { }
                             }
@@ -116,13 +119,15 @@ namespace ACABUS_Control_de_operacion {
 
         private String QueryBySSH(String ip, String query) {
             int time = 0;
-            int maxTime = 5;
+            int maxTime = 10;
             String response = "";
             while (time < maxTime) {
                 try {
                     using (Ssh ssh = new Ssh(ip, "teknei", "4c4t3k")) {
                         if (ssh.IsConnected()) {
                             response = ssh.SendCommand(String.Format("PGPASSWORD='4c4t3k' /opt/PostgreSQL/9.3/bin/psql -U postgres -d SITM -c \"{0}\" | grep ','", query));
+                            if (String.IsNullOrEmpty(response))
+                                throw new Exception(String.Format("{0}: Sin respuesta", ip));
                             break;
 
                         }
@@ -131,54 +136,78 @@ namespace ACABUS_Control_de_operacion {
                 catch (Exception) {
                     time++;
                     response = "Error al obtener información,,,";
-                    Console.WriteLine(String.Format("{0}: Intentando por SSH de nuevo", ip));
+                    Trace.WriteLine(String.Format("{0}: Intentando por SSH de nuevo", ip));
                 }
             }
             return response;
         }
 
+
+        List<Device> _replicaDownRetry = new List<Device>();
+
         private void restartReplicaButton_Click(object sender, EventArgs e) {
 
-            // Añadir ejecución en hilos
-            if (this._replicaDown.Count > 0) {
+            if (this._replicaDown.Count > 0 || this._replicaDownRetry.Count > 0) {
+                if (this._replicaDownRetry.Count > 0) {
+                    this._replicaDown.Clear();
+                    this._replicaDown.AddRange(_replicaDownRetry);
+                    _replicaDownRetry.Clear();
+                }
+                this.currentTaskLabel.Text = "Tarea actual: Reiniciando réplica";
+                this.taskProgressBar.Maximum = this._replicaDown.Count;
+                this.taskProgressBar.Value = 0;
 
                 this.resultTable.Rows.Clear();
                 this.resultTable.Columns.Clear();
 
                 Dictionary<string, string> SQL = loadConfigurationPostgreSQL();
 
-
                 this.resultTable.Columns.Add("numeSeri", "Número Serie");
                 this.resultTable.Columns.Add("countTranB", "Trans. a/reiniciar");
                 this.resultTable.Columns.Add("countTranA", "Trans. d/reiniciar");
-
+                int timeMax = 10;
                 foreach (var entry in this._replicaDown) {
                     var ip = entry.IP;
-                    String[] response = entry.Type == Device.DeviceType.KVR ? QueryTran(ip, SQL).Split(',') : QueryVal(ip, SQL).Split(',');
-                    String pendingBefore = response[0];
-                    try {
-                        using (Ssh ssh = new Ssh(ip, "root", "t43ck4n&3u12")) {
-                            if (ssh.IsConnected()) {
-                                ssh.SendCommand("rm /home/teknei/SITM/CONFIG/PID_SAVE.txt");
-                                ssh.SendCommand("killall java");
-                            }
-                        }
-                        using (Ssh ssh = new Ssh(ip, "teknei", "4c4t3k")) {
-                            if (ssh.IsConnected()) {
-                                ssh.SendCommand("killall java");
-                                ssh.SendCommand("sh /home/teknei/SITM/SHELL/JAR_CONFIG.sh start");
-                                ssh.SendCommand("ps -fea | grep SNAP*.jar");
-                                ssh.SendCommand("echo \"Replica reiniciada\"");
-                            }
-                        }
-                        Application.DoEvents();
-                    }
-                    catch (Exception) { }
-                    Thread.Sleep(150);
-                    response = entry.Type == Device.DeviceType.KVR ? QueryTran(ip, SQL).Split(',') : QueryVal(ip, SQL).Split(',');
-                    String pendingAfter = response[0];
-                    string[] rowArray = new string[] { entry.GetNumeSeri(), pendingBefore, pendingAfter };
+                    string[] rowArray = new string[] { entry.GetNumeSeri() };
                     this.resultTable.Rows.Add(rowArray);
+                    new Thread(() => {
+                        int time = 0;
+                        DataGridViewRow row = GetRow(resultTable, entry.GetNumeSeri());
+                        String[] response = entry.Type == Device.DeviceType.KVR ? QueryTran(ip, SQL).Split(',') : QueryVal(ip, SQL).Split(',');
+                        String pendingBefore = response[0].Trim();
+                        row.Cells[1].Value = pendingBefore;
+                        while (time < timeMax)
+                            try {
+                                using (Ssh ssh = new Ssh(ip, "root", "t43ck4n&3u12")) {
+                                    if (ssh.IsConnected()) {
+                                        ssh.SendCommand("rm /home/teknei/SITM/CONFIG/PID_SAVE.txt");
+                                        ssh.SendCommand("killall java");
+                                    }
+                                }
+                                using (Ssh ssh = new Ssh(ip, "teknei", "4c4t3k")) {
+                                    if (ssh.IsConnected()) {
+                                        ssh.SendCommand("killall java");
+                                        ssh.SendCommand("sh /home/teknei/SITM/SHELL/JAR_CONFIG.sh start");
+                                        Thread.Sleep(1000);
+                                        Trace.WriteLine(ip + ": " + ssh.SendCommand("ps -fea | grep 'SNAPSHOT.jar'"));
+                                    }
+                                }
+                                this.BeginInvoke(new Action(delegate {
+                                    this.taskProgressBar.Value++;
+                                    Trace.WriteLine(String.Format("Progreso: {0}%", (int)((float)this.taskProgressBar.Value / (float)this.taskProgressBar.Maximum * 100)));
+                                }));
+                                Thread.Sleep(20000);
+                                response = entry.Type == Device.DeviceType.KVR ? QueryTran(ip, SQL).Split(',') : QueryVal(ip, SQL).Split(',');
+                                String pendingAfter = response[0].Trim();
+                                row.Cells[2].Value = pendingAfter;
+                                if (Int16.Parse(pendingAfter) > 0) {
+                                    _replicaDownRetry.Add(entry);
+                                }
+                                break;
+                            }
+                            catch (Exception) { time++; }
+
+                    }).Start();
                     Application.DoEvents();
                 }
 

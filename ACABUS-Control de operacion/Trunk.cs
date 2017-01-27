@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace ACABUS_Control_de_operacion
-{
+namespace ACABUS_Control_de_operacion {
     /// <summary>
     /// Esta es una estructura que define los atributos de una ruta troncal,
     /// además de gestionar la lista de troncales.
     /// </summary>
-    public class Trunk
-    {
+    public class Trunk {
         #region StaticFunctions
         /// <summary>
         /// Archivo de configuración de las rutas.
@@ -29,11 +27,10 @@ namespace ACABUS_Control_de_operacion
         /// <summary>
         /// Obtiene la lista de rutas troncales.
         /// </summary>
-        public static List<Trunk> Trunks
-        {
-            get
-            {
-                if (trunks == null) trunks = new List<Trunk>();
+        public static List<Trunk> Trunks {
+            get {
+                if (trunks == null)
+                    trunks = new List<Trunk>();
                 return trunks;
             }
         }
@@ -41,14 +38,13 @@ namespace ACABUS_Control_de_operacion
         /// <summary>
         /// Carga la configuración del XML en Trunk.Trunks.
         /// </summary>
-        public static void LoadConfiguration()
-        {
+        public static void LoadConfiguration() {
             Trunks.Clear();
             xmlConfig = new XmlDocument();
             xmlConfig.Load(FILE_NAME_CONFIG_XML);
-            foreach (XmlNode trunk in xmlConfig.SelectSingleNode("Trunks"))
-            {
-                if (!trunk.Name.Equals("Trunk")) continue;
+            foreach (XmlNode trunk in xmlConfig.SelectSingleNode("Trunks")) {
+                if (!trunk.Name.Equals("Trunk"))
+                    continue;
                 var trunkTemp = Trunk.ToTrunk(trunk) as Trunk;
                 trunkTemp.LoadStations(trunk.ChildNodes);
                 Trunks.Add(trunkTemp);
@@ -62,8 +58,7 @@ namespace ACABUS_Control_de_operacion
         /// <param name="trunk">Nodo XML a parsear.</param>
         /// <returns>Una instancia de ruta troncal correspondiente al nodo
         /// pasado como argumento.</returns>
-        public static Trunk ToTrunk(XmlNode trunk)
-        {
+        public static Trunk ToTrunk(XmlNode trunk) {
             Trunk trunkTemp = new Trunk();
             trunkTemp.ID = Int32.Parse(trunk.Attributes["id"].Value);
             return trunkTemp;
@@ -83,23 +78,21 @@ namespace ACABUS_Control_de_operacion
         /// <summary>
         /// Crea una instancia de una ruta troncal.
         /// </summary>
-        public Trunk()
-        {
+        public Trunk() {
             Stations = new List<Station>();
         }
-                
+
         /// <summary>
         /// Carga las estaciones a partir de una lista de nodos
         /// XML.
         /// </summary>
         /// <param name="childNodes">Lista de nodos XML que representan
         /// una estación cada uno.</param>
-        public void LoadStations(XmlNodeList childNodes)
-        {
+        public void LoadStations(XmlNodeList childNodes) {
             Stations.Clear();
-            foreach (XmlNode station in childNodes)
-            {
-                if (!station.Name.Equals("Station")) continue;
+            foreach (XmlNode station in childNodes) {
+                if (!station.Name.Equals("Station"))
+                    continue;
                 var stationTemp = Station.ToStation(station, this) as Station;
                 stationTemp.LoadDevices(station.ChildNodes);
                 Stations.Add(stationTemp);
@@ -110,9 +103,20 @@ namespace ACABUS_Control_de_operacion
         /// Representa en una cadena la instancia actual.
         /// </summary>
         /// <returns>Una cadena que representa una instancia Trunk.</returns>
-        public new String ToString()
-        {
+        public new String ToString() {
             return String.Format("Ruta T{0}", ID.ToString("D2"));
+        }
+
+        /// <summary>
+        /// Obtiene el número de dispositivos en la ruta troncal
+        /// </summary>
+        /// <returns>Número de dispositivos</returns>
+        public int CountDevices() {
+            int count = 0;
+            foreach (Station station in Stations)
+                foreach (Device device in station.Devices)
+                    count++;
+            return count;
         }
     }
 }

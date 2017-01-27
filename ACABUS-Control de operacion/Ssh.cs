@@ -134,7 +134,7 @@ namespace ACABUS_Control_de_operacion {
                     responseBuilder.Append(response);
 
                     // Si ya leimos el final de la respuesta, terminamos los intentos
-                    if (response.Contains(PATTERN_F))
+                    if (response.Contains(PATTERN_F) && responseBuilder.Length > command.Length)
                         break;
                 }
             }
@@ -153,7 +153,6 @@ namespace ACABUS_Control_de_operacion {
                     response.Substring(0, response.LastIndexOf("\r\n" + PATTERN_F))
                     : response.Substring(0, response.LastIndexOf(PATTERN_F));
             }
-            Console.WriteLine(String.Format("{0}: Listo, Respuesta: {1}", this.Host, response));
             return response;
         }
 
