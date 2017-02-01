@@ -328,6 +328,7 @@ if [ "$(whoami)" != "root" ]; then
     echo "Necesitas ser superusuario, ejecuta con sudo"
     exit
 fi
+rm -rf /home/teknei/opera_bus*
 NO_ECON=$(getNoEcon)
 if [[ $? -ne 0 ]]; then
     echo "Debes ingresar el número económico, adios! :)"
