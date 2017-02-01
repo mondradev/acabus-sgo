@@ -3,7 +3,7 @@
 # ||            Script de verificación              ||
 # ||                de vehículos                    ||
 # ||                                                ||
-# ||    2017/01/27                          v1.0    ||
+# ||    2017/02/01                          v1.0    ||
 # ||    Javier de Jesús Flores Mondragón            ||
 # ||    Operadora de transporte integral            ||
 # ----------------------------------------------------
@@ -28,8 +28,9 @@ function getNoEcon() {
     log "Obteniendo número económico"
     noecon=$(query "SELECT NO_ECON FROM SITM_DISP.SFVH_VEHI" $DB_NAME | grep -o "A[ACP]\{1\}-[0-9]\{3\}")
     if [ "$noecon" == "" ]; then
-        read -p "No se obtuvo el número económico del vehículo, ingréselo por favor: " -e noecon
-        read -p "El número económico: $noecon es correcto? (s/n): " -e response
+        read -p "       No se obtuvo el número económico del vehículo, ingréselo por favor: " -e noecon
+        noecon=$(toUpperCase $noecon)
+        read -p "       El número económico: $noecon es correcto? (s/n): " -e response
         if [[ "$response" == "s" || "$response" == "S" ]]; then
             if [ "$noecon" == "" ]; then
                 return 1
@@ -334,12 +335,12 @@ if [[ $? -ne 0 ]]; then
 fi
 LOG_FILENAME="log_$NO_ECON$(echo _)$(date +"%Y%m%d").log"
 readyLog=1
-log "Iniciando Opera Bus v0.9 $NO_ECON"
+log "Iniciando Opera Bus v1.0 $NO_ECON"
 opcMain=0
 while [ "$opcMain" != "16" ]
 do
 	# Menú de funcionamiento de consultas
-	title "Opera script para Vehiculos $NO_ECON"
+	title "Opera Bus v1.0 | $NO_ECON"
 	menu "[SICOFT]" \
         "Verificar sicoft" \
         "Estado de tarjeta WWAN" \
@@ -355,13 +356,12 @@ do
         "Transacciones pendientes" \
         "DB Backup LOG" \
         "Looking LOG" \
-	    "[SALTO]" \
         "[Otras funciones]" \
         "Crear backup SITM" \
         "Actualizar lista negra" \
         "Apagar PC" \
         "Reiniciar PC"
-	read -p "Opcion: " -e opcMain
+	read -p "   Opcion: " -e opcMain
 	if [ "$opcMain" != "" ]; then
 	    case $opcMain in
        	    1)

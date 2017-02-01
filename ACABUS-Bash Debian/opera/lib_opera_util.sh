@@ -43,7 +43,7 @@ function title() {
     done
     strTitle="$strTitle "$1""
     separator
-    echo $strTitle
+    echo "$strTitle"
     separator
 }
 
@@ -71,16 +71,21 @@ function menu() {
                 tempOpc=${tempOpc/[/}
                 tempOpc=${tempOpc/]/}
                 if (( ${#tempOpc} > 0 )); then
-                        echo "  $tempOpc"
+                    printf "\e[38;5;196m     $tempOpc\n"
+                    printf "\e[0m"
                 fi
             else
-                echo " $i$(echo "] ")$param"
+                if [[ $i -lt 10 ]]; then
+                    echo "      $i$(echo "] ")$param"
+                else
+                    echo "     $i$(echo "] ")$param"
+                fi
                 i=$(($i+1))
             fi
 		fi
 		done
 		echo ''
-		echo " $i$(echo "] Salir")"
+		echo "     $i$(echo "] Salir")"
 		echo ''
 	fi
 }
@@ -161,6 +166,16 @@ function viewLog() {
 	sleep 1
     fi
     kill -9 $PID
+}
+
+# Convierte todo a mayusculas
+function toUpperCase() {
+    echo $1 | tr [a-z] [A-Z]
+}
+
+# Convierte todo a minusculas
+function toLowerCase() {
+    echo $1 | tr [A-Z] [a-z]
 }
 
 UTIL_LIB_LOADED=1

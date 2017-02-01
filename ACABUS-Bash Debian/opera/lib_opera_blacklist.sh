@@ -3,7 +3,7 @@
 # ||            Script de actualización de          ||
 # ||            lista negra en vehículos            ||
 # ||                                                ||
-# ||    2017/01/26                          v0.3    ||
+# ||    2017/01/26                          v0.4    ||
 # ||    Javier de Jesús Flores Mondragón            ||
 # ||    Operadora de transporte integral            ||
 # ----------------------------------------------------
@@ -34,8 +34,11 @@ function updateBackList() {
         if [[ $exists -eq 0 ]]; then
             idTarj=$(query "SELECT 'id_tarj: '||(ID_TARJ + 1) FROM SITM_DISP.SBLN_LNEG ORDER BY ID_TARJ DESC LIMIT 1" $DB_NAME | grep 'id_tarj: ')
             idTarj=${idTarj/'id_tarj: '/}
+            if [[ "$idTarj" == "" ]]; then
+                idTarj=1
+            fi
             log ">> Agregando tarjeta $uidTarj"
-            $(query "INSERT INTO sitm_disp.sbln_lneg (id_tarj, desc_lneg, fch_alta, uid_tarj) VALUES ($idTarj, 'Carga masiva', NOW(), '$uidTarj')" $DB_NAME)
+            result=$(query "INSERT INTO sitm_disp.sbln_lneg (id_tarj, desc_lneg, fch_alta, uid_tarj) VALUES ($idTarj, 'Carga masiva', NOW(), '$uidTarj')" $DB_NAME)
             if [[ $? -eq 0 ]]; then
                 log "<< Se agregó tarjeta $uidTarj"
                 updated=$((updated+1))
