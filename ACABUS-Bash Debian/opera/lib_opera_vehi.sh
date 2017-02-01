@@ -3,7 +3,7 @@
 # ||            Script de verificación              ||
 # ||                de vehículos                    ||
 # ||                                                ||
-# ||    2017/02/01                          v1.0    ||
+# ||    2017/02/01                          v1.1    ||
 # ||    Javier de Jesús Flores Mondragón            ||
 # ||    Operadora de transporte integral            ||
 # ----------------------------------------------------
@@ -15,7 +15,7 @@
 
 # Validando dependencias
 if [ "$BLACKLIST_LIB_LOADED" != "1" ]; then
-    echo "No se cargó la librería de listas negras"
+    echo "       No se cargó la librería de listas negras"
     exit 2
 fi
 
@@ -52,34 +52,34 @@ FILE_UPDATE_ENVI="update_envi.sql"
 # @param $2 Nombre del equipo
 function createBackup() {
     title "Backup de base de datos $2"  
-    echo "Deteniendo RN GPS..."
+    echo "       Deteniendo RN GPS..."
     killall -s KILL rn_gps &>/dev/null
     sleep 1
     reportAcceCont $NO_ECON  
-    echo "Espere, preparando información..."
+    echo "       Espere, preparando información..."
     lastdaysTrans=$(showAllTrans | grep "[Val|Cont|Loc|Asgn_turn|Turn|Asgn_Ruta]")
     lineToLog "$lastdaysTrans" "Ultimos 10 días de transacciones"
     backup $2 $1
     if [ $? -ne 1 ]; then 
         createTar $2
         if [ $? -ne 1 ]; then
-            read -p "Desea actualizar las tablas de sitm_envi ? (s/n): " response
+            read -p "       Desea actualizar las tablas de sitm_envi ? (s/n): " response
             if [[ "$response" == "" ]]; then return 1; fi
             if [[ "$response" == "s" || "$response" == "S" ]]; then
-                echo "Actualizando sitm_envi, espere..."
+                echo "       Actualizando sitm_envi, espere..."
                 result=$(queryFromFile "$FILE_UPDATE_ENVI" $DB_NAME)
                 if [[ $? -eq 0 ]]; then
-                    echo "Actualización de sitm_envi correcta"
+                    echo "       Actualización de sitm_envi correcta"
                     log "<< Fin de actualización de sitm_envi.*.bol_envi=true"
                 else
-                    echo "Ocurrió un error al actualizar"
+                    echo "       Ocurrió un error al actualizar"
                     log "<< Error al actualizar sitm_envi"
                 fi
             fi
         fi
     fi
     here="$PWD"
-    echo  "Iniciando RN GPS..."
+    echo  "       Iniciando RN GPS..."
     cd /home/teknei/.teknei_startup/rn
     sudo -u tkn_gsm ./rn_gps_startup.sh &>/tmp/tkn_rn_gps.log &
     cd "$here"
@@ -204,32 +204,32 @@ function showAllTrans() {
 # @param $1 Nombre del equipo
 function showTrans() {
     title "Transacciones pendientes $1"
-    query "SELECT date(fch_envi)||' Validaciones: '||count(*)
+    query "SELECT date(fch_envi)||'       Validaciones: '||count(*)
         FROM sitm_envi.sbop_acce_sali
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
         ORDER BY date(fch_envi)" $DB_NAME | grep 'Validaciones:'
-    query "SELECT date(fch_envi)||' Conteos: '||count(*)
+    query "SELECT date(fch_envi)||'       Conteos: '||count(*)
         FROM sitm_envi.sbop_cont_acce
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
         ORDER BY date(fch_envi)" $DB_NAME | grep 'Conteos:'
-    query "SELECT date(fch_envi)||' Localización: '||count(*)
+    query "SELECT date(fch_envi)||'       Localización: '||count(*)
         FROM sitm_envi.sfmo_hist_rece_nave
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
         ORDER BY date(fch_envi)" $DB_NAME | grep 'Localización:'
-    query "SELECT date(fch_envi)||' Asignación Turnos: '||count(*)
+    query "SELECT date(fch_envi)||'       Asignación Turnos: '||count(*)
         FROM sitm_envi.sbop_asgn_turn
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
         ORDER BY date(fch_envi)" $DB_NAME | grep 'Asignación Turnos:'
-    query "SELECT date(fch_envi)||' Turnos: '||count(*)
+    query "SELECT date(fch_envi)||'       Turnos: '||count(*)
         FROM sitm_envi.sbop_turn
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
         ORDER BY date(fch_envi)" $DB_NAME | grep 'Turnos:'
-    query "SELECT date(fch_envi)||' Asignación Ruta: '||count(*)
+    query "SELECT date(fch_envi)||'       Asignación Ruta: '||count(*)
         FROM sitm_envi.sfru_asgn
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
@@ -240,8 +240,8 @@ function showTrans() {
 # Muestra el ID de vehiculo y el ID de equipo
 function showIDVehiEqui() {
     title 'ID de Vehículo y ID de Equipo'
-    query "SELECT 'ID Vehículo: '||id_vehi FROM sitm_disp.sfvh_vehi " $DB_NAME | grep "ID Vehículo: "
-    query "SELECT 'ID Equipo: '||id_equi FROM sitm_disp.sbeq_equi" $DB_NAME | grep "ID Equipo: "
+    query "SELECT '       ID Vehículo: '||id_vehi FROM sitm_disp.sfvh_vehi " $DB_NAME | grep "ID Vehículo: "
+    query "SELECT '       ID Equipo: '||id_equi FROM sitm_disp.sbeq_equi" $DB_NAME | grep "ID Equipo: "
     pause
 }
 
@@ -251,7 +251,7 @@ function showICCID() {
     title 'ICCID de SIM Card'
     echo " Obteniendo número de serie de la SIM"
     echo -e "AT+ICCID" > /dev/ttyUSB3
-    head -n 8 /dev/ttyUSB3 | grep ICCID:
+    echo "       $(head -n 8 /dev/ttyUSB3 | grep ICCID:)"
     pause
 }
 
@@ -278,7 +278,7 @@ function openRNProperties() {
 # Ejecuta un ping al servidor de base de datos
 function validateConnection() {
     title 'Verificando conectividad a internet'
-    echo ' Realizando ping al servidor de SICOFT'
+    echo '       Realizando ping al servidor de SICOFT'
     sudo -u tkn_gsm ping 187.217.65.98 -c 5
     pause
 }
@@ -312,9 +312,9 @@ function checkCounterDB() {
     while (true); do
         clear
         title "Conteos en base de datos"
-        echo "Presione [ENTER] para finalizar..."
+        echo "       Presione [ENTER] para finalizar..."
         echo ""
-        query "select 'Conteos: '||count(*) from sitm_disp.sbop_cont_acce" $DB_NAME | grep "Conteos:"
+        query "select '       Conteos: '||count(*) from sitm_disp.sbop_cont_acce" $DB_NAME | grep "Conteos:"
 	if read -t 10 -n 1 key; then
 	    break
 	fi
@@ -325,13 +325,12 @@ function checkCounterDB() {
 # Funcionamiento principal del programa
 # ------------------------------------------------------
 if [ "$(whoami)" != "root" ]; then
-    echo "Necesitas ser superusuario, ejecuta con sudo"
+    echo "       Necesitas ser superusuario, ejecuta con sudo"
     exit
 fi
-rm -rf /home/teknei/opera_bus*
 NO_ECON=$(getNoEcon)
 if [[ $? -ne 0 ]]; then
-    echo "Debes ingresar el número económico, adios! :)"
+    echo "       Debes ingresar el número económico, adios! :)"
     exit
 fi
 LOG_FILENAME="log_$NO_ECON$(echo _)$(date +"%Y%m%d").log"
@@ -341,7 +340,7 @@ opcMain=0
 while [ "$opcMain" != "16" ]
 do
 	# Menú de funcionamiento de consultas
-	title "Opera Bus v1.0 | $NO_ECON"
+	title "Opera Bus v1.1 | $NO_ECON"
 	menu "[SICOFT]" \
         "Verificar sicoft" \
         "Estado de tarjeta WWAN" \
@@ -362,7 +361,7 @@ do
         "Actualizar lista negra" \
         "Apagar PC" \
         "Reiniciar PC"
-	read -p "   Opcion: " -e opcMain
+	read -p "      Opcion: " -e opcMain
 	if [ "$opcMain" != "" ]; then
 	    case $opcMain in
        	    1)

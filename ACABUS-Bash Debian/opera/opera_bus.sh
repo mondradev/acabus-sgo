@@ -11,6 +11,7 @@ function include() {
 # -----------------------------------------------------
 # Creación del archivo ejecutable
 # -----------------------------------------------------
+rm -rf /home/teknei/opera_bus*
 rm -rf exec.sh # Eliminamos si existe
 echo "#!/bin/bash" >> $FILENAME_EXEC
 

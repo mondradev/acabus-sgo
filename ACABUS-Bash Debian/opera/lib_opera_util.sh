@@ -51,7 +51,7 @@ function title() {
 # presiona una tecla
 function pause() {
     echo ''
-    read -p "Presione [ENTER] para continuar..." pauseVar
+    read -p "       Presione [ENTER] para continuar..." pauseVar
 }
 
 # Permite mostrar en pantalla un menu
@@ -93,7 +93,7 @@ function menu() {
 # Permite crea un comprimido de un archivo y las bitacoras
 # @param $1 Nombre del archivo
 function createTar () {
-    echo "Comprimiendo resultados y bitácoras, espere..."
+    echo "       Comprimiendo resultados y bitácoras, espere..."
     log ">> Comprimiendo resultados y las bitácoras en el $1"
     filename="$1$(echo '.tar.gz')"
     tar -cf $filename $DIR_RESULTS/*
@@ -101,13 +101,13 @@ function createTar () {
 	    return 1
     fi
     log "<< comprimido completo"
-    echo "Se terminá de crear el comprimido: $filename"
+    echo "       Se terminá de crear el comprimido: $filename"
 }
 
 # Permite reiniciar la pc
 function rebootPC() {
     echo ''
-    echo "Reiniciando PC..."
+    echo "       Reiniciando PC..."
     log ">> Reiniciando equipo abordo"
     reboot
 }
@@ -115,7 +115,7 @@ function rebootPC() {
 # Permite reiniciar la pc
 function shutdownNow() {
     echo ''
-    echo "Apagando PC..."
+    echo "       Apagando PC..."
     log ">> Apagando equipo abordo"
     shutdown now
 }
@@ -151,7 +151,7 @@ function lineToLog() {
 function viewLog() {
     title "$2"
     if [ "$3" == "1" ]; then
-	    echo "Presione [ENTER] para cerrar el log"
+	    echo "       Presione [ENTER] para cerrar el log"
     fi
     echo ""
     tail -f "$1" &

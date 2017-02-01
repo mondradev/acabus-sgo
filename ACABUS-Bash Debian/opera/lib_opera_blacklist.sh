@@ -13,7 +13,7 @@
 
 # Validando dependencias
 if [ "$DB_LIB_LOADED" != "1" ]; then
-    echo "No se cargó la librería de base de datos"
+    echo "       No se cargó la librería de base de datos"
     exit 2
 fi
 
@@ -24,7 +24,7 @@ BLACK_LIST_FILENAME="blacklist.list"
 function updateBackList() {
     clear
     title "Actualizacion de lista negra de la unidad $1"
-    echo "Actualizando, espere..."
+    echo "       Actualizando, espere..."
     log ">> Actualizando lista negra"
     updated=0
     error=0
@@ -48,11 +48,11 @@ function updateBackList() {
             fi
         fi
     done
-    echo "Fin de la actualización"
-    echo "Agregados: $updated"
-    echo "Errores: $error"
+    echo "       Fin de la actualización"
+    echo "       Agregados: $updated"
+    echo "       Errores: $error"
     log "<< Actualización terminada, actualizados: $updated, errores: $error"
-    echo ""
+    pause
 }
 
 BLACKLIST_LIB_LOADED=1
