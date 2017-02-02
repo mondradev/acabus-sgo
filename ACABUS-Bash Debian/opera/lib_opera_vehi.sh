@@ -51,16 +51,17 @@ FILE_UPDATE_ENVI="update_envi.sql"
 # @param $1 Nombre de la base de datos
 # @param $2 Nombre del equipo
 function createBackup() {
-    title "Backup de base de datos $2"  
+    title "Backup de base de datos $2"
     echo "       Deteniendo RN GPS..."
     killall -s KILL rn_gps &>/dev/null
     sleep 1
-    reportAcceCont $NO_ECON  
+    reportAcceCont $NO_ECON
     echo "       Espere, preparando información..."
     lastdaysTrans=$(showAllTrans | grep "[Val|Cont|Loc|Asgn_turn|Turn|Asgn_Ruta]")
     lineToLog "$lastdaysTrans" "Ultimos 10 días de transacciones"
     backup $2 $1
-    if [ $? -ne 1 ]; then 
+    if [ $? -ne 1 ]; then
+        ifconfig > $DIR_RESULTS/mac_$2.info
         createTar $2
         if [ $? -ne 1 ]; then
             read -p "       Desea actualizar las tablas de sitm_envi ? (s/n): " response
@@ -233,7 +234,7 @@ function showTrans() {
         FROM sitm_envi.sfru_asgn
         WHERE bol_envi=false
         GROUP BY date(fch_envi)
-        ORDER BY date(fch_envi)" $DB_NAME | grep 'Asignación Ruta:'    
+        ORDER BY date(fch_envi)" $DB_NAME | grep 'Asignación Ruta:'
 }
 
 
@@ -335,7 +336,7 @@ if [[ $? -ne 0 ]]; then
 fi
 LOG_FILENAME="log_$NO_ECON$(echo _)$(date +"%Y%m%d").log"
 readyLog=1
-log "Iniciando Opera Bus v1.0 $NO_ECON"
+log "Iniciando Opera Bus v1.1 $NO_ECON"
 opcMain=0
 while [ "$opcMain" != "16" ]
 do
