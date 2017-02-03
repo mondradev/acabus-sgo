@@ -3,7 +3,7 @@
 # ||            Script de verificación              ||
 # ||                de vehículos                    ||
 # ||                                                ||
-# ||    2017/02/01                          v1.1    ||
+# ||    2017/02/01                          v1.2    ||
 # ||    Javier de Jesús Flores Mondragón            ||
 # ||    Operadora de transporte integral            ||
 # ----------------------------------------------------
@@ -12,6 +12,8 @@
 # el funcionamiento de sicoft, crear backups y validar
 # el número de registros pendientes por envíar a través
 # del proceso de réplica.
+
+VERSION="v1.2"
 
 # Validando dependencias
 if [ "$BLACKLIST_LIB_LOADED" != "1" ]; then
@@ -30,6 +32,11 @@ function getNoEcon() {
     if [ "$noecon" == "" ]; then
         read -p "       No se obtuvo el número económico del vehículo, ingréselo por favor: " -e noecon
         noecon=$(toUpperCase $noecon)
+        noecon=${noecon/-/}
+        noecon=$(echo $noecon | grep -o "A[ACP]\{1\}[0-9]\{3\}")
+        if [ "$noecon" == "" ]; then
+            return 1
+        fi
         read -p "       El número económico: $noecon es correcto? (s/n): " -e response
         if [[ "$response" == "s" || "$response" == "S" ]]; then
             if [ "$noecon" == "" ]; then
@@ -55,36 +62,34 @@ function createBackup() {
     echo "       Deteniendo RN GPS..."
     killall -s KILL rn_gps &>/dev/null
     sleep 1
-    reportAcceCont $NO_ECON
+    reportAcceCont $2
     echo "       Espere, preparando información..."
     lastdaysTrans=$(showAllTrans | grep "[Val|Cont|Loc|Asgn_turn|Turn|Asgn_Ruta]")
     lineToLog "$lastdaysTrans" "Ultimos 10 días de transacciones"
     backup $2 $1
     if [ $? -ne 1 ]; then
-        ifconfig > $DIR_RESULTS/mac_$2.info
-        createTar $2
-        if [ $? -ne 1 ]; then
-            read -p "       Desea actualizar las tablas de sitm_envi ? (s/n): " response
-            if [[ "$response" == "" ]]; then return 1; fi
-            if [[ "$response" == "s" || "$response" == "S" ]]; then
-                echo "       Actualizando sitm_envi, espere..."
-                result=$(queryFromFile "$FILE_UPDATE_ENVI" $DB_NAME)
-                if [[ $? -eq 0 ]]; then
-                    echo "       Actualización de sitm_envi correcta"
-                    log "<< Fin de actualización de sitm_envi.*.bol_envi=true"
-                else
-                    echo "       Ocurrió un error al actualizar"
-                    log "<< Error al actualizar sitm_envi"
-                fi
+        echo "$2,$(ifconfig | grep 'wlan[0-9]\{1\}' | grep -o '[0-9a-f:]\{3\}\{5\}[0-9a-f]\{2\}')" > $DIR_RESULTS/mac_$2.info
+        read -p "       Desea actualizar las tablas de sitm_envi ? (s/n): " response
+        if [[ "$response" == "" ]]; then return 1; fi
+        if [[ "$response" == "s" || "$response" == "S" ]]; then
+            echo "       Actualizando sitm_envi, espere..."
+            result=$(queryFromFile "$FILE_UPDATE_ENVI" $DB_NAME)
+            if [[ $? -eq 0 ]]; then
+                echo "       Actualización de sitm_envi correcta"
+                log "<< Fin de actualización de sitm_envi.*.bol_envi=true"
+            else
+                echo "       Ocurrió un error al actualizar"
+                log "<< Error al actualizar sitm_envi"
             fi
         fi
+        createTar $2
     fi
     here="$PWD"
     echo  "       Iniciando RN GPS..."
     cd /home/teknei/.teknei_startup/rn
     sudo -u tkn_gsm ./rn_gps_startup.sh &>/tmp/tkn_rn_gps.log &
     cd "$here"
-    echo "Listo..."
+    echo "       Listo..."
     pause
 }
 
@@ -331,17 +336,17 @@ if [ "$(whoami)" != "root" ]; then
 fi
 NO_ECON=$(getNoEcon)
 if [[ $? -ne 0 ]]; then
-    echo "       Debes ingresar el número económico, adios! :)"
+    echo "       Debes ingresar el número económico correctamente, adios! :)"
     exit
 fi
 LOG_FILENAME="log_$NO_ECON$(echo _)$(date +"%Y%m%d").log"
 readyLog=1
-log "Iniciando Opera Bus v1.1 $NO_ECON"
+log "Iniciando Opera Bus $VERSION $NO_ECON"
 opcMain=0
 while [ "$opcMain" != "16" ]
 do
 	# Menú de funcionamiento de consultas
-	title "Opera Bus v1.1 | $NO_ECON"
+	title "Opera Bus $VERSION | $NO_ECON"
 	menu "[SICOFT]" \
         "Verificar sicoft" \
         "Estado de tarjeta WWAN" \
