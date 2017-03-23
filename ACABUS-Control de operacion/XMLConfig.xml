@@ -125,6 +125,7 @@
       <Equip type="PMR" id="1" ip="172.17.13.31"/>
       <Equip type="TOR" id="1" ip="172.17.13.21"/>
       <Equip type="TOR" id="2" ip="172.17.13.22"/>
+      <Equip type="TOR" id="3" ip="172.17.13.23"/>
     </Station>
     <Station id="14" name="La Postal">
       <Equip type="KVR" id="1" ip="172.17.14.41" maxCard="" minCard="50" status="true"/>
@@ -132,6 +133,7 @@
       <Equip type="PMR" id="1" ip="172.17.14.31"/>
       <Equip type="TOR" id="1" ip="172.17.14.21"/>
       <Equip type="TOR" id="2" ip="172.17.14.22"/>
+      <Equip type="TOR" id="3" ip="172.17.14.23"/>
     </Station>
     <Station id="15" name="Vacacional">
       <Equip type="KVR" id="1" ip="172.17.15.41" maxCard="" minCard="50" status="true"/>
@@ -139,6 +141,7 @@
       <Equip type="PMR" id="1" ip="172.17.15.31"/>
       <Equip type="TOR" id="1" ip="172.17.15.21"/>
       <Equip type="TOR" id="2" ip="172.17.15.22"/>
+      <Equip type="TOR" id="3" ip="172.17.15.23"/>
     </Station>
     <Station id="16" name="Paso Limonero">
       <Equip type="KVR" id="1" ip="172.17.16.41" maxCard="" minCard="50" status="true"/>

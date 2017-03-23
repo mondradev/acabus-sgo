@@ -67,9 +67,11 @@ namespace ACABUS_Control_de_operacion {
                 this.Host = host;
                 this.Username = username;
                 this._password = password;
-                this.TimeOut = 2000;
-                this._session = new SshShell(this.Host, this.Username);
-                this._session.Password = this._password;
+                this.TimeOut = 600;
+                this._session = new SshShell(this.Host, this.Username)
+                {
+                    Password = this._password
+                };
                 this._session.Connect();
                 this._session.RemoveTerminalEmulationCharacters = true;
                 this._connected = this._session.Connected;
@@ -110,7 +112,7 @@ namespace ACABUS_Control_de_operacion {
             int timeMax = 5;
 
             // Intentamos leer los datos que tenga el flujo actualmente para descartarlos
-            responseSize = readResponse(out response);
+            responseSize = ReadResponse(out response);
 
             // Preparamos el comando para ejecutar una salida limpia
             command = command.Insert(0, String.Format("echo -n '{0}' ; ", PATTERN_I));
@@ -119,10 +121,10 @@ namespace ACABUS_Control_de_operacion {
             // Escribimos el comando a ejecutar en el equipo remoto
             this._session.WriteLine(command);
 
-            while (time < timeMax) {
+            while (time < timeMax && _session.ShellConnected && _session.ShellOpened) {
 
                 // Intentamos leer
-                responseSize = readResponse(out response);
+                responseSize = ReadResponse(out response);
                 // Si el tamaño de la respuesta es cero, intentamos leer de nuevo
                 if (responseSize == 0) {
                     time++;
@@ -162,7 +164,7 @@ namespace ACABUS_Control_de_operacion {
         /// </summary>
         /// <param name="response">Varible donde se devolverá la respuesta.</param>
         /// <returns>El número de bytes leidos.</returns>
-        private int readResponse(out String response) {
+        private int ReadResponse(out String response) {
             // Indica si ocurrió un error en la lectura
             bool isError = false;
 
@@ -192,7 +194,7 @@ namespace ACABUS_Control_de_operacion {
                     timer = 0; // Iniciamos el temporizador en 0
                     responseSize = sshStream.Read(buffer, 0, BUFFER_SIZE); // Intentamos leer
                     if (responseSize < 0) { // Si es menor a cero el tamaño de la respuesta 
-                        timer = TimeOut;
+                        // timer = TimeOut;
                         isError = true;
                         return; // Terminamos la lectura
                     }
@@ -212,7 +214,7 @@ namespace ACABUS_Control_de_operacion {
 
             // Ejecutamos un temporizador que se reinicia cada vez que se lee de nuevo
             // Si la variable local se vuelve mayor que el tiempo de espera, termina el temporizador
-            while (timer < TimeOut) {
+            while (timer < TimeOut && threadSshRead.IsAlive) {
                 Thread.Sleep(1); // Esperamos un milisegundo
                 timer++; // Incrementamos el tiempo del temporizador en 1ms
             }

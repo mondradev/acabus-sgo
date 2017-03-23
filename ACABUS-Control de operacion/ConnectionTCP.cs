@@ -1,32 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ACABUS_Control_de_operacion
 {
-    class ConnectionTCP
+    public class ConnectionTCP
     {
-        public bool sendToPing(string strIP, int it)
+        public bool SendToPing(string strIP, int it)
         {
-            if (!isIPv4(strIP))
+            if (!IsIPv4(strIP))
                 return false;
+
             Ping ping = new Ping();
             try
             {
-                PingReply pr = ping.Send(strIP);
-                if (pr.Status != IPStatus.Success)
+                PingReply pr = null;
+                Int16 i = 0;
+                while ((pr == null || pr.Status != IPStatus.Success) && i < it)
                 {
-                    for (int i = 1; i < it; i++)
-                    {
-                        pr = ping.Send(strIP);
-                        if (pr.Status == IPStatus.Success)
-                            return true;
-                    }
-                    return false;
+                    pr = ping.Send(strIP);
+                    i++;
+                    if (i == it && pr.Status != IPStatus.Success)
+                        return false;
                 }
             }
             catch (Exception)
@@ -36,12 +31,11 @@ namespace ACABUS_Control_de_operacion
             return true;
         }
 
-        public bool isIPv4(string strIp)
+        public bool IsIPv4(string strIp)
         {
             if (strIp.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length == 4)
             {
-                IPAddress ipAddr;
-                if (IPAddress.TryParse(strIp, out ipAddr))
+                if (IPAddress.TryParse(strIp, out IPAddress ipAddr))
                     return true;
             }
             return false;

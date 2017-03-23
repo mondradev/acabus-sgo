@@ -43,12 +43,13 @@
             // 
             // menuStrip1
             // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmiFile,
             this.tsmiEdit});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(786, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1282, 28);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -58,36 +59,37 @@
             this.tsmifSeparator,
             this.tsmifExit});
             this.tsmiFile.Name = "tsmiFile";
-            this.tsmiFile.Size = new System.Drawing.Size(70, 20);
+            this.tsmiFile.Size = new System.Drawing.Size(84, 24);
             this.tsmiFile.Text = "ARCHIVO";
             // 
             // tsmifSeparator
             // 
             this.tsmifSeparator.Name = "tsmifSeparator";
-            this.tsmifSeparator.Size = new System.Drawing.Size(93, 6);
+            this.tsmifSeparator.Size = new System.Drawing.Size(110, 6);
             // 
             // tsmifExit
             // 
             this.tsmifExit.Image = global::ACABUS_Control_de_operacion.Properties.Resources.Actions_close_icon;
             this.tsmifExit.Name = "tsmifExit";
-            this.tsmifExit.Size = new System.Drawing.Size(96, 22);
+            this.tsmifExit.Size = new System.Drawing.Size(113, 26);
             this.tsmifExit.Text = "Salir";
             this.tsmifExit.Click += new System.EventHandler(this.mbrArcExi_Click);
             // 
             // tsmiEdit
             // 
             this.tsmiEdit.Name = "tsmiEdit";
-            this.tsmiEdit.Size = new System.Drawing.Size(57, 20);
+            this.tsmiEdit.Size = new System.Drawing.Size(70, 24);
             this.tsmiEdit.Text = "EDITAR";
             // 
             // tlsTools
             // 
+            this.tlsTools.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.tlsTools.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbStockCard,
             this.dailyTaskButton});
-            this.tlsTools.Location = new System.Drawing.Point(0, 24);
+            this.tlsTools.Location = new System.Drawing.Point(0, 28);
             this.tlsTools.Name = "tlsTools";
-            this.tlsTools.Size = new System.Drawing.Size(786, 25);
+            this.tlsTools.Size = new System.Drawing.Size(1282, 27);
             this.tlsTools.TabIndex = 2;
             this.tlsTools.Text = "toolStrip1";
             // 
@@ -97,7 +99,7 @@
             this.tsbStockCard.Image = ((System.Drawing.Image)(resources.GetObject("tsbStockCard.Image")));
             this.tsbStockCard.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbStockCard.Name = "tsbStockCard";
-            this.tsbStockCard.Size = new System.Drawing.Size(23, 22);
+            this.tsbStockCard.Size = new System.Drawing.Size(24, 24);
             this.tsbStockCard.Text = "Stock de tarjetas";
             this.tsbStockCard.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
@@ -107,20 +109,21 @@
             this.dailyTaskButton.Image = ((System.Drawing.Image)(resources.GetObject("dailyTaskButton.Image")));
             this.dailyTaskButton.ImageTransparentColor = System.Drawing.Color.Transparent;
             this.dailyTaskButton.Name = "dailyTaskButton";
-            this.dailyTaskButton.Size = new System.Drawing.Size(23, 22);
+            this.dailyTaskButton.Size = new System.Drawing.Size(24, 24);
             this.dailyTaskButton.Text = "Tareas diarias";
             this.dailyTaskButton.Click += new System.EventHandler(this.dailyTaskButton_Click);
             // 
             // frmMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(786, 461);
+            this.ClientSize = new System.Drawing.Size(1282, 653);
             this.Controls.Add(this.tlsTools);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip1;
+            this.MinimumSize = new System.Drawing.Size(1300, 700);
             this.Name = "frmMain";
             this.Text = "Control de operación - ACABUS";
             this.menuStrip1.ResumeLayout(false);

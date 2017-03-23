@@ -72,7 +72,7 @@ namespace ACABUS_Control_de_operacion
         private bool isAvaibleIP(string strIP)
         {
             ConnectionTCP cnnTCP = new ConnectionTCP();
-            if (cnnTCP.sendToPing(strIP, 3))
+            if (cnnTCP.SendToPing(strIP, 3))
                 return true;
             return false;
         }
@@ -80,13 +80,15 @@ namespace ACABUS_Control_de_operacion
         private string consultStock(string strEquip, Dictionary<string, string> dicConfig)
         {
             PostgreSQL SQL = new PostgreSQL();
-            return SQL.stockCard(dicConfig, strEquip, PostgreSQL.queryConsult.totalCard);
+            //return SQL.stockCard(dicConfig, strEquip, PostgreSQL.queryConsult.totalCard);
+            return "";
         }
 
         private static string consultSales(string strEquip, Dictionary<string, string> dicConfig)
         {
             PostgreSQL SQL = new PostgreSQL();
-            return SQL.stockCard(dicConfig, strEquip, PostgreSQL.queryConsult.totalVta);
+            //return SQL.stockCard(dicConfig, strEquip, PostgreSQL.queryConsult.totalVta);
+            return "";
         }
 
         #endregion

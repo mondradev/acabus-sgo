@@ -37,13 +37,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DiffieHellman">
-      <HintPath>..\..\..\Libs\bin\DiffieHellman.dll</HintPath>
+      <HintPath>Libraries\DiffieHellman.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>Libraries\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql">
-      <HintPath>..\..\ACA_Equipo de recaudo_1\ACA_Equipo de recaudo_1\lib\Npgsql.dll</HintPath>
+      <HintPath>Libraries\Npgsql.dll</HintPath>
     </Reference>
     <Reference Include="Org.Mentalis.Security">
-      <HintPath>..\..\..\Libs\bin\Org.Mentalis.Security.dll</HintPath>
+      <HintPath>Libraries\Org.Mentalis.Security.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -57,7 +60,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Tamir.SharpSSH">
-      <HintPath>..\..\..\Libs\bin\Tamir.SharpSSH.dll</HintPath>
+      <HintPath>Libraries\Tamir.SharpSSH.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +80,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="KVR.cs" />
+    <Compile Include="MultiThread.cs" />
     <Compile Include="PostgreSQL.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
