@@ -112,6 +112,8 @@ namespace ACABUS_Control_de_operacion
             // Intentamos leer
             responseSize = ReadResponse(out response);
 
+            Trace.WriteLine(String.Format("El host {0} respondió: {1}", Host, response));
+
             // Removemos el comando escrito en el buffer de ser necesario
             response = ProcessReponse(response);
 
@@ -142,6 +144,9 @@ namespace ACABUS_Control_de_operacion
         /// <returns>Resultado procesado</returns>
         private string ProcessReponse(string result)
         {
+            // Removemos el comando enviado y nos quedamos con la respuesta a tratar
+            result = result.Substring(result.LastIndexOf(_BEGIN_RESPONSE_PATTERN.Replace("\\", "")));
+
             // Preparamos el patrón utilizado para extraer solo la cadena de respuesta
             String regex = String.Format("{0}([^'])(.|\r\n|\n){{0,}}([^']){1}", _BEGIN_RESPONSE_PATTERN, _END_RESPONSE_PATTERN);
 

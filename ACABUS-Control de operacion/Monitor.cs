@@ -28,6 +28,7 @@ namespace ACABUS_Control_de_operacion
         private void StopOnClick(object sender, EventArgs e)
         {
             Trace.WriteLine("Estado: Deteniendo monitor");
+            _multiThread.KillAllThreads();
             timer1.Stop();
             button1.Enabled = true;
             button2.Enabled = false;
