@@ -29,7 +29,6 @@ namespace ACABUS_Control_de_operacion
         public String Host { get; private set; }
         public String DataBase { get; private set; }
         public Int16 Port { get; private set; }
-        public Int16 TimeOut { get; set; }
         public Int16 LimitOfAttempts { get; set; }
 
         public static PostgreSQL CreateConnection(String host, Int16 port, String username, String password, String database)
@@ -41,8 +40,7 @@ namespace ACABUS_Control_de_operacion
                 Username = username,
                 Passoword = password,
                 DataBase = database,
-                LimitOfAttempts = 5,
-                TimeOut = 600
+                LimitOfAttempts = 5
             };
         }
 
@@ -60,10 +58,7 @@ namespace ACABUS_Control_de_operacion
 
                 if (connection.State == ConnectionState.Open)
                 {
-                    NpgsqlCommand command = new NpgsqlCommand(statement, connection)
-                    {
-                        CommandTimeout = TimeOut
-                    };
+                    NpgsqlCommand command = new NpgsqlCommand(statement, connection);
                     NpgsqlDataReader reader = command.ExecuteReader();
                     StringBuilder header = new StringBuilder();
                     Boolean readHeader = false;
@@ -110,7 +105,6 @@ namespace ACABUS_Control_de_operacion
                 {
                     using (Ssh ssh = new Ssh(Host, usernameSsh, passwordSsh))
                     {
-                        ssh.TimeOut = TimeOut;
                         if (ssh.IsConnected())
                         {
                             response = ssh.SendCommand(String.Format(this.ConnectionBySsh, Passoword, Username, DataBase, Port, query));

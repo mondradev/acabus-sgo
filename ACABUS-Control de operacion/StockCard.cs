@@ -100,7 +100,6 @@ namespace ACABUS_Control_de_operacion
         private string QueryStock(string strEquip)
         {
             PostgreSQL sql = PostgreSQL.CreateConnection(strEquip, 5432, "postgres", "4c4t3k", "SITM");
-            sql.TimeOut = 1000;
             String[][] response = sql.ExecuteQuery(PostgreSQL.CARD_STOCK);
             return response.Length > 1 ? response[1][0] : "0";
         }
@@ -108,7 +107,6 @@ namespace ACABUS_Control_de_operacion
         private static string QuerySales(string strEquip)
         {
             PostgreSQL sql = PostgreSQL.CreateConnection(strEquip, 5432, "postgres", "4c4t3k", "SITM");
-            sql.TimeOut = 1000;
             String[][] response = sql.ExecuteQuery(PostgreSQL.TOTAL_SALE);
             return response.Length > 1 ? response[1][0] : "0";
         }

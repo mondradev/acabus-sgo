@@ -152,13 +152,12 @@ namespace ACABUS_Control_de_operacion
             }
         }
 
-      
+
 
         private void RunQueryInDevice(string query, Device device)
         {
 
             PostgreSQL psql = PostgreSQL.CreateConnection(device.IP, 5432, "postgres", "4c4t3k", "SITM");
-            psql.TimeOut = 1000;
             String[][] response;
             try
             {
@@ -278,6 +277,8 @@ namespace ACABUS_Control_de_operacion
                     taskTimeTimer.Stop();
                 }));
             }
+            if (this.taskProgressBar.Value == this.taskProgressBar.Maximum)
+                this._multiThread.KillAllThreads();
         }
 
         private bool IsAvaibleIP(string strIP)
@@ -395,10 +396,7 @@ namespace ACABUS_Control_de_operacion
                     if (Regex.IsMatch(value, "[0-9]{2,4}-[0-9]{2}-[0-9]{2,4}|[0-9]{2,4}/[0-9]{2}/[0-9]{2,4}|[0-9]{2}-[A-Za-z]{3}-[0-9]{2}"))
                     {
                         DateTime tempDateTime = DateTime.Parse(value);
-                        if (Regex.IsMatch(value, "[0-9]{2}:[0-9]{2}:[0-9]{2}"))
-                            value = tempDateTime.ToString();
-                        else
-                            value = tempDateTime.ToShortDateString();
+                        value = tempDateTime.ToString();
                     }
                     else
                     if (Regex.IsMatch(value, "^[0-9]{1,}.[0-9]{1,}$"))
