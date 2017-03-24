@@ -39,13 +39,13 @@
             this.NoEcon = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ValPending = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.alarmTrunkTable = new System.Windows.Forms.DataGridView();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.badCountersTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.disconnectVehicleTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.alarmTrunkTable)).BeginInit();
@@ -54,7 +54,7 @@
             // counterLabel
             // 
             this.counterLabel.AutoSize = true;
-            this.counterLabel.Location = new System.Drawing.Point(375, 56);
+            this.counterLabel.Location = new System.Drawing.Point(337, 56);
             this.counterLabel.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.counterLabel.Name = "counterLabel";
             this.counterLabel.Size = new System.Drawing.Size(173, 24);
@@ -81,11 +81,11 @@
             this.dataGridViewTextBoxColumn1,
             this.statusCounterColumn,
             this.lastAccessColumn});
-            this.badCountersTable.Location = new System.Drawing.Point(379, 86);
+            this.badCountersTable.Location = new System.Drawing.Point(341, 86);
             this.badCountersTable.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.badCountersTable.Name = "badCountersTable";
             this.badCountersTable.RowHeadersVisible = false;
-            this.badCountersTable.Size = new System.Drawing.Size(304, 602);
+            this.badCountersTable.Size = new System.Drawing.Size(238, 602);
             this.badCountersTable.TabIndex = 10;
             this.badCountersTable.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.ResultTableOnRowsAdded);
             // 
@@ -126,7 +126,7 @@
             this.disconnectVehicleTable.Name = "disconnectVehicleTable";
             this.disconnectVehicleTable.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             this.disconnectVehicleTable.RowHeadersVisible = false;
-            this.disconnectVehicleTable.Size = new System.Drawing.Size(360, 602);
+            this.disconnectVehicleTable.Size = new System.Drawing.Size(317, 602);
             this.disconnectVehicleTable.TabIndex = 9;
             this.disconnectVehicleTable.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.ResultTableOnRowsAdded);
             // 
@@ -155,19 +155,42 @@
             this.dataGridViewTextBoxColumn2,
             this.dataGridViewTextBoxColumn3,
             this.Column1});
-            this.alarmTrunkTable.Location = new System.Drawing.Point(693, 86);
+            this.alarmTrunkTable.Location = new System.Drawing.Point(589, 86);
             this.alarmTrunkTable.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.alarmTrunkTable.Name = "alarmTrunkTable";
             this.alarmTrunkTable.RowHeadersVisible = false;
-            this.alarmTrunkTable.Size = new System.Drawing.Size(606, 602);
+            this.alarmTrunkTable.Size = new System.Drawing.Size(710, 602);
             this.alarmTrunkTable.TabIndex = 13;
             this.alarmTrunkTable.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.ResultTableOnRowsAdded);
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.dataGridViewTextBoxColumn2.HeaderText = "Equipo";
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            this.dataGridViewTextBoxColumn2.Width = 98;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.dataGridViewTextBoxColumn3.HeaderText = "Descripción";
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            this.dataGridViewTextBoxColumn3.Width = 135;
+            // 
+            // Column1
+            // 
+            this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Column1.HeaderText = "Fecha";
+            this.Column1.Name = "Column1";
+            this.Column1.Width = 87;
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(802, 54);
+            this.label1.Location = new System.Drawing.Point(585, 56);
             this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(133, 24);
@@ -199,29 +222,6 @@
             // 
             this.timer1.Interval = 10000;
             this.timer1.Tick += new System.EventHandler(this.RefreshOnTick);
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.dataGridViewTextBoxColumn2.HeaderText = "Equipo";
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 98;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.dataGridViewTextBoxColumn3.HeaderText = "Descripción";
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 135;
-            // 
-            // Column1
-            // 
-            this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.Column1.HeaderText = "Fecha";
-            this.Column1.Name = "Column1";
-            this.Column1.Width = 87;
             // 
             // Monitor
             // 

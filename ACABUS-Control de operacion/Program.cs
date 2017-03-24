@@ -14,6 +14,7 @@ namespace ACABUS_Control_de_operacion
         [STAThread]
         static void Main()
         {
+            Trunk.LoadConfiguration();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain());

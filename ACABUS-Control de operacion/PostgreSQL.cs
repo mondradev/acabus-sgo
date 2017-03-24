@@ -27,7 +27,6 @@ namespace ACABUS_Control_de_operacion
         public String Username { get; private set; }
         public String Passoword { get; private set; }
         public String Host { get; private set; }
-        public String HostBySsh { get; set; }
         public String DataBase { get; private set; }
         public Int16 Port { get; private set; }
         public Int16 TimeOut { get; set; }
@@ -45,6 +44,10 @@ namespace ACABUS_Control_de_operacion
                 LimitOfAttempts = 5,
                 TimeOut = 600
             };
+        }
+
+        private PostgreSQL()
+        {
         }
 
         public String[][] ExecuteQuery(String statement)

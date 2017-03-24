@@ -45,7 +45,6 @@ namespace ACABUS_Control_de_operacion
             {
                 String[][] response;
                 PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
-                psql.TimeOut = 1200;
                 psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
                 try
                 {
@@ -68,12 +67,12 @@ namespace ACABUS_Control_de_operacion
                     this.BeginInvoke(new Action(delegate
                     {
                         String[] tmpRow = row;
-                        this.disconnectVehicleTable.Rows.Add(tmpRow);
                         if (!readyDisconnections)
                         {
                             this.disconnectVehicleTable.Rows.Clear();
                             readyDisconnections = true;
                         }
+                        this.disconnectVehicleTable.Rows.Add(tmpRow);
                     }));
                 }
             }, (ex) =>
@@ -106,12 +105,12 @@ namespace ACABUS_Control_de_operacion
                     this.BeginInvoke(new Action(delegate
                     {
                         String[] tmpRow = row;
-                        this.badCountersTable.Rows.Add(tmpRow);
                         if (!readyCounters)
                         {
                             this.badCountersTable.Rows.Clear();
                             readyCounters = true;
                         }
+                        this.badCountersTable.Rows.Add(tmpRow);
                     }));
                 }
             }, (ex) =>
@@ -145,12 +144,12 @@ namespace ACABUS_Control_de_operacion
                     this.BeginInvoke(new Action(delegate
                     {
                         String[] tmpRow = row;
-                        this.alarmTrunkTable.Rows.Add(tmpRow);
                         if (!readyAlarms)
                         {
                             this.alarmTrunkTable.Rows.Clear();
                             readyAlarms = true;
                         }
+                        this.alarmTrunkTable.Rows.Add(tmpRow);
                     }));
                 }
             }, (ex) =>

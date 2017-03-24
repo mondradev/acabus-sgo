@@ -59,8 +59,12 @@ namespace ACABUS_Control_de_operacion
             monitor.Show();
         }
 
+
         #endregion
 
-
+        private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Application.Exit();
+        }
     }
 }

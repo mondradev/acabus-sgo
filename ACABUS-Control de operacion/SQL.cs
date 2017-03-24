@@ -23,7 +23,6 @@ namespace ACABUS_Control_de_operacion
 
         public SQLModule()
         {
-            Trunk.LoadConfiguration();
             this._multiThread.ThreadsChanged += ThreadsChanged;
             this._multiThread.Capacity = 20;
             this.InitializeComponent();

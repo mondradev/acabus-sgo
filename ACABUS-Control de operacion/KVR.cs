@@ -15,10 +15,12 @@ namespace ACABUS_Control_de_operacion {
         /// <param name="device">Dispositivo a convertir.</param>
         /// <returns>Instancia de Kiosko de venta y recarga</returns>
         public static KVR ToKVR(Device device) {
-            KVR kvrTemp = new KVR(device.Station);
-            kvrTemp.ID = device.ID;
-            kvrTemp.IP = device.IP;
-            kvrTemp.Type = DeviceType.KVR;
+            KVR kvrTemp = new KVR(device.Station)
+            {
+                ID = device.ID,
+                IP = device.IP,
+                Type = DeviceType.KVR
+            };
             return kvrTemp;
         }
 
