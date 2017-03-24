@@ -79,83 +79,83 @@ namespace ACABUS_Control_de_operacion
             {
                 Trace.WriteLine(ex.Message);
             });
-            //this._multiThread.RunTask(() =>
-            //{
-            //    String[][] response;
-            //    PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
-            //    psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
-            //    try
-            //    {
-            //        response = psql.ExecuteQuery(counterQuery);
-            //    }
-            //    catch (NpgsqlException ex)
-            //    {
-            //        Trace.WriteLine(ex.Message);
-            //        Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, "teknei"));
-            //        response = psql.ExcuteQueryBySsh(counterQuery, "Administrador", "Administrador*2016");
-            //    }
-            //    if (response.Length <= 1)
-            //        throw new Exception(string.Format("El host {0} no respondió con un resultado", host));
-            //    bool readyCounters = false;
-            //    for (int i = 1; i < response.Length; i++)
-            //    {
-            //        String[] row = response[i];
-            //        if (row[0].Contains("Error al obtener información"))
-            //            throw new Exception(string.Format("Error al obtener la información del host {0}", host));
-            //        this.BeginInvoke(new Action(delegate
-            //        {
-            //            String[] tmpRow = row;
-            //            if (!readyCounters)
-            //            {
-            //                this.badCountersTable.Rows.Clear();
-            //                readyCounters = true;
-            //            }
-            //            this.badCountersTable.Rows.Add(tmpRow);
-            //        }));
-            //    }
-            //}, (ex) =>
-            //{
-            //    Trace.WriteLine(ex.Message);
-            //});
+            this._multiThread.RunTask(() =>
+            {
+                String[][] response;
+                PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
+                psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
+                try
+                {
+                    response = psql.ExecuteQuery(counterQuery);
+                }
+                catch (NpgsqlException ex)
+                {
+                    Trace.WriteLine(ex.Message);
+                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, "teknei"));
+                    response = psql.ExcuteQueryBySsh(counterQuery, "Administrador", "Administrador*2016");
+                }
+                if (response.Length <= 1)
+                    throw new Exception(string.Format("El host {0} no respondió con un resultado", host));
+                bool readyCounters = false;
+                for (int i = 1; i < response.Length; i++)
+                {
+                    String[] row = response[i];
+                    if (row[0].Contains("Error al obtener información"))
+                        throw new Exception(string.Format("Error al obtener la información del host {0}", host));
+                    this.BeginInvoke(new Action(delegate
+                    {
+                        String[] tmpRow = row;
+                        if (!readyCounters)
+                        {
+                            this.badCountersTable.Rows.Clear();
+                            readyCounters = true;
+                        }
+                        this.badCountersTable.Rows.Add(tmpRow);
+                    }));
+                }
+            }, (ex) =>
+            {
+                Trace.WriteLine(ex.Message);
+            });
 
-//            this._multiThread.RunTask(() =>
-//{
-//String[][] response;
-//PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
-//psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
-//try
-//{
-//response = psql.ExecuteQuery(alarmQuery);
-//}
-//catch (NpgsqlException ex)
-//{
-//Trace.WriteLine(ex.Message);
-//Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, "teknei"));
-//response = psql.ExcuteQueryBySsh(alarmQuery, "Administrador", "Administrador*2016");
-//}
-//if (response.Length <= 1)
-//throw new Exception(string.Format("El host {0} no respondió con un resultado", host));
-//bool readyAlarms = false;
-//for (int i = 1; i < response.Length; i++)
-//{
-//String[] row = response[i];
-//if (row[0].Contains("Error al obtener información"))
-//throw new Exception(string.Format("Error al obtener la información del host {0}", host));
-//this.BeginInvoke(new Action(delegate
-//{
-//String[] tmpRow = row;
-//if (!readyAlarms)
-//{
-//this.alarmTrunkTable.Rows.Clear();
-//readyAlarms = true;
-//}
-//this.alarmTrunkTable.Rows.Add(tmpRow);
-//}));
-//}
-//}, (ex) =>
-//{
-//Trace.WriteLine(ex.Message);
-//});
+            this._multiThread.RunTask(() =>
+            {
+                String[][] response;
+                PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
+                psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
+                try
+                {
+                    response = psql.ExecuteQuery(alarmQuery);
+                }
+                catch (NpgsqlException ex)
+                {
+                    Trace.WriteLine(ex.Message);
+                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, "teknei"));
+                    response = psql.ExcuteQueryBySsh(alarmQuery, "Administrador", "Administrador*2016");
+                }
+                if (response.Length <= 1)
+                    throw new Exception(string.Format("El host {0} no respondió con un resultado", host));
+                bool readyAlarms = false;
+                for (int i = 1; i < response.Length; i++)
+                {
+                    String[] row = response[i];
+                    if (row[0].Contains("Error al obtener información"))
+                        throw new Exception(string.Format("Error al obtener la información del host {0}", host));
+                    this.BeginInvoke(new Action(delegate
+                    {
+                        String[] tmpRow = row;
+                        if (!readyAlarms)
+                        {
+                            this.alarmTrunkTable.Rows.Clear();
+                            readyAlarms = true;
+                        }
+                        this.alarmTrunkTable.Rows.Add(tmpRow);
+                    }));
+                }
+            }, (ex) =>
+            {
+                Trace.WriteLine(ex.Message);
+            });
         }
 
         private void ResultTableOnRowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
