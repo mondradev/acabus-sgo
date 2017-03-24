@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Tamir.SharpSsh;
 
-namespace ACABUS_Control_de_operacion {
+namespace ACABUS_Control_de_operacion
+{
     /// <summary>
     /// Esta clase permite el envío de comandos a un equipo remoto que tenga 
     /// el servicio de SSH.
     /// </summary>
-    public class Ssh : IDisposable {
+    public class Ssh : IDisposable
+    {
         /// <summary>
         /// Obtiene el nombre o la ip del equipo remoto.
         /// </summary>
@@ -43,17 +47,17 @@ namespace ACABUS_Control_de_operacion {
         /// <summary>
         /// Obtiene el tamaño del buffer de datos.
         /// </summary>
-        private const int BUFFER_SIZE = 1024;
+        private const int _BUFFER_SIZE = 2048;
 
         /// <summary>
         /// Patrón de inicio de la respuesta.
         /// </summary>
-        private const string PATTERN_I = "<<i<<";
+        private const string _BEGIN_RESPONSE_PATTERN = "\\<\\<i\\<\\<";
 
         /// <summary>
         /// Patrón del final de la respuesta.
         /// </summary>
-        private const string PATTERN_F = ">>f>>";
+        private const string _END_RESPONSE_PATTERN = "\\>\\>f\\>\\>";
 
         /// <summary>
         /// Crea una instancia de una conexión por SSH a un equipo remoto especificando 
@@ -62,8 +66,10 @@ namespace ACABUS_Control_de_operacion {
         /// <param name="host">Nombre o dirección IP del equipo remoto.</param>
         /// <param name="username">Nombre de usuario para la autenticación en el equipo remoto.</param>
         /// <param name="password">Contraseña correspondiente al usuario.</param>
-        public Ssh(String host, String username, String password) {
-            try {
+        public Ssh(String host, String username, String password)
+        {
+            try
+            {
                 this.Host = host;
                 this.Username = username;
                 this._password = password;
@@ -76,7 +82,8 @@ namespace ACABUS_Control_de_operacion {
                 this._session.RemoveTerminalEmulationCharacters = true;
                 this._connected = this._session.Connected;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 throw ex;
             }
         }
@@ -85,7 +92,8 @@ namespace ACABUS_Control_de_operacion {
         /// Indica si se logró la comunicación al equipo remoto.
         /// </summary>
         /// <returns>Un valor verdadero si se estableció la comunicación.</returns>
-        public Boolean IsConnected() {
+        public Boolean IsConnected()
+        {
             return this._connected;
         }
 
@@ -94,68 +102,52 @@ namespace ACABUS_Control_de_operacion {
         /// </summary>
         /// <param name="command">Comando a ejecutar en el equipo remoto.</param>
         /// <returns>Respuesta de la terminal del equipo remoto al de ejecutar el comando.</returns>
-        public String SendCommand(String command) {
-
-            // Variable local para obtener la respuesta del flujo
-            String response;
-
+        public String SendCommand(String command)
+        {
             // Variable local que indica el tamaño de la respuesta
             int responseSize = 0;
 
-            // Variable local donde construiremos la respuesta obtenida del comando
-            StringBuilder responseBuilder = new StringBuilder();
+            string beginResponse = _BEGIN_RESPONSE_PATTERN.Replace("\\", "");
+            string endResponse = _END_RESPONSE_PATTERN.Replace("\\", "");
+            this._session.WriteLine(string.Format("\n\n\necho -n '{0}'; echo -n '{1}'\n", beginResponse, endResponse));
 
-            // Variable local donde llevaremos el numero de intentos
-            int time = 0;
-
-            // Número máximo de intentos
-            int timeMax = 5;
 
             // Intentamos leer los datos que tenga el flujo actualmente para descartarlos
-            responseSize = ReadResponse(out response);
+            responseSize = ReadResponse(out String response);
 
             // Preparamos el comando para ejecutar una salida limpia
-            command = command.Insert(0, String.Format("echo -n '{0}' ; ", PATTERN_I));
-            command = String.Format("{0}; echo -n '{1}'", command, PATTERN_F);
+            command = command.Insert(0, string.Format("echo -n '{0}' ; ", beginResponse));
+            command = string.Format("{0}; echo -n '{1}'; history -c", command, endResponse);
 
             // Escribimos el comando a ejecutar en el equipo remoto
             this._session.WriteLine(command);
 
-            while (time < timeMax && _session.ShellConnected && _session.ShellOpened) {
-
-                // Intentamos leer
-                responseSize = ReadResponse(out response);
-                // Si el tamaño de la respuesta es cero, intentamos leer de nuevo
-                if (responseSize == 0) {
-                    time++;
-                    continue;
-                }
-                // Si es mayor a cero,  
-                if (responseSize > 0) {
-                    // Construimos la respuesta
-                    responseBuilder.Append(response);
-
-                    // Si ya leimos el final de la respuesta, terminamos los intentos
-                    if (response.Contains(PATTERN_F) && responseBuilder.Length > command.Length)
-                        break;
-                }
-            }
-
-
-            response = responseBuilder.ToString();
-
+            // Intentamos leer
+            responseSize = ReadResponse(out response);
+            
             // Removemos el comando escrito en el buffer de ser necesario
-            response = response.Contains(String.Format("'{0}'", PATTERN_F))
-                ? response.Substring(response.IndexOf(String.Format("'{0}'", PATTERN_F)) + PATTERN_F.Length + 2)
-                : response;
+            response = ProcessReponse(response);            
 
-            if (response.Contains(PATTERN_F)) {
-                response = response.Substring(response.LastIndexOf(PATTERN_I) + PATTERN_I.Length);
-                response = response.Contains(String.Format("\r\n{0}", PATTERN_F)) ?
-                    response.Substring(0, response.LastIndexOf("\r\n" + PATTERN_F))
-                    : response.Substring(0, response.LastIndexOf(PATTERN_F));
-            }
+            // Devolvemos la respuesta del comando pasado por argumento a esta función
             return response;
+        }
+
+        /// <summary>
+        /// Procesa la salida del programa para obtener el resultado real correspondiente al comando
+        /// ejecutado en el host remoto.
+        /// </summary>
+        /// <param name="result">Resultado a procesar</param>
+        /// <returns>Resultado procesado</returns>
+        private string ProcessReponse(string result)
+        {
+            // Preparamos el patrón utilizado para extraer solo la cadena de respuesta
+            String regex = String.Format("{0}([^'])(.|\r\n|\n){{0,}}([^']){1}", _BEGIN_RESPONSE_PATTERN, _END_RESPONSE_PATTERN);
+
+            // Extraemos la cadena de respuesta
+            result = Regex.Match(result, regex).Value;
+
+            // Eliminamos los patrones de la cadena de respuesta y poder obtener el valor real
+            return new Regex(String.Format("{0}|{1}", _BEGIN_RESPONSE_PATTERN, _END_RESPONSE_PATTERN)).Replace(result, "");
         }
 
         /// <summary>
@@ -164,7 +156,8 @@ namespace ACABUS_Control_de_operacion {
         /// </summary>
         /// <param name="response">Varible donde se devolverá la respuesta.</param>
         /// <returns>El número de bytes leidos.</returns>
-        private int ReadResponse(out String response) {
+        private int ReadResponse(out String response)
+        {
             // Indica si ocurrió un error en la lectura
             bool isError = false;
 
@@ -175,38 +168,45 @@ namespace ACABUS_Control_de_operacion {
             int timer = 0;
 
             // Declaración e implementación del hilo para la lectura del flujo de datos SSH
-            Thread threadSshRead = new Thread(() => {
-
+            Thread threadSshRead = new Thread(() =>
+            {
                 // Flujo de datos del SSH
                 Stream sshStream = this._session.IO;
 
                 // Buffer bytes
-                byte[] buffer = new byte[BUFFER_SIZE];
+                byte[] buffer = new byte[_BUFFER_SIZE];
 
                 // Tamaño de la respuesta en bytes
                 int responseSize = 0;
 
-                // Indica si ya ha recibido datos
-                bool receive = false;
-
                 // Comienza el intento de lectura del flujo de datos
-                while (true) {
+                while (this._session.ShellConnected && this._session.ShellOpened)
+                {
                     timer = 0; // Iniciamos el temporizador en 0
-                    responseSize = sshStream.Read(buffer, 0, BUFFER_SIZE); // Intentamos leer
-                    if (responseSize < 0) { // Si es menor a cero el tamaño de la respuesta 
-                        // timer = TimeOut;
+
+                    try
+                    {
+                        responseSize = sshStream.Read(buffer, 0, _BUFFER_SIZE); // Intentamos leer
+                    }
+                    catch (ThreadInterruptedException)
+                    {
+                        Trace.WriteLine("Comunicación con host se detuvo por tiempo agotado");
+                    }
+
+                    if (responseSize < 0)
+                    {
+                        // Si es menor a cero el tamaño de la respuesta 
                         isError = true;
-                        return; // Terminamos la lectura
+                        break; // Terminamos la lectura
                     }
-                    if (responseSize > 0) { // Si es mayor a cero
-                        receive = true; // Marcamos que ya estamos recibiendo datos
+                    if (responseSize > 0)
+                    { // Si es mayor a cero
                         responseBuilder.Append(Encoding.UTF8.GetString(buffer, 0, responseSize)); // Añadimos a la respuesta
-                        continue; // Continuamos en el bucle para intentar leer más de nuevo
                     }
-                    if (responseSize == 0 && receive) // Si ya recibimos datos anteriormente pero esta ocasion no
+                    String regex = String.Format("echo\\s-n\\s'{0}'(.|\r\n|\n){{0,}}{0}", _END_RESPONSE_PATTERN);
+                    if (Regex.IsMatch(responseBuilder.ToString(), regex))
                         break; // Terminamos los intentos de leer más datos
                 }
-
             });
 
             // Ejecución del hilo de lectura del flujo de datos de SSH
@@ -214,16 +214,26 @@ namespace ACABUS_Control_de_operacion {
 
             // Ejecutamos un temporizador que se reinicia cada vez que se lee de nuevo
             // Si la variable local se vuelve mayor que el tiempo de espera, termina el temporizador
-            while (timer < TimeOut && threadSshRead.IsAlive) {
+            while (timer < TimeOut && threadSshRead.IsAlive)
+            {
                 Thread.Sleep(1); // Esperamos un milisegundo
                 timer++; // Incrementamos el tiempo del temporizador en 1ms
             }
-            // Al terminar el tiempo detenemos el hilo para evitar la espera infinita
-            threadSshRead.Abort();
+
+            if (threadSshRead.IsAlive)
+            {
+                // Al terminar el tiempo detenemos el hilo para evitar la espera infinita
+                threadSshRead.Interrupt();
+                threadSshRead.Abort();
+            }
 
             // Si el tamaño de la respuesta es menor a cero, lanzamos una excepción.
             if (isError)
                 throw new IOException(String.Format("Error: Al leer el flujo de datos SSH, Host: {0}", this.Host)); // Lanzamos una excepcion de E/S
+
+            // Si el tiempo de espera de la respuesta se agota, lanzamos una excepción
+            if (timer >= TimeOut)
+                throw new IOException(String.Format("Error: Se agoto el tiempo de espera, Host: {0}", this.Host)); // Lanzamos una excepcion de E/S
 
             // Elegimos como respuesta todo lo que se recuperó del flujo de datos
             response = responseBuilder.ToString();
@@ -235,7 +245,8 @@ namespace ACABUS_Control_de_operacion {
         /// <summary>
         /// Libera la conexión al equipo remoto.
         /// </summary>
-        public void Dispose() {
+        public void Dispose()
+        {
             this._session.Close();
         }
     }

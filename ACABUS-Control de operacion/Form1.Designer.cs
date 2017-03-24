@@ -32,11 +32,12 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.tsmiFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmifSeparator = new System.Windows.Forms.ToolStripSeparator();
-            this.tsmifExit = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.tlsTools = new System.Windows.Forms.ToolStrip();
-            this.tsbStockCard = new System.Windows.Forms.ToolStripButton();
-            this.dailyTaskButton = new System.Windows.Forms.ToolStripButton();
+            this.stockCardButton = new System.Windows.Forms.ToolStripButton();
+            this.sqlButton = new System.Windows.Forms.ToolStripButton();
+            this.monitorButton = new System.Windows.Forms.ToolStripButton();
+            this.tsmifExit = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tlsTools.SuspendLayout();
             this.SuspendLayout();
@@ -67,14 +68,6 @@
             this.tsmifSeparator.Name = "tsmifSeparator";
             this.tsmifSeparator.Size = new System.Drawing.Size(110, 6);
             // 
-            // tsmifExit
-            // 
-            this.tsmifExit.Image = global::ACABUS_Control_de_operacion.Properties.Resources.Actions_close_icon;
-            this.tsmifExit.Name = "tsmifExit";
-            this.tsmifExit.Size = new System.Drawing.Size(113, 26);
-            this.tsmifExit.Text = "Salir";
-            this.tsmifExit.Click += new System.EventHandler(this.mbrArcExi_Click);
-            // 
             // tsmiEdit
             // 
             this.tsmiEdit.Name = "tsmiEdit";
@@ -85,33 +78,52 @@
             // 
             this.tlsTools.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.tlsTools.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsbStockCard,
-            this.dailyTaskButton});
+            this.stockCardButton,
+            this.sqlButton,
+            this.monitorButton});
             this.tlsTools.Location = new System.Drawing.Point(0, 28);
             this.tlsTools.Name = "tlsTools";
             this.tlsTools.Size = new System.Drawing.Size(1282, 27);
             this.tlsTools.TabIndex = 2;
             this.tlsTools.Text = "toolStrip1";
             // 
-            // tsbStockCard
+            // stockCardButton
             // 
-            this.tsbStockCard.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbStockCard.Image = ((System.Drawing.Image)(resources.GetObject("tsbStockCard.Image")));
-            this.tsbStockCard.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbStockCard.Name = "tsbStockCard";
-            this.tsbStockCard.Size = new System.Drawing.Size(24, 24);
-            this.tsbStockCard.Text = "Stock de tarjetas";
-            this.tsbStockCard.Click += new System.EventHandler(this.toolStripButton1_Click);
+            this.stockCardButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.stockCardButton.Image = ((System.Drawing.Image)(resources.GetObject("stockCardButton.Image")));
+            this.stockCardButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.stockCardButton.Name = "stockCardButton";
+            this.stockCardButton.Size = new System.Drawing.Size(24, 24);
+            this.stockCardButton.Text = "Inventario de tarjetas en KVR";
+            this.stockCardButton.Click += new System.EventHandler(this.ToolStripButton1_Click);
             // 
-            // dailyTaskButton
+            // sqlButton
             // 
-            this.dailyTaskButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.dailyTaskButton.Image = ((System.Drawing.Image)(resources.GetObject("dailyTaskButton.Image")));
-            this.dailyTaskButton.ImageTransparentColor = System.Drawing.Color.Transparent;
-            this.dailyTaskButton.Name = "dailyTaskButton";
-            this.dailyTaskButton.Size = new System.Drawing.Size(24, 24);
-            this.dailyTaskButton.Text = "Tareas diarias";
-            this.dailyTaskButton.Click += new System.EventHandler(this.dailyTaskButton_Click);
+            this.sqlButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.sqlButton.Image = ((System.Drawing.Image)(resources.GetObject("sqlButton.Image")));
+            this.sqlButton.ImageTransparentColor = System.Drawing.Color.Transparent;
+            this.sqlButton.Name = "sqlButton";
+            this.sqlButton.Size = new System.Drawing.Size(24, 24);
+            this.sqlButton.Text = "SQL y Réplica";
+            this.sqlButton.Click += new System.EventHandler(this.DailyTaskButton_Click);
+            // 
+            // monitorButton
+            // 
+            this.monitorButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.monitorButton.Image = ((System.Drawing.Image)(resources.GetObject("monitorButton.Image")));
+            this.monitorButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.monitorButton.Name = "monitorButton";
+            this.monitorButton.Size = new System.Drawing.Size(24, 24);
+            this.monitorButton.Text = "Monitoreo";
+            this.monitorButton.Click += new System.EventHandler(this.MonitorButton_Click);
+            // 
+            // tsmifExit
+            // 
+            this.tsmifExit.Image = global::ACABUS_Control_de_operacion.Properties.Resources.Actions_close_icon;
+            this.tsmifExit.Name = "tsmifExit";
+            this.tsmifExit.Size = new System.Drawing.Size(113, 26);
+            this.tsmifExit.Text = "Salir";
+            this.tsmifExit.Click += new System.EventHandler(this.mbrArcExi_Click);
             // 
             // frmMain
             // 
@@ -141,10 +153,11 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiFile;
         private System.Windows.Forms.ToolStripMenuItem tsmifExit;
         private System.Windows.Forms.ToolStrip tlsTools;
-        private System.Windows.Forms.ToolStripButton tsbStockCard;
+        private System.Windows.Forms.ToolStripButton stockCardButton;
         private System.Windows.Forms.ToolStripMenuItem tsmiEdit;
         private System.Windows.Forms.ToolStripSeparator tsmifSeparator;
-        private System.Windows.Forms.ToolStripButton dailyTaskButton;
+        private System.Windows.Forms.ToolStripButton sqlButton;
+        private System.Windows.Forms.ToolStripButton monitorButton;
     }
 }
 

@@ -32,21 +32,35 @@ namespace ACABUS_Control_de_operacion
 
         #region BARRA DE HERRAMIENTAS
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        private void ToolStripButton1_Click(object sender, EventArgs e)
         {
-            StockCard stockCard = new StockCard();
-            stockCard.MdiParent = this;
+            StockCard stockCard = new StockCard()
+            {
+                MdiParent = this
+            };
             stockCard.Show();
         }
 
+        private void DailyTaskButton_Click(object sender, EventArgs e)
+        {
+            SQLModule sqlAndReplica = new SQLModule()
+            {
+                MdiParent = this
+            };
+            sqlAndReplica.Show();
+        }
+
+        private void MonitorButton_Click(object sender, EventArgs e)
+        {
+            Monitor monitor = new Monitor()
+            {
+                MdiParent = this
+            };
+            monitor.Show();
+        }
 
         #endregion
 
-        private void dailyTaskButton_Click(object sender, EventArgs e)
-        {
-            DailyTask dailyTasks = new DailyTask();
-            dailyTasks.MdiParent = this;
-            dailyTasks.Show();
-        }
+
     }
 }

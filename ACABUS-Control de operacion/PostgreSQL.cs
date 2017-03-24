@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,9 +10,8 @@ namespace ACABUS_Control_de_operacion
 {
     public class PostgreSQL
     {
-
         private const String _CONNECTION = "Server={0};Port={1};User Id={2};Password={3};Database={4};";
-        private const String _connectionBySsh = "PGPASSWORD='{0}' /opt/PostgreSQL/9.3/bin/psql -U {1} -d {2} -p {3}  -F ',' -R '|' --no-align -c \"{4}\" | grep -E '[\\||,|0-9A-Za-z]'";
+        private const String _CONNECTION_BY_SSH = "PGPASSWORD='{0}' /opt/PostgreSQL/9.3/bin/psql -U {1} -d {2} -p {3} -F ',' -R '|' --no-align -c \"{4}\" | grep -E '[\\||,|0-9A-Za-z]'";
 
         private Boolean _customCommand;
         private String _customConnectionBySsh;
@@ -20,13 +20,14 @@ namespace ACABUS_Control_de_operacion
             get {
                 if (_customCommand && !String.IsNullOrEmpty(this._customConnectionBySsh))
                     return this._customConnectionBySsh;
-                return _connectionBySsh;
+                return _CONNECTION_BY_SSH;
             }
         }
 
         public String Username { get; private set; }
         public String Passoword { get; private set; }
         public String Host { get; private set; }
+        public String HostBySsh { get; set; }
         public String DataBase { get; private set; }
         public Int16 Port { get; private set; }
         public Int16 TimeOut { get; set; }
@@ -122,9 +123,11 @@ namespace ACABUS_Control_de_operacion
                     attempts++;
                     response = "Error al obtener información";
                     Trace.WriteLine(ex.Message);
-                    Trace.WriteLine(String.Format("El host {0} intentará nuevamente realizar la consulta: intento {1}/{2}", Host, attempts + 1, limitOfAttempts));
+                    Trace.WriteLine(String.Format("El host {0} intentará nuevamente realizar la consulta: intento {1}/{2}", Host, attempts, limitOfAttempts));
                 }
             }
+            if (response.Contains("ERROR:"))
+                throw new Exception(response);
             return String.IsNullOrEmpty(response) ? null : ProcessResponse(response);
         }
 
