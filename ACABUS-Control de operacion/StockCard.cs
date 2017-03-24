@@ -44,6 +44,8 @@ namespace ACABUS_Control_de_operacion
         private void ProccessRequest()
         {
             KVR[] kvrs = GetKVRs();
+            this.dgvResult.Columns.Clear();
+            this.dgvResult.Rows.Clear();
             InitializeTask((Int16)(kvrs.Length * 2));
             this.dgvResult.Columns.Add("KVR", "Id KVR");
             this.dgvResult.Columns.Add("Vta", "Total de Ventas");
@@ -200,6 +202,8 @@ namespace ACABUS_Control_de_operacion
                     taskTimeTimer.Stop();
                 }));
             }
+            if (this.taskProgressBar.Value == this.taskProgressBar.Maximum)
+                this._multiThread.KillAllThreads();
         }
 
         private void DesactiveControls()
