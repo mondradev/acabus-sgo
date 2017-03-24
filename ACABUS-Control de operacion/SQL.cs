@@ -272,6 +272,7 @@ namespace ACABUS_Control_de_operacion
                 {
                     this.taskProgressBar.Value = 0;
                     this.currentTaskLabel.Text = "Tarea actual: Ninguna";
+                    this.progressLabel.Text = "0 %";
                     ActiveControls();
                     _inStoping = false;
                     taskTimeTimer.Stop();
