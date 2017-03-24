@@ -40,11 +40,6 @@ namespace ACABUS_Control_de_operacion
         private SshShell _session;
 
         /// <summary>
-        /// Indica si se estableció la conexión al equipo remoto.
-        /// </summary>
-        private bool _connected;
-
-        /// <summary>
         /// Obtiene el tamaño del buffer de datos.
         /// </summary>
         private const int _BUFFER_SIZE = 2048;
@@ -52,12 +47,17 @@ namespace ACABUS_Control_de_operacion
         /// <summary>
         /// Patrón de inicio de la respuesta.
         /// </summary>
-        private const string _BEGIN_RESPONSE_PATTERN = "\\<\\<i\\<\\<";
+        private const String _BEGIN_RESPONSE_PATTERN = "\\<\\<i\\<\\<";
 
         /// <summary>
         /// Patrón del final de la respuesta.
         /// </summary>
-        private const string _END_RESPONSE_PATTERN = "\\>\\>f\\>\\>";
+        private const String _END_RESPONSE_PATTERN = "\\>\\>f\\>\\>";
+
+        /// <summary>
+        /// Indica si la lectura desde el host a comenzado.
+        /// </summary>
+        private bool _inReadFromRemote = false;
 
         /// <summary>
         /// Crea una instancia de una conexión por SSH a un equipo remoto especificando 
@@ -80,7 +80,6 @@ namespace ACABUS_Control_de_operacion
                 };
                 this._session.Connect();
                 this._session.RemoveTerminalEmulationCharacters = true;
-                this._connected = this._session.Connected;
             }
             catch (Exception ex)
             {
@@ -94,7 +93,7 @@ namespace ACABUS_Control_de_operacion
         /// <returns>Un valor verdadero si se estableció la comunicación.</returns>
         public Boolean IsConnected()
         {
-            return this._connected;
+            return this._session.Connected && this._session.ShellConnected && this._session.ShellOpened;
         }
 
         /// <summary>
@@ -107,29 +106,43 @@ namespace ACABUS_Control_de_operacion
             // Variable local que indica el tamaño de la respuesta
             int responseSize = 0;
 
-            string beginResponse = _BEGIN_RESPONSE_PATTERN.Replace("\\", "");
-            string endResponse = _END_RESPONSE_PATTERN.Replace("\\", "");
-            this._session.WriteLine(string.Format("\n\n\necho -n '{0}'; echo -n '{1}'\n", beginResponse, endResponse));
-
+            // Ejecutamos un simple eco para poder leer el resto de los caracteres devueltos por remoto.
+            this._session.Write(PrepareCommand("echo"));
 
             // Intentamos leer los datos que tenga el flujo actualmente para descartarlos
             responseSize = ReadResponse(out String response);
 
+            Trace.WriteLine(String.Format("Enviando el comando al host {0} remoto", Host));
+
             // Preparamos el comando para ejecutar una salida limpia
-            command = command.Insert(0, string.Format("echo -n '{0}' ; ", beginResponse));
-            command = string.Format("{0}; echo -n '{1}'; history -c", command, endResponse);
+            command = PrepareCommand(command);
 
             // Escribimos el comando a ejecutar en el equipo remoto
             this._session.WriteLine(command);
 
             // Intentamos leer
             responseSize = ReadResponse(out response);
-            
+
             // Removemos el comando escrito en el buffer de ser necesario
-            response = ProcessReponse(response);            
+            response = ProcessReponse(response);
 
             // Devolvemos la respuesta del comando pasado por argumento a esta función
             return response;
+        }
+
+        /// <summary>
+        /// Prepara el comando de forma que se puede interpretar posteriormente para identificar el
+        /// inicio y final de la respuesta.
+        /// </summary>
+        /// <param name="command">Comando a preparar.</param>
+        /// <returns>Un comando complementado de patrones.</returns>
+        private String PrepareCommand(String command)
+        {
+            String beginResponse = _BEGIN_RESPONSE_PATTERN.Replace("\\", "");
+            String endResponse = _END_RESPONSE_PATTERN.Replace("\\", "");
+            String tmpCommand = command.Insert(0, String.Format("echo -n '{0}' ; ", beginResponse));
+            tmpCommand = String.Format("{0}; echo -n '{1}'; history -c", tmpCommand, endResponse);
+            return tmpCommand;
         }
 
         /// <summary>
@@ -180,18 +193,22 @@ namespace ACABUS_Control_de_operacion
                 int responseSize = 0;
 
                 // Comienza el intento de lectura del flujo de datos
-                while (this._session.ShellConnected && this._session.ShellOpened)
+                while (this.IsConnected())
                 {
                     timer = 0; // Iniciamos el temporizador en 0
 
                     try
                     {
+                        this._inReadFromRemote = true;
                         responseSize = sshStream.Read(buffer, 0, _BUFFER_SIZE); // Intentamos leer
+                        Trace.WriteLine(String.Format("El host {0} tardo en responder {1} ms", Host, timer));
                     }
                     catch (ThreadInterruptedException)
                     {
-                        Trace.WriteLine("Comunicación con host se detuvo por tiempo agotado");
+                        Trace.WriteLine(String.Format("Comunicación con host {0} se detuvo por tiempo agotado", Host));
                     }
+
+                    this._inReadFromRemote = false;
 
                     if (responseSize < 0)
                     {
@@ -214,10 +231,11 @@ namespace ACABUS_Control_de_operacion
 
             // Ejecutamos un temporizador que se reinicia cada vez que se lee de nuevo
             // Si la variable local se vuelve mayor que el tiempo de espera, termina el temporizador
-            while (timer < TimeOut && threadSshRead.IsAlive)
+            while (timer < TimeOut && threadSshRead.IsAlive && this.IsConnected())
             {
                 Thread.Sleep(1); // Esperamos un milisegundo
-                timer++; // Incrementamos el tiempo del temporizador en 1ms
+                if (this._inReadFromRemote) timer++; // Incrementamos el tiempo del temporizador en 1ms si estamos
+                                                     // intentando leer desde remoto.
             }
 
             if (threadSshRead.IsAlive)
@@ -240,6 +258,14 @@ namespace ACABUS_Control_de_operacion
 
             // Devolvemos la respuesta
             return response.Length;
+        }
+
+        /// <summary>
+        /// Desctructor de la instancia.
+        /// </summary>
+        ~Ssh()
+        {
+            this.Dispose();
         }
 
         /// <summary>
