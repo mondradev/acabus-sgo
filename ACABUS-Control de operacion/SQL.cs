@@ -165,8 +165,8 @@ namespace ACABUS_Control_de_operacion
             }
             catch (NpgsqlException ex)
             {
-                Trace.WriteLine(ex.Message);
-                Trace.WriteLine(String.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", device.IP, "teknei"));
+                Trace.WriteLine(ex.Message, "ERROR");
+                Trace.WriteLine(String.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", device.IP, "teknei"), "DEBUG");
                 response = psql.ExcuteQueryBySsh(query, "teknei", "4c4t3k");
             }
             if (response == null || response.Length <= 0)
@@ -258,7 +258,6 @@ namespace ACABUS_Control_de_operacion
                     this.taskProgressBar.Value++;
                 ValidateEndTask();
                 string progress = String.Format("Progreso: {0}%", (int)((float)this.taskProgressBar.Value / (float)this.taskProgressBar.Maximum * 100));
-                Trace.WriteLine(progress);
                 this.progressLabel.Text = progress;
             }));
         }

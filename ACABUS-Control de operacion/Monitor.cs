@@ -26,12 +26,15 @@ namespace ACABUS_Control_de_operacion
         private void LoadUncirculatedVehicles()
         {
             String uncirculatedVehicles = UncirculatedVehicles.FILENAME_UNCIRCULATED_VEHICLES;
-            this._uncirculatedVehicles = File.ReadAllLines(uncirculatedVehicles);
+            if (File.Exists(uncirculatedVehicles))
+                this._uncirculatedVehicles = File.ReadAllLines(uncirculatedVehicles);
+            else
+                this._uncirculatedVehicles = null;
         }
 
         private void StartOnClick(object sender, EventArgs e)
         {
-            Trace.WriteLine("Estado: Iniciando monitor");
+            Trace.WriteLine("Estado: Iniciando monitor", "INFO");
             RefreshMonitor();
             timer1.Start();
             startButton.Enabled = false;
@@ -39,7 +42,7 @@ namespace ACABUS_Control_de_operacion
         }
         private void StopOnClick(object sender, EventArgs e)
         {
-            Trace.WriteLine("Estado: Deteniendo monitor");
+            Trace.WriteLine("Estado: Deteniendo monitor", "INFO");
             _multiThread.KillAllThreads(() =>
             {
                 this.BeginInvoke(new Action(() =>
@@ -60,7 +63,7 @@ namespace ACABUS_Control_de_operacion
 
             this._multiThread.RunTask(() =>
             {
-                String receNaveQuery = String.Format("SELECT NO_ECON, RECE.FCH_CREA AS ULTIMA_HORA FROM SITM.SFMO_RECE_NAVE AS RECE JOIN SITM.SFVH_VEHI AS VEHI ON RECE.ID_VEHI = VEHI.ID_VEHI WHERE NOW()::TIME - RECE.FCH_CREA::TIME > '00:10:00'::TIME AND VEHI.NO_ECON NOT IN ({0}) ORDER BY VEHI.NO_ECON ASC, RECE.FCH_CREA DESC", ProcessArray(this._uncirculatedVehicles));
+                String receNaveQuery = String.Format("SELECT NO_ECON, RECE.FCH_CREA AS ULTIMA_HORA FROM SITM.SFMO_RECE_NAVE AS RECE JOIN SITM.SFVH_VEHI AS VEHI ON RECE.ID_VEHI = VEHI.ID_VEHI WHERE (DATE(NOW())>DATE(RECE.FCH_CREA) OR NOW()::TIME - RECE.FCH_CREA::TIME > '00:10:00'::TIME) AND VEHI.NO_ECON NOT IN ({0}) ORDER BY VEHI.NO_ECON ASC, RECE.FCH_CREA DESC", ProcessArray(this._uncirculatedVehicles));
                 String[][] response;
                 PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
                 psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
@@ -70,8 +73,8 @@ namespace ACABUS_Control_de_operacion
                 }
                 catch (NpgsqlException ex)
                 {
-                    Trace.WriteLine(ex.Message);
-                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME));
+                    Trace.WriteLine(ex.Message, "ERROR");
+                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME), "DEBUG");
                     response = psql.ExcuteQueryBySsh(receNaveQuery, USERNAME, PASSWORD);
                 }
                 if (response.Length <= 1)
@@ -95,7 +98,7 @@ namespace ACABUS_Control_de_operacion
                 }
             }, (ex) =>
             {
-                Trace.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message, "ERROR");
             });
             this._multiThread.RunTask(() =>
             {
@@ -108,8 +111,8 @@ namespace ACABUS_Control_de_operacion
                 }
                 catch (NpgsqlException ex)
                 {
-                    Trace.WriteLine(ex.Message);
-                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME));
+                    Trace.WriteLine(ex.Message, "ERROR");
+                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME), "DEBUG");
                     response = psql.ExcuteQueryBySsh(counterQuery, USERNAME, PASSWORD);
                 }
                 if (response.Length <= 1)
@@ -133,7 +136,7 @@ namespace ACABUS_Control_de_operacion
                 }
             }, (ex) =>
             {
-                Trace.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message, "ERROR");
             });
 
             this._multiThread.RunTask(() =>
@@ -147,8 +150,8 @@ namespace ACABUS_Control_de_operacion
                 }
                 catch (NpgsqlException ex)
                 {
-                    Trace.WriteLine(ex.Message);
-                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME));
+                    Trace.WriteLine(ex.Message, "ERROR");
+                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME), "DEBUG");
                     response = psql.ExcuteQueryBySsh(alarmQuery, USERNAME, PASSWORD);
                 }
                 if (response.Length <= 1)
@@ -172,17 +175,16 @@ namespace ACABUS_Control_de_operacion
                 }
             }, (ex) =>
             {
-                Trace.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message, "ERROR");
             });
         }
 
         private object ProcessArray(string[] array)
         {
             String arrayInLine = "''";
-            foreach (String item in array)
-            {
-                arrayInLine = String.Format("{0},'{1}'", arrayInLine, item.Split(',')[0]);
-            }
+            if (array != null)
+                foreach (String item in array)
+                    arrayInLine = String.Format("{0},'{1}'", arrayInLine, item.Split(',')[0]);
             return arrayInLine;
         }
 
@@ -195,6 +197,7 @@ namespace ACABUS_Control_de_operacion
                 {
                     Object cell = table.Rows[i].Cells[j].Value;
                     String value = cell != null ? cell.ToString() : "";
+                    Trace.WriteLine(String.Format("Valor recibido en la tabla: {0}", value), "DEBUG");
                     if (Regex.IsMatch(value, "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"))
                     {
                         value = TimeSpan.Parse(value).ToString();
@@ -224,7 +227,7 @@ namespace ACABUS_Control_de_operacion
 
         private void RefreshOnTick(object sender, EventArgs e)
         {
-            Trace.WriteLine("Estado: Actualizando monitor");
+            Trace.WriteLine("Estado: Actualizando monitor", "INFO");
             RefreshMonitor();
         }
 

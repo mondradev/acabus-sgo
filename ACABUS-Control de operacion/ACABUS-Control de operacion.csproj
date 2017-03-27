@@ -64,7 +64,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration.cs" />
     <Compile Include="ConnectionTCP.cs" />
     <Compile Include="Monitor.cs">
       <SubType>Form</SubType>
@@ -111,7 +110,6 @@
     <Compile Include="UncirculatedVehicles.Designer.cs">
       <DependentUpon>UncirculatedVehicles.cs</DependentUpon>
     </Compile>
-    <Compile Include="XMLConfiguration.cs" />
     <EmbeddedResource Include="Monitor.resx">
       <DependentUpon>Monitor.cs</DependentUpon>
     </EmbeddedResource>

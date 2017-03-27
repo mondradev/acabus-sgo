@@ -30,12 +30,12 @@
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.debugCheck = new System.Windows.Forms.CheckBox();
+            this.errorCheck = new System.Windows.Forms.CheckBox();
+            this.infoCheck = new System.Windows.Forms.CheckBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.dateTimeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.moduleColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.typeEventColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.messageColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -44,6 +44,9 @@
             // 
             // tableLayoutPanel1
             // 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -62,49 +65,52 @@
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.checkBox3);
-            this.groupBox1.Controls.Add(this.checkBox2);
-            this.groupBox1.Controls.Add(this.checkBox1);
+            this.groupBox1.Controls.Add(this.debugCheck);
+            this.groupBox1.Controls.Add(this.errorCheck);
+            this.groupBox1.Controls.Add(this.infoCheck);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(1074, 51);
+            this.groupBox1.Size = new System.Drawing.Size(1074, 52);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Opciones de eventos";
             // 
-            // checkBox1
+            // debugCheck
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(6, 21);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(103, 21);
-            this.checkBox1.TabIndex = 0;
-            this.checkBox1.Text = "Información";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.debugCheck.AutoSize = true;
+            this.debugCheck.Location = new System.Drawing.Point(224, 21);
+            this.debugCheck.Name = "debugCheck";
+            this.debugCheck.Size = new System.Drawing.Size(103, 21);
+            this.debugCheck.TabIndex = 2;
+            this.debugCheck.Text = "Depuración";
+            this.debugCheck.UseVisualStyleBackColor = true;
+            this.debugCheck.CheckedChanged += new System.EventHandler(this.InfoCheck_CheckedChanged);
             // 
-            // checkBox2
+            // errorCheck
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Checked = true;
-            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox2.Location = new System.Drawing.Point(115, 21);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(103, 21);
-            this.checkBox2.TabIndex = 1;
-            this.checkBox2.Text = "Depuración";
-            this.checkBox2.UseVisualStyleBackColor = true;
+            this.errorCheck.AutoSize = true;
+            this.errorCheck.Checked = true;
+            this.errorCheck.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.errorCheck.Location = new System.Drawing.Point(115, 21);
+            this.errorCheck.Name = "errorCheck";
+            this.errorCheck.Size = new System.Drawing.Size(77, 21);
+            this.errorCheck.TabIndex = 1;
+            this.errorCheck.Text = "Errores";
+            this.errorCheck.UseVisualStyleBackColor = true;
+            this.errorCheck.CheckedChanged += new System.EventHandler(this.InfoCheck_CheckedChanged);
             // 
-            // checkBox3
+            // infoCheck
             // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(224, 21);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(77, 21);
-            this.checkBox3.TabIndex = 2;
-            this.checkBox3.Text = "Errores";
-            this.checkBox3.UseVisualStyleBackColor = true;
+            this.infoCheck.AutoSize = true;
+            this.infoCheck.Checked = true;
+            this.infoCheck.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.infoCheck.Location = new System.Drawing.Point(6, 21);
+            this.infoCheck.Name = "infoCheck";
+            this.infoCheck.Size = new System.Drawing.Size(103, 21);
+            this.infoCheck.TabIndex = 0;
+            this.infoCheck.Text = "Información";
+            this.infoCheck.UseVisualStyleBackColor = true;
+            this.infoCheck.CheckedChanged += new System.EventHandler(this.InfoCheck_CheckedChanged);
             // 
             // dataGridView1
             // 
@@ -116,46 +122,49 @@
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dateTimeColumn,
-            this.moduleColumn,
+            this.typeEventColumn,
             this.messageColumn});
-            this.dataGridView1.Location = new System.Drawing.Point(3, 60);
+            this.dataGridView1.Location = new System.Drawing.Point(3, 61);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(1074, 505);
+            this.dataGridView1.Size = new System.Drawing.Size(1074, 504);
             this.dataGridView1.TabIndex = 1;
             // 
             // dateTimeColumn
             // 
-            this.dateTimeColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dateTimeColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.dateTimeColumn.HeaderText = "Fecha/Hora";
             this.dateTimeColumn.Name = "dateTimeColumn";
             this.dateTimeColumn.ReadOnly = true;
             this.dateTimeColumn.Width = 111;
             // 
-            // moduleColumn
+            // typeEventColumn
             // 
-            this.moduleColumn.HeaderText = "Modulo";
-            this.moduleColumn.Name = "moduleColumn";
-            this.moduleColumn.ReadOnly = true;
+            this.typeEventColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.typeEventColumn.HeaderText = "Tipo";
+            this.typeEventColumn.Name = "typeEventColumn";
+            this.typeEventColumn.ReadOnly = true;
+            this.typeEventColumn.Width = 65;
             // 
             // messageColumn
             // 
-            this.messageColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.messageColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.messageColumn.HeaderText = "Mensaje";
             this.messageColumn.Name = "messageColumn";
             this.messageColumn.ReadOnly = true;
             this.messageColumn.Width = 90;
             // 
-            // ViewLogger
+            // EventViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1104, 592);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Name = "ViewLogger";
+            this.Name = "EventViewer";
             this.Text = "Visor de eventos";
+            this.Load += new System.EventHandler(this.EventViewer_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -168,12 +177,12 @@
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.CheckBox checkBox3;
-        private System.Windows.Forms.CheckBox checkBox2;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox debugCheck;
+        private System.Windows.Forms.CheckBox errorCheck;
+        private System.Windows.Forms.CheckBox infoCheck;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dateTimeColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn moduleColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn typeEventColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn messageColumn;
     }
 }

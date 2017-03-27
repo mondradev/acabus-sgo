@@ -60,7 +60,7 @@ namespace ACABUS_Control_de_operacion
 
             if (_inStoping)
             {
-                Trace.WriteLine(String.Format("En proceso de destrucción de subprocesos: {0}", Threads.Count));
+                Trace.WriteLine(String.Format("En proceso de destrucción de subprocesos: {0}", Threads.Count), "DEBUG");
                 return;
             }
 
@@ -77,11 +77,11 @@ namespace ACABUS_Control_de_operacion
                     }
                     if (_inStoping)
                     {
-                        Trace.WriteLine(String.Format("En proceso de destrucción de subprocesos: {0}", Threads.Count));
+                        Trace.WriteLine(String.Format("En proceso de destrucción de subprocesos: {0}", Threads.Count), "DEBUG");
                         return;
                     }
                     Threads.Add(Thread.CurrentThread);
-                    Trace.WriteLine(String.Format("Subproceso creado: {0}", Threads.Count));
+                    Trace.WriteLine(String.Format("Subproceso creado: {0}", Threads.Count), "DEBUG");
                     OnChanged(new MultiThreadEventArgs(ActionThread.ADDING));
                     toDo.Invoke();
                     RemoveProcess(Thread.CurrentThread);
@@ -99,9 +99,9 @@ namespace ACABUS_Control_de_operacion
 
         private void RemoveProcess(Thread thread)
         {
-            Trace.WriteLine(String.Format("Removiendo subproceso: {0}", Threads.Count));
+            Trace.WriteLine(String.Format("Removiendo subproceso: {0}", Threads.Count), "DEBUG");
             Threads.Remove(thread);
-            Trace.WriteLine(String.Format("Subproceso removido: {0}", Threads.Count));
+            Trace.WriteLine(String.Format("Subproceso removido: {0}", Threads.Count), "DEBUG");
             OnChanged(new MultiThreadEventArgs(ActionThread.REMOVING));
         }
 
@@ -112,7 +112,7 @@ namespace ACABUS_Control_de_operacion
                 _inStoping = true;
                 while (Threads.Count > 0)
                 {
-                    Trace.WriteLine(String.Format("Intentando matar subproceso: {0}", Threads.Count));
+                    Trace.WriteLine(String.Format("Intentando matar subproceso: {0}", Threads.Count), "DEBUG");
                     for (Int16 i = (Int16)(Threads.Count - 1); i >= 0; i--)
                     {
                         try
@@ -127,7 +127,7 @@ namespace ACABUS_Control_de_operacion
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            Trace.WriteLine(String.Format("Cambió la cantidad de subprocesos {0}", Threads.Count));
+                            Trace.WriteLine(String.Format("Cambió la cantidad de subprocesos {0}", Threads.Count), "DEBUG");
                         }
                     }
                     Thread.Sleep(600);

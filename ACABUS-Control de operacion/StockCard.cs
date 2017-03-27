@@ -82,7 +82,7 @@ namespace ACABUS_Control_de_operacion
                     }
                 }, (ex) =>
                 {
-                    Trace.WriteLine(String.Format("Ocurrió un error al consultar el host: {0}", kvr.IP));
+                    Trace.WriteLine(String.Format("Ocurrió un error al consultar el host: {0}", kvr.IP), "ERROR");
                 });
             }
 
@@ -182,7 +182,6 @@ namespace ACABUS_Control_de_operacion
                     this.taskProgressBar.Value++;
                 ValidateEndTask();
                 string progress = String.Format("Progreso: {0}%", (int)((float)this.taskProgressBar.Value / (float)this.taskProgressBar.Maximum * 100));
-                Trace.WriteLine(progress);
                 this.progressLabel.Text = progress;
             }));
         }

@@ -59,6 +59,9 @@ namespace ACABUS_Control_de_operacion
         {
             try
             {
+                // Tiempo inicial del establecimiento del enlace
+                DateTime initTime = DateTime.Now;
+
                 this.Host = host;
                 this.Username = username;
                 this._password = password;
@@ -68,7 +71,7 @@ namespace ACABUS_Control_de_operacion
                 };
                 this._session.Connect();
                 this._session.RemoveTerminalEmulationCharacters = true;
-                Trace.WriteLine(String.Format("Conectado al host {0}", Host));
+                Trace.WriteLine(String.Format("Conectado al host {0}, Tiempo: {1}", Host, DateTime.Now - initTime), "INFO");
             }
             catch (Exception ex)
             {
@@ -92,6 +95,9 @@ namespace ACABUS_Control_de_operacion
         /// <returns>Respuesta de la terminal del equipo remoto al de ejecutar el comando.</returns>
         public String SendCommand(String command)
         {
+            // Tiempo inicial del envío de comando
+            DateTime initTime = DateTime.Now;
+
             // Variable local que indica el tamaño de la respuesta
             int responseSize = 0;
 
@@ -101,7 +107,7 @@ namespace ACABUS_Control_de_operacion
             // Intentamos leer los datos que tenga el flujo actualmente para descartarlos
             responseSize = ReadResponse(out String response);
 
-            Trace.WriteLine(String.Format("Enviando el comando al host {0}", Host));
+            Trace.WriteLine(String.Format("Enviando el comando al host {0}", Host), "INFO");
 
             // Preparamos el comando para ejecutar una salida limpia
             command = PrepareCommand(command);
@@ -114,6 +120,8 @@ namespace ACABUS_Control_de_operacion
 
             // Removemos el comando escrito en el buffer de ser necesario
             response = ProcessReponse(response);
+
+            Trace.WriteLine(String.Format("Tiempo de espera de la respuesta: {0}", DateTime.Now - initTime), "DEBUG");
 
             // Devolvemos la respuesta del comando pasado por argumento a esta función
             return response;
@@ -151,7 +159,7 @@ namespace ACABUS_Control_de_operacion
             // Extraemos la cadena de respuesta
             result = Regex.Match(result, regex).Value;
 
-            Trace.WriteLine(String.Format("El host {0} respondió: {1}", Host, result));
+            Trace.WriteLine(String.Format("El host {0} respondió: {1}", Host, result), "DEBUG");
 
             // Eliminamos los patrones de la cadena de respuesta y poder obtener el valor real
             return new Regex(String.Format("{0}|{1}", _BEGIN_RESPONSE_PATTERN, _END_RESPONSE_PATTERN)).Replace(result, "");
@@ -179,7 +187,7 @@ namespace ACABUS_Control_de_operacion
 
             // Tamaño de la respuesta en bytes
             int responseSize = 0;
-            DateTime initTime = DateTime.Now;
+
             // Comienza el intento de lectura del flujo de datos
             while (this.IsConnected())
             {
@@ -196,10 +204,10 @@ namespace ACABUS_Control_de_operacion
                     responseBuilder.Append(Encoding.UTF8.GetString(buffer, 0, responseSize)); // Añadimos a la respuesta
                 }
                 String regex = String.Format("{0}([^'])(.|\r\n|\n){{0,}}([^']){1}", _BEGIN_RESPONSE_PATTERN, _END_RESPONSE_PATTERN);
-                if (Regex.IsMatch(responseBuilder.ToString(), regex)|| Regex.IsMatch(responseBuilder.ToString(), "\\<i\\>\\<f\\>"))
+                if (Regex.IsMatch(responseBuilder.ToString(), regex) || Regex.IsMatch(responseBuilder.ToString(), "\\<i\\>\\<f\\>"))
                     break; // Terminamos los intentos de leer más datos
             }
-            Trace.WriteLine(String.Format("Tiempo de espera de la respuesta: {0}", DateTime.Now - initTime));
+
             // Si el tamaño de la respuesta es menor a cero, lanzamos una excepción.
             if (isError)
                 throw new IOException(String.Format("Error: Al leer el flujo de datos SSH, Host: {0}", this.Host)); // Lanzamos una excepcion de E/S

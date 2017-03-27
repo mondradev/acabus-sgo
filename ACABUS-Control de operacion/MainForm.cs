@@ -70,5 +70,12 @@ namespace ACABUS_Control_de_operacion
         {
             Application.Exit();
         }
+
+        private void visorDeEventosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (EventViewer.Instance == null || EventViewer.Instance.IsDisposed)
+                EventViewer.Instance = new EventViewer();
+            EventViewer.Instance.Show();
+        }
     }
 }

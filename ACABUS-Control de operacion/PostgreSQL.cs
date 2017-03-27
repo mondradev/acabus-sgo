@@ -120,9 +120,8 @@ namespace ACABUS_Control_de_operacion
                 catch (Exception ex)
                 {
                     attempts++;
-                    response = "Error al obtener información";
-                    Trace.WriteLine(ex.Message);
-                    Trace.WriteLine(String.Format("El host {0} intentará nuevamente realizar la consulta: intento {1}/{2}", Host, attempts, limitOfAttempts));
+                    Trace.WriteLine(ex.Message, "ERROR");
+                    Trace.WriteLine(String.Format("El host {0} intentará nuevamente realizar la consulta: intento {1}/{2}", Host, attempts, limitOfAttempts), "INFO");
                 }
             }
             if (response.Contains("ERROR:"))
