@@ -41,12 +41,12 @@ namespace ACABUS_Control_de_operacion
         /// <summary>
         /// Patrón de inicio de la respuesta.
         /// </summary>
-        private const String _BEGIN_RESPONSE_PATTERN = "\\<\\<i\\<\\<";
+        private const String _BEGIN_RESPONSE_PATTERN = "\\<i\\>";
 
         /// <summary>
         /// Patrón del final de la respuesta.
         /// </summary>
-        private const String _END_RESPONSE_PATTERN = "\\>\\>f\\>\\>";
+        private const String _END_RESPONSE_PATTERN = "\\<f\\>";
 
         /// <summary>
         /// Crea una instancia de una conexión por SSH a un equipo remoto especificando 
@@ -112,8 +112,6 @@ namespace ACABUS_Control_de_operacion
             // Intentamos leer
             responseSize = ReadResponse(out response);
 
-            Trace.WriteLine(String.Format("El host {0} respondió: {1}", Host, response));
-
             // Removemos el comando escrito en el buffer de ser necesario
             response = ProcessReponse(response);
 
@@ -153,6 +151,8 @@ namespace ACABUS_Control_de_operacion
             // Extraemos la cadena de respuesta
             result = Regex.Match(result, regex).Value;
 
+            Trace.WriteLine(String.Format("El host {0} respondió: {1}", Host, result));
+
             // Eliminamos los patrones de la cadena de respuesta y poder obtener el valor real
             return new Regex(String.Format("{0}|{1}", _BEGIN_RESPONSE_PATTERN, _END_RESPONSE_PATTERN)).Replace(result, "");
         }
@@ -179,7 +179,7 @@ namespace ACABUS_Control_de_operacion
 
             // Tamaño de la respuesta en bytes
             int responseSize = 0;
-
+            DateTime initTime = DateTime.Now;
             // Comienza el intento de lectura del flujo de datos
             while (this.IsConnected())
             {
@@ -195,11 +195,11 @@ namespace ACABUS_Control_de_operacion
                 { // Si es mayor a cero
                     responseBuilder.Append(Encoding.UTF8.GetString(buffer, 0, responseSize)); // Añadimos a la respuesta
                 }
-                String regex = String.Format("echo\\s-n\\s'{0}'(.|\r\n|\n){{0,}}{0}", _END_RESPONSE_PATTERN);
-                if (Regex.IsMatch(responseBuilder.ToString(), regex))
+                String regex = String.Format("{0}([^'])(.|\r\n|\n){{0,}}([^']){1}", _BEGIN_RESPONSE_PATTERN, _END_RESPONSE_PATTERN);
+                if (Regex.IsMatch(responseBuilder.ToString(), regex)|| Regex.IsMatch(responseBuilder.ToString(), "\\<i\\>\\<f\\>"))
                     break; // Terminamos los intentos de leer más datos
             }
-
+            Trace.WriteLine(String.Format("Tiempo de espera de la respuesta: {0}", DateTime.Now - initTime));
             // Si el tamaño de la respuesta es menor a cero, lanzamos una excepción.
             if (isError)
                 throw new IOException(String.Format("Error: Al leer el flujo de datos SSH, Host: {0}", this.Host)); // Lanzamos una excepcion de E/S

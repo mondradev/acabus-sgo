@@ -51,6 +51,7 @@ namespace ACABUS_Control_de_operacion
         public String[][] ExecuteQuery(String statement)
         {
             String response = null;
+            if (String.IsNullOrEmpty(statement)) return null;
             using (NpgsqlConnection connection = InitializeConnection())
             {
                 if (connection != null) connection.Open();
@@ -99,6 +100,7 @@ namespace ACABUS_Control_de_operacion
             Int16 attempts = 0;
             Int16 limitOfAttempts = LimitOfAttempts;
             String response = "";
+            if (String.IsNullOrEmpty(query)) return null;
             while (attempts < limitOfAttempts)
             {
                 try

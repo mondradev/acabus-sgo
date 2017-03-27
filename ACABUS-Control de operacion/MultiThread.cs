@@ -105,32 +105,37 @@ namespace ACABUS_Control_de_operacion
             OnChanged(new MultiThreadEventArgs(ActionThread.REMOVING));
         }
 
-        public void KillAllThreads()
+        public void KillAllThreads(Action action = null)
         {
-            _inStoping = true;
-            while (Threads.Count > 0)
+            new Thread(() =>
             {
-                Trace.WriteLine(String.Format("Intentando matar subproceso: {0}", Threads.Count));
-                for (Int16 i = (Int16)(Threads.Count - 1); i >= 0; i--)
+                _inStoping = true;
+                while (Threads.Count > 0)
                 {
-                    try
+                    Trace.WriteLine(String.Format("Intentando matar subproceso: {0}", Threads.Count));
+                    for (Int16 i = (Int16)(Threads.Count - 1); i >= 0; i--)
                     {
-                        if (!Threads[i].IsAlive)
-                            RemoveProcess(Threads[i]);
-                        else
+                        try
                         {
-                            Threads[i].Interrupt();
-                            Threads[i].Abort();
+                            if (!Threads[i].IsAlive)
+                                RemoveProcess(Threads[i]);
+                            else
+                            {
+                                Threads[i].Interrupt();
+                                Threads[i].Abort();
+                            }
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            Trace.WriteLine(String.Format("Cambió la cantidad de subprocesos {0}", Threads.Count));
                         }
                     }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        Trace.WriteLine(String.Format("Cambió la cantidad de subprocesos {0}", Threads.Count));
-                    }
+                    Thread.Sleep(600);
                 }
-                Thread.Sleep(50);
-            }
-            _inStoping = false;
+                _inStoping = false;
+                if (action != null)
+                    action.Invoke();
+            }).Start();
         }
 
         public Boolean IsRunning()

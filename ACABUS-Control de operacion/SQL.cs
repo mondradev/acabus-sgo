@@ -58,13 +58,14 @@ namespace ACABUS_Control_de_operacion
             _inStoping = true;
             InitializeTask("Deteniendo tarea", 2);
             IncrementProgressBar();
-            new Thread(() =>
+            _multiThread.KillAllThreads(() =>
             {
-                this.Name = "Deteniendo tarea actual";
-                _multiThread.KillAllThreads();
                 IncrementProgressBar();
-            }).Start();
-            stopTaskButton.Enabled = false;
+                this.BeginInvoke(new Action(() =>
+                {
+                    stopTaskButton.Enabled = false;
+                }));
+            });
         }
 
         private void CheckReplicaButtonOnClick(object sender, EventArgs e)
@@ -136,9 +137,10 @@ namespace ACABUS_Control_de_operacion
             this._hasColumns = false;
             this._countcolumns = 0;
 
-            this.InitializeTask("Consulta SQL en masivo", (Int16)(devices.Length * 2));
-
             String query = queryBox.Text.Trim().Replace("\n", " ").Replace("\r", "");
+            if (String.IsNullOrEmpty(query)) return;
+
+            this.InitializeTask("Consulta SQL en masivo", (Int16)(devices.Length * 2));
 
             foreach (Device device in devices)
             {
@@ -151,8 +153,6 @@ namespace ACABUS_Control_de_operacion
                 });
             }
         }
-
-
 
         private void RunQueryInDevice(string query, Device device)
         {
@@ -169,7 +169,7 @@ namespace ACABUS_Control_de_operacion
                 Trace.WriteLine(String.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", device.IP, "teknei"));
                 response = psql.ExcuteQueryBySsh(query, "teknei", "4c4t3k");
             }
-            if (response.Length <= 0)
+            if (response == null || response.Length <= 0)
                 throw new Exception(String.Format("El host {0} no respondió con un resultado", device.IP));
 
             if (!this._hasColumns || this._countcolumns < response[0].Length)

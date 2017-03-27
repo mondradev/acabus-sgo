@@ -79,11 +79,11 @@
       <DependentUpon>SQL.cs</DependentUpon>
     </Compile>
     <Compile Include="Device.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="KVR.cs" />
     <Compile Include="MultiThread.cs" />
@@ -99,6 +99,18 @@
       <DependentUpon>StockCard.cs</DependentUpon>
     </Compile>
     <Compile Include="Trunk.cs" />
+    <Compile Include="EventViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EventViewer.Designer.cs">
+      <DependentUpon>EventViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UncirculatedVehicles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UncirculatedVehicles.Designer.cs">
+      <DependentUpon>UncirculatedVehicles.cs</DependentUpon>
+    </Compile>
     <Compile Include="XMLConfiguration.cs" />
     <EmbeddedResource Include="Monitor.resx">
       <DependentUpon>Monitor.cs</DependentUpon>
@@ -106,8 +118,8 @@
     <EmbeddedResource Include="SQL.resx">
       <DependentUpon>SQL.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -121,6 +133,12 @@
     </Compile>
     <EmbeddedResource Include="StockCard.resx">
       <DependentUpon>StockCard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EventViewer.resx">
+      <DependentUpon>EventViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UncirculatedVehicles.resx">
+      <DependentUpon>UncirculatedVehicles.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
