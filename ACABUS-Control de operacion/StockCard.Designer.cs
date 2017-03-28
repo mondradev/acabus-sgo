@@ -163,7 +163,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "StockCard";
-            this.Text = "StockCard";
+            this.Text = "Inventario de tarjetas en KVRs";
             ((System.ComponentModel.ISupportInitialize)(this.dgvResult)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();

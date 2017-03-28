@@ -251,7 +251,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "SQLModule";
-            this.Text = "DailyTask";
+            this.Text = "SQL Masivo";
             ((System.ComponentModel.ISupportInitialize)(this.resultTable)).EndInit();
             this.statusBarra.ResumeLayout(false);
             this.statusBarra.PerformLayout();

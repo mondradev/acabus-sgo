@@ -32,8 +32,16 @@
             this.counterLabel = new System.Windows.Forms.Label();
             this.disconnectVehicleLabel = new System.Windows.Forms.Label();
             this.badCountersTable = new System.Windows.Forms.DataGridView();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusCounterColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lastAccessColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.disconnectVehicleTable = new System.Windows.Forms.DataGridView();
+            this.NoEcon = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ValPending = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.alarmTrunkTable = new System.Windows.Forms.DataGridView();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label1 = new System.Windows.Forms.Label();
             this.startButton = new System.Windows.Forms.Button();
             this.StopButton = new System.Windows.Forms.Button();
@@ -43,14 +51,6 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.uncirculatedVehiclesButton = new System.Windows.Forms.Button();
-            this.NoEcon = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ValPending = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.statusCounterColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.lastAccessColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.badCountersTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.disconnectVehicleTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.alarmTrunkTable)).BeginInit();
@@ -98,6 +98,28 @@
             this.badCountersTable.TabIndex = 10;
             this.badCountersTable.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.ResultTableOnRowsAdded);
             // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridViewTextBoxColumn1.HeaderText = "No. Económico";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            // 
+            // statusCounterColumn
+            // 
+            this.statusCounterColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.statusCounterColumn.HeaderText = "Estado del contador";
+            this.statusCounterColumn.Name = "statusCounterColumn";
+            this.statusCounterColumn.ReadOnly = true;
+            // 
+            // lastAccessColumn
+            // 
+            this.lastAccessColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.lastAccessColumn.HeaderText = "Ultima validación";
+            this.lastAccessColumn.Name = "lastAccessColumn";
+            this.lastAccessColumn.ReadOnly = true;
+            this.lastAccessColumn.Width = 168;
+            // 
             // disconnectVehicleTable
             // 
             this.disconnectVehicleTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -116,6 +138,21 @@
             this.disconnectVehicleTable.TabIndex = 9;
             this.disconnectVehicleTable.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.ResultTableOnRowsAdded);
             // 
+            // NoEcon
+            // 
+            this.NoEcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.NoEcon.HeaderText = "No. Económico";
+            this.NoEcon.Name = "NoEcon";
+            this.NoEcon.ReadOnly = true;
+            // 
+            // ValPending
+            // 
+            this.ValPending.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.ValPending.HeaderText = "Última conexión";
+            this.ValPending.Name = "ValPending";
+            this.ValPending.ReadOnly = true;
+            this.ValPending.Width = 160;
+            // 
             // alarmTrunkTable
             // 
             this.alarmTrunkTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -133,6 +170,28 @@
             this.alarmTrunkTable.Size = new System.Drawing.Size(570, 599);
             this.alarmTrunkTable.TabIndex = 13;
             this.alarmTrunkTable.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.ResultTableOnRowsAdded);
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.dataGridViewTextBoxColumn2.HeaderText = "Equipo";
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            this.dataGridViewTextBoxColumn2.Width = 98;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridViewTextBoxColumn3.HeaderText = "Descripción";
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            // 
+            // Column1
+            // 
+            this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Column1.HeaderText = "Hora";
+            this.Column1.Name = "Column1";
+            this.Column1.Width = 79;
             // 
             // label1
             // 
@@ -235,65 +294,6 @@
             this.uncirculatedVehiclesButton.UseVisualStyleBackColor = true;
             this.uncirculatedVehiclesButton.Click += new System.EventHandler(this.UncirculatedVehiclesButton_Click);
             // 
-            // NoEcon
-            // 
-            this.NoEcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.NoEcon.HeaderText = "No. Económico";
-            this.NoEcon.Name = "NoEcon";
-            this.NoEcon.ReadOnly = true;
-            // 
-            // ValPending
-            // 
-            this.ValPending.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.ValPending.HeaderText = "Última conexión";
-            this.ValPending.Name = "ValPending";
-            this.ValPending.ReadOnly = true;
-            this.ValPending.Width = 160;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.dataGridViewTextBoxColumn2.HeaderText = "Equipo";
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 98;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn3.HeaderText = "Descripción";
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            // 
-            // Column1
-            // 
-            this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.Column1.HeaderText = "Hora";
-            this.Column1.Name = "Column1";
-            this.Column1.Width = 79;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn1.HeaderText = "No. Económico";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // statusCounterColumn
-            // 
-            this.statusCounterColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.statusCounterColumn.HeaderText = "Estado del contador";
-            this.statusCounterColumn.Name = "statusCounterColumn";
-            this.statusCounterColumn.ReadOnly = true;
-            // 
-            // lastAccessColumn
-            // 
-            this.lastAccessColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.lastAccessColumn.HeaderText = "Ultima validación";
-            this.lastAccessColumn.Name = "lastAccessColumn";
-            this.lastAccessColumn.ReadOnly = true;
-            this.lastAccessColumn.Width = 168;
-            // 
             // Monitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 24F);
@@ -308,7 +308,7 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(1160, 750);
             this.Name = "Monitor";
-            this.Text = "Monitor";
+            this.Text = "Monitor Vía y Vehículos";
             ((System.ComponentModel.ISupportInitialize)(this.badCountersTable)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.disconnectVehicleTable)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.alarmTrunkTable)).EndInit();

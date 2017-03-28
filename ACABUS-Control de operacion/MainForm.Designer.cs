@@ -32,13 +32,13 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.tsmiFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmifSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.visorDeEventosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmifExit = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.tlsTools = new System.Windows.Forms.ToolStrip();
             this.stockCardButton = new System.Windows.Forms.ToolStripButton();
             this.sqlButton = new System.Windows.Forms.ToolStripButton();
             this.monitorButton = new System.Windows.Forms.ToolStripButton();
-            this.visorDeEventosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tlsTools.SuspendLayout();
             this.SuspendLayout();
@@ -69,6 +69,13 @@
             // 
             this.tsmifSeparator.Name = "tsmifSeparator";
             this.tsmifSeparator.Size = new System.Drawing.Size(190, 6);
+            // 
+            // visorDeEventosToolStripMenuItem
+            // 
+            this.visorDeEventosToolStripMenuItem.Name = "visorDeEventosToolStripMenuItem";
+            this.visorDeEventosToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.visorDeEventosToolStripMenuItem.Text = "Visor de eventos";
+            this.visorDeEventosToolStripMenuItem.Click += new System.EventHandler(this.visorDeEventosToolStripMenuItem_Click);
             // 
             // tsmifExit
             // 
@@ -127,13 +134,6 @@
             this.monitorButton.Text = "Monitoreo";
             this.monitorButton.Click += new System.EventHandler(this.MonitorButton_Click);
             // 
-            // visorDeEventosToolStripMenuItem
-            // 
-            this.visorDeEventosToolStripMenuItem.Name = "visorDeEventosToolStripMenuItem";
-            this.visorDeEventosToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
-            this.visorDeEventosToolStripMenuItem.Text = "Visor de eventos";
-            this.visorDeEventosToolStripMenuItem.Click += new System.EventHandler(this.visorDeEventosToolStripMenuItem_Click);
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
@@ -146,7 +146,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(1300, 700);
             this.Name = "frmMain";
-            this.Text = "Control de operación - ACABUS";
+            this.Text = "Control de operación ACABUS";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

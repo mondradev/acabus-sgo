@@ -24,6 +24,11 @@ namespace ACABUS_Control_de_operacion
         public String Username { get; private set; }
 
         /// <summary>
+        /// Indica si el equipo remoto maneja algun sistema con una terminal basada en UNIX.
+        /// </summary>
+        public Boolean IsUnix { get; private set; }
+
+        /// <summary>
         /// Obtiene o establece la clave del usuario para la autenticación en el equipo remoto.
         /// </summary>
         private String _password;
@@ -93,7 +98,7 @@ namespace ACABUS_Control_de_operacion
         /// </summary>
         /// <param name="command">Comando a ejecutar en el equipo remoto.</param>
         /// <returns>Respuesta de la terminal del equipo remoto al de ejecutar el comando.</returns>
-        public String SendCommand(String command)
+        public String SendCommand(String command, Boolean clearHistory = true)
         {
             // Tiempo inicial del envío de comando
             DateTime initTime = DateTime.Now;
@@ -123,6 +128,12 @@ namespace ACABUS_Control_de_operacion
 
             Trace.WriteLine(String.Format("Tiempo de espera de la respuesta: {0}", DateTime.Now - initTime), "DEBUG");
 
+            if (IsUnix && clearHistory)
+            {
+                Trace.WriteLine(String.Format("Limpiando historial de Unix: {0}: ", Host), "DEBUG");
+                SendCommand("history -a;  history -r; cat .bash_history | grep -v '\\<i\\>' >> .bash_history.bkp; mv .bash_history.bkp .bash_history ; history -c", false);
+            }
+
             // Devolvemos la respuesta del comando pasado por argumento a esta función
             return response;
         }
@@ -150,6 +161,9 @@ namespace ACABUS_Control_de_operacion
         /// <returns>Resultado procesado</returns>
         private string ProcessReponse(string result)
         {
+            // Intentamos identificar si la terminal es linux
+            IsUnix = DetectUNIXShell(result);
+
             // Removemos el comando enviado y nos quedamos con la respuesta a tratar
             result = result.Substring(result.LastIndexOf(_BEGIN_RESPONSE_PATTERN.Replace("\\", "")));
 
@@ -163,6 +177,16 @@ namespace ACABUS_Control_de_operacion
 
             // Eliminamos los patrones de la cadena de respuesta y poder obtener el valor real
             return new Regex(String.Format("{0}|{1}", _BEGIN_RESPONSE_PATTERN, _END_RESPONSE_PATTERN)).Replace(result, "");
+        }
+
+        /// <summary>
+        /// Determina si la teminal del equipo remoto es basada en UNIX.
+        /// </summary>
+        /// <param name="result">Respuesta el equipo remoto a evaluar.</param>
+        /// <returns>Un valor verdadero si el equipo remoto es basado en UNIX.</returns>
+        private Boolean DetectUNIXShell(string result)
+        {
+            return !String.IsNullOrEmpty(Regex.Match(result, ".*\\@.*(\\#|\\~)").Value);
         }
 
         /// <summary>
@@ -219,6 +243,11 @@ namespace ACABUS_Control_de_operacion
             return response.Length;
         }
 
+        private void ClearHistoryInLinux()
+        {
+
+        }
+
         /// <summary>
         /// Desctructor de la instancia.
         /// </summary>
@@ -232,7 +261,8 @@ namespace ACABUS_Control_de_operacion
         /// </summary>
         public void Dispose()
         {
-            this._session.Close();
+            if (this._session != null)
+                this._session.Close();
         }
     }
 }
