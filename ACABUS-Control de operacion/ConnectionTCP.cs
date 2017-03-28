@@ -4,41 +4,63 @@ using System.Net.NetworkInformation;
 
 namespace ACABUS_Control_de_operacion
 {
-    public class ConnectionTCP
+    /// <summary>
+    /// Esta clase contiene funciones básicas para evaluar la disponibilidad de un
+    /// equipo remoto en la red.
+    /// </summary>
+    public sealed class ConnectionTCP
     {
-        public bool SendToPing(string strIP, int it)
+        /// <summary>
+        /// Determina si el host está disponible en la red.
+        /// </summary>
+        /// <param name="host">Dirección IPv4 del host remoto.</param>
+        /// <returns>Un valor true si está disponible el host remoto.</returns>
+        public static Boolean IsAvaibleIP(String host)
         {
-            if (!IsIPv4(strIP))
-                return false;
+            if (SendToPing(host, 3) > 0)
+                return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Envía un mensaje eco al host remoto el número de veces inidicado.
+        /// </summary>
+        /// <param name="host">Dirección IPv4 del host remoto</param>
+        /// <param name="attempts">Número de intentos para realizar el eco (default: 5)</param>
+        /// <returns>El tiempo en milisegundo en completar el envío del mensaje eco.</returns>
+        public static Int16 SendToPing(String host, Int16 attempts = 5)
+        {
+            if (!IsIPv4(host))
+                return -1;
 
             Ping ping = new Ping();
             try
             {
                 PingReply pr = null;
                 Int16 i = 0;
-                while ((pr == null || pr.Status != IPStatus.Success) && i < it)
+                while ((pr == null || pr.Status != IPStatus.Success) && i < attempts)
                 {
-                    pr = ping.Send(strIP);
+                    pr = ping.Send(host);
                     i++;
-                    if (i == it && pr.Status != IPStatus.Success)
-                        return false;
+                    if (i == attempts && pr.Status != IPStatus.Success)
+                        return -1;
                 }
+                return (Int16)pr.RoundtripTime;
             }
             catch (Exception)
             {
-                return false;
+                return -1;
             }
-            return true;
         }
 
-        public bool IsIPv4(string strIp)
+        /// <summary>
+        /// Indica si la cadena especificada como argumento es una dirección IPv4 válida.
+        /// </summary>
+        /// <param name="host">Dirección IPv4 a evaluar.</param>
+        /// <returns>Un valor verdadero si la cadena es una dirección IPv4 válida.</returns>
+        public static Boolean IsIPv4(String host)
         {
-            if (strIp.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length == 4)
-            {
-                if (IPAddress.TryParse(strIp, out IPAddress ipAddr))
-                    return true;
-            }
-            return false;
+            return IPAddress.TryParse(host, out IPAddress ipAddr);
         }
 
     }

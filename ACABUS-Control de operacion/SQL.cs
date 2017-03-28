@@ -41,7 +41,7 @@ namespace ACABUS_Control_de_operacion
         {
             if (!_inStoping)
                 IncrementProgressBar();
-            Int16 processCount = (Int16)_multiThread.Threads.Count;
+            Int16 processCount = (Int16)_multiThread.Count;
             this.BeginInvoke(new Action(() =>
             {
                 this.threadsStatusLabel.Text = String.Format("{0} Subprocesos", processCount);
@@ -98,12 +98,12 @@ namespace ACABUS_Control_de_operacion
                 foreach (Device device in devices)
                 {
                     if (this._inStoping) break;
-                    this._multiThread.RunTask(() =>
+                    this._multiThread.RunTask(String.Format("Check Reply Thread: {0}", device.GetNumeSeri()), () =>
                     {
                         String query = device.Type == Device.DeviceType.KVR
                                                         ? PostgreSQL.PENDING_INFO_TO_SEND_DEVICE_R_S
                                                         : PostgreSQL.PENDING_INFO_TO_SEND_DEVICE_I_O;
-                        if (this.IsAvaibleIP(device.IP))
+                        if (ConnectionTCP.IsAvaibleIP(device.IP))
                             this.RunQueryInDevice(query, device);
                         else
                             throw new Exception(String.Format("No hay accesos al host {0}", device.IP));
@@ -145,12 +145,12 @@ namespace ACABUS_Control_de_operacion
             foreach (Device device in devices)
             {
                 if (this._inStoping) break;
-                this._multiThread.RunTask(() =>
-                {
-                    if (this.IsAvaibleIP(device.IP))
-                        this.RunQueryInDevice(query, device);
+                this._multiThread.RunTask(String.Format("Run SQL Thread: {0}", device.GetNumeSeri()), () =>
+                 {
+                     if (ConnectionTCP.IsAvaibleIP(device.IP))
+                         this.RunQueryInDevice(query, device);
 
-                });
+                 });
             }
         }
 
@@ -278,14 +278,6 @@ namespace ACABUS_Control_de_operacion
             }
             if (this.taskProgressBar.Value == this.taskProgressBar.Maximum)
                 this._multiThread.KillAllThreads();
-        }
-
-        private bool IsAvaibleIP(string strIP)
-        {
-            ConnectionTCP cnnTCP = new ConnectionTCP();
-            if (cnnTCP.SendToPing(strIP, 3))
-                return true;
-            return false;
         }
 
         private void DesactiveControls()

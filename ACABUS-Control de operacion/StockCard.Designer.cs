@@ -86,6 +86,7 @@
             // stopTaskButton
             // 
             this.stopTaskButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.stopTaskButton.Enabled = false;
             this.stopTaskButton.Image = ((System.Drawing.Image)(resources.GetObject("stopTaskButton.Image")));
             this.stopTaskButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.stopTaskButton.Name = "stopTaskButton";
