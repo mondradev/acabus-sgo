@@ -11,6 +11,12 @@ namespace ACABUS_Control_de_operacion
         private MultiThread _multiThread;
         private DateTime _taskTime;
 
+        static String _database = "SITM";
+        static String _username = "postgres";
+        static String _password = "4c4t3k";
+        static String usernameSsh = "teknei";
+        static String passwordSsh = "4c4t3k";
+
         public StockCard()
         {
             InitializeComponent();
@@ -51,8 +57,8 @@ namespace ACABUS_Control_de_operacion
                  {
                      if (ConnectionTCP.IsAvaibleIP(kvr.IP))
                      {
-                         Int16 sales = Int16.Parse(QuerySales(kvr.IP));
-                         Int16 stock = Int16.Parse(QueryStock(kvr.IP));
+                         Int16 sales = Int16.Parse(QuerySales(kvr));
+                         Int16 stock = Int16.Parse(QueryStock(kvr));
                          Int16 sum = 0;
                          if (kvr.MaxCard > stock && stock > kvr.MinCard)
                              sum = (Int16)(sales * 1.5);
@@ -81,17 +87,35 @@ namespace ACABUS_Control_de_operacion
 
         }
 
-        private string QueryStock(string strEquip)
+        private static string QueryStock(KVR kvr)
         {
-            PostgreSQL sql = PostgreSQL.CreateConnection(strEquip, 5432, "postgres", "4c4t3k", "SITM");
-            String[][] response = sql.ExecuteQuery(PostgreSQL.CARD_STOCK);
+            PostgreSQL sql = PostgreSQL.CreateConnection(
+                kvr.IP,
+                5432,
+                _username,
+                kvr.IsExtern ? "admin" : _password,
+                kvr.IsExtern ? kvr.DataBaseName : _database);
+            String[][] response = sql.ExecuteQuery(
+                PostgreSQL.CARD_STOCK,
+                true,
+                kvr.IsExtern ? "Administrador" : usernameSsh,
+                kvr.IsExtern ? "Administrador*2016" : passwordSsh);
             return response.Length > 1 ? response[1][0] : "0";
         }
 
-        private static string QuerySales(string strEquip)
+        private static string QuerySales(KVR kvr)
         {
-            PostgreSQL sql = PostgreSQL.CreateConnection(strEquip, 5432, "postgres", "4c4t3k", "SITM");
-            String[][] response = sql.ExecuteQuery(PostgreSQL.TOTAL_SALE);
+            PostgreSQL sql = PostgreSQL.CreateConnection(
+                kvr.IP,
+                5432,
+                _username,
+                kvr.IsExtern ? "admin" : _password,
+                kvr.IsExtern ? kvr.DataBaseName : _database);
+            String[][] response = sql.ExecuteQuery(
+                PostgreSQL.TOTAL_SALE,
+                true,
+                kvr.IsExtern ? "Administrador" : usernameSsh,
+                kvr.IsExtern ? "Administrador*2016" : passwordSsh);
             return response.Length > 1 ? response[1][0] : "0";
         }
 

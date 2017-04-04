@@ -14,9 +14,10 @@ namespace ACABUS_Control_de_operacion
         {
             Trunk.LoadConfiguration();
             RuntimeHelpers.RunClassConstructor(typeof(EventViewer).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(DBKVRsExternos).TypeHandle);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
+            Application.Run(new MainForm());
         }
     }
 }

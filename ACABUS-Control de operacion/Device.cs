@@ -5,16 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace ACABUS_Control_de_operacion {
+namespace ACABUS_Control_de_operacion
+{
     /// <summary>
     /// Esta clase define la estructura básica de un equipo
     /// en ruta troncal.
     /// </summary>
-    public class Device {
+    public class Device
+    {
         /// <summary>
         /// Define los tipos de equipos disponibles.
         /// </summary>
-        public enum DeviceType {
+        public enum DeviceType
+        {
             /// <summary>
             /// Kiosko de venta y recarga.
             /// </summary>
@@ -26,7 +29,15 @@ namespace ACABUS_Control_de_operacion {
             /// <summary>
             /// Puerta para personas de movilidad reducida.
             /// </summary>
-            PMR
+            PMR,
+            /// <summary>
+            /// Grabador de video en red
+            /// </summary>
+            NVR,
+            /// <summary>
+            /// Switch de estación
+            /// </summary>
+            SW
         }
 
         /// <summary>
@@ -35,14 +46,20 @@ namespace ACABUS_Control_de_operacion {
         /// </summary>
         /// <param name="value">Cadena a convertir</param>
         /// <returns>Una instancia de tipo</returns>
-        private static DeviceType? ParseType(String value) {
-            switch (value) {
+        private static DeviceType? ParseType(String value)
+        {
+            switch (value)
+            {
                 case "KVR":
                     return DeviceType.KVR;
                 case "PMR":
                     return DeviceType.PMR;
                 case "TOR":
                     return DeviceType.TOR;
+                case "NVR":
+                    return DeviceType.NVR;
+                case "SW":
+                    return DeviceType.SW;
             }
             return null;
         }
@@ -54,23 +71,30 @@ namespace ACABUS_Control_de_operacion {
         /// <param name="device">Nodo XML que representa un equipo.</param>
         /// <param name="station">Estación a la que pertenece el equipo.</param>
         /// <returns>Una instancia de un equipo de estación.</returns>
-        public static Device ToDevice(XmlNode device, Station station) {
+        public static Device ToDevice(XmlNode device, Station station)
+        {
             if (!device.Name.Equals("Equip"))
                 return null;
-            var deviceTemp = new Device(station);
-            deviceTemp.ID = Int32.Parse(device.Attributes["id"].Value);
-            deviceTemp.IP = device.Attributes["ip"].Value;
-            deviceTemp.Type = ParseType(device.Attributes["type"].Value);
-            deviceTemp.Status = device.Attributes["status"] != null ? Boolean.Parse(device.Attributes["status"].Value) : true;
-            if (deviceTemp.Type == DeviceType.KVR) {
-                var kvr = KVR.ToKVR(deviceTemp);
+            var deviceTemp = new Device(station)
+            {
+                ID = Int32.Parse(device.Attributes["id"].Value),
+                IP = device.Attributes["ip"].Value,
+                Type = ParseType(device.Attributes["type"].Value),
+                Status = device.Attributes["status"] != null ? Boolean.Parse(device.Attributes["status"].Value) : true
+            };
+            if (deviceTemp.Type == DeviceType.KVR)
+            {
                 String maxCardStr = device.Attributes["maxCard"].Value;
-                maxCardStr = String.IsNullOrEmpty(maxCardStr) ? "0" : maxCardStr;
                 String minCardStr = device.Attributes["minCard"].Value;
+                var kvr = KVR.ToKVR(deviceTemp);
+                maxCardStr = String.IsNullOrEmpty(maxCardStr) ? "0" : maxCardStr;
                 minCardStr = String.IsNullOrEmpty(minCardStr) ? "0" : minCardStr;
                 kvr.MaxCard = Int32.Parse(maxCardStr);
                 kvr.MinCard = Int32.Parse(minCardStr);
                 kvr.Status = Boolean.Parse(device.Attributes["status"].Value);
+                kvr.IsExtern = device.Attributes["extern"] != null;
+                if (kvr.IsExtern)
+                    kvr.IP = device.Attributes["ipServer"].Value;
                 return kvr;
             }
             return deviceTemp;
@@ -108,7 +132,8 @@ namespace ACABUS_Control_de_operacion {
         /// </summary>
         /// <param name="station">Estación a la que pertence
         /// el equipo.</param>
-        public Device(Station station) {
+        public Device(Station station)
+        {
             this.Station = station;
         }
 
@@ -116,7 +141,8 @@ namespace ACABUS_Control_de_operacion {
         /// Una cadena que representa a este equipo.
         /// </summary>
         /// <returns>Un número de serie que identifica al equipo.</returns>
-        public new String ToString() {
+        public new String ToString()
+        {
             return GetNumeSeri();
         }
 
@@ -124,7 +150,8 @@ namespace ACABUS_Control_de_operacion {
         /// Obtiene el número de serie del equipo.
         /// </summary>
         /// <returns>El número de serie del equipo.</returns>
-        public String GetNumeSeri() {
+        public String GetNumeSeri()
+        {
             var type = Type.ToString();
             var trunkID = this.Station.Trunk.ID.ToString("D2");
             var stationID = this.Station.ID.ToString("D2");

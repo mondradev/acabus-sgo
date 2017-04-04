@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 
@@ -17,7 +18,9 @@ namespace ACABUS_Control_de_operacion
         /// <returns>Un valor true si está disponible el host remoto.</returns>
         public static Boolean IsAvaibleIP(String host)
         {
-            if (SendToPing(host, 3) > 0)
+            short ping = SendToPing(host, 3);
+            Trace.WriteLine(String.Format("Eco al host {0}: {1} ms", host, ping), "DEBUG");
+            if (ping >= 0)
                 return true;
             return false;
         }

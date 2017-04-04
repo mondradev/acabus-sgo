@@ -103,6 +103,8 @@ namespace ACABUS_Control_de_operacion
                         String query = device.Type == Device.DeviceType.KVR
                                                         ? PostgreSQL.PENDING_INFO_TO_SEND_DEVICE_R_S
                                                         : PostgreSQL.PENDING_INFO_TO_SEND_DEVICE_I_O;
+                        if (device.Type == Device.DeviceType.KVR && ((KVR)device).IsExtern)
+                            return;
                         if (ConnectionTCP.IsAvaibleIP(device.IP))
                             this.RunQueryInDevice(query, device);
                         else
@@ -147,28 +149,29 @@ namespace ACABUS_Control_de_operacion
                 if (this._inStoping) break;
                 this._multiThread.RunTask(String.Format("Run SQL Thread: {0}", device.GetNumeSeri()), () =>
                  {
-                     if (ConnectionTCP.IsAvaibleIP(device.IP))
+                     if (device.Type == Device.DeviceType.KVR && ((KVR)device).IsExtern)
+                     {
+                         KVR kvrExtern = (KVR)device;
+                         if (ConnectionTCP.IsAvaibleIP(device.IP))
+                             this.RunQueryInDevice(query, device, kvrExtern.DataBaseName, "postgres", "admin", "Administrador", "Administrador*2016");
+
+                     }
+                     else
+                         if (ConnectionTCP.IsAvaibleIP(device.IP))
                          this.RunQueryInDevice(query, device);
 
                  });
             }
         }
 
-        private void RunQueryInDevice(string query, Device device)
+        private void RunQueryInDevice(string query, Device device, String database = "SITM", String username = "postgres", String password = "4c4t3k", String usernameSsh = "teknei", String passwordSsh = "4c4t3k")
         {
 
-            PostgreSQL psql = PostgreSQL.CreateConnection(device.IP, 5432, "postgres", "4c4t3k", "SITM");
+            PostgreSQL psql = PostgreSQL.CreateConnection(device.IP, 5432, username, password, database);
             String[][] response;
-            try
-            {
-                response = psql.ExecuteQuery(query);
-            }
-            catch (NpgsqlException ex)
-            {
-                Trace.WriteLine(ex.Message, "ERROR");
-                Trace.WriteLine(String.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", device.IP, "teknei"), "DEBUG");
-                response = psql.ExcuteQueryBySsh(query, "teknei", "4c4t3k");
-            }
+
+            response = psql.ExecuteQuery(query, true, usernameSsh, passwordSsh);
+
             if (response == null || response.Length <= 0)
                 throw new Exception(String.Format("El host {0} no respondió con un resultado", device.IP));
 

@@ -72,16 +72,9 @@ namespace ACABUS_Control_de_operacion
                 String[][] response;
                 PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
                 psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
-                try
-                {
-                    response = psql.ExecuteQuery(receNaveQuery);
-                }
-                catch (NpgsqlException ex)
-                {
-                    Trace.WriteLine(ex.Message, "ERROR");
-                    Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME), "DEBUG");
-                    response = psql.ExcuteQueryBySsh(receNaveQuery, USERNAME, PASSWORD);
-                }
+
+                response = psql.ExecuteQuery(receNaveQuery);
+
                 if (response.Length <= 1)
                     throw new Exception(string.Format("El host {0} no respondió con un resultado", host));
                 bool readyDisconnections = false;
@@ -110,16 +103,9 @@ namespace ACABUS_Control_de_operacion
                  String[][] response;
                  PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
                  psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
-                 try
-                 {
-                     response = psql.ExecuteQuery(counterQuery);
-                 }
-                 catch (NpgsqlException ex)
-                 {
-                     Trace.WriteLine(ex.Message, "ERROR");
-                     Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME), "DEBUG");
-                     response = psql.ExcuteQueryBySsh(counterQuery, USERNAME, PASSWORD);
-                 }
+
+                 response = psql.ExecuteQuery(counterQuery);
+
                  if (response.Length <= 1)
                      throw new Exception(string.Format("El host {0} no respondió con un resultado", host));
                  bool readyCounters = false;
@@ -149,16 +135,9 @@ namespace ACABUS_Control_de_operacion
                  String[][] response;
                  PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
                  psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
-                 try
-                 {
-                     response = psql.ExecuteQuery(alarmQuery);
-                 }
-                 catch (NpgsqlException ex)
-                 {
-                     Trace.WriteLine(ex.Message, "ERROR");
-                     Trace.WriteLine(string.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", host, USERNAME), "DEBUG");
-                     response = psql.ExcuteQueryBySsh(alarmQuery, USERNAME, PASSWORD);
-                 }
+
+                 response = psql.ExecuteQuery(alarmQuery);
+
                  if (response.Length <= 1)
                      throw new Exception(string.Format("El host {0} no respondió con un resultado", host));
                  bool readyAlarms = false;
@@ -240,13 +219,16 @@ namespace ACABUS_Control_de_operacion
         {
             if (this._uncirculatedVehiclesDialog == null || this._uncirculatedVehiclesDialog.IsDisposed)
             {
-                this._uncirculatedVehiclesDialog = new UncirculatedVehicles();
+                this._uncirculatedVehiclesDialog = new UncirculatedVehicles()
+                {
+
+                };
                 this._uncirculatedVehiclesDialog.FormClosing += (senderClosing, args) =>
                 {
                     LoadUncirculatedVehicles();
                 };
             }
-            this._uncirculatedVehiclesDialog.ShowDialog();
+            this._uncirculatedVehiclesDialog.ShowDialog(MainForm.Instance);
         }
     }
 }

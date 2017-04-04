@@ -3,15 +3,20 @@ using System.Windows.Forms;
 
 namespace ACABUS_Control_de_operacion
 {
-    public partial class frmMain : Form
+    public partial class MainForm : Form
     {
         private SQLModule sqlAndReplica;
         private Monitor monitor;
         private StockCard stockCard;
+        private NetworkingMonitor netMonitor;
+        private DBKVRsExternos bdkvrExterns;
 
-        public frmMain()
+        public static MainForm Instance { get; set; }
+
+        public MainForm()
         {
             InitializeComponent();
+            Instance = this;
         }
 
         #region MENU
@@ -62,7 +67,17 @@ namespace ACABUS_Control_de_operacion
             monitor.BringToFront();
         }
 
+        private void MonitorLanButton_Click(object sender, EventArgs e)
+        {
+            if (netMonitor == null || netMonitor.IsDisposed)
+                netMonitor = new NetworkingMonitor()
+                {
+                    MdiParent = this
+                };
+            netMonitor.Show();
+            netMonitor.BringToFront();
 
+        }
 
         #endregion
 
@@ -71,11 +86,18 @@ namespace ACABUS_Control_de_operacion
             Application.Exit();
         }
 
-        private void visorDeEventosToolStripMenuItem_Click(object sender, EventArgs e)
+        private void VisorDeEventosToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (EventViewer.Instance == null || EventViewer.Instance.IsDisposed)
                 EventViewer.Instance = new EventViewer();
-            EventViewer.Instance.Show();
+            EventViewer.Instance.ShowDialog();
+        }
+
+        private void ConexiónBDKVRExternosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (bdkvrExterns == null || bdkvrExterns.IsDisposed)
+                bdkvrExterns = new DBKVRsExternos();
+            bdkvrExterns.ShowDialog();
         }
     }
 }

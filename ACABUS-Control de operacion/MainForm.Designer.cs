@@ -1,6 +1,6 @@
 ﻿namespace ACABUS_Control_de_operacion
 {
-    partial class frmMain
+    partial class MainForm
     {
         /// <summary>
         /// Variable del diseñador necesaria.
@@ -28,17 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.tsmiFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmifSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.visorDeEventosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.conexiónBDKVRExternosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmifExit = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.tlsTools = new System.Windows.Forms.ToolStrip();
             this.stockCardButton = new System.Windows.Forms.ToolStripButton();
             this.sqlButton = new System.Windows.Forms.ToolStripButton();
             this.monitorButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.tlsTools.SuspendLayout();
             this.SuspendLayout();
@@ -60,6 +62,7 @@
             this.tsmiFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmifSeparator,
             this.visorDeEventosToolStripMenuItem,
+            this.conexiónBDKVRExternosToolStripMenuItem,
             this.tsmifExit});
             this.tsmiFile.Name = "tsmiFile";
             this.tsmiFile.Size = new System.Drawing.Size(84, 24);
@@ -68,20 +71,27 @@
             // tsmifSeparator
             // 
             this.tsmifSeparator.Name = "tsmifSeparator";
-            this.tsmifSeparator.Size = new System.Drawing.Size(190, 6);
+            this.tsmifSeparator.Size = new System.Drawing.Size(258, 6);
             // 
             // visorDeEventosToolStripMenuItem
             // 
             this.visorDeEventosToolStripMenuItem.Name = "visorDeEventosToolStripMenuItem";
-            this.visorDeEventosToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.visorDeEventosToolStripMenuItem.Size = new System.Drawing.Size(261, 26);
             this.visorDeEventosToolStripMenuItem.Text = "Visor de eventos";
-            this.visorDeEventosToolStripMenuItem.Click += new System.EventHandler(this.visorDeEventosToolStripMenuItem_Click);
+            this.visorDeEventosToolStripMenuItem.Click += new System.EventHandler(this.VisorDeEventosToolStripMenuItem_Click);
+            // 
+            // conexiónBDKVRExternosToolStripMenuItem
+            // 
+            this.conexiónBDKVRExternosToolStripMenuItem.Name = "conexiónBDKVRExternosToolStripMenuItem";
+            this.conexiónBDKVRExternosToolStripMenuItem.Size = new System.Drawing.Size(261, 26);
+            this.conexiónBDKVRExternosToolStripMenuItem.Text = "Conexión BD KVR externos";
+            this.conexiónBDKVRExternosToolStripMenuItem.Click += new System.EventHandler(this.ConexiónBDKVRExternosToolStripMenuItem_Click);
             // 
             // tsmifExit
             // 
             this.tsmifExit.Image = global::ACABUS_Control_de_operacion.Properties.Resources.Actions_close_icon;
             this.tsmifExit.Name = "tsmifExit";
-            this.tsmifExit.Size = new System.Drawing.Size(193, 26);
+            this.tsmifExit.Size = new System.Drawing.Size(261, 26);
             this.tsmifExit.Text = "Salir";
             this.tsmifExit.Click += new System.EventHandler(this.mbrArcExi_Click);
             // 
@@ -97,7 +107,8 @@
             this.tlsTools.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.stockCardButton,
             this.sqlButton,
-            this.monitorButton});
+            this.monitorButton,
+            this.toolStripButton1});
             this.tlsTools.Location = new System.Drawing.Point(0, 28);
             this.tlsTools.Name = "tlsTools";
             this.tlsTools.Size = new System.Drawing.Size(1282, 27);
@@ -134,7 +145,17 @@
             this.monitorButton.Text = "Monitoreo";
             this.monitorButton.Click += new System.EventHandler(this.MonitorButton_Click);
             // 
-            // frmMain
+            // toolStripButton1
+            // 
+            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
+            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(24, 24);
+            this.toolStripButton1.Text = "Monitor de la red";
+            this.toolStripButton1.Click += new System.EventHandler(this.MonitorLanButton_Click);
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -142,10 +163,11 @@
             this.Controls.Add(this.tlsTools);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(1300, 700);
-            this.Name = "frmMain";
+            this.Name = "MainForm";
             this.Text = "Control de operación ACABUS";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);
             this.menuStrip1.ResumeLayout(false);
@@ -169,6 +191,8 @@
         private System.Windows.Forms.ToolStripButton sqlButton;
         private System.Windows.Forms.ToolStripButton monitorButton;
         private System.Windows.Forms.ToolStripMenuItem visorDeEventosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.ToolStripMenuItem conexiónBDKVRExternosToolStripMenuItem;
     }
 }
 
