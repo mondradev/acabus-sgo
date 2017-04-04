@@ -105,7 +105,8 @@ namespace ACABUS_Control_de_operacion
             this._session.Write(PrepareCommand("echo ''"));
 
             // Intentamos leer los datos que tenga el flujo actualmente para descartarlos
-            responseSize = ReadResponse(out String response);
+            String response = null;
+            responseSize = ReadResponse(out response);
 
             Trace.WriteLine(String.Format("Enviando el comando al host {0}", Host), "INFO");
 
@@ -173,6 +174,7 @@ namespace ACABUS_Control_de_operacion
         /// <returns>El número de bytes leidos.</returns>
         private int ReadResponse(out String response)
         {
+
             // Indica si ocurrió un error en la lectura
             bool isError = false;
 

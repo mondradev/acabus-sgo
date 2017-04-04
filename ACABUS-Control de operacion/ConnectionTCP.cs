@@ -35,7 +35,8 @@ namespace ACABUS_Control_de_operacion
         {
             if (strIp.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length == 4)
             {
-                if (IPAddress.TryParse(strIp, out IPAddress ipAddr))
+                IPAddress ipAddr;
+                if (IPAddress.TryParse(strIp, out ipAddr))
                     return true;
             }
             return false;
