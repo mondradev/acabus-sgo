@@ -86,6 +86,7 @@
             // stopTaskButton
             // 
             this.stopTaskButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.stopTaskButton.Enabled = false;
             this.stopTaskButton.Image = ((System.Drawing.Image)(resources.GetObject("stopTaskButton.Image")));
             this.stopTaskButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.stopTaskButton.Name = "stopTaskButton";
@@ -162,7 +163,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "StockCard";
-            this.Text = "StockCard";
+            this.Text = "Inventario de tarjetas en KVRs";
             ((System.ComponentModel.ISupportInitialize)(this.dgvResult)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();

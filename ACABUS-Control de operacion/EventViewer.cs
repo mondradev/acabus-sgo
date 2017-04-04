@@ -109,7 +109,7 @@ namespace ACABUS_Control_de_operacion
 
         private static void AddRow(EventRow item)
         {
-            if (!Instance.IsDisposed)
+            if (Instance != null && !Instance.IsDisposed)
                 Instance.BeginInvoke(new Action(() =>
                 {
                     if (Instance.infoCheck.Checked && item.EventType.Equals(EventType.INFO))

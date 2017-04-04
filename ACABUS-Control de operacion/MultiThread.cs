@@ -28,17 +28,13 @@ namespace ACABUS_Control_de_operacion
 
         private List<Thread> _threads;
 
-        public List<Thread> Threads {
+        public int Capacity { get; set; }
+
+        public int Count {
             get {
-                if (_threads == null) _threads = new List<Thread>();
-                return _threads;
-            }
-            private set {
-                _threads = value;
+                return _threads.Count;
             }
         }
-
-        public int Capacity { get; set; }
 
         public delegate void ChangedEventHandler(object sender, EventArgs e);
 
@@ -51,37 +47,41 @@ namespace ACABUS_Control_de_operacion
 
         public MultiThread()
         {
-            Capacity = MAX_THREADS_DEFAULT;
-            Threads.Capacity = Capacity;
+            this.Capacity = MAX_THREADS_DEFAULT;
+            this._threads = new List<Thread>()
+            {
+                Capacity = Capacity
+            };
         }
 
-        public void RunTask(Action toDo, Action<Exception> onError = null)
+        public void RunTask(String taskName, Action toDo, Action<Exception> onError = null)
         {
-
             if (_inStoping)
             {
-                Trace.WriteLine(String.Format("En proceso de destrucción de subprocesos: {0}", Threads.Count), "DEBUG");
+                Trace.WriteLine(String.Format("En proceso de destrucción de subprocesos: {0}", this.Count), "DEBUG");
                 return;
             }
 
             Thread task = new Thread(() =>
             {
+
+                Thread.CurrentThread.Name = taskName;
                 try
                 {
-                    if (Threads.Count >= Capacity)
+                    lock (_threads)
                     {
-                        while (Threads.Count + 2 > Capacity)
+                        if (_threads.Count >= Capacity)
                         {
-                            Thread.Sleep(50);
+                            System.Threading.Monitor.Wait(_threads);
                         }
+                        if (_inStoping)
+                        {
+                            Trace.WriteLine(String.Format("Proceso abortado: {0}", Thread.CurrentThread.Name), "DEBUG");
+                            return;
+                        }
+                        _threads.Add(Thread.CurrentThread);
                     }
-                    if (_inStoping)
-                    {
-                        Trace.WriteLine(String.Format("En proceso de destrucción de subprocesos: {0}", Threads.Count), "DEBUG");
-                        return;
-                    }
-                    Threads.Add(Thread.CurrentThread);
-                    Trace.WriteLine(String.Format("Subproceso creado: {0}", Threads.Count), "DEBUG");
+                    Trace.WriteLine(String.Format("Subproceso creado: {0}", Thread.CurrentThread.Name), "DEBUG");
                     OnChanged(new MultiThreadEventArgs(ActionThread.ADDING));
                     toDo.Invoke();
                     RemoveProcess(Thread.CurrentThread);
@@ -99,38 +99,47 @@ namespace ACABUS_Control_de_operacion
 
         private void RemoveProcess(Thread thread)
         {
-            Trace.WriteLine(String.Format("Removiendo subproceso: {0}", Threads.Count), "DEBUG");
-            Threads.Remove(thread);
-            Trace.WriteLine(String.Format("Subproceso removido: {0}", Threads.Count), "DEBUG");
-            OnChanged(new MultiThreadEventArgs(ActionThread.REMOVING));
+            lock (_threads)
+            {
+                _threads.Remove(thread);
+                Trace.WriteLine(String.Format("Subproceso removido: {0}", thread.Name), "DEBUG");
+                System.Threading.Monitor.Pulse(_threads);
+                OnChanged(new MultiThreadEventArgs(ActionThread.REMOVING));
+            }
         }
 
         public void KillAllThreads(Action action = null)
         {
             new Thread(() =>
             {
+                Thread.CurrentThread.Name = "Killing Process";
                 _inStoping = true;
-                while (Threads.Count > 0)
+                while (_threads.Count > 0)
                 {
-                    Trace.WriteLine(String.Format("Intentando matar subproceso: {0}", Threads.Count), "DEBUG");
-                    for (Int16 i = (Int16)(Threads.Count - 1); i >= 0; i--)
+                    lock (_threads)
+                        System.Threading.Monitor.PulseAll(_threads);
+
+                    for (Int16 i = (Int16)(_threads.Count - 1); i >= 0; i--)
                     {
                         try
                         {
-                            if (!Threads[i].IsAlive)
-                                RemoveProcess(Threads[i]);
+                            Trace.WriteLine(String.Format("Intentando matar subproceso: {0}", _threads[i].Name), "DEBUG");
+                            if (!_threads[i].IsAlive)
+                                RemoveProcess(_threads[i]);
                             else
                             {
-                                Threads[i].Interrupt();
-                                Threads[i].Abort();
+                                _threads[i].Interrupt();
+                                _threads[i].Join(600);
+                                _threads[i].Abort();
+                                _threads[i].Join(600);
                             }
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            Trace.WriteLine(String.Format("Cambió la cantidad de subprocesos {0}", Threads.Count), "DEBUG");
+                            Trace.WriteLine(String.Format("Cambió la cantidad de subprocesos {0}", this.Count), "DEBUG");
+                            OnChanged(new MultiThreadEventArgs(ActionThread.REMOVING));
                         }
                     }
-                    Thread.Sleep(600);
                 }
                 _inStoping = false;
                 if (action != null)
@@ -140,7 +149,7 @@ namespace ACABUS_Control_de_operacion
 
         public Boolean IsRunning()
         {
-            return Threads.Count > 0;
+            return this.Count > 0;
         }
     }
 }

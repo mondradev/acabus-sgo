@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ACABUS_Control_de_operacion
@@ -15,8 +9,13 @@ namespace ACABUS_Control_de_operacion
     public partial class StockCard : Form
     {
         private MultiThread _multiThread;
-        private Boolean _inStoping = false;
         private DateTime _taskTime;
+
+        static String _database = "SITM";
+        static String _username = "postgres";
+        static String _password = "4c4t3k";
+        static String usernameSsh = "teknei";
+        static String passwordSsh = "4c4t3k";
 
         public StockCard()
         {
@@ -54,60 +53,69 @@ namespace ACABUS_Control_de_operacion
 
             foreach (KVR kvr in kvrs)
             {
-                _multiThread.RunTask(() =>
-                {
-                    if (IsAvaibleIP(kvr.IP))
-                    {
-                        Int16 sales = Int16.Parse(QuerySales(kvr.IP));
-                        Int16 stock = Int16.Parse(QueryStock(kvr.IP));
-                        Int16 sum = 0;
-                        if (kvr.MaxCard > stock && stock > kvr.MinCard)
-                            sum = (Int16)(sales * 1.5);
-                        else if (kvr.MinCard > stock && stock != 0)
-                            sum = (Int16)(sales * 2);
-                        else if (stock == 0)
-                            sum = (Int16)kvr.MaxCard;
+                _multiThread.RunTask(String.Format("Check Stock Thread: {0}", kvr.GetNumeSeri()), () =>
+                 {
+                     if (ConnectionTCP.IsAvaibleIP(kvr.IP))
+                     {
+                         Int16 sales = Int16.Parse(QuerySales(kvr));
+                         Int16 stock = Int16.Parse(QueryStock(kvr));
+                         Int16 sum = 0;
+                         if (kvr.MaxCard > stock && stock > kvr.MinCard)
+                             sum = (Int16)(sales * 1.5);
+                         else if (kvr.MinCard > stock && stock != 0)
+                             sum = (Int16)(sales * 2);
+                         else if (stock == 0)
+                             sum = (Int16)kvr.MaxCard;
 
-                        String[] row = new String[] {
+                         String[] row = new String[] {
                             kvr.GetNumeSeri(),
                             sales.ToString(),
                             stock.ToString(),
                             sum.ToString()
-                        };
-                        this.BeginInvoke(new Action(() =>
-                        {
-                            String[] tempRow = row;
-                            dgvResult.Rows.Add(tempRow);
-                        }));
-                    }
-                }, (ex) =>
-                {
-                    Trace.WriteLine(String.Format("Ocurrió un error al consultar el host: {0}", kvr.IP), "ERROR");
-                });
+                         };
+                         this.BeginInvoke(new Action(() =>
+                         {
+                             String[] tempRow = row;
+                             dgvResult.Rows.Add(tempRow);
+                         }));
+                     }
+                 }, (ex) =>
+                 {
+                     Trace.WriteLine(String.Format("Ocurrió un error al consultar el host: {0}", kvr.IP), "ERROR");
+                 });
             }
 
         }
 
-
-        private bool IsAvaibleIP(string strIP)
+        private static string QueryStock(KVR kvr)
         {
-            ConnectionTCP cnnTCP = new ConnectionTCP();
-            if (cnnTCP.SendToPing(strIP, 3))
-                return true;
-            return false;
-        }
-
-        private string QueryStock(string strEquip)
-        {
-            PostgreSQL sql = PostgreSQL.CreateConnection(strEquip, 5432, "postgres", "4c4t3k", "SITM");
-            String[][] response = sql.ExecuteQuery(PostgreSQL.CARD_STOCK);
+            PostgreSQL sql = PostgreSQL.CreateConnection(
+                kvr.IP,
+                5432,
+                _username,
+                kvr.IsExtern ? "admin" : _password,
+                kvr.IsExtern ? kvr.DataBaseName : _database);
+            String[][] response = sql.ExecuteQuery(
+                PostgreSQL.CARD_STOCK,
+                true,
+                kvr.IsExtern ? "Administrador" : usernameSsh,
+                kvr.IsExtern ? "Administrador*2016" : passwordSsh);
             return response.Length > 1 ? response[1][0] : "0";
         }
 
-        private static string QuerySales(string strEquip)
+        private static string QuerySales(KVR kvr)
         {
-            PostgreSQL sql = PostgreSQL.CreateConnection(strEquip, 5432, "postgres", "4c4t3k", "SITM");
-            String[][] response = sql.ExecuteQuery(PostgreSQL.TOTAL_SALE);
+            PostgreSQL sql = PostgreSQL.CreateConnection(
+                kvr.IP,
+                5432,
+                _username,
+                kvr.IsExtern ? "admin" : _password,
+                kvr.IsExtern ? kvr.DataBaseName : _database);
+            String[][] response = sql.ExecuteQuery(
+                PostgreSQL.TOTAL_SALE,
+                true,
+                kvr.IsExtern ? "Administrador" : usernameSsh,
+                kvr.IsExtern ? "Administrador*2016" : passwordSsh);
             return response.Length > 1 ? response[1][0] : "0";
         }
 
@@ -138,9 +146,8 @@ namespace ACABUS_Control_de_operacion
 
         private void ThreadsChanged(object sender, EventArgs e)
         {
-            if (!_inStoping)
-                IncrementProgressBar();
-            Int16 processCount = (Int16)_multiThread.Threads.Count;
+            IncrementProgressBar();
+            Int16 processCount = (Int16)_multiThread.Count;
             this.BeginInvoke(new Action(() =>
             {
                 this.threadsStatusLabel.Text = String.Format("{0} Subprocesos", processCount);
@@ -149,14 +156,12 @@ namespace ACABUS_Control_de_operacion
 
         private void StopTaskButtonOnClick(object sender, EventArgs e)
         {
-            _inStoping = true;
-            InitializeTask(2);
+            InitializeTask((Int16)(_multiThread.Count * 2));
             IncrementProgressBar();
             new Thread(() =>
             {
                 this.Name = "Deteniendo tarea actual";
                 _multiThread.KillAllThreads();
-                IncrementProgressBar();
             }).Start();
             stopTaskButton.Enabled = false;
         }
@@ -195,12 +200,9 @@ namespace ACABUS_Control_de_operacion
                     this.taskProgressBar.Value = 0;
                     this.progressLabel.Text = "0 %";
                     ActiveControls();
-                    _inStoping = false;
                     taskTimeTimer.Stop();
                 }));
             }
-            if (this.taskProgressBar.Value == this.taskProgressBar.Maximum)
-                this._multiThread.KillAllThreads();
         }
 
         private void DesactiveControls()

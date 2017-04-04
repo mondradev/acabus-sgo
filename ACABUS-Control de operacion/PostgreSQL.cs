@@ -48,44 +48,57 @@ namespace ACABUS_Control_de_operacion
         {
         }
 
-        public String[][] ExecuteQuery(String statement)
+        public String[][] ExecuteQuery(String statement, Boolean tryBySsh = false, String usernameSsh = "teknei", String passwordSsh = "4c4t3k")
         {
-            String response = null;
-            if (String.IsNullOrEmpty(statement)) return null;
-            using (NpgsqlConnection connection = InitializeConnection())
+            try
             {
-                if (connection != null) connection.Open();
-                else return null;
-
-                if (connection.State == ConnectionState.Open)
+                String response = null;
+                if (String.IsNullOrEmpty(statement)) return null;
+                using (NpgsqlConnection connection = InitializeConnection())
                 {
-                    NpgsqlCommand command = new NpgsqlCommand(statement, connection);
-                    NpgsqlDataReader reader = command.ExecuteReader();
-                    StringBuilder header = new StringBuilder();
-                    Boolean readHeader = false;
-                    Int64 rowsCount = 0;
-                    StringBuilder rows = new StringBuilder();
-                    while (reader.Read())
+                    if (connection != null) connection.Open();
+                    else return null;
+
+                    if (connection.State == ConnectionState.Open)
                     {
-                        if (rowsCount > 0) rows.Append('|');
-                        for (Int16 i = 0; i < reader.FieldCount; i++)
+                        NpgsqlCommand command = new NpgsqlCommand(statement, connection);
+                        NpgsqlDataReader reader = command.ExecuteReader();
+                        StringBuilder header = new StringBuilder();
+                        Boolean readHeader = false;
+                        Int64 rowsCount = 0;
+                        StringBuilder rows = new StringBuilder();
+                        while (reader.Read())
                         {
-                            if (!readHeader)
+                            if (rowsCount > 0) rows.Append('|');
+                            for (Int16 i = 0; i < reader.FieldCount; i++)
                             {
-                                header.Append(reader.GetName(i));
-                                if (i + 1 < reader.FieldCount)
-                                    header.Append(",");
+                                if (!readHeader)
+                                {
+                                    header.Append(reader.GetName(i));
+                                    if (i + 1 < reader.FieldCount)
+                                        header.Append(",");
+                                }
+                                rows.Append(reader[i].ToString());
+                                if (i + 1 < reader.FieldCount) rows.Append(",");
                             }
-                            rows.Append(reader[i].ToString());
-                            if (i + 1 < reader.FieldCount) rows.Append(",");
+                            rowsCount++;
+                            readHeader = true;
                         }
-                        rowsCount++;
-                        readHeader = true;
+                        response = header.Append("|").Append(rows.ToString()).ToString();
                     }
-                    response = header.Append("|").Append(rows.ToString()).ToString();
+                }
+                return String.IsNullOrEmpty(response) ? null : ProcessResponse(response);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message, "ERROR");
+                if (tryBySsh)
+                {
+                    Trace.WriteLine(String.Format("Host {0} falló al realizar consulta PSQL a través del controlador de PostgreSQL\nIntentando por SSH con la credenciales\nUsername: {1}\nPassword: ******", Host, usernameSsh), "DEBUG");
+                    return ExcuteQueryBySsh(statement, usernameSsh, passwordSsh);
                 }
             }
-            return String.IsNullOrEmpty(response) ? null : ProcessResponse(response);
+            return new String[][] { };
         }
 
         private NpgsqlConnection InitializeConnection()

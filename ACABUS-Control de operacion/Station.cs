@@ -25,9 +25,12 @@ namespace ACABUS_Control_de_operacion
         public static Station ToStation(XmlNode station, Trunk trunk)
         {
             if (!station.Name.Equals("Station")) return null;
-            var stationTemp = new Station(trunk);
-            stationTemp.Name = station.Attributes["name"].Value;
-            stationTemp.ID = Int32.Parse(station.Attributes["id"].Value);
+            var stationTemp = new Station(trunk)
+            {
+                Name = station.Attributes["name"].Value,
+                ID = Int32.Parse(station.Attributes["id"].Value),
+                Connected = Boolean.Parse(station.Attributes["connected"].Value)
+            };
             return stationTemp;
         }
 
@@ -52,6 +55,11 @@ namespace ACABUS_Control_de_operacion
         /// Obtiene la lista de dispositivos pertenecientes a la estación.
         /// </summary>
         public List<Device> Devices { get; private set; }
+
+        /// <summary>
+        /// Indica si la estación esta conectada a la red.
+        /// </summary>
+        public Boolean Connected { get; set; }
 
         /// <summary>
         /// Crea una instancia de una estación indicando la ruta troncal 
