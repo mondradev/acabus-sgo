@@ -109,8 +109,10 @@ namespace ACABUS_Control_de_operacion
             // Ejecutamos un simple eco para poder leer el resto de los caracteres devueltos por remoto.
             this._session.Write(PrepareCommand("echo ''"));
 
+            String response;
+
             // Intentamos leer los datos que tenga el flujo actualmente para descartarlos
-            responseSize = ReadResponse(out String response);
+            responseSize = ReadResponse(out response);
 
             Trace.WriteLine(String.Format("Enviando el comando al host {0}", Host), "INFO");
 

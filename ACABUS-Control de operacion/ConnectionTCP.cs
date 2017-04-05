@@ -63,7 +63,8 @@ namespace ACABUS_Control_de_operacion
         /// <returns>Un valor verdadero si la cadena es una dirección IPv4 válida.</returns>
         public static Boolean IsIPv4(String host)
         {
-            return IPAddress.TryParse(host, out IPAddress ipAddr);
+            IPAddress ipAddr;
+            return IPAddress.TryParse(host, out ipAddr);
         }
 
     }
