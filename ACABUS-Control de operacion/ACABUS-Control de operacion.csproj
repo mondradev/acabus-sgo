@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ACABUS_Control_de_operacion</RootNamespace>
     <AssemblyName>ACABUS-Control de operacion</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -34,7 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject />
+    <StartupObject>ACABUS_Control_de_operacion.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>acabus_icon.ico</ApplicationIcon>
@@ -69,13 +69,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utils\DataGridSql.cs" />
+    <Compile Include="Utils\XmlAttribute.cs" />
+    <Compile Include="Acabus\AcabusData.cs" />
     <Compile Include="DBKVRsExternos.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="DBKVRsExternos.Designer.cs">
       <DependentUpon>DBKVRsExternos.cs</DependentUpon>
     </Compile>
-    <Compile Include="ConnectionTCP.cs" />
+    <Compile Include="Utils\ConnectionTCP.cs" />
     <Compile Include="Monitor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -94,27 +97,27 @@
     <Compile Include="SQL.Designer.cs">
       <DependentUpon>SQL.cs</DependentUpon>
     </Compile>
-    <Compile Include="Device.cs" />
+    <Compile Include="Acabus\Device.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="KVR.cs" />
-    <Compile Include="MultiThread.cs" />
-    <Compile Include="PostgreSQL.cs" />
+    <Compile Include="Acabus\Kvr.cs" />
+    <Compile Include="Utils\MultiThread.cs" />
+    <Compile Include="Utils\PostgreSQL.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Ssh.cs" />
-    <Compile Include="Station.cs" />
+    <Compile Include="Utils\Ssh.cs" />
+    <Compile Include="Acabus\Station.cs" />
     <Compile Include="StockCard.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="StockCard.Designer.cs">
       <DependentUpon>StockCard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Trunk.cs" />
+    <Compile Include="Acabus\Trunk.cs" />
     <Compile Include="EventViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -127,6 +130,8 @@
     <Compile Include="UncirculatedVehicles.Designer.cs">
       <DependentUpon>UncirculatedVehicles.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\SshPostgreSQL.cs" />
+    <Compile Include="Utils\XmlUtils.cs" />
     <EmbeddedResource Include="DBKVRsExternos.resx">
       <DependentUpon>DBKVRsExternos.cs</DependentUpon>
     </EmbeddedResource>
@@ -170,6 +175,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Content Include="Trunks.Config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -184,6 +192,7 @@
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 
-namespace ACABUS_Control_de_operacion
+namespace ACABUS_Control_de_operacion.Utils
 {
     /// <summary>
     /// Esta clase contiene funciones básicas para evaluar la disponibilidad de un

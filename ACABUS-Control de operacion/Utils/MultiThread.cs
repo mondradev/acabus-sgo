@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace ACABUS_Control_de_operacion
+namespace ACABUS_Control_de_operacion.Utils
 {
     public class MultiThread
     {

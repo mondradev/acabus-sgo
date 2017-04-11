@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ACABUS_Control_de_operacion.Acabus;
+using ACABUS_Control_de_operacion.Utils;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -42,7 +44,7 @@ namespace ACABUS_Control_de_operacion
 
         private void ProccessRequest()
         {
-            KVR[] kvrs = GetKVRs();
+            Kvr[] kvrs = GetKVRs();
             this.dgvResult.Columns.Clear();
             this.dgvResult.Rows.Clear();
             InitializeTask((Int16)(kvrs.Length * 2));
@@ -51,7 +53,7 @@ namespace ACABUS_Control_de_operacion
             this.dgvResult.Columns.Add("Sto", "Total de Stock");
             this.dgvResult.Columns.Add("Sum", "Total de Suministro");
 
-            foreach (KVR kvr in kvrs)
+            foreach (Kvr kvr in kvrs)
             {
                 _multiThread.RunTask(String.Format("Check Stock Thread: {0}", kvr.GetNumeSeri()), () =>
                  {
@@ -87,7 +89,7 @@ namespace ACABUS_Control_de_operacion
 
         }
 
-        private static string QueryStock(KVR kvr)
+        private static string QueryStock(Kvr kvr)
         {
             PostgreSQL sql = PostgreSQL.CreateConnection(
                 kvr.IP,
@@ -96,14 +98,14 @@ namespace ACABUS_Control_de_operacion
                 kvr.IsExtern ? "admin" : _password,
                 kvr.IsExtern ? kvr.DataBaseName : _database);
             String[][] response = sql.ExecuteQuery(
-                PostgreSQL.CARD_STOCK,
-                true,
-                kvr.IsExtern ? "Administrador" : usernameSsh,
-                kvr.IsExtern ? "Administrador*2016" : passwordSsh);
+                PostgreSQL.CARD_STOCK);
+            //true,
+            //kvr.IsExtern ? "Administrador" : usernameSsh,
+            //kvr.IsExtern ? "Administrador*2016" : passwordSsh);
             return response.Length > 1 ? response[1][0] : "0";
         }
 
-        private static string QuerySales(KVR kvr)
+        private static string QuerySales(Kvr kvr)
         {
             PostgreSQL sql = PostgreSQL.CreateConnection(
                 kvr.IP,
@@ -112,10 +114,10 @@ namespace ACABUS_Control_de_operacion
                 kvr.IsExtern ? "admin" : _password,
                 kvr.IsExtern ? kvr.DataBaseName : _database);
             String[][] response = sql.ExecuteQuery(
-                PostgreSQL.TOTAL_SALE,
-                true,
-                kvr.IsExtern ? "Administrador" : usernameSsh,
-                kvr.IsExtern ? "Administrador*2016" : passwordSsh);
+                PostgreSQL.TOTAL_SALE);
+            //true,
+            //kvr.IsExtern ? "Administrador" : usernameSsh,
+            //kvr.IsExtern ? "Administrador*2016" : passwordSsh);
             return response.Length > 1 ? response[1][0] : "0";
         }
 
@@ -123,16 +125,16 @@ namespace ACABUS_Control_de_operacion
 
         #endregion
 
-        private KVR[] GetKVRs()
+        private Kvr[] GetKVRs()
         {
-            List<KVR> devices = new List<KVR>();
-            foreach (Trunk trunk in Trunk.Trunks)
-                foreach (Station station in trunk.Stations)
+            List<Kvr> devices = new List<Kvr>();
+            foreach (Trunk trunk in AcabusData.Trunks)
+                foreach (Station station in trunk.GetStations())
                 {
-                    foreach (Device device in station.Devices)
+                    foreach (Device device in station.GetDevices())
                     {
                         if (device.Type == Device.DeviceType.KVR)
-                            devices.Add((KVR)device);
+                            devices.Add((Kvr)device);
                     }
                 }
             return devices.ToArray();

@@ -33,13 +33,13 @@
             this.debugCheck = new System.Windows.Forms.CheckBox();
             this.errorCheck = new System.Windows.Forms.CheckBox();
             this.infoCheck = new System.Windows.Forms.CheckBox();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.eventTable = new System.Windows.Forms.DataGridView();
             this.dateTimeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.typeEventColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.messageColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.eventTable)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -51,7 +51,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.Controls.Add(this.groupBox1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.dataGridView1, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.eventTable, 0, 1);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
@@ -114,23 +114,23 @@
             // 
             // dataGridView1
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.eventTable.AllowUserToAddRows = false;
+            this.eventTable.AllowUserToDeleteRows = false;
+            this.eventTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.eventTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.eventTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dateTimeColumn,
             this.typeEventColumn,
             this.messageColumn});
-            this.dataGridView1.Location = new System.Drawing.Point(3, 61);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.RowHeadersVisible = false;
-            this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(1074, 504);
-            this.dataGridView1.TabIndex = 1;
+            this.eventTable.Location = new System.Drawing.Point(3, 61);
+            this.eventTable.Name = "dataGridView1";
+            this.eventTable.ReadOnly = true;
+            this.eventTable.RowHeadersVisible = false;
+            this.eventTable.RowTemplate.Height = 24;
+            this.eventTable.Size = new System.Drawing.Size(1074, 504);
+            this.eventTable.TabIndex = 1;
             // 
             // dateTimeColumn
             // 
@@ -168,7 +168,7 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.eventTable)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -180,7 +180,7 @@
         private System.Windows.Forms.CheckBox debugCheck;
         private System.Windows.Forms.CheckBox errorCheck;
         private System.Windows.Forms.CheckBox infoCheck;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView eventTable;
         private System.Windows.Forms.DataGridViewTextBoxColumn dateTimeColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn typeEventColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn messageColumn;

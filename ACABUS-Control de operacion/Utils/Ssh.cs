@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Tamir.SharpSsh;
 
-namespace ACABUS_Control_de_operacion
+namespace ACABUS_Control_de_operacion.Utils
 {
     /// <summary>
     /// Esta clase permite el envío de comandos a un equipo remoto que tenga 
@@ -22,11 +22,6 @@ namespace ACABUS_Control_de_operacion
         /// Obtiene el nombre de usuario para autenticarse en el equipo remoto.
         /// </summary>
         public String Username { get; private set; }
-
-        /// <summary>
-        /// Indica si el equipo remoto maneja algun sistema con una terminal basada en UNIX.
-        /// </summary>
-        public Boolean IsUnix { get; private set; }
 
         /// <summary>
         /// Obtiene o establece la clave del usuario para la autenticación en el equipo remoto.
@@ -74,13 +69,15 @@ namespace ACABUS_Control_de_operacion
                 {
                     Password = this._password
                 };
+                if (!ConnectionTCP.IsAvaibleIP(this.Host))
+                    throw new IOException(String.Format("No hay comunicación con el host {0}", this.Host));
                 this._session.Connect();
                 this._session.RemoveTerminalEmulationCharacters = true;
                 Trace.WriteLine(String.Format("Conectado al host {0}, Tiempo: {1}", Host, DateTime.Now - initTime), "INFO");
             }
             catch (Exception ex)
             {
-                throw ex;
+                Trace.WriteLine(ex.Message, "ERROR");
             }
         }
 
@@ -130,7 +127,7 @@ namespace ACABUS_Control_de_operacion
 
             Trace.WriteLine(String.Format("Tiempo de espera de la respuesta: {0}", DateTime.Now - initTime), "DEBUG");
 
-            if (IsUnix && clearHistory)
+            if (clearHistory)
             {
                 Trace.WriteLine(String.Format("Limpiando historial de Unix: {0}: ", Host), "DEBUG");
                 SendCommand("history -a;  history -r; cat .bash_history | grep -v '\\<i\\>' >> .bash_history.bkp; mv .bash_history.bkp .bash_history ; history -c", false);
@@ -163,9 +160,6 @@ namespace ACABUS_Control_de_operacion
         /// <returns>Resultado procesado</returns>
         private string ProcessReponse(string result)
         {
-            // Intentamos identificar si la terminal es linux
-            IsUnix = DetectUNIXShell(result);
-
             // Removemos el comando enviado y nos quedamos con la respuesta a tratar
             result = result.Substring(result.LastIndexOf(_BEGIN_RESPONSE_PATTERN.Replace("\\", "")));
 
@@ -182,16 +176,6 @@ namespace ACABUS_Control_de_operacion
         }
 
         /// <summary>
-        /// Determina si la teminal del equipo remoto es basada en UNIX.
-        /// </summary>
-        /// <param name="result">Respuesta el equipo remoto a evaluar.</param>
-        /// <returns>Un valor verdadero si el equipo remoto es basado en UNIX.</returns>
-        private Boolean DetectUNIXShell(string result)
-        {
-            return !String.IsNullOrEmpty(Regex.Match(result, ".*\\@.*(\\#|\\~)").Value);
-        }
-
-        /// <summary>
         /// Intenta la lectura del flujo de datos SSH antes que se agote el tiempo de espera
         /// definido por la propiedad TimeOut.
         /// </summary>
@@ -199,6 +183,7 @@ namespace ACABUS_Control_de_operacion
         /// <returns>El número de bytes leidos.</returns>
         private int ReadResponse(out String response)
         {
+
             // Indica si ocurrió un error en la lectura
             bool isError = false;
 
@@ -243,11 +228,6 @@ namespace ACABUS_Control_de_operacion
 
             // Devolvemos la respuesta
             return response.Length;
-        }
-
-        private void ClearHistoryInLinux()
-        {
-
         }
 
         /// <summary>

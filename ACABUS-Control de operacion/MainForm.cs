@@ -90,14 +90,14 @@ namespace ACABUS_Control_de_operacion
         {
             if (EventViewer.Instance == null || EventViewer.Instance.IsDisposed)
                 EventViewer.Instance = new EventViewer();
-            EventViewer.Instance.ShowDialog();
+            EventViewer.Instance.Show();
         }
 
         private void ConexiónBDKVRExternosToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (bdkvrExterns == null || bdkvrExterns.IsDisposed)
                 bdkvrExterns = new DBKVRsExternos();
-            bdkvrExterns.ShowDialog();
+            bdkvrExterns.Show();
         }
     }
 }

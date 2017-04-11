@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ACABUS_Control_de_operacion.Utils;
+using System;
+using System.Diagnostics;
 using System.Xml;
 
-namespace ACABUS_Control_de_operacion
+namespace ACABUS_Control_de_operacion.Acabus
 {
     /// <summary>
     /// Esta clase define la estructura básica de un equipo
@@ -27,6 +25,14 @@ namespace ACABUS_Control_de_operacion
             /// </summary>
             TOR,
             /// <summary>
+            /// Torniquete Doble E/S.
+            /// </summary>
+            TD,
+            /// <summary>
+            /// Torniquete Simple de E/S.
+            /// </summary>
+            TS,
+            /// <summary>
             /// Puerta para personas de movilidad reducida.
             /// </summary>
             PMR,
@@ -37,7 +43,11 @@ namespace ACABUS_Control_de_operacion
             /// <summary>
             /// Switch de estación
             /// </summary>
-            SW
+            SW,
+            /// <summary>
+            /// Concentrador de estación
+            /// </summary>
+            CDE
         }
 
         /// <summary>
@@ -56,10 +66,16 @@ namespace ACABUS_Control_de_operacion
                     return DeviceType.PMR;
                 case "TOR":
                     return DeviceType.TOR;
+                case "TS":
+                    return DeviceType.TS;
+                case "TD":
+                    return DeviceType.TD;
                 case "NVR":
                     return DeviceType.NVR;
                 case "SW":
                     return DeviceType.SW;
+                case "CDE":
+                    return DeviceType.CDE;
             }
             return null;
         }
@@ -68,43 +84,46 @@ namespace ACABUS_Control_de_operacion
         /// Convierte un nodo XML con una estructura correspondiente
         /// a un equipo de estación a una instancia Device.
         /// </summary>
-        /// <param name="device">Nodo XML que representa un equipo.</param>
+        /// <param name="deviceXmlNode">Nodo XML que representa un equipo.</param>
         /// <param name="station">Estación a la que pertenece el equipo.</param>
         /// <returns>Una instancia de un equipo de estación.</returns>
-        public static Device ToDevice(XmlNode device, Station station)
+        public static Device ToDevice(XmlNode deviceXmlNode, Station station)
         {
-            if (!device.Name.Equals("Equip"))
-                return null;
-            var deviceTemp = new Device(station)
+            try
             {
-                ID = Int32.Parse(device.Attributes["id"].Value),
-                IP = device.Attributes["ip"].Value,
-                Type = ParseType(device.Attributes["type"].Value),
-                Status = device.Attributes["status"] != null ? Boolean.Parse(device.Attributes["status"].Value) : true
-            };
-            if (deviceTemp.Type == DeviceType.KVR)
-            {
-                String maxCardStr = device.Attributes["maxCard"].Value;
-                String minCardStr = device.Attributes["minCard"].Value;
-                var kvr = KVR.ToKVR(deviceTemp);
-                maxCardStr = String.IsNullOrEmpty(maxCardStr) ? "0" : maxCardStr;
-                minCardStr = String.IsNullOrEmpty(minCardStr) ? "0" : minCardStr;
-                kvr.MaxCard = Int32.Parse(maxCardStr);
-                kvr.MinCard = Int32.Parse(minCardStr);
-                kvr.Status = Boolean.Parse(device.Attributes["status"].Value);
-                kvr.IsExtern = device.Attributes["extern"] != null;
-                if (kvr.IsExtern)
-                    kvr.IP = device.Attributes["ipServer"].Value;
-                return kvr;
+                if (!deviceXmlNode.Name.Equals("Device"))
+                    return null;
+                var device = new Device(station)
+                {
+                    ID = Int16.Parse(XmlUtils.GetAttribute(deviceXmlNode, "ID")),
+                    IP = XmlUtils.GetAttribute(deviceXmlNode, "IP"),
+                    Type = ParseType(XmlUtils.GetAttribute(deviceXmlNode, "Type")),
+                    Status = XmlUtils.GetAttributeBool(deviceXmlNode, "Status"),
+                    HasDataBase = XmlUtils.GetAttributeBool(deviceXmlNode, "HasDataBase")
+                };
+                if (device.Type == DeviceType.KVR)
+                {
+                    var kvr = Kvr.ToKVR(device);
+                    kvr.MaxCard = XmlUtils.GetAttributeInt(deviceXmlNode, "MaxCard");
+                    kvr.MinCard = XmlUtils.GetAttributeInt(deviceXmlNode, "MinCard");
+                    kvr.IsExtern = XmlUtils.GetAttributeBool(deviceXmlNode, "IsExtern");
+                    return kvr;
+                }
+                return device;
             }
-            return deviceTemp;
+            catch (Exception ex)
+            {
+                if (ex is FormatException || ex is ArgumentNullException)
+                    Trace.WriteLine("Un nodo 'Device' debe tener un ID ", "ERROR");
+            }
+            return null;
         }
 
         /// <summary>
         /// Obtiene el identificador del equipo en la 
         /// estación.
         /// </summary>
-        public int ID { get; protected set; }
+        public Int16 ID { get; protected set; }
 
         /// <summary>
         /// Obtiene el tipo de equipo
@@ -122,10 +141,15 @@ namespace ACABUS_Control_de_operacion
         public Boolean Status { get; protected set; }
 
         /// <summary>
+        /// Indica si tiene una base de datos
+        /// </summary>
+        public Boolean HasDataBase { get; set; }
+
+        /// <summary>
         /// Obtiene la estación a la que pertenece el 
         /// equipo.
         /// </summary>
-        public Station Station { get; protected set; }
+        [XmlAnnotation(Ignore = true)] public Station Station { get; protected set; }
 
         /// <summary>
         /// Crea una instancia nueva de un equipo.

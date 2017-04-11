@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using ACABUS_Control_de_operacion.Utils;
+using Npgsql;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -71,7 +72,7 @@ namespace ACABUS_Control_de_operacion
                 String receNaveQuery = String.Format("SELECT NO_ECON, RECE.FCH_CREA AS ULTIMA_HORA FROM SITM.SFMO_RECE_NAVE AS RECE JOIN SITM.SFVH_VEHI AS VEHI ON RECE.ID_VEHI = VEHI.ID_VEHI WHERE (DATE(NOW())>DATE(RECE.FCH_CREA) OR NOW()::TIME - RECE.FCH_CREA::TIME > '00:10:00'::TIME) AND VEHI.NO_ECON NOT IN ({0}) ORDER BY VEHI.NO_ECON ASC, RECE.FCH_CREA DESC", ProcessArray(this._uncirculatedVehicles));
                 String[][] response;
                 PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
-                psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
+                //psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
 
                 response = psql.ExecuteQuery(receNaveQuery);
 
@@ -102,7 +103,7 @@ namespace ACABUS_Control_de_operacion
              {
                  String[][] response;
                  PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
-                 psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
+                 //psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
 
                  response = psql.ExecuteQuery(counterQuery);
 
@@ -134,7 +135,7 @@ namespace ACABUS_Control_de_operacion
              {
                  String[][] response;
                  PostgreSQL psql = PostgreSQL.CreateConnection(host, 5432, "postgres", "admin", "SITM");
-                 psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
+                 //psql.SetConnectionBySsh(psql.ConnectionBySsh.Replace("/opt/PostgreSQL/9.3/", "/opt/PostgresPlus/9.3AS/"));
 
                  response = psql.ExecuteQuery(alarmQuery);
 

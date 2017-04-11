@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ACABUS_Control_de_operacion.Acabus;
+using System;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
@@ -12,7 +13,7 @@ namespace ACABUS_Control_de_operacion
         [STAThread]
         static void Main()
         {
-            Trunk.LoadConfiguration();
+            AcabusData.LoadConfiguration();
             RuntimeHelpers.RunClassConstructor(typeof(EventViewer).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(DBKVRsExternos).TypeHandle);
             Application.EnableVisualStyles();

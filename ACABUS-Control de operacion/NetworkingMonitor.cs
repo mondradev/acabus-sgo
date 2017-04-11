@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ACABUS_Control_de_operacion.Acabus;
+using ACABUS_Control_de_operacion.Utils;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -36,7 +38,7 @@ namespace ACABUS_Control_de_operacion
 
                     if (selectedItem.Equals("Todas las estaciones"))
                     {
-                        foreach (Station station in Trunk.Trunks[0].Stations)
+                        foreach (Station station in AcabusData.Trunks[0].GetStations())
                         {
                             String stationIP = String.Format("172.17.{0}.1", station.ID);
                             if (station.Connected)
@@ -49,11 +51,11 @@ namespace ACABUS_Control_de_operacion
                     }
                     else
                     {
-                        foreach (Station station in Trunk.Trunks[0].Stations)
+                        foreach (Station station in AcabusData.Trunks[0].GetStations())
                         {
                             if (station.Name.Equals(selectedItem))
                             {
-                                foreach (Device device in station.Devices)
+                                foreach (Device device in station.GetDevices())
                                 {
                                     _devicesInMonitoring.Add(new DeviceInMonitoring()
                                     {
@@ -135,8 +137,8 @@ namespace ACABUS_Control_de_operacion
         {
             this.stationComboBox.Items.Clear();
             this.stationComboBox.Items.Add("Todas las estaciones");
-            foreach (Trunk trunk in Trunk.Trunks)
-                foreach (Station station in trunk.Stations)
+            foreach (Trunk trunk in AcabusData.Trunks)
+                foreach (Station station in trunk.GetStations())
                     if (station.Connected)
                         this.stationComboBox.Items.Add(station.Name);
             this.stationComboBox.SelectedIndex = 0;

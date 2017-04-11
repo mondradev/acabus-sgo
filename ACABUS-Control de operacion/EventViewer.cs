@@ -113,11 +113,11 @@ namespace ACABUS_Control_de_operacion
                 Instance.BeginInvoke(new Action(() =>
                 {
                     if (Instance.infoCheck.Checked && item.EventType.Equals(EventType.INFO))
-                        Instance.dataGridView1.Rows.Insert(0, item.ToString().Split(new Char[] { '-' }, 3));
+                        Instance.eventTable.Rows.Insert(0, item.ToString().Split(new Char[] { '-' }, 3));
                     if (Instance.errorCheck.Checked && item.EventType.Equals(EventType.ERROR))
-                        Instance.dataGridView1.Rows.Insert(0, item.ToString().Split(new Char[] { '-' }, 3));
+                        Instance.eventTable.Rows.Insert(0, item.ToString().Split(new Char[] { '-' }, 3));
                     if (Instance.debugCheck.Checked && item.EventType.Equals(EventType.DEBUG))
-                        Instance.dataGridView1.Rows.Insert(0, item.ToString().Split(new Char[] { '-' }, 3));
+                        Instance.eventTable.Rows.Insert(0, item.ToString().Split(new Char[] { '-' }, 3));
                 }));
         }
 
@@ -152,9 +152,9 @@ namespace ACABUS_Control_de_operacion
             if (!Instance.IsDisposed)
                 Instance.BeginInvoke(new Action(() =>
                 {
-                    Instance.dataGridView1.Rows.Clear();
+                    Instance.eventTable.Rows.Clear();
                     foreach (var item in events)
-                        Instance.dataGridView1.Rows.Add(item);
+                        Instance.eventTable.Rows.Add(item);
                 }));
         }
 

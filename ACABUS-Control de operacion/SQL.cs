@@ -1,4 +1,6 @@
-﻿using Npgsql;
+﻿using ACABUS_Control_de_operacion.Acabus;
+using ACABUS_Control_de_operacion.Utils;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,12 +16,8 @@ namespace ACABUS_Control_de_operacion
         private const String DEVICES_CAPTION = "Todos los equipos";
 
         private MultiThread _multiThread = new MultiThread();
-        private List<String[]> _tempRows = new List<String[]>();
-        private Boolean _isReadyTable = false;
         private Boolean _inStoping = false;
         private DateTime _taskTime;
-        private bool _hasColumns;
-        private int _countcolumns;
 
         public SQLModule()
         {
@@ -70,25 +68,19 @@ namespace ACABUS_Control_de_operacion
 
         private void CheckReplicaButtonOnClick(object sender, EventArgs e)
         {
-            this.resultTable.Rows.Clear();
-            this.resultTable.Columns.Clear();
-            this._hasColumns = false;
-            this._countcolumns = 0;
-
-            this.GenerateColumns(new String[] {
-                "Número de Serie", "Dirección IP", "Última trans. registrada",
-                "Primera trans. s/enviar", "Trans. pendientes", "Tiempo sin replicar"
-            }, () =>
+            DataGridSql dataGrdSql = new DataGridSql()
             {
-
-                this.resultTable.Columns[2].ValueType = typeof(DateTime);
-                this.resultTable.Columns[3].ValueType = typeof(DateTime);
-                this.resultTable.Columns[4].ValueType = typeof(Int16);
-                this.resultTable.Columns[5].ValueType = typeof(TimeSpan);
-            });
-
-            this._hasColumns = true;
-            this._countcolumns = 6;
+                DataGrid = this.resultTable,
+                MultiThreadManager = _multiThread
+            };
+            dataGrdSql.ClearDataGrid();
+            dataGrdSql.PgPath = AcabusData.PG_PATH;
+            dataGrdSql.PortDb = 5432;
+            dataGrdSql.DataBase = "SITM";
+            dataGrdSql.UsernameDb = "postgres";
+            dataGrdSql.PasswordDb = "4c4t3k";
+            dataGrdSql.UsernameSsh = "teknei";
+            dataGrdSql.PasswordSsh = "4c4t3k";
 
             Device[] devices = GetDevice();
 
@@ -98,33 +90,19 @@ namespace ACABUS_Control_de_operacion
                 foreach (Device device in devices)
                 {
                     if (this._inStoping) break;
-                    this._multiThread.RunTask(String.Format("Check Reply Thread: {0}", device.GetNumeSeri()), () =>
-                    {
-                        String query = device.Type == Device.DeviceType.KVR
+
+                    String query = device.Type == Device.DeviceType.KVR
                                                         ? PostgreSQL.PENDING_INFO_TO_SEND_DEVICE_R_S
                                                         : PostgreSQL.PENDING_INFO_TO_SEND_DEVICE_I_O;
-                        if (device.Type == Device.DeviceType.KVR && ((KVR)device).IsExtern)
-                            return;
-                        if (ConnectionTCP.IsAvaibleIP(device.IP))
-                            this.RunQueryInDevice(query, device);
-                        else
-                            throw new Exception(String.Format("No hay accesos al host {0}", device.IP));
-                    }, (ex) =>
+                    if (device.Type == Device.DeviceType.KVR && ((Kvr)device).IsExtern && !device.Station.Connected)
+                        return;
+                    dataGrdSql.Host = device.IP;
+                    dataGrdSql.ExecuteAndFill(query, (ex) =>
                     {
-                        if (ex is ThreadAbortException || ex is ThreadInterruptedException) return;
-
-                        this.BeginInvoke(new Action(() =>
-                        {
-                            String[] row = new String[] {
-                                device.GetNumeSeri(),
+                        dataGrdSql.AddRow(new String[] {
+                        device.GetNumeSeri(),
                                 device.IP
-                            };
-                            if (this._isReadyTable)
-                                this.resultTable.Rows.Add(row);
-                            else
-                                this._tempRows.Add(row);
-                        }));
-
+                        });
                     });
                 }
             }).Start();
@@ -132,12 +110,17 @@ namespace ACABUS_Control_de_operacion
 
         private void RunQueryInDeviceOnClick(object sender, EventArgs e)
         {
-            this.resultTable.Rows.Clear();
-            this.resultTable.Columns.Clear();
+            DataGridSql dataGrdSql = new DataGridSql()
+            {
+                DataGrid = this.resultTable,
+                MultiThreadManager = _multiThread
+            };
+            dataGrdSql.ClearDataGrid();
+            dataGrdSql.UsernameDb = "postgres";
+            dataGrdSql.PortDb = 5432;
+            dataGrdSql.PgPath = AcabusData.PG_PATH;
 
             Device[] devices = GetDevice();
-            this._hasColumns = false;
-            this._countcolumns = 0;
 
             String query = queryBox.Text.Trim().Replace("\n", " ").Replace("\r", "");
             if (String.IsNullOrEmpty(query)) return;
@@ -147,67 +130,36 @@ namespace ACABUS_Control_de_operacion
             foreach (Device device in devices)
             {
                 if (this._inStoping) break;
-                this._multiThread.RunTask(String.Format("Run SQL Thread: {0}", device.GetNumeSeri()), () =>
-                 {
-                     if (device.Type == Device.DeviceType.KVR && ((KVR)device).IsExtern)
-                     {
-                         KVR kvrExtern = (KVR)device;
-                         if (ConnectionTCP.IsAvaibleIP(device.IP))
-                             this.RunQueryInDevice(query, device, kvrExtern.DataBaseName, "postgres", "admin", "Administrador", "Administrador*2016");
-
-                     }
-                     else
-                         if (ConnectionTCP.IsAvaibleIP(device.IP))
-                         this.RunQueryInDevice(query, device);
-
-                 });
-            }
-        }
-
-        private void RunQueryInDevice(string query, Device device, String database = "SITM", String username = "postgres", String password = "4c4t3k", String usernameSsh = "teknei", String passwordSsh = "4c4t3k")
-        {
-
-            PostgreSQL psql = PostgreSQL.CreateConnection(device.IP, 5432, username, password, database);
-            String[][] response;
-
-            response = psql.ExecuteQuery(query, true, usernameSsh, passwordSsh);
-
-            if (response == null || response.Length <= 0)
-                throw new Exception(String.Format("El host {0} no respondió con un resultado", device.IP));
-
-            if (!this._hasColumns || this._countcolumns < response[0].Length)
-            {
-                this.GenerateColumns(response[0]);
-                this._hasColumns = true;
-                this._countcolumns = (Int16)response[0].Length;
-            }
-            for (int i = 1; i < response.Length; i++)
-            {
-                String[] row = response[i];
-                if (row[0].Contains("Error al obtener información"))
-                    throw new Exception(String.Format("Error al obtener la información del host {0}", device.IP));
-                this.BeginInvoke(new Action(delegate
+                dataGrdSql.Host = device.IP;
+                dataGrdSql.DataBase = "SITM";
+                dataGrdSql.PasswordDb = "4c4t3k";
+                dataGrdSql.UsernameSsh = "teknei";
+                dataGrdSql.PasswordSsh = "4c4t3k";
+                if (device.Type == Device.DeviceType.KVR && ((Kvr)device).IsExtern && !device.Station.Connected)
                 {
-                    String[] tmpRow = row;
-                    if (this._isReadyTable)
-                        this.resultTable.Rows.Add(tmpRow);
-                    else
-                        this._tempRows.Add(tmpRow);
-                }));
+                    Kvr kvrExtern = (Kvr)device;
+                    dataGrdSql.DataBase = kvrExtern.DataBaseName;
+                    dataGrdSql.PasswordDb = "admin";
+                    dataGrdSql.UsernameSsh = "Administrador";
+                    dataGrdSql.PasswordSsh = "Administrador*2016";
+                }
+                dataGrdSql.ExecuteAndFill(query);
             }
         }
+
 
         private Device[] GetDevice()
         {
             List<Device> devices = new List<Device>();
-            foreach (Trunk trunk in Trunk.Trunks)
-                foreach (Station station in trunk.Stations)
+            foreach (Trunk trunk in AcabusData.Trunks)
+                foreach (Station station in trunk.GetStations())
                 {
-                    if (!stationsList.SelectedItem.Equals(STATIONS_CAPTION)
-                        && !station.Name.Equals(stationsList.SelectedItem))
+                    if ((!stationsList.SelectedItem.Equals(STATIONS_CAPTION)
+                        && !station.Name.Equals(stationsList.SelectedItem)) || !station.Connected)
                         continue;
-                    foreach (Device device in station.Devices)
+                    foreach (Device device in station.GetDevices())
                     {
+                        if (!device.Status || !device.HasDataBase) continue;
                         if (deviceList.SelectedItem.Equals(DEVICES_CAPTION))
                         {
                             if (device.Type == Device.DeviceType.KVR && kvrCheck.Checked)
@@ -231,10 +183,11 @@ namespace ACABUS_Control_de_operacion
         {
             stationsList.Items.Clear();
             stationsList.Items.Add(STATIONS_CAPTION);
-            foreach (Station station in Trunk.Trunks[0].Stations)
-            {
-                stationsList.Items.Add(station.Name);
-            }
+            foreach (Trunk trunk in AcabusData.Trunks)
+                foreach (Station station in trunk.GetStations())
+                {
+                    stationsList.Items.Add(station.Name);
+                }
             stationsList.SelectedIndex = 0;
             LoadDevices();
         }
@@ -309,61 +262,17 @@ namespace ACABUS_Control_de_operacion
             stopTaskButton.Enabled = false;
         }
 
-        private void GenerateColumns(String[] row, Action columnsReady = null)
-        {
-            _isReadyTable = false;
-            Int16 i = 0;
-            this.BeginInvoke(new Action(delegate
-            {
-                String[,] rows = GetRows(this.resultTable.Rows);
-                this.resultTable.Rows.Clear();
-                this.resultTable.Columns.Clear();
-                foreach (var item in row)
-                {
-                    this.resultTable.Columns.Add("column" + i, item);
-                    this.resultTable.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                    this.resultTable.Columns[i].ReadOnly = true;
-                    i++;
-                }
-                Application.DoEvents();
-                if (rows != null)
-                    this.resultTable.Rows.Add(rows);
-                foreach (var item in this._tempRows.ToArray())
-                    this.resultTable.Rows.Add(item);
-                this._tempRows.Clear();
-                _isReadyTable = true;
-                if (columnsReady != null)
-                    columnsReady.Invoke();
-            }));
-        }
-
-        private string[,] GetRows(DataGridViewRowCollection rows)
-        {
-            int rowsCount = rows.Count;
-            if (rows.Count <= 0)
-                return null;
-            int cellCount = rows[0].Cells.Count;
-            String[,] rowsBackup = new string[rowsCount, cellCount];
-            for (int i = 0; i < rowsCount; i++)
-                for (int j = 0; j < cellCount; j++)
-                {
-                    var val = rows[i].Cells[j].Value;
-                    if (val != null)
-                        rowsBackup[i, j] = val.ToString();
-                }
-            return rowsBackup;
-        }
 
         private void LoadDevices()
         {
             deviceList.Items.Clear();
             deviceList.Items.Add(DEVICES_CAPTION);
-            foreach (Trunk trunk in Trunk.Trunks)
-                foreach (Station station in trunk.Stations)
+            foreach (Trunk trunk in AcabusData.Trunks)
+                foreach (Station station in trunk.GetStations())
                 {
                     if (stationsList.SelectedItem.Equals(station.Name))
                     {
-                        foreach (Device device in station.Devices)
+                        foreach (Device device in station.GetDevices())
                         {
                             deviceList.Items.Add(device.GetNumeSeri());
                         }

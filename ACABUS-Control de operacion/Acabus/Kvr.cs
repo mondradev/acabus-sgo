@@ -1,25 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ACABUS_Control_de_operacion.Utils;
+using System;
 
-namespace ACABUS_Control_de_operacion {
+namespace ACABUS_Control_de_operacion.Acabus
+{
     /// <summary>
     /// Esta clase define la estructura básica de un Kiosko de venta y recarga.
     /// </summary>
-    public class KVR : Device {
+    [XmlAnnotation(Name = "Device")]
+    public class Kvr : Device
+    {
         /// <summary>
         /// Obtiene una instancia de Kiosko de venta y recarga a partir de un dispositivo.
         /// </summary>
         /// <param name="device">Dispositivo a convertir.</param>
         /// <returns>Instancia de Kiosko de venta y recarga</returns>
-        public static KVR ToKVR(Device device) {
-            KVR kvrTemp = new KVR(device.Station)
+        public static Kvr ToKVR(Device device)
+        {
+            Kvr kvrTemp = new Kvr(device.Station)
             {
                 ID = device.ID,
                 IP = device.IP,
-                Type = DeviceType.KVR
+                Type = DeviceType.KVR,
+                HasDataBase = device.HasDataBase,
+                Status = device.Status
             };
             return kvrTemp;
         }
@@ -27,12 +30,12 @@ namespace ACABUS_Control_de_operacion {
         /// <summary>
         /// Capacidad máxima de tarjetas.
         /// </summary>
-        public int MaxCard { get; set; }
+        public Int16 MaxCard { get; set; }
 
         /// <summary>
         /// Capacidad minima de tarjetas.
         /// </summary>
-        public int MinCard { get; set; }
+        public Int16 MinCard { get; set; }
 
         /// <summary>
         /// Indica si el kiosko es externo.
@@ -48,6 +51,6 @@ namespace ACABUS_Control_de_operacion {
         /// Crea una instancia de Kiosko de venta y recarga.
         /// </summary>
         /// <param name="station">Estación a la que pertenece el equipo.</param>
-        public KVR(Station station) : base(station) { }
+        public Kvr(Station station) : base(station) { }
     }
 }
