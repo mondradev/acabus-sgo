@@ -61,7 +61,10 @@ namespace ACABUS_Control_de_operacion
                                     if (i + 1 < reader.FieldCount)
                                         header.Append(",");
                                 }
-                                rows.Append(reader[i].ToString());
+                                var value = reader[i];
+                                if (value is DateTime && (value as DateTime?).Value.Year == 1)
+                                    value = (value as DateTime?).Value.TimeOfDay;
+                                rows.Append(value.ToString());
                                 if (i + 1 < reader.FieldCount) rows.Append(",");
                             }
                             rowsCount++;
@@ -116,10 +119,5 @@ namespace ACABUS_Control_de_operacion
             }
             return null;
         }
-
-        public static String TOTAL_SALE = String.Format("SELECT COUNT(*) AS VENTA FROM SITM_DISP.SBOP_TRAN WHERE  TIPO_TRAN = 'V' AND CAST(FCH_TRAN AS DATE)='{0:yyyy-MM-dd}'", DateTime.Now.AddDays(-1));
-        public static String CARD_STOCK = "SELECT tarj_stck FROM sitm_disp.sbop_sum_tarj ORDER BY fch_oper DESC LIMIT 1";
-        public static String PENDING_INFO_TO_SEND_DEVICE_R_S = "SELECT NUME_SERI \"Número de serie\", DIR_IP \"Dirección IP\", ULTIMO_DATO \"Última trans. registrada\", PRIMERO_SIN_ENVIAR \"Primera trans. s/enviar\", CASE WHEN DATOS_PENDIENTES IS NULL THEN 0 ELSE DATOS_PENDIENTES END \"Trans. pendientes\", CASE WHEN PRIMERO_SIN_ENVIAR IS NULL THEN '00:00:00' ELSE (NOW()-PRIMERO_SIN_ENVIAR) END \"Tiempo s/replicar\" FROM ( SELECT D.ID_EQUI, MAX(FCH_TRAN) ULTIMO_DATO, PRIMERO_SIN_ENVIAR, DATOS_PENDIENTES FROM SITM_DISP.SBOP_TRAN D LEFT JOIN ( SELECT ID_EQUI, MIN(FCH_ENVI) PRIMERO_SIN_ENVIAR, COUNT(*) DATOS_PENDIENTES FROM SITM_ENVI.SBOP_TRAN WHERE BOL_ENVI=FALSE GROUP BY ID_EQUI ) E ON E.ID_EQUI=D.ID_EQUI GROUP BY D.ID_EQUI, PRIMERO_SIN_ENVIAR, DATOS_PENDIENTES ) AS DATA_ENVI JOIN SITM_DISP.SBEQ_EQUI E ON E.ID_EQUI=DATA_ENVI.ID_EQUI WHERE E.ID_ESTA=1";
-        public static String PENDING_INFO_TO_SEND_DEVICE_I_O = "SELECT NUME_SERI \"Número de serie\", DIR_IP \"Dirección IP\", ULTIMO_DATO \"Última trans. registrada\", PRIMERO_SIN_ENVIAR \"Primera trans. s/enviar\", CASE WHEN DATOS_PENDIENTES IS NULL THEN 0 ELSE DATOS_PENDIENTES END \"Trans. pendientes\", CASE WHEN PRIMERO_SIN_ENVIAR IS NULL THEN '00:00:00' ELSE (NOW()-PRIMERO_SIN_ENVIAR) END \"Tiempo s/replicar\" FROM ( SELECT D.ID_EQUI, MAX(FCH_ACCE_SALI) ULTIMO_DATO, PRIMERO_SIN_ENVIAR, DATOS_PENDIENTES FROM SITM_DISP.SBOP_ACCE_SALI D LEFT JOIN ( SELECT ID_EQUI, MIN(FCH_ENVI) PRIMERO_SIN_ENVIAR, COUNT(*) DATOS_PENDIENTES FROM SITM_ENVI.SBOP_ACCE_SALI WHERE BOL_ENVI=FALSE GROUP BY ID_EQUI ) E ON E.ID_EQUI=D.ID_EQUI GROUP BY D.ID_EQUI, PRIMERO_SIN_ENVIAR, DATOS_PENDIENTES ) AS DATA_ENVI JOIN SITM_DISP.SBEQ_EQUI E ON E.ID_EQUI=DATA_ENVI.ID_EQUI WHERE E.ID_ESTA=1";
     }
 }

@@ -38,33 +38,35 @@ namespace ACABUS_Control_de_operacion
 
                     if (selectedItem.Equals("Todas las estaciones"))
                     {
-                        foreach (Station station in AcabusData.Trunks[0].GetStations())
-                        {
-                            String stationIP = String.Format("172.17.{0}.1", station.ID);
-                            if (station.Connected)
-                                _devicesInMonitoring.Add(new DeviceInMonitoring()
-                                {
-                                    Name = station.Name,
-                                    IPAddress = stationIP
-                                });
-                        }
+                        foreach (Trunk trunk in AcabusData.Trunks)
+                            foreach (Station station in trunk.GetStations())
+                            {
+                                String stationIP = ((Device)station.GetDevices().GetValue(0))?.IP;
+                                if (station.Connected)
+                                    _devicesInMonitoring.Add(new DeviceInMonitoring()
+                                    {
+                                        Name = station.Name,
+                                        IPAddress = stationIP
+                                    });
+                            }
                     }
                     else
                     {
-                        foreach (Station station in AcabusData.Trunks[0].GetStations())
-                        {
-                            if (station.Name.Equals(selectedItem))
+                        foreach (Trunk trunk in AcabusData.Trunks)
+                            foreach (Station station in trunk.GetStations())
                             {
-                                foreach (Device device in station.GetDevices())
+                                if (station.Name.Equals(selectedItem))
                                 {
-                                    _devicesInMonitoring.Add(new DeviceInMonitoring()
+                                    foreach (Device device in station.GetDevices())
                                     {
-                                        Name = device.GetNumeSeri(),
-                                        IPAddress = device.IP
-                                    });
+                                        _devicesInMonitoring.Add(new DeviceInMonitoring()
+                                        {
+                                            Name = device.GetNumeSeri(),
+                                            IPAddress = device.IP
+                                        });
+                                    }
                                 }
                             }
-                        }
                     }
 
                     RefreshMonitoring();

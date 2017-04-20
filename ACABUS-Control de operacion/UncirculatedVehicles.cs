@@ -43,6 +43,8 @@ namespace ACABUS_Control_de_operacion
                 ClearTable();
                 LoadUncirculatedVehicles();
                 MessageBox.Show("Vehículos sin circular guardados correctamente.");
+                Hide();
+                Dispose();
             }
             catch (Exception)
             {
@@ -61,6 +63,17 @@ namespace ACABUS_Control_de_operacion
                 String vehicle = String.Format("{0},{1}\n", item.Cells[0].Value, item.Cells[1].Value);
                 File.AppendAllText(FILENAME_UNCIRCULATED_VEHICLES, vehicle);
             }
+        }
+
+        private void UncirculatedVehiOnCellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && String.IsNullOrEmpty(this.uncirculatedTable.Rows[e.RowIndex].Cells[1].Value?.ToString()))
+                this.uncirculatedTable.Rows[e.RowIndex].Cells[1].Value = "TALLER";
+        }
+
+        private void RefreshButtonOnClick(object sender, EventArgs e)
+        {
+            LoadUncirculatedVehicles();
         }
     }
 }

@@ -33,6 +33,7 @@ namespace ACABUS_Control_de_operacion.Utils
 
         public String[][] ExecuteQuerySsh(String query)
         {
+            query = query.Replace("\"", "\\\"").Replace("á", "a").Replace("é", "e").Replace("í", "i").Replace("ó", "o").Replace("ú", "u");
             Int16 attempts = 0;
             String response = "";
             if (String.IsNullOrEmpty(query)) return null;

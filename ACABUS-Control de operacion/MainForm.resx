@@ -189,6 +189,19 @@
         Ao3Ey74YCDotwj43wFJJPi/slP9KxIqxrBBb+wI8s1HQPO24swAAAABJRU5ErkJggg==
 </value>
   </data>
+  <data name="weekReportButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAGSSURBVDhPxZPLTsJAFED7CcaFKxbQN32Azw8wpCIppRAf
+        UaAUdGN0ISaCISZm9AMsoC418SuIe0D/6to7bUkJMXHHJCeT3pl75t6ZlFn+uHbdlQvHbR+ZFjlACiap
+        5AsU28gTyzCIlTOIiezmKAWf1vFJG3MZe2+/vaNnYVvLwJaqw6aiwUZahXWfjJSGjCiDJkqgCiKovAgK
+        J0DaR5NkKBnGDaMLErm+vIKf6TRgEvA9mQSMA6bjMXyNRnRGymYRJI57ooLX/oCeGnHuuPA2GM4q0H2a
+        1Tq8eH1QeIFW4ZxWA4EaCrKyQsvG+azeAIzpsRbcau0vgUB6nS60ag606g5Nvu/ewef7hx+rQzOk1+lQ
+        QcNPRMqmFQo4gWiCRMs8LNkLvcfvIM5M4N8owdtFCZ6EIgTLpvjx2QuE5c+1gAJcwA3YJyZE0MR4cijA
+        Z5wTYAAXK0ULhp5He43Ab8rzPHb0jDLLt1FAJaFogXAt2ofIHA9SkrtllERiVUyyD1KK8/6LkEohjyzL
+        roV/xNIGw/wCfgxU5ZEaLjoAAAAASUVORK5CYII=
+</value>
+  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>50</value>
   </metadata>

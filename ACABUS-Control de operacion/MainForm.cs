@@ -9,7 +9,8 @@ namespace ACABUS_Control_de_operacion
         private Monitor monitor;
         private StockCard stockCard;
         private NetworkingMonitor netMonitor;
-        private DBKVRsExternos bdkvrExterns;
+        private TrunkDeviceDisconnected bdkvrExterns;
+        private WeekReport weekReport;
 
         public static MainForm Instance { get; set; }
 
@@ -23,7 +24,7 @@ namespace ACABUS_Control_de_operacion
 
         #region MENU ARCHIVO
 
-        private void mbrArcExi_Click(object sender, EventArgs e)
+        private void MbrArcExi_Click(object sender, EventArgs e)
         {
             this.Close();
         }
@@ -96,8 +97,19 @@ namespace ACABUS_Control_de_operacion
         private void ConexiónBDKVRExternosToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (bdkvrExterns == null || bdkvrExterns.IsDisposed)
-                bdkvrExterns = new DBKVRsExternos();
+                bdkvrExterns = new TrunkDeviceDisconnected();
             bdkvrExterns.Show();
+        }
+
+        private void WeekReportButton_Click(object sender, EventArgs e)
+        {
+            if (weekReport == null || weekReport.IsDisposed)
+                weekReport = new WeekReport()
+                {
+                    MdiParent = this
+                };
+            weekReport.Show();
+            weekReport.BringToFront();
         }
     }
 }

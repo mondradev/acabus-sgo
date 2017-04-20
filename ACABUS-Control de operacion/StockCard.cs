@@ -16,8 +16,8 @@ namespace ACABUS_Control_de_operacion
         static String _database = "SITM";
         static String _username = "postgres";
         static String _password = "4c4t3k";
-        static String usernameSsh = "teknei";
-        static String passwordSsh = "4c4t3k";
+        static String _usernameSsh = "teknei";
+        static String _passwordSsh = "4c4t3k";
 
         public StockCard()
         {
@@ -75,7 +75,8 @@ namespace ACABUS_Control_de_operacion
                             stock.ToString(),
                             sum.ToString()
                          };
-                         this.BeginInvoke(new Action(() =>
+                         if (!this.IsDisposed)
+                             this.BeginInvoke(new Action(() =>
                          {
                              String[] tempRow = row;
                              dgvResult.Rows.Add(tempRow);
@@ -91,33 +92,33 @@ namespace ACABUS_Control_de_operacion
 
         private static string QueryStock(Kvr kvr)
         {
-            PostgreSQL sql = PostgreSQL.CreateConnection(
+            SshPostgreSQL sql = SshPostgreSQL.CreateConnection(AcabusData.PG_PATH,
                 kvr.IP,
                 5432,
                 _username,
-                kvr.IsExtern ? "admin" : _password,
-                kvr.IsExtern ? kvr.DataBaseName : _database);
+                 kvr.Status && !kvr.Station.Connected ? "admin" : _password,
+                 kvr.Status && !kvr.Station.Connected ? kvr.DataBaseName : _database,
+                 kvr.Status && !kvr.Station.Connected ? "Administrador" : _usernameSsh,
+                 kvr.Status && !kvr.Station.Connected ? "Administrador*2016" : _passwordSsh
+            );
             String[][] response = sql.ExecuteQuery(
-                PostgreSQL.CARD_STOCK);
-            //true,
-            //kvr.IsExtern ? "Administrador" : usernameSsh,
-            //kvr.IsExtern ? "Administrador*2016" : passwordSsh);
+                AcabusData.CARD_STOCK);
             return response.Length > 1 ? response[1][0] : "0";
         }
 
         private static string QuerySales(Kvr kvr)
         {
-            PostgreSQL sql = PostgreSQL.CreateConnection(
+            SshPostgreSQL sql = SshPostgreSQL.CreateConnection(AcabusData.PG_PATH,
                 kvr.IP,
                 5432,
                 _username,
-                kvr.IsExtern ? "admin" : _password,
-                kvr.IsExtern ? kvr.DataBaseName : _database);
+                 kvr.Status && !kvr.Station.Connected ? "admin" : _password,
+                 kvr.Status && !kvr.Station.Connected ? kvr.DataBaseName : _database,
+                 kvr.Status && !kvr.Station.Connected ? "Administrador" : _usernameSsh,
+                 kvr.Status && !kvr.Station.Connected ? "Administrador*2016" : _passwordSsh
+            );
             String[][] response = sql.ExecuteQuery(
-                PostgreSQL.TOTAL_SALE);
-            //true,
-            //kvr.IsExtern ? "Administrador" : usernameSsh,
-            //kvr.IsExtern ? "Administrador*2016" : passwordSsh);
+                AcabusData.TOTAL_SALE);
             return response.Length > 1 ? response[1][0] : "0";
         }
 
@@ -150,10 +151,11 @@ namespace ACABUS_Control_de_operacion
         {
             IncrementProgressBar();
             Int16 processCount = (Int16)_multiThread.Count;
-            this.BeginInvoke(new Action(() =>
-            {
-                this.threadsStatusLabel.Text = String.Format("{0} Subprocesos", processCount);
-            }));
+            if (!this.IsDisposed)
+                this.BeginInvoke(new Action(() =>
+                {
+                    this.threadsStatusLabel.Text = String.Format("{0} Subprocesos", processCount);
+                }));
         }
 
         private void StopTaskButtonOnClick(object sender, EventArgs e)
@@ -183,7 +185,8 @@ namespace ACABUS_Control_de_operacion
 
         private void IncrementProgressBar()
         {
-            this.BeginInvoke(new Action(delegate
+            if (!this.IsDisposed)
+                this.BeginInvoke(new Action(delegate
             {
                 if (this.taskProgressBar.Value + 1 <= this.taskProgressBar.Maximum)
                     this.taskProgressBar.Value++;
@@ -197,7 +200,8 @@ namespace ACABUS_Control_de_operacion
         {
             if (!_multiThread.IsRunning())
             {
-                this.BeginInvoke(new Action(delegate
+                if (!this.IsDisposed)
+                    this.BeginInvoke(new Action(delegate
                 {
                     this.taskProgressBar.Value = 0;
                     this.progressLabel.Text = "0 %";

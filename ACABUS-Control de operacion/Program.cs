@@ -15,7 +15,7 @@ namespace ACABUS_Control_de_operacion
         {
             AcabusData.LoadConfiguration();
             RuntimeHelpers.RunClassConstructor(typeof(EventViewer).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(DBKVRsExternos).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(TrunkDeviceDisconnected).TypeHandle);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

@@ -54,7 +54,7 @@ namespace ACABUS_Control_de_operacion
 
             public override string ToString()
             {
-                return String.Format("{0}-{1}-{2}", DateTimeEvent.ToUniversalTime(), EventType.GetName(typeof(EventType), EventType), MessageEvent);
+                return String.Format("{0:yyyy/MM/dd H:mm:ss}-{1}-{2}", DateTimeEvent, EventType.GetName(typeof(EventType), EventType), MessageEvent);
             }
         }
 

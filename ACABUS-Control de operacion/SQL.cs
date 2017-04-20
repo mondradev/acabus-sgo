@@ -40,10 +40,11 @@ namespace ACABUS_Control_de_operacion
             if (!_inStoping)
                 IncrementProgressBar();
             Int16 processCount = (Int16)_multiThread.Count;
-            this.BeginInvoke(new Action(() =>
-            {
-                this.threadsStatusLabel.Text = String.Format("{0} Subprocesos", processCount);
-            }));
+            if (!this.IsDisposed)
+                this.BeginInvoke(new Action(() =>
+                {
+                    this.threadsStatusLabel.Text = String.Format("{0} Subprocesos", processCount);
+                }));
         }
 
         private void DeviceListOnSelectedChanged(object sender, EventArgs e)
@@ -59,10 +60,11 @@ namespace ACABUS_Control_de_operacion
             _multiThread.KillAllThreads(() =>
             {
                 IncrementProgressBar();
-                this.BeginInvoke(new Action(() =>
-                {
-                    stopTaskButton.Enabled = false;
-                }));
+                if (!this.IsDisposed)
+                    this.BeginInvoke(new Action(() =>
+                    {
+                        stopTaskButton.Enabled = false;
+                    }));
             });
         }
 
@@ -92,16 +94,15 @@ namespace ACABUS_Control_de_operacion
                     if (this._inStoping) break;
 
                     String query = device.Type == Device.DeviceType.KVR
-                                                        ? PostgreSQL.PENDING_INFO_TO_SEND_DEVICE_R_S
-                                                        : PostgreSQL.PENDING_INFO_TO_SEND_DEVICE_I_O;
-                    if (device.Type == Device.DeviceType.KVR && ((Kvr)device).IsExtern && !device.Station.Connected)
-                        return;
-                    dataGrdSql.Host = device.IP;
-                    dataGrdSql.ExecuteAndFill(query, (ex) =>
+                                                        ? AcabusData.PENDING_INFO_TO_SEND_DEVICE_R_S
+                                                        : AcabusData.PENDING_INFO_TO_SEND_DEVICE_I_O;
+                    if (!device.Station.Connected)
+                        continue;
+                    dataGrdSql.ExecuteAndFill(query, new Dictionary<String, Object> { { "Host", device.IP } }, (ex) =>
                     {
                         dataGrdSql.AddRow(new String[] {
-                        device.GetNumeSeri(),
-                                device.IP
+                            device.GetNumeSeri(),
+                            device.IP
                         });
                     });
                 }
@@ -119,6 +120,10 @@ namespace ACABUS_Control_de_operacion
             dataGrdSql.UsernameDb = "postgres";
             dataGrdSql.PortDb = 5432;
             dataGrdSql.PgPath = AcabusData.PG_PATH;
+            dataGrdSql.DataBase = "SITM";
+            dataGrdSql.PasswordDb = "4c4t3k";
+            dataGrdSql.UsernameSsh = "teknei";
+            dataGrdSql.PasswordSsh = "4c4t3k";
 
             Device[] devices = GetDevice();
 
@@ -130,20 +135,16 @@ namespace ACABUS_Control_de_operacion
             foreach (Device device in devices)
             {
                 if (this._inStoping) break;
-                dataGrdSql.Host = device.IP;
-                dataGrdSql.DataBase = "SITM";
-                dataGrdSql.PasswordDb = "4c4t3k";
-                dataGrdSql.UsernameSsh = "teknei";
-                dataGrdSql.PasswordSsh = "4c4t3k";
-                if (device.Type == Device.DeviceType.KVR && ((Kvr)device).IsExtern && !device.Station.Connected)
+                var properties = new Dictionary<String, Object> { { "Host", device.IP } };
+                if (!device.Station.Connected)
                 {
-                    Kvr kvrExtern = (Kvr)device;
-                    dataGrdSql.DataBase = kvrExtern.DataBaseName;
-                    dataGrdSql.PasswordDb = "admin";
-                    dataGrdSql.UsernameSsh = "Administrador";
-                    dataGrdSql.PasswordSsh = "Administrador*2016";
+                    properties.Add("DataBase", device.DataBaseName);
+                    properties.Add("PasswordDb", "admin");
+                    properties.Add("UsernameSsh", "Administrador");
+                    properties.Add("PasswordSsh", "Administrador*2016");
                 }
-                dataGrdSql.ExecuteAndFill(query);
+                dataGrdSql.ExecuteAndFill(query, properties);
+                properties.Clear();
             }
         }
 
@@ -155,7 +156,7 @@ namespace ACABUS_Control_de_operacion
                 foreach (Station station in trunk.GetStations())
                 {
                     if ((!stationsList.SelectedItem.Equals(STATIONS_CAPTION)
-                        && !station.Name.Equals(stationsList.SelectedItem)) || !station.Connected)
+                        && !station.Name.Equals(stationsList.SelectedItem)))
                         continue;
                     foreach (Device device in station.GetDevices())
                     {
@@ -208,29 +209,31 @@ namespace ACABUS_Control_de_operacion
 
         private void IncrementProgressBar()
         {
-            this.BeginInvoke(new Action(delegate
-            {
-                if (this.taskProgressBar.Value + 1 <= this.taskProgressBar.Maximum)
-                    this.taskProgressBar.Value++;
-                ValidateEndTask();
-                string progress = String.Format("Progreso: {0}%", (int)((float)this.taskProgressBar.Value / (float)this.taskProgressBar.Maximum * 100));
-                this.progressLabel.Text = progress;
-            }));
+            if (!this.IsDisposed)
+                this.BeginInvoke(new Action(delegate
+                {
+                    if (this.taskProgressBar.Value + 1 <= this.taskProgressBar.Maximum)
+                        this.taskProgressBar.Value++;
+                    ValidateEndTask();
+                    string progress = String.Format("Progreso: {0}%", (int)((float)this.taskProgressBar.Value / (float)this.taskProgressBar.Maximum * 100));
+                    this.progressLabel.Text = progress;
+                }));
         }
 
         private void ValidateEndTask()
         {
             if (!_multiThread.IsRunning())
             {
-                this.BeginInvoke(new Action(delegate
-                {
-                    this.taskProgressBar.Value = 0;
-                    this.currentTaskLabel.Text = "Tarea actual: Ninguna";
-                    this.progressLabel.Text = "0 %";
-                    ActiveControls();
-                    _inStoping = false;
-                    taskTimeTimer.Stop();
-                }));
+                if (!this.IsDisposed)
+                    this.BeginInvoke(new Action(delegate
+                    {
+                        this.taskProgressBar.Value = 0;
+                        this.currentTaskLabel.Text = "Tarea actual: Ninguna";
+                        this.progressLabel.Text = "0 %";
+                        ActiveControls();
+                        _inStoping = false;
+                        taskTimeTimer.Stop();
+                    }));
             }
             if (this.taskProgressBar.Value == this.taskProgressBar.Maximum)
                 this._multiThread.KillAllThreads();

@@ -35,12 +35,12 @@
             this.visorDeEventosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.conexiónBDKVRExternosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmifExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.tlsTools = new System.Windows.Forms.ToolStrip();
             this.stockCardButton = new System.Windows.Forms.ToolStripButton();
             this.sqlButton = new System.Windows.Forms.ToolStripButton();
             this.monitorButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.weekReportButton = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.tlsTools.SuspendLayout();
             this.SuspendLayout();
@@ -49,8 +49,7 @@
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsmiFile,
-            this.tsmiEdit});
+            this.tsmiFile});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1282, 28);
@@ -71,35 +70,29 @@
             // tsmifSeparator
             // 
             this.tsmifSeparator.Name = "tsmifSeparator";
-            this.tsmifSeparator.Size = new System.Drawing.Size(258, 6);
+            this.tsmifSeparator.Size = new System.Drawing.Size(329, 6);
             // 
             // visorDeEventosToolStripMenuItem
             // 
             this.visorDeEventosToolStripMenuItem.Name = "visorDeEventosToolStripMenuItem";
-            this.visorDeEventosToolStripMenuItem.Size = new System.Drawing.Size(261, 26);
+            this.visorDeEventosToolStripMenuItem.Size = new System.Drawing.Size(332, 26);
             this.visorDeEventosToolStripMenuItem.Text = "Visor de eventos";
             this.visorDeEventosToolStripMenuItem.Click += new System.EventHandler(this.VisorDeEventosToolStripMenuItem_Click);
             // 
             // conexiónBDKVRExternosToolStripMenuItem
             // 
             this.conexiónBDKVRExternosToolStripMenuItem.Name = "conexiónBDKVRExternosToolStripMenuItem";
-            this.conexiónBDKVRExternosToolStripMenuItem.Size = new System.Drawing.Size(261, 26);
-            this.conexiónBDKVRExternosToolStripMenuItem.Text = "Conexión BD KVR externos";
+            this.conexiónBDKVRExternosToolStripMenuItem.Size = new System.Drawing.Size(332, 26);
+            this.conexiónBDKVRExternosToolStripMenuItem.Text = "Conexión BD Equipos Desconectados";
             this.conexiónBDKVRExternosToolStripMenuItem.Click += new System.EventHandler(this.ConexiónBDKVRExternosToolStripMenuItem_Click);
             // 
             // tsmifExit
             // 
             this.tsmifExit.Image = global::ACABUS_Control_de_operacion.Properties.Resources.Actions_close_icon;
             this.tsmifExit.Name = "tsmifExit";
-            this.tsmifExit.Size = new System.Drawing.Size(261, 26);
+            this.tsmifExit.Size = new System.Drawing.Size(332, 26);
             this.tsmifExit.Text = "Salir";
-            this.tsmifExit.Click += new System.EventHandler(this.mbrArcExi_Click);
-            // 
-            // tsmiEdit
-            // 
-            this.tsmiEdit.Name = "tsmiEdit";
-            this.tsmiEdit.Size = new System.Drawing.Size(70, 24);
-            this.tsmiEdit.Text = "EDITAR";
+            this.tsmifExit.Click += new System.EventHandler(this.MbrArcExi_Click);
             // 
             // tlsTools
             // 
@@ -108,7 +101,8 @@
             this.stockCardButton,
             this.sqlButton,
             this.monitorButton,
-            this.toolStripButton1});
+            this.toolStripButton1,
+            this.weekReportButton});
             this.tlsTools.Location = new System.Drawing.Point(0, 28);
             this.tlsTools.Name = "tlsTools";
             this.tlsTools.Size = new System.Drawing.Size(1282, 27);
@@ -155,6 +149,17 @@
             this.toolStripButton1.Text = "Monitor de la red";
             this.toolStripButton1.Click += new System.EventHandler(this.MonitorLanButton_Click);
             // 
+            // weekReportButton
+            // 
+            this.weekReportButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.weekReportButton.Enabled = false;
+            this.weekReportButton.Image = ((System.Drawing.Image)(resources.GetObject("weekReportButton.Image")));
+            this.weekReportButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.weekReportButton.Name = "weekReportButton";
+            this.weekReportButton.Size = new System.Drawing.Size(24, 24);
+            this.weekReportButton.Text = "Reporte Semanal";
+            this.weekReportButton.Click += new System.EventHandler(this.WeekReportButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
@@ -186,13 +191,13 @@
         private System.Windows.Forms.ToolStripMenuItem tsmifExit;
         private System.Windows.Forms.ToolStrip tlsTools;
         private System.Windows.Forms.ToolStripButton stockCardButton;
-        private System.Windows.Forms.ToolStripMenuItem tsmiEdit;
         private System.Windows.Forms.ToolStripSeparator tsmifSeparator;
         private System.Windows.Forms.ToolStripButton sqlButton;
         private System.Windows.Forms.ToolStripButton monitorButton;
         private System.Windows.Forms.ToolStripMenuItem visorDeEventosToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.ToolStripMenuItem conexiónBDKVRExternosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton weekReportButton;
     }
 }
 

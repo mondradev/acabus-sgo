@@ -1,6 +1,6 @@
 ﻿namespace ACABUS_Control_de_operacion
 {
-    partial class DBKVRsExternos
+    partial class TrunkDeviceDisconnected
     {
         /// <summary>
         /// Required designer variable.
@@ -32,12 +32,12 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.kvrExternTable = new System.Windows.Forms.DataGridView();
+            this.deviceDisconnectedTable = new System.Windows.Forms.DataGridView();
             this.numeSeriColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataBaseColumn = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.kvrExternTable)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.deviceDisconnectedTable)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -48,7 +48,7 @@
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.kvrExternTable, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.deviceDisconnectedTable, 0, 1);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
@@ -89,20 +89,20 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.SaveDataOnClick);
             // 
-            // dataGridView1
+            // deviceDisconnectedTable
             // 
-            this.kvrExternTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.deviceDisconnectedTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.kvrExternTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.kvrExternTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.deviceDisconnectedTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.deviceDisconnectedTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.numeSeriColumn,
             this.dataBaseColumn});
-            this.kvrExternTable.Location = new System.Drawing.Point(3, 52);
-            this.kvrExternTable.Name = "dataGridView1";
-            this.kvrExternTable.RowTemplate.Height = 24;
-            this.kvrExternTable.Size = new System.Drawing.Size(536, 372);
-            this.kvrExternTable.TabIndex = 1;
+            this.deviceDisconnectedTable.Location = new System.Drawing.Point(3, 52);
+            this.deviceDisconnectedTable.Name = "deviceDisconnectedTable";
+            this.deviceDisconnectedTable.RowTemplate.Height = 24;
+            this.deviceDisconnectedTable.Size = new System.Drawing.Size(536, 372);
+            this.deviceDisconnectedTable.TabIndex = 1;
             // 
             // numeSeriColumn
             // 
@@ -110,7 +110,7 @@
             this.numeSeriColumn.HeaderText = "Núm. Serie";
             this.numeSeriColumn.Name = "numeSeriColumn";
             this.numeSeriColumn.ReadOnly = true;
-            this.numeSeriColumn.Width = 107;
+            this.numeSeriColumn.Width = 99;
             // 
             // dataBaseColumn
             // 
@@ -118,7 +118,7 @@
             this.dataBaseColumn.HeaderText = "Base de datos en PdE";
             this.dataBaseColumn.Name = "dataBaseColumn";
             // 
-            // DBKVRsExternos
+            // TrunkDeviceDisconnected
             // 
             this.AcceptButton = this.button1;
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -128,14 +128,14 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "DBKVRsExternos";
+            this.Name = "TrunkDeviceDisconnected";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "Configuración de la base de datos para KVR externo";
+            this.Text = "Configuración de la base de datos para equipos sin conexión";
             this.TopMost = true;
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.kvrExternTable)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.deviceDisconnectedTable)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -145,7 +145,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.DataGridView kvrExternTable;
+        private System.Windows.Forms.DataGridView deviceDisconnectedTable;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.DataGridViewTextBoxColumn numeSeriColumn;
         private System.Windows.Forms.DataGridViewComboBoxColumn dataBaseColumn;

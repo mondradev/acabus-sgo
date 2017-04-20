@@ -9,31 +9,30 @@ using System.Windows.Forms;
 
 namespace ACABUS_Control_de_operacion
 {
-    public partial class DBKVRsExternos : Form
+    public partial class TrunkDeviceDisconnected : Form
     {
-        private string USERNAME = "Administrador";
-        private string PASSWORD = "Administrador*2016";
-        private static String FILENAME = "kvrExternData.list";
 
-        private static List<KVRextern> _kvrExterns = new List<KVRextern>();
+        private static String FILENAME = "deviceData.list";
+
+        private static List<DeviceDisconnected> _deviceDisconnected = new List<DeviceDisconnected>();
 
         private MultiThread _multiTask = new MultiThread()
         {
             Capacity = 12
         };
 
-        private class KVRextern
+        private class DeviceDisconnected
         {
             public String NumeSeri { get; set; }
             public String DataBase { get; set; }
         }
 
-        static DBKVRsExternos()
+        static TrunkDeviceDisconnected()
         {
             LoadData();
         }
 
-        public DBKVRsExternos()
+        public TrunkDeviceDisconnected()
         {
             InitializeComponent();
             LoadDataBases();
@@ -44,26 +43,26 @@ namespace ACABUS_Control_de_operacion
         {
             if (!File.Exists(FILENAME)) return;
 
-            String[] kvrs = File.ReadAllLines(FILENAME);
-            Kvr[] kvrExterns = GetKVRExterns();
+            String[] deviceDisconnectedFile = File.ReadAllLines(FILENAME);
+            Device[] deviceDisconnected = GetTrunkDeviceDisconnected();
 
-            _kvrExterns.Clear();
+            _deviceDisconnected.Clear();
 
-            foreach (String kvr in kvrs)
+            foreach (String deviceFile in deviceDisconnectedFile)
             {
-                String numeSeri = kvr.Split(',')[0];
-                String database = kvr.Split(',')[1];
+                String numeSeri = deviceFile.Split(',')[0];
+                String database = deviceFile.Split(',')[1];
                 if (String.IsNullOrEmpty(numeSeri) || String.IsNullOrEmpty(database))
                     continue;
-                _kvrExterns.Add(new KVRextern()
+                _deviceDisconnected.Add(new DeviceDisconnected()
                 {
                     NumeSeri = numeSeri,
                     DataBase = database
                 });
-                foreach (Kvr kvre in kvrExterns)
-                    if (kvre.GetNumeSeri().Equals(numeSeri))
+                foreach (Device device in deviceDisconnected)
+                    if (device.GetNumeSeri().Equals(numeSeri))
                     {
-                        kvre.DataBaseName = database.ToString();
+                        device.DataBaseName = database.ToString();
                         break;
                     }
             }
@@ -73,11 +72,11 @@ namespace ACABUS_Control_de_operacion
         private void LoadTable()
         {
             LoadData();
-            foreach (KVRextern kvr in _kvrExterns)
-                foreach (DataGridViewRow item in this.kvrExternTable.Rows)
-                    if (item.Cells[0].Value != null && item.Cells[0].Value.Equals(kvr.NumeSeri))
-                        if (this.dataBaseColumn.Items.Contains(kvr.DataBase))
-                            item.Cells[1].Value = kvr.DataBase;
+            foreach (DeviceDisconnected device in _deviceDisconnected)
+                foreach (DataGridViewRow item in this.deviceDisconnectedTable.Rows)
+                    if (item.Cells[0].Value != null && item.Cells[0].Value.Equals(device.NumeSeri))
+                        if (this.dataBaseColumn.Items.Contains(device.DataBase))
+                            item.Cells[1].Value = device.DataBase;
 
         }
 
@@ -94,10 +93,10 @@ namespace ACABUS_Control_de_operacion
         private void SaveData()
         {
             File.Delete(FILENAME);
-            for (Int16 i = 0; i < this.kvrExternTable.Rows.Count; i++)
+            for (Int16 i = 0; i < this.deviceDisconnectedTable.Rows.Count; i++)
             {
-                Object numeseri = this.kvrExternTable.Rows[i].Cells[0].Value;
-                Object database = this.kvrExternTable.Rows[i].Cells[1].Value;
+                Object numeseri = this.deviceDisconnectedTable.Rows[i].Cells[0].Value;
+                Object database = this.deviceDisconnectedTable.Rows[i].Cells[1].Value;
                 if (numeseri == null || database == null) continue;
                 File.AppendAllText(FILENAME, String.Format("{0},{1}\n", numeseri, database));
             }
@@ -110,18 +109,27 @@ namespace ACABUS_Control_de_operacion
 
         private void LoadDataBases()
         {
-            this.kvrExternTable.Rows.Clear();
+            this.deviceDisconnectedTable.Rows.Clear();
 
-            Kvr[] kvrExterns = GetKVRExterns();
+            Device[] deviceDisconnected = GetTrunkDeviceDisconnected();
 
-            foreach (Kvr kvr in kvrExterns)
-                this.kvrExternTable.Rows.Add(new String[] { kvr.GetNumeSeri() });
+            foreach (Device device in deviceDisconnected)
+                this.deviceDisconnectedTable.Rows.Add(new String[] { device.GetNumeSeri() });
 
-            String databasequery = String.Format("SELECT datname FROM pg_database WHERE datname like 'SITM_KVR%' ORDER BY datname");
+            String databasequery = String.Format(AcabusData.QUERY_DB_BACKUP);
             String[][] response;
-            const string host = "172.17.0.125";
+            const string host = AcabusData.REPLICA_SERVER_IP;
             this.dataBaseColumn.Items.Clear();
-            SshPostgreSQL psql = SshPostgreSQL.CreateConnection(AcabusData.PG_PATH, host, 5432, "postgres", "admin", "SITM_REPLICA", USERNAME, PASSWORD);
+            SshPostgreSQL psql = SshPostgreSQL.CreateConnection(
+                AcabusData.PG_PATH,
+                host,
+                AcabusData.PG_PORT,
+                AcabusData.PG_USERNAME,
+                AcabusData.PG_PASSWORD_SERVER,
+                AcabusData.DATABASE_REPLICA_NAME,
+                AcabusData.SSH_USERNAME_SERVER,
+                AcabusData.SSH_PASSWORD_SERVER
+            );
             try
             {
                 response = psql.ExecuteQuery(databasequery);
@@ -142,18 +150,17 @@ namespace ACABUS_Control_de_operacion
 
         }
 
-        private static Kvr[] GetKVRExterns()
+        private static Device[] GetTrunkDeviceDisconnected()
         {
-            List<Kvr> kvrs = new List<Kvr>();
+            List<Device> devicesDisconnected = new List<Device>();
             foreach (Trunk trunk in AcabusData.Trunks)
                 foreach (Station station in trunk.GetStations())
                     foreach (Device device in station.GetDevices())
                     {
-                        if (device.Type == Device.DeviceType.KVR)
-                            if (((Kvr)device).IsExtern && device.Status && device.HasDataBase && !station.Connected)
-                                kvrs.Add((Kvr)device);
+                        if (device.Status && device.HasDataBase && !station.Connected)
+                            devicesDisconnected.Add(device);
                     }
-            return kvrs.ToArray();
+            return devicesDisconnected.ToArray();
         }
     }
 }

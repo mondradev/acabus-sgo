@@ -106,7 +106,6 @@ namespace ACABUS_Control_de_operacion.Acabus
                     var kvr = Kvr.ToKVR(device);
                     kvr.MaxCard = XmlUtils.GetAttributeInt(deviceXmlNode, "MaxCard");
                     kvr.MinCard = XmlUtils.GetAttributeInt(deviceXmlNode, "MinCard");
-                    kvr.IsExtern = XmlUtils.GetAttributeBool(deviceXmlNode, "IsExtern");
                     return kvr;
                 }
                 return device;
@@ -152,6 +151,11 @@ namespace ACABUS_Control_de_operacion.Acabus
         [XmlAnnotation(Ignore = true)] public Station Station { get; protected set; }
 
         /// <summary>
+        /// Es el nombre de la base de datos en caso de ser KVR externo
+        /// </summary>
+        public String DataBaseName { get; set; }
+
+        /// <summary>
         /// Crea una instancia nueva de un equipo.
         /// </summary>
         /// <param name="station">Estación a la que pertence
@@ -165,7 +169,7 @@ namespace ACABUS_Control_de_operacion.Acabus
         /// Una cadena que representa a este equipo.
         /// </summary>
         /// <returns>Un número de serie que identifica al equipo.</returns>
-        public new String ToString()
+        public override string ToString()
         {
             return GetNumeSeri();
         }

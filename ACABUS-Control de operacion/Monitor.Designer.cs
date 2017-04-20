@@ -48,16 +48,16 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
             this.uncirculatedVehiclesButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.badCountersTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.disconnectVehicleTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.alarmTrunkTable)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel3.SuspendLayout();
-            this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // counterLabel
@@ -239,8 +239,8 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 45F));
             this.tableLayoutPanel1.Controls.Add(this.panel3, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.panel2, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.panel2, 1, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 54);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
@@ -260,18 +260,6 @@
             this.panel3.Size = new System.Drawing.Size(575, 635);
             this.panel3.TabIndex = 19;
             // 
-            // panel2
-            // 
-            this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel2.Controls.Add(this.badCountersTable);
-            this.panel2.Controls.Add(this.counterLabel);
-            this.panel2.Location = new System.Drawing.Point(287, 3);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(420, 635);
-            this.panel2.TabIndex = 18;
-            // 
             // panel1
             // 
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -283,6 +271,18 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(278, 635);
             this.panel1.TabIndex = 12;
+            // 
+            // panel2
+            // 
+            this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel2.Controls.Add(this.badCountersTable);
+            this.panel2.Controls.Add(this.counterLabel);
+            this.panel2.Location = new System.Drawing.Point(287, 3);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(420, 635);
+            this.panel2.TabIndex = 18;
             // 
             // uncirculatedVehiclesButton
             // 
@@ -315,10 +315,10 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
 
         }

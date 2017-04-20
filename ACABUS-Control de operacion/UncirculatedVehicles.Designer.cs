@@ -33,12 +33,13 @@
             this.uncirculatedTable = new System.Windows.Forms.DataGridView();
             this.noEconColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.statusColumn = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.refreshButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.uncirculatedTable)).BeginInit();
             this.SuspendLayout();
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(415, 60);
+            this.saveButton.Location = new System.Drawing.Point(418, 57);
             this.saveButton.Margin = new System.Windows.Forms.Padding(4);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(118, 37);
@@ -49,7 +50,7 @@
             // 
             // clearButton
             // 
-            this.clearButton.Location = new System.Drawing.Point(415, 15);
+            this.clearButton.Location = new System.Drawing.Point(418, 12);
             this.clearButton.Margin = new System.Windows.Forms.Padding(4);
             this.clearButton.Name = "clearButton";
             this.clearButton.Size = new System.Drawing.Size(118, 37);
@@ -69,6 +70,7 @@
             this.uncirculatedTable.RowTemplate.Height = 24;
             this.uncirculatedTable.Size = new System.Drawing.Size(396, 470);
             this.uncirculatedTable.TabIndex = 19;
+            this.uncirculatedTable.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.UncirculatedVehiOnCellValueChanged);
             // 
             // noEconColumn
             // 
@@ -87,11 +89,23 @@
             this.statusColumn.Name = "statusColumn";
             this.statusColumn.Width = 73;
             // 
+            // refreshButton
+            // 
+            this.refreshButton.Location = new System.Drawing.Point(418, 102);
+            this.refreshButton.Margin = new System.Windows.Forms.Padding(4);
+            this.refreshButton.Name = "refreshButton";
+            this.refreshButton.Size = new System.Drawing.Size(118, 37);
+            this.refreshButton.TabIndex = 20;
+            this.refreshButton.Text = "&Actualizar";
+            this.refreshButton.UseVisualStyleBackColor = true;
+            this.refreshButton.Click += new System.EventHandler(this.RefreshButtonOnClick);
+            // 
             // UncirculatedVehicles
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(549, 495);
+            this.Controls.Add(this.refreshButton);
             this.Controls.Add(this.uncirculatedTable);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.clearButton);
@@ -117,5 +131,6 @@
         private System.Windows.Forms.DataGridView uncirculatedTable;
         private System.Windows.Forms.DataGridViewTextBoxColumn noEconColumn;
         private System.Windows.Forms.DataGridViewComboBoxColumn statusColumn;
+        private System.Windows.Forms.Button refreshButton;
     }
 }
