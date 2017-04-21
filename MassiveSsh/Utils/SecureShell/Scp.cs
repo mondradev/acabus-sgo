@@ -1,31 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using Renci.SshNet;
 
 namespace MassiveSsh.Utils.SecureShell
 {
-    public class Scp : IDisposable
+    public sealed class Scp : IDisposable
     {
-        /// <summary>
-        /// Indica el estado de la transferencia de los archivos.
-        /// </summary>
-        public enum ScpStatus
-        {
-            /// <summary>
-            /// Comenzando la transferencia.
-            /// </summary>
-            START,
-
-            /// <summary>
-            /// En progreso de la transferencia.
-            /// </summary>
-            PROGRESS,
-
-            /// <summary>
-            /// Finalizando la transferencia.
-            /// </summary>
-            END
-        }
 
         /// <summary>
         /// Clase de argumentos para los eventos provocados por la transferencias de archivos
@@ -33,12 +14,9 @@ namespace MassiveSsh.Utils.SecureShell
         /// </summary>
         public class ScpEventArgs : EventArgs
         {
-            public String SourceData { get; internal set; }
-            public String DestinationData { get; internal set; }
-            public Int32 TransferredBytes { get; internal set; }
-            public Int32 TotalBytes { get; internal set; }
-            public String Message { get; internal set; }
-            public ScpStatus Status { get; internal set; }
+            public String Filename { get; internal set; }
+            public Int64 TransferredBytes { get; internal set; }
+            public Int64 TotalBytes { get; internal set; }
         }
 
         /// <summary>
@@ -59,7 +37,7 @@ namespace MassiveSsh.Utils.SecureShell
         /// <summary>
         /// Obtiene o establece la instancia de una conexión a el equipo remoto.
         /// </summary>
-        private Tamir.SharpSsh.Scp _session;
+        private ScpClient _session;
 
         /// <summary>
         /// Evento que surge durante la transferencia de datos.
@@ -84,26 +62,14 @@ namespace MassiveSsh.Utils.SecureShell
                 this.Username = username;
                 this._password = password;
 
-                this._session = new Tamir.SharpSsh.Scp(host, username)
-                {
-                    Password = password
-                };
+                this._session = new ScpClient(host, username, password);
+
                 if (!ConnectionTCP.IsAvaibleIP(this.Host))
                     throw new IOException(String.Format("No hay comunicación con el host {0}", this.Host));
                 this._session.Connect();
 
-                this._session.OnTransferStart += (string src, string dst, int transferredBytes, int totalBytes, string message) =>
-                {
-                    OnTransfer(src, dst, transferredBytes, totalBytes, message, ScpStatus.START);
-                };
-                this._session.OnTransferProgress += (string src, string dst, int transferredBytes, int totalBytes, string message) =>
-                {
-                    OnTransfer(src, dst, transferredBytes, totalBytes, message, ScpStatus.PROGRESS);
-                };
-                this._session.OnTransferEnd += (string src, string dst, int transferredBytes, int totalBytes, string message) =>
-                {
-                    OnTransfer(src, dst, transferredBytes, totalBytes, message, ScpStatus.END);
-                };
+                this._session.Downloading += _session_Downloading;
+                this._session.Uploading += _session_Uploading;
 
                 Trace.WriteLine(String.Format("Conectado al host {0}, Tiempo: {1}", Host, DateTime.Now - initTime), "INFO");
             }
@@ -113,34 +79,38 @@ namespace MassiveSsh.Utils.SecureShell
             }
         }
 
+        private void _session_Uploading(object sender, Renci.SshNet.Common.ScpUploadEventArgs e)
+        {
+            OnTransfer(e.Filename, e.Uploaded, e.Size);
+        }
+
+        private void _session_Downloading(object sender, Renci.SshNet.Common.ScpDownloadEventArgs e)
+        {
+            OnTransfer(e.Filename, e.Downloaded, e.Size);
+        }
+
         /// <summary>
         /// Indica si se logró la comunicación al equipo remoto.
         /// </summary>
         /// <returns>Un valor verdadero si se estableció la comunicación.</returns>
         public Boolean IsConnected()
         {
-            return this._session.Connected;
+            return this._session.IsConnected;
         }
 
         /// <summary>
         /// Desencadena el evento de transferencia de datos.
         /// </summary>
-        /// <param name="src">Origen de datos.</param>
-        /// <param name="dst">Destino de datos.</param>
+        /// <param name="filename">Archivo que se encuentra en procesamiento.</param>
         /// <param name="transferredBytes">Bytes transferidos.</param>
         /// <param name="totalBytes">Total de bytes.</param>
-        /// <param name="message">Mensajes de evento.</param>
-        /// <param name="status">Estado de la transferencia.</param>
-        private void OnTransfer(string src, string dst, int transferredBytes, int totalBytes, string message, ScpStatus status)
+        private void OnTransfer(string filename, long transferredBytes, long totalBytes)
         {
             TransferEvent?.Invoke(this, new ScpEventArgs()
             {
-                DestinationData = dst,
-                SourceData = src,
-                Message = message,
+                Filename = filename,
                 TransferredBytes = transferredBytes,
-                TotalBytes = totalBytes,
-                Status = status
+                TotalBytes = totalBytes
             });
         }
 
@@ -152,7 +122,8 @@ namespace MassiveSsh.Utils.SecureShell
         {
             if (String.IsNullOrEmpty(filenameLocal)
                 || String.IsNullOrEmpty(filenameRemote)) return false;
-            _session.Put(filenameLocal, filenameRemote);
+            FileInfo file = new FileInfo(filenameLocal);
+            _session.Upload(file, filenameRemote);
             return true;
         }
 
@@ -164,7 +135,10 @@ namespace MassiveSsh.Utils.SecureShell
         {
             if (String.IsNullOrEmpty(filenameLocal)
                 || String.IsNullOrEmpty(filenameRemote)) return false;
-            _session.Get(filenameRemote, filenameLocal);
+            if (Directory.Exists(filenameLocal))
+                _session.Download(filenameRemote, new DirectoryInfo(filenameLocal));
+            else
+                _session.Download(filenameRemote, new FileInfo(filenameLocal));
             return true;
         }
 
@@ -182,7 +156,8 @@ namespace MassiveSsh.Utils.SecureShell
         public void Dispose()
         {
             if (this._session != null)
-                this._session.Close();
+                this._session.Disconnect();
+            GC.SuppressFinalize(this);
         }
     }
 }

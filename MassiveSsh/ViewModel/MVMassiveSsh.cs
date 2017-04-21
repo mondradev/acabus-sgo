@@ -193,6 +193,7 @@ namespace MassiveSsh.ViewModel
                 _multiThread.RunTask(String.Format("Descargando respaldo de {0}", item.IP), () =>
                 {
                     String[] filenameBackup = null;
+                    ShowResponse(item.IP, "Descargando archivos");
                     using (Ssh connection = new Ssh(item.IP, AcabusData.UsernameSsh, AcabusData.PasswordSsh))
                     {
                         if (connection.IsConnected())
@@ -211,7 +212,6 @@ namespace MassiveSsh.ViewModel
                             Trace.WriteLine(String.Format("Falla al conectar a: {0}", item.IP), "ERROR");
                         }
                     }
-                    ShowResponse(item.IP, "Descargando archivos");
                     if (filenameBackup?.Length > 0)
                         using (Scp connection = new Scp(item.IP, AcabusData.UsernameSsh, AcabusData.PasswordSsh))
                         {
@@ -230,6 +230,8 @@ namespace MassiveSsh.ViewModel
                                 Trace.WriteLine(String.Format("Falla al conectar a: {0}", item.IP), "ERROR");
                             }
                         }
+                    else
+                        ShowResponse(item.IP, "No hay respaldos por descargar");
                 }, (ex) =>
                 {
                     Trace.WriteLine(String.Format("Ocurrió un problema al descargar el respaldo", item.IP), "ERROR");
@@ -241,7 +243,7 @@ namespace MassiveSsh.ViewModel
 
         private void Download_TransferEvent(object sender, Scp.ScpEventArgs e)
         {
-            if (e.Status == Scp.ScpStatus.START)
+            if (e.TransferredBytes == 0)
             {
                 double fileSize = e.TotalBytes;
                 int i = 0;
@@ -251,11 +253,11 @@ namespace MassiveSsh.ViewModel
                     fileSize /= 1024;
                     i++;
                 }
-                ShowResponse((sender as Scp).Host, String.Format("Descargando {0} {1:0.00} {2}", e.SourceData, fileSize, unit[i]));
+                ShowResponse((sender as Scp).Host, String.Format("Descargando {{Archivo: {0}, Tamaño: {1:0.00} {2}}}", e.Filename, fileSize, unit[i]));
             }
-            else if (e.Status == Scp.ScpStatus.END)
+            else if (e.TransferredBytes == e.TotalBytes)
             {
-                ShowResponse((sender as Scp).Host, String.Format("Descarga completa {0}", e.SourceData));
+                ShowResponse((sender as Scp).Host, String.Format("Descarga completa {0}", e.Filename));
 
             }
         }
@@ -355,6 +357,8 @@ namespace MassiveSsh.ViewModel
 
                             if (String.IsNullOrEmpty(response))
                                 response = "Comando terminado";
+                            if (connection.ThereError)
+                                ShowResponse(item.IP, connection.ErrorResult);
                             ShowResponse(item.IP, response);
                         }
                         else
@@ -414,7 +418,7 @@ namespace MassiveSsh.ViewModel
 
         private void Upload_TransferEvent(object sender, Scp.ScpEventArgs e)
         {
-            if (e.Status == Scp.ScpStatus.START)
+            if (e.TransferredBytes == 0)
             {
                 double fileSize = e.TotalBytes;
                 int i = 0;
@@ -424,11 +428,11 @@ namespace MassiveSsh.ViewModel
                     fileSize /= 1024;
                     i++;
                 }
-                ShowResponse((sender as Scp).Host, String.Format("Cargando {0} {1:0.00} {2}", e.SourceData, fileSize, unit[i]));
+                ShowResponse((sender as Scp).Host, String.Format("Cargando {0} {1:0.00} {2}", e.Filename, fileSize, unit[i]));
             }
-            else if (e.Status == Scp.ScpStatus.END)
+            else if (e.TransferredBytes == e.TotalBytes)
             {
-                ShowResponse((sender as Scp).Host, String.Format("Carga completa {0}", e.SourceData));
+                ShowResponse((sender as Scp).Host, String.Format("Carga completa {0}", e.Filename));
 
             }
         }
@@ -440,6 +444,13 @@ namespace MassiveSsh.ViewModel
 
         private void ShowResponse(String host, String response)
         {
+            if (response.EndsWith("\n")) response = response.Remove(response.Length - 1);
+            if (response.Split('\n').Length > 1 && !String.IsNullOrEmpty(response.Split('\n')[1]) && !host.Equals("MSsh"))
+            {
+                response = String.Format("\n{0}", response);
+                response = response.Replace("\n", "\n\t");
+                response = response.EndsWith("\n\t") ? response.Remove(response.LastIndexOf("\n\t")) : response;
+            }
             Response += String.Format("{0} > {1}\n", host, response);
         }
     }
