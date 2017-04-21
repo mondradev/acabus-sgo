@@ -21,12 +21,16 @@ namespace MassiveSsh.ViewModel
         private MultiThread _multiThread;
         private Station _selectedStation;
         private Device _selectedDevice;
-        private bool _allDevices = true;
-        private bool _allStations = true;
+        private bool _allDevices;
+        private bool _allStations;
         private double _maxProgressTask = 100.0;
         private double _progressTask = 0.0;
         private string _localPath;
         private int _lineHistory = -1;
+        private bool _checkCde;
+        private bool _checkPmr;
+        private bool _checkTor;
+        private bool _checkKvr;
 
         public Double MaxProgressTask {
             get {
@@ -122,6 +126,13 @@ namespace MassiveSsh.ViewModel
             set {
                 _allDevices = value;
                 OnPropertyChanged("AllDevices");
+                if (value)
+                {
+                    CheckKvr = true;
+                    CheckPmr = true;
+                    CheckTor = true;
+                    CheckCde = true;
+                }
             }
         }
 
@@ -132,6 +143,46 @@ namespace MassiveSsh.ViewModel
             set {
                 _allStations = value;
                 OnPropertyChanged("AllStations");
+            }
+        }
+
+        public Boolean CheckKvr {
+            get {
+                return _checkKvr;
+            }
+            set {
+                _checkKvr = value;
+                OnPropertyChanged("CheckKvr");
+            }
+        }
+
+        public Boolean CheckTor {
+            get {
+                return _checkTor;
+            }
+            set {
+                _checkTor = value;
+                OnPropertyChanged("CheckTor");
+            }
+        }
+
+        public Boolean CheckPmr {
+            get {
+                return _checkPmr;
+            }
+            set {
+                _checkPmr = value;
+                OnPropertyChanged("CheckPmr");
+            }
+        }
+
+        public Boolean CheckCde {
+            get {
+                return _checkCde;
+            }
+            set {
+                _checkCde = value;
+                OnPropertyChanged("CheckCde");
             }
         }
 
@@ -178,6 +229,8 @@ namespace MassiveSsh.ViewModel
                     }
                 }
             };
+            AllDevices = true;
+            AllStations = true;
             AcabusData.LoadConfiguration();
         }
 
@@ -266,10 +319,7 @@ namespace MassiveSsh.ViewModel
         {
             if (AllDevices || AllStations)
                 if (SelectedStation != null && !AllStations)
-                    return SelectedStation.Devices.FindAll((device) =>
-                    {
-                        return device.SshEnabled;
-                    });
+                    return SelectedStation.Devices.FindAll(ValidateDevice());
                 else
                     return GetAllDevices();
             else if (SelectedDevice != null)
@@ -282,11 +332,24 @@ namespace MassiveSsh.ViewModel
             List<Device> devices = new List<Device>();
             foreach (Trunk trunk in AcabusData.Trunks)
                 foreach (Station station in trunk.Stations)
-                    devices.AddRange(station.Devices.FindAll((device) =>
-                    {
-                        return device.SshEnabled;
-                    }));
+                    devices.AddRange(station.Devices.FindAll(ValidateDevice()));
             return devices;
+        }
+
+        private Predicate<Device> ValidateDevice()
+        {
+            return (device) =>
+            {
+                if (!CheckKvr && device.Type == Device.DeviceType.KVR)
+                    return false;
+                if (!CheckPmr && device.Type == Device.DeviceType.PMR)
+                    return false;
+                if (!CheckTor && device.Type == Device.DeviceType.TOR)
+                    return false;
+                if (!CheckCde && device.Type == Device.DeviceType.CDE)
+                    return false;
+                return device.SshEnabled;
+            };
         }
 
         private void SendCommandToRemote()
