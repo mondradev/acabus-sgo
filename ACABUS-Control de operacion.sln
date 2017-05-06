@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACABUS-Control de operacion", "ACABUS-Control de operacion\ACABUS-Control de operacion.csproj", "{A58C906C-F542-42B9-9169-2D58A2B7C80D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassiveSsh", "MassiveSsh\MassiveSsh.csproj", "{E196B435-1093-4704-8F4D-FC430842FFCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acabus_Control_Operaciones", "MassiveSsh\Acabus_Control_Operaciones.csproj", "{E196B435-1093-4704-8F4D-FC430842FFCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

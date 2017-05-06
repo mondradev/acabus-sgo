@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 
-namespace MassiveSsh.Utils
+namespace Acabus.Utils
 {
     /// <summary>
     /// Esta clase contiene funciones básicas para evaluar la disponibilidad de un

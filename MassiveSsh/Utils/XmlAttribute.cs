@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MassiveSsh.Utils
+namespace Acabus.Utils
 {
  
     public class XmlAnnotationAttribute : Attribute

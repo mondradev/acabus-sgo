@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace MassiveSsh.Utils.SecureShell
+namespace Acabus.Utils.SecureShell
 {
     /// <summary>
     /// Esta clase permite el envío de comandos a un equipo remoto que tenga 
@@ -76,10 +76,7 @@ namespace MassiveSsh.Utils.SecureShell
         /// Indica si se logró la comunicación al equipo remoto.
         /// </summary>
         /// <returns>Un valor verdadero si se estableció la comunicación.</returns>
-        public Boolean IsConnected()
-        {
-            return this._session.IsConnected;
-        }
+        public Boolean IsConnected() => this._session.IsConnected;
 
         /// <summary>
         /// Envía y ejecuta un comando en la terminal del equipo remoto.
@@ -113,10 +110,8 @@ namespace MassiveSsh.Utils.SecureShell
         /// <summary>
         /// Desctructor de la instancia.
         /// </summary>
-        ~Ssh()
-        {
+        ~Ssh() =>
             this.Dispose();
-        }
 
         /// <summary>
         /// Libera la conexión al equipo remoto.

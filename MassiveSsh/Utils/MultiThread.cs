@@ -2,14 +2,39 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace MassiveSsh.Utils
+namespace Acabus.Utils
 {
     public class MultiThread
     {
         public enum ActionThread
         {
             ADDING, REMOVING
+        }
+
+        private class ThreadInfo
+        {
+            public Thread Thread;
+
+            public System.Threading.ThreadState State;
+
+            public void StopThread(Action<ThreadInfo> callback)
+            {
+                var self = this;
+                new Task(() =>
+                {
+                    self.State = System.Threading.ThreadState.StopRequested;
+                    Trace.WriteLine(String.Format("Intentando matar subproceso: {0}", self.Thread.Name), "DEBUG");
+                    while (self.Thread.IsAlive)
+                    {
+                        if (self.Thread.ThreadState == System.Threading.ThreadState.WaitSleepJoin)
+                            self.Thread.Interrupt();
+                        self.Thread.Abort();
+                    }
+                    callback?.Invoke(self);
+                }).Start();
+            }
         }
 
         public class MultiThreadEventArgs : EventArgs
@@ -26,13 +51,13 @@ namespace MassiveSsh.Utils
 
         private Boolean _inStoping = false;
 
-        private List<Thread> _threads;
+        private List<ThreadInfo> _threads;
 
         public int Capacity { get; set; }
 
         public int Count {
             get {
-                return _threads.Count;
+                return _threads.FindAll((threadInfo) => threadInfo.State == System.Threading.ThreadState.Running).Count;
             }
         }
 
@@ -48,7 +73,7 @@ namespace MassiveSsh.Utils
         public MultiThread()
         {
             this.Capacity = MAX_THREADS_DEFAULT;
-            this._threads = new List<Thread>()
+            this._threads = new List<ThreadInfo>()
             {
                 Capacity = Capacity
             };
@@ -64,32 +89,38 @@ namespace MassiveSsh.Utils
 
             Thread task = new Thread(() =>
             {
-
-                Thread.CurrentThread.Name = taskName;
+                ThreadInfo threadInfo = new ThreadInfo()
+                {
+                    State = System.Threading.ThreadState.Unstarted,
+                    Thread = Thread.CurrentThread
+                };
+                threadInfo.Thread.Name = taskName;
                 try
                 {
                     lock (_threads)
                     {
-                        if (_threads.Count >= Capacity)
+                        _threads.Add(threadInfo);
+                        if (_threads.FindAll((threadinfo) => threadInfo.State == System.Threading.ThreadState.Running).Count >= Capacity)
                         {
-                            System.Threading.Monitor.Wait(_threads);
+                            Monitor.Wait(_threads);
                         }
-                        if (_inStoping)
-                        {
-                            Trace.WriteLine(String.Format("Proceso abortado: {0}", Thread.CurrentThread.Name), "DEBUG");
-                            return;
-                        }
-                        _threads.Add(Thread.CurrentThread);
                     }
-                    Trace.WriteLine(String.Format("Subproceso creado: {0}", Thread.CurrentThread.Name), "DEBUG");
+                    if (threadInfo.State == System.Threading.ThreadState.StopRequested)
+                    {
+                        Trace.WriteLine(String.Format("Proceso abortado: {0}", threadInfo.Thread.Name), "DEBUG");
+                        return;
+                    }
+                    threadInfo.State = System.Threading.ThreadState.Running;
+
+                    Trace.WriteLine(String.Format("Subproceso creado: {0}", threadInfo.Thread.Name), "DEBUG");
                     OnChanged(new MultiThreadEventArgs(ActionThread.ADDING));
                     toDo.Invoke();
-                    RemoveProcess(Thread.CurrentThread);
+                    RemoveProcess(threadInfo);
                 }
 
                 catch (Exception ex)
                 {
-                    RemoveProcess(Thread.CurrentThread);
+                    RemoveProcess(threadInfo);
                     if (onError != null)
                         onError.Invoke(ex);
                 }
@@ -97,15 +128,20 @@ namespace MassiveSsh.Utils
             task.Start();
         }
 
-        private void RemoveProcess(Thread thread)
+        private void RemoveProcess(ThreadInfo threadInfo)
         {
-            lock (_threads)
+            if (threadInfo == null) return;
+            threadInfo.StopThread((param) =>
             {
-                _threads.Remove(thread);
-                Trace.WriteLine(String.Format("Subproceso removido: {0}", thread.Name), "DEBUG");
-                System.Threading.Monitor.Pulse(_threads);
+                _threads.Remove(param);
+                GC.SuppressFinalize(param);
+                Trace.WriteLine(String.Format("Subproceso removido: {0}", param.Thread.Name), "DEBUG");
+                lock (_threads)
+                {
+                    Monitor.Pulse(_threads);
+                }
                 OnChanged(new MultiThreadEventArgs(ActionThread.REMOVING));
-            }
+            });
         }
 
         public void KillAllThreads(Action action = null)
@@ -114,32 +150,16 @@ namespace MassiveSsh.Utils
             {
                 Thread.CurrentThread.Name = "Killing Process";
                 _inStoping = true;
-                while (_threads.Count > 0)
+                while (IsRunning())
                 {
                     lock (_threads)
-                        System.Threading.Monitor.PulseAll(_threads);
-
-                    for (Int16 i = (Int16)(_threads.Count - 1); i >= 0; i--)
-                    {
-                        try
+                        Monitor.PulseAll(_threads);
+                    _threads.FindAll((threadInfo) => threadInfo.State == System.Threading.ThreadState.Running)
+                        .ForEach((threadInfo) => threadInfo.StopThread((param) =>
                         {
-                            Trace.WriteLine(String.Format("Intentando matar subproceso: {0}", _threads[i].Name), "DEBUG");
-                            if (!_threads[i].IsAlive)
-                                RemoveProcess(_threads[i]);
-                            else
-                            {
-                                _threads[i].Interrupt();
-                                _threads[i].Join(600);
-                                _threads[i].Abort();
-                                _threads[i].Join(600);
-                            }
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            Trace.WriteLine(String.Format("Cambió la cantidad de subprocesos {0}", this.Count), "DEBUG");
+                            RemoveProcess(param);
                             OnChanged(new MultiThreadEventArgs(ActionThread.REMOVING));
-                        }
-                    }
+                        }));
                 }
                 _inStoping = false;
                 if (action != null)
@@ -150,6 +170,11 @@ namespace MassiveSsh.Utils
         public Boolean IsRunning()
         {
             return this.Count > 0;
+        }
+
+        public Boolean HasThreadUnStarted()
+        {
+            return this._threads.FindAll((threafInfo) => threafInfo.State == System.Threading.ThreadState.Unstarted).Count > 0;
         }
     }
 }

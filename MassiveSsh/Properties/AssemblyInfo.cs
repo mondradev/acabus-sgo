@@ -7,13 +7,13 @@ using System.Windows;
 // La información general de un ensamblado se controla mediante el siguiente 
 // conjunto de atributos. Cambie estos valores de atributo para modificar la información
 // asociada con un ensamblado.
-[assembly: AssemblyTitle("Massive Secure Shell")]
-[assembly: AssemblyDescription("Una herramienta sencilla para envíar comandos a disitintos equipos conectados a la infraestructura de acabus")]
+[assembly: AssemblyTitle("Acabus Control Center")]
+[assembly: AssemblyDescription("Una herramienta que permite monitoriar y realizar tareas básica sobre los equipos de vía.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MassiveSsh")]
-[assembly: AssemblyCopyright("Copyright © MassiveSsh 2017")]
-[assembly: AssemblyTrademark("Ssh Masivo")]
+[assembly: AssemblyProduct("AcabusCC")]
+[assembly: AssemblyCopyright("Copyright © AcabusCC 2017")]
+[assembly: AssemblyTrademark("Acabus Centro de control")]
 [assembly: AssemblyCulture("")]
 
 // Si establece ComVisible en false, los tipos de este ensamblado no estarán visibles 

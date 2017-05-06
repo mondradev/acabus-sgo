@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using Renci.SshNet;
 
-namespace MassiveSsh.Utils.SecureShell
+namespace Acabus.Utils.SecureShell
 {
     public sealed class Scp : IDisposable
     {
@@ -68,35 +68,19 @@ namespace MassiveSsh.Utils.SecureShell
                     throw new IOException(String.Format("No hay comunicación con el host {0}", this.Host));
                 this._session.Connect();
 
-                this._session.Downloading += _session_Downloading;
-                this._session.Uploading += _session_Uploading;
+                this._session.Downloading += (sender, args) => OnTransfer(args.Filename, args.Downloaded, args.Size);
+                this._session.Uploading += (sender, args) => OnTransfer(args.Filename, args.Uploaded, args.Size);
 
                 Trace.WriteLine(String.Format("Conectado al host {0}, Tiempo: {1}", Host, DateTime.Now - initTime), "INFO");
             }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message, "ERROR");
-            }
-        }
-
-        private void _session_Uploading(object sender, Renci.SshNet.Common.ScpUploadEventArgs e)
-        {
-            OnTransfer(e.Filename, e.Uploaded, e.Size);
-        }
-
-        private void _session_Downloading(object sender, Renci.SshNet.Common.ScpDownloadEventArgs e)
-        {
-            OnTransfer(e.Filename, e.Downloaded, e.Size);
+            catch (Exception ex) { Trace.WriteLine(ex.Message, "ERROR"); }
         }
 
         /// <summary>
         /// Indica si se logró la comunicación al equipo remoto.
         /// </summary>
         /// <returns>Un valor verdadero si se estableció la comunicación.</returns>
-        public Boolean IsConnected()
-        {
-            return this._session.IsConnected;
-        }
+        public Boolean IsConnected() => this._session.IsConnected;
 
         /// <summary>
         /// Desencadena el evento de transferencia de datos.
@@ -104,15 +88,13 @@ namespace MassiveSsh.Utils.SecureShell
         /// <param name="filename">Archivo que se encuentra en procesamiento.</param>
         /// <param name="transferredBytes">Bytes transferidos.</param>
         /// <param name="totalBytes">Total de bytes.</param>
-        private void OnTransfer(string filename, long transferredBytes, long totalBytes)
-        {
+        private void OnTransfer(string filename, long transferredBytes, long totalBytes) =>
             TransferEvent?.Invoke(this, new ScpEventArgs()
             {
                 Filename = filename,
                 TransferredBytes = transferredBytes,
                 TotalBytes = totalBytes
             });
-        }
 
         /// <summary>
         /// Permite copiar un archivo al equipo remoto.
@@ -145,10 +127,7 @@ namespace MassiveSsh.Utils.SecureShell
         /// <summary>
         /// Desctructor de la instancia.
         /// </summary>
-        ~Scp()
-        {
-            this.Dispose();
-        }
+        ~Scp() => this.Dispose();
 
         /// <summary>
         /// Libera la conexión al equipo remoto.
@@ -160,4 +139,5 @@ namespace MassiveSsh.Utils.SecureShell
             GC.SuppressFinalize(this);
         }
     }
+
 }

@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace MassiveSsh.Utils.MVVM
+namespace Acabus.Utils.MVVM
 {
     public class AndBooleanConverter : IMultiValueConverter
     {

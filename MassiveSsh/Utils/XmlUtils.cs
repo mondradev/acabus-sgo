@@ -3,7 +3,7 @@ using System.Collections;
 using System.Reflection;
 using System.Xml;
 
-namespace MassiveSsh.Utils
+namespace Acabus.Utils
 {
     public sealed class XmlUtils
     {

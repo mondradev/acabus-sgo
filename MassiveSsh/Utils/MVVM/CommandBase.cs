@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace MassiveSsh.Utils.MVVM
+namespace Acabus.Utils.MVVM
 {
     public class CommandBase : ICommand
     {
@@ -23,13 +23,9 @@ namespace MassiveSsh.Utils.MVVM
         public bool CanExecute(object parameter)
         {
             if (canExecFunc != null)
-            {
                 return canExecFunc.Invoke(parameter);
-            }
             else
-            {
                 return true;
-            }
         }
 
         public event EventHandler CanExecuteChanged {
@@ -40,9 +36,7 @@ namespace MassiveSsh.Utils.MVVM
         public void Execute(object parameter)
         {
             if (execAction != null)
-            {
                 execAction.Invoke(parameter);
-            }
         }
     }
 }
