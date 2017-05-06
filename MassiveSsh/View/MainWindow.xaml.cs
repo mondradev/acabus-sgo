@@ -1,34 +1,52 @@
-﻿using MahApps.Metro.Controls;
-using MassiveSsh.ViewModel;
+﻿using Acabus.Modules.TrunkMonitor;
+using MahApps.Metro.Controls;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
-namespace MassiveSsh.View
+namespace Acabus.View
 {
     /// <summary>
-    /// Lógica de interacción para MainWindow.xaml
+    /// Lógica de interacción para Window1.xaml
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        public static MainWindow Instance { get; private set; }
+
+        private Action _navigeted = null;
+
+
+        internal static void LoadPage(Object page, Action callback)
         {
-            (this.DataContext as MVMassiveSsh).KillAll();
+            Instance._contentFrame.Content = page;
+            Instance._navigeted = callback;
         }
 
-        private void ScrollToEndOnTextChanged(object sender, TextChangedEventArgs e)
+        public MainWindow()
         {
-            (sender as TextBox).ScrollToEnd();
+            InitializeComponent();
+            Instance = this;
+            Closing += (sender, args) =>
+            {
+                //Page page = TryFindResource("TrunkMonitor") as TrunkMonitor;
+                //(page.DataContext as ViewModel.VMTrunkMonitor).StopCommand.Execute(null);
+            };
         }
 
-        private void WindowOnLoaded(object sender, System.Windows.RoutedEventArgs e)
-        {
-            this.SshCommand.Focus();
-        }
+        private void NavigetedHandler(Object sender, EventArgs eventArgs) =>
+            _navigeted?.Invoke();
 
-        private void GetFocusOnIsEnabledChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
-        {
-            if (e.NewValue != null && e.NewValue is Boolean && ((Boolean)e.NewValue))
-                this.SshCommand.Focus();
-        }
+        
     }
 }

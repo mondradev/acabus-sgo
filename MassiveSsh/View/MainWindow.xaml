@@ -4,10 +4,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:mv="clr-namespace:MassiveSsh.ViewModel"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:Utils="clr-namespace:MassiveSsh.Utils.MVVM" 
-        x:Class="MassiveSsh.View.MainWindow"
+        xmlns:local="clr-namespace:Acabus.View"
+        xmlns:views="clr-namespace:Acabus.Modules.TrunkMonitor"
+        xmlns:DataAccess="clr-namespace:Acabus.DataAccess"
+        x:Class="Acabus.View.MainWindow"
         mc:Ignorable="d"
         GlowBrush="Black"
         BorderThickness="0"
@@ -17,87 +17,12 @@
         TextElement.FontWeight="Medium"
         TextElement.FontSize="14"
         FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
-        
-        Title="Ssh Masivo" Height="500" Width="850" Closing="Window_Closing" WindowStartupLocation="CenterScreen" SaveWindowPosition="False" MinWidth="850" MinHeight="500" Icon="/MassiveSsh;component/acabus_icon.ico" Loaded="WindowOnLoaded">
+        Title="Acabus Centro de Operaciones"
+        WindowStartupLocation="CenterScreen" MinWidth="860" MinHeight="550" Height="auto" Width="auto" Icon="/AcabusControlCenter;component/acabus_icon.ico">
     <Controls:MetroWindow.Resources>
-        <Utils:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
-        <Utils:AndBooleanConverter x:Key="AndBooleanConverter"/>
+        <views:TrunkMonitorView x:Key="view"  x:Name="Monitor"/>
     </Controls:MetroWindow.Resources>
-    <Controls:MetroWindow.DataContext>
-        <mv:MVMassiveSsh x:Name="ModelView" />
-    </Controls:MetroWindow.DataContext>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="65.6"/>
-            <RowDefinition Height="16"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="8"/>
-            <RowDefinition Height="10"/>
-            <RowDefinition Height="16"/>
-            <RowDefinition Height="37"/>
-            <RowDefinition Height="16"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="24"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="24"/>
-        </Grid.ColumnDefinitions>
-        <TextBox TextWrapping="WrapWithOverflow" Text="{Binding Response}" IsReadOnly="True" Margin="0,0,23.6,0" VerticalScrollBarVisibility="Auto" BorderBrush="{DynamicResource AccentColorBrush}" UseLayoutRounding="False" BorderThickness="1" Grid.Row="2" Grid.Column="1" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Animated" FontSize="12" Grid.ColumnSpan="2" VerticalContentAlignment="Top" TextChanged="ScrollToEndOnTextChanged" IsTabStop="False" AllowDrop="False"/>
-        <TextBox x:Name="SshCommand" Margin="0,0,47.2,15.4" VerticalAlignment="Bottom" Text="{Binding SshCommand}"  materialDesign:HintAssist.Hint="Comando" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Grid.Row="5" Grid.Column="1" Grid.RowSpan="3" IsEnabled="{Binding LockCommandInput, Mode=OneWay}" IsEnabledChanged="GetFocusOnIsEnabledChanged" >
-            <TextBox.InputBindings>
-                <KeyBinding Key="Return" Command="{Binding SendCommand}" CommandParameter="{Binding Text, ElementName=SshCommand}" />
-                <KeyBinding Key="Down" Command="{Binding SearchCommand}" CommandParameter="Down" />
-                <KeyBinding Key="Up" Command="{Binding SearchCommand}" CommandParameter="Up" />
-            </TextBox.InputBindings>
-        </TextBox>
-        <Button Style="{DynamicResource MaterialDesignFloatingActionAccentButton}" VerticalAlignment="Bottom" Command="{Binding SendCommand}" HorizontalAlignment="Right" Margin="0,0,7.2,7.4" Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="5" Grid.RowSpan="3" IsEnabled="{Binding LockCommandInput, Mode=OneWay}">
-            <Viewbox Width="24" Height="24">
-                <Canvas Width="24" Height="24">
-                    <Path Data="M2,21L23,12L2,3V10L17,12L2,14V21Z" Fill="Black" />
-                </Canvas>
-            </Viewbox>
-        </Button>
-        <Grid IsEnabled="{Binding LockCommandInput, Mode=OneWay}" Margin="0" Grid.RowSpan="3" Grid.ColumnSpan="3" VerticalAlignment="Top" Height="82">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="180"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="180"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="180"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="48"/>
-                <ColumnDefinition Width="29"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="48"/>
-                <ColumnDefinition Width="30"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="48"/>
-                <ColumnDefinition Width="32"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <ComboBox VerticalAlignment="Stretch" Style="{StaticResource MaterialDesignFloatingHintComboBox}" materialDesign:HintAssist.Hint="Estación" ItemsSource="{Binding Stations}" SelectedItem="{Binding SelectedStation}" Margin="0" IsEnabled="{Binding IsChecked, Converter={StaticResource InverseBooleanConverter}, ElementName=EnableStations}" Grid.Column="2" Height="40" />
-            <ComboBox Margin="0" VerticalAlignment="Stretch" Style="{StaticResource MaterialDesignFloatingHintComboBox}" materialDesign:HintAssist.Hint="Equipo" SelectedItem="{Binding SelectedDevice}" ItemsSource="{Binding Devices}" Grid.Column="4" Height="40" >
-                <ComboBox.IsEnabled>
-                    <MultiBinding Converter="{StaticResource AndBooleanConverter}" >
-                        <Binding ElementName="EnableDevices" Path="IsChecked" Converter="{StaticResource InverseBooleanConverter}"/>
-                        <Binding ElementName="EnableStations" Path="IsEnabled" />
-                        <Binding ElementName="EnableStations" Path="IsChecked" Converter="{StaticResource InverseBooleanConverter}" />
-                    </MultiBinding>
-                </ComboBox.IsEnabled>
-            </ComboBox>
-            <CheckBox x:Name="EnableStations" Content="Todas las estaciones" VerticalAlignment="Top" IsChecked="{Binding AllStations}" Margin="24,16,0,0"/>
-            <CheckBox x:Name="EnableDevices" Content="Todos los equipos" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="24,0,0,16" IsChecked="{Binding AllDevices}" IsEnabled="{Binding IsChecked, Converter={StaticResource InverseBooleanConverter}, ElementName=EnableStations}"/>
-            <ToggleButton Content="" Margin="0,21,0,0" Grid.Column="6" VerticalAlignment="Top" IsChecked="{Binding CheckKvr}"/>
-            <ToggleButton Content="" Margin="0,0,0,18" Grid.Column="6"  VerticalAlignment="Bottom" IsChecked="{Binding CheckPmr}"/>
-            <ToggleButton Content="" Margin="0,21,0,0" VerticalAlignment="Top" Grid.Column="9" IsChecked="{Binding CheckTor}"/>
-            <ToggleButton Content="" Margin="0,0,0,18" VerticalAlignment="Bottom" Grid.Column="9" IsChecked="{Binding CheckCde}"/>
-            <ToggleButton Content="" Margin="0,21,0,0" IsEnabled="False" Grid.Column="12" VerticalAlignment="Top"/>
-            <Label Content="KVR" Margin="0,22,0,0" FontSize="13.333" Padding="0" VerticalAlignment="Top" Grid.Column="7" Grid.ColumnSpan="2"/>
-            <Label Content="PMR" Margin="0,0,0,18" FontSize="13.333" Padding="0" Grid.Column="7" Width="29" VerticalAlignment="Bottom"/>
-            <Label Content="TOR" Margin="0,22,0,0" FontSize="13.333" Padding="0" VerticalAlignment="Top" Grid.Column="10"/>
-            <Label Content="CdE" Margin="0,0,0,18" FontSize="13.333" Padding="0" VerticalAlignment="Bottom" Grid.Column="10"/>
-            <Label Content="SRV" Margin="0,22,0,0" FontSize="13.333" Padding="0" Grid.Column="13" VerticalAlignment="Top"/>
-        </Grid>
-        <ProgressBar Grid.Column="1" Height="10" Margin="0,0,0.2,15.6" Grid.Row="4" Value="{Binding ProgressTask}" Maximum="{Binding MaxProgressTask}" Grid.RowSpan="2"/>
+        <Frame x:Name="_contentFrame" Margin="0" Navigated="NavigetedHandler" NavigationUIVisibility="Hidden" Content="{DynamicResource view}" />
     </Grid>
 </Controls:MetroWindow>
