@@ -19,7 +19,7 @@ namespace Acabus.Services
                 }
             }
 
-            station.State = Util.GetConnectionState((Int16)(ping / nDevice), station.PingMin, station.PingMax);
+            station.State = ConnectionStateFuncs.GetConnectionState((Int16)(ping / nDevice), station.PingMin, station.PingMax);
 
             return (Int16)(ping / nDevice);
         }

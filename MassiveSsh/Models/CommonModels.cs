@@ -81,9 +81,9 @@ namespace Acabus.Models
     }
 
     /// <summary>
-    /// Provee de funciones estáticas útiles.
+    /// Provee de funciones para el manejo de estados de conexión.
     /// </summary>
-    public sealed class Util
+    public static class ConnectionStateFuncs
     {
         /// <summary>
         /// Obtiene el estado de conexión determinado por la latencia mínima y máxima aceptable.
@@ -216,6 +216,25 @@ namespace Acabus.Models
         /// Prioridad alta.
         /// </summary>
         HIGH
+    }
+
+    /// <summary>
+    /// Define los posibles estados de un vehículo.
+    /// </summary>
+    public enum VehicleStatus
+    {
+        /// <summary>
+        /// En reparación.
+        /// </summary>
+        IN_REPAIR,
+        /// <summary>
+        /// Sin energía en baterías
+        /// </summary>
+        WITHOUT_ENERGY,
+        /// <summary>
+        /// Operando.
+        /// </summary>
+        OPERATING
     }
 
 }

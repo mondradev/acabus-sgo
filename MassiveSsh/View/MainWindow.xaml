@@ -7,7 +7,8 @@
         xmlns:local="clr-namespace:Acabus.View"
         xmlns:views="clr-namespace:Acabus.Modules.TrunkMonitor"
         xmlns:DataAccess="clr-namespace:Acabus.DataAccess"
-        x:Class="Acabus.View.MainWindow"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    x:Class="Acabus.View.MainWindow"
         mc:Ignorable="d"
         GlowBrush="Black"
         BorderThickness="0"
@@ -22,7 +23,7 @@
     <Controls:MetroWindow.Resources>
         <views:TrunkMonitorView x:Key="view"  x:Name="Monitor"/>
     </Controls:MetroWindow.Resources>
-    <Grid>
-        <Frame x:Name="_contentFrame" Margin="0" Navigated="NavigetedHandler" NavigationUIVisibility="Hidden" Content="{DynamicResource view}" />
-    </Grid>
+    <materialDesign:DialogHost>
+        <materialDesign:Card Content="{StaticResource view}" VerticalAlignment="Stretch"/>
+    </materialDesign:DialogHost>    
 </Controls:MetroWindow>

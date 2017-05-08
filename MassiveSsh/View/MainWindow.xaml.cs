@@ -29,7 +29,6 @@ namespace Acabus.View
 
         internal static void LoadPage(Object page, Action callback)
         {
-            Instance._contentFrame.Content = page;
             Instance._navigeted = callback;
         }
 

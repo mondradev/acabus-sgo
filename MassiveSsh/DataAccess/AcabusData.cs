@@ -14,12 +14,17 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Archivo de configuración de las rutas.
         /// </summary>
-        private static String _fileNameTrunkConfig;
+        private static String CONFIG_FILENAME = Path.Combine(Environment.CurrentDirectory, "Resources\\Trunks.Config");
 
         /// <summary>
         /// Archivo de historial de comandos de la consola Ssh.
         /// </summary>
-        public static readonly String SSH_HISTORY_FILENAME = Path.Combine(Environment.CurrentDirectory, "Resources\\ssh_history");
+        public static readonly String SSH_HISTORY_FILENAME = Path.Combine(Environment.CurrentDirectory, "Resources\\ssh_history.dat");
+
+        /// <summary>
+        /// Archivo donde se guarda la lista de unidades fuera de servicio.
+        /// </summary>
+        public static readonly String OFF_DUTY_VEHICLES_FILENAME = Path.Combine(Environment.CurrentDirectory, "Resources\\vehicles_{0:yyyyMMdd}.dat");
 
         /// <summary>
         /// Instancia que pertenece al documento XML.
@@ -49,6 +54,22 @@ namespace Acabus.DataAccess
                 if (_trunks == null)
                     _trunks = new ObservableCollection<Trunk>();
                 return _trunks;
+            }
+        }
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'OffDutyVehicles'.
+        /// </summary>
+        private static ObservableCollection<Vehicle> _offDutyVehicles;
+
+        /// <summary>
+        /// Obtiene una lista de las unidades en taller o sin energía.
+        /// </summary>
+        public static ObservableCollection<Vehicle> OffDutyVehicles {
+            get {
+                if (_offDutyVehicles == null)
+                    _offDutyVehicles = new ObservableCollection<Vehicle>();
+                return _offDutyVehicles;
             }
         }
 
@@ -133,21 +154,68 @@ namespace Acabus.DataAccess
             if (_loadedData) return;
             try
             {
-                _fileNameTrunkConfig = Path.Combine(Environment.CurrentDirectory, "Resources\\Trunks.Config");
 
                 _xmlConfig = new XmlDocument();
-                _xmlConfig.Load(_fileNameTrunkConfig);
+                _xmlConfig.Load(CONFIG_FILENAME);
 
                 LoadSettings();
                 LoadTrunk();
                 LoadCC();
                 LoadLinks();
+                LoadOffDutyVehicles();
 
                 _loadedData = true;
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex.Message, "ERROR");
+            }
+        }
+
+        /// <summary>
+        /// Carga la lista de unidades fuera de servicio.
+        /// </summary>
+        public static void LoadOffDutyVehicles()
+        {
+            var filename = String.Format(OFF_DUTY_VEHICLES_FILENAME, DateTime.Now);
+
+            OffDutyVehicles.Clear();
+            try
+            {
+                if (!File.Exists(filename)) return;
+
+                var lines = File.ReadAllLines(filename);
+
+                foreach (var line in lines)
+                {
+                    var economicNumber = line.Split('|')?[0];
+                    var status = line.Split('|')?[1];
+
+                    OffDutyVehicles.Add(new Vehicle(economicNumber, (VehicleStatus)Enum.Parse(typeof(VehicleStatus), status)));
+                }
+            }
+            catch (IOException)
+            {
+                Trace.WriteLine("Ocurrió un error al intentar leer el archivo de la lista de vehículos.", "ERROR");
+            }
+        }
+
+        /// <summary>
+        /// Guarda toda la información de los vehículos en fuera de servicio.
+        /// </summary>
+        public static void SaveOffDutyVehiclesList()
+        {
+            var filename = String.Format(OFF_DUTY_VEHICLES_FILENAME, DateTime.Now);
+
+            File.Delete(filename);
+            try
+            {
+                foreach (Vehicle vehicle in OffDutyVehicles)
+                    File.AppendAllText(filename, String.Format("{0}|{1}\n", vehicle.EconomicNumber, vehicle.Status));
+            }
+            catch (IOException)
+            {
+                Trace.WriteLine("Ocurrió un problema al intentar guardar la lista de vehículos.", "ERROR");
             }
         }
 
@@ -213,7 +281,7 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Carga la información leida del nodo Settings del documento de configuración en XML.
         /// </summary>
-        private static void LoadSettings()
+        public static void LoadSettings()
         {
             _cmdCreateBackup = GetProperty("Backup", "Command-Ssh");
             _pgDatabaseName = GetProperty("DBName", "PGSetting");
@@ -226,8 +294,10 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Carga la información leida del nodo Trunks del documento de configuración en XML.
         /// </summary>
-        private static void LoadTrunk()
+        public static void LoadTrunk()
         {
+            Trunks.Clear();
+
             foreach (XmlNode trunkXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Trunks").SelectNodes("Trunk"))
             {
                 var trunk = ToTrunk(trunkXmlNode) as Trunk;

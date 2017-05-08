@@ -116,11 +116,17 @@
     <Compile Include="Acabus\Trunk.cs" />
     <Compile Include="Models\Station.cs" />
     <Compile Include="Models\Trunk.cs" />
+    <Compile Include="Models\Vehicle.cs" />
+    <Compile Include="Modules\OffDutyVehicles\ConverterVehicleStatus.cs" />
+    <Compile Include="Modules\OffDutyVehicles\OffDutyVehiclesView.xaml.cs">
+      <DependentUpon>OffDutyVehiclesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\OffDutyVehicles\OffDutyVehiclesViewModel.cs" />
     <Compile Include="Modules\TrunkMonitor\ConvertAlertStateToColor.cs" />
     <Compile Include="Modules\TrunkMonitor\TrunkMonitor.xaml.cs">
       <DependentUpon>TrunkMonitor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\TrunkMonitor\TrunkMonitorModelView.cs" />
+    <Compile Include="Modules\TrunkMonitor\TrunkMonitorViewModel.cs" />
     <Compile Include="Modules\TrunkMonitor\TrunkMonitorView.xaml.cs">
       <DependentUpon>TrunkMonitorView.xaml</DependentUpon>
     </Compile>
@@ -131,27 +137,30 @@
     <Compile Include="Utils\MVVM\AndBooleanConverter.cs" />
     <Compile Include="Utils\MVVM\CommandBase.cs" />
     <Compile Include="Utils\MVVM\ConverterPriorityToColor.cs" />
+    <Compile Include="Utils\MVVM\ConverterToArray.cs" />
     <Compile Include="Utils\MVVM\InverseBooleanConverter.cs" />
     <Compile Include="Utils\MultiThread.cs" />
+    <Compile Include="Utils\MVVM\ConverterMultiCommand.cs" />
     <Compile Include="Utils\MVVM\NotifyPropertyChanged.cs" />
     <Compile Include="Utils\PostgreSQL.cs" />
     <Compile Include="Utils\SecureShell\Scp.cs" />
     <Compile Include="Utils\SecureShell\Ssh.cs" />
     <Compile Include="Utils\SecureShell\SshPostgreSQL.cs" />
     <Compile Include="Utils\ThreadPool.cs" />
+    <Compile Include="Utils\Util.cs" />
     <Compile Include="Utils\XmlAttribute.cs" />
     <Compile Include="Utils\XmlUtils.cs" />
     <Compile Include="ViewModel\VMMassiveSsh.cs" />
-    <Compile Include="ViewModel\VMTrunkMonitor.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Information.xaml.cs">
       <DependentUpon>Information.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\TrunkMonitor.xaml.cs">
-      <DependentUpon>TrunkMonitor.xaml</DependentUpon>
-    </Compile>
+    <Page Include="Modules\OffDutyVehicles\OffDutyVehiclesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Modules\TrunkMonitor\TrunkMonitor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -177,10 +186,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="View\MainWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\TrunkMonitor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,10 +1,11 @@
 ﻿using Acabus.DataAccess;
 using Acabus.Models;
 using Acabus.Services;
+using Acabus.Utils;
 using Acabus.Utils.MVVM;
 using Acabus.Utils.SecureShell;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
@@ -43,7 +44,7 @@ namespace Acabus.Modules.TrunkMonitor
     /// <summary>
     /// Modelo la vista del monitor de vía, proporciona toda las funciones que realizará el monitor de vía.
     /// </summary>
-    public class TrunkMonitorModelView : NotifyPropertyChanged
+    public class TrunkMonitorViewModel : NotifyPropertyChanged
     {
         /// <summary>
         /// Tareas disponibles para la ejecución en el monitor de vía.
@@ -88,12 +89,12 @@ namespace Acabus.Modules.TrunkMonitor
         /// <summary>
         /// Campo que provee a la propiedad 'Instance'.
         /// </summary>
-        private static TrunkMonitorModelView _instance;
+        private static TrunkMonitorViewModel _instance;
 
         /// <summary>
         /// Obtiene la instancia del modelo de la vista del monitor de vía.
         /// </summary>
-        public static TrunkMonitorModelView Instance => _instance;
+        public static TrunkMonitorViewModel Instance => _instance;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Alerts'.
@@ -146,7 +147,7 @@ namespace Acabus.Modules.TrunkMonitor
         /// <summary>
         /// Crea una instance del modelo de la vista del monitor de vía.
         /// </summary>
-        public TrunkMonitorModelView()
+        public TrunkMonitorViewModel()
         {
             _instance = this;
             LoadedHandlerCommand = new CommandBase((param) =>
@@ -162,7 +163,7 @@ namespace Acabus.Modules.TrunkMonitor
                 _alertMonitor.Dispose();
                 _isRunnig = false;
             });
-            SelectedAlertCommand = new CommandBase((param) =>
+            AlertSelectedChangeHandlerCommand = new CommandBase((param) =>
             {
                 if (SelectedAlert != null)
                     SelectedAlert.State = AlertState.READ;
@@ -191,7 +192,11 @@ namespace Acabus.Modules.TrunkMonitor
                     credentialSshServer.Username,
                     credentialSshServer.Password);
 
-                var response = psql.ExecuteQuery(AcabusData.BusDisconnectedQuery);
+                Vehicle[] vehicles = new Vehicle[AcabusData.OffDutyVehicles.Count];
+                AcabusData.OffDutyVehicles.CopyTo(vehicles, 0);
+
+                var response = psql.ExecuteQuery(String.Format(AcabusData.BusDisconnectedQuery, vehicles.Length < 1 ? "''" : Util.ToString(vehicles, "'{0}'", (vehi) => vehi.EconomicNumber)));
+
                 if (response == null) return;
 
                 App.Current.Dispatcher.Invoke(()
@@ -211,7 +216,7 @@ namespace Acabus.Modules.TrunkMonitor
                                     => alert.LastSentLocation = DateTime.Parse(row[1]));
                     }
                     else
-                        App.Current.Dispatcher.Invoke(()
+                        App.Current?.Dispatcher.Invoke(()
                             => BusDisconnected.Add(BusDisconnectedAlert.CreateBusAlert(row[0], DateTime.Parse(row[1]))));
                 }
 
@@ -305,7 +310,6 @@ namespace Acabus.Modules.TrunkMonitor
         {
             if (links == null) return;
 
-            CancellationTokenSource _token = new CancellationTokenSource();
             foreach (var link in links)
             {
                 new Task(() =>
@@ -318,16 +322,14 @@ namespace Acabus.Modules.TrunkMonitor
                         link.State = state;
                     UpdateLinkStatus(link.StationB?.Links, link.State);
 
-                }, _token.Token).Start();
+                }).Start();
             }
         }
 
         /// <summary>
         /// Obtiene o establece la lista de enlaces de estaciones.
         /// </summary>
-        public ObservableCollection<Link> Links {
-            get => AcabusData.CC.Links;
-        }
+        public ObservableCollection<Link> Links => AcabusData.CC.Links;
 
         /// <summary>
         /// Obtiene el comando cuando se desencadena el evento Loaded de la vista.
@@ -340,8 +342,8 @@ namespace Acabus.Modules.TrunkMonitor
         public ICommand UnloadedHandlerCommand { get; }
 
         /// <summary>
-        /// Obtiene el comando cuando se desencadena el evento SelectedChange de la tabla.
+        /// Obtiene el comando cuando se desencadena el evento SelectedChange de la tabla Alertas.
         /// </summary>
-        public ICommand SelectedAlertCommand { get; }
+        public ICommand AlertSelectedChangeHandlerCommand { get; }
     }
 }

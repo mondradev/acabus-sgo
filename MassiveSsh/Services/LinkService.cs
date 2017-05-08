@@ -11,8 +11,8 @@ namespace Acabus.Services
             var pingB = StationService.DoPingLinkDevice(link.StationB);
             link.Ping = pingA > pingB ? pingA : pingB;
 
-            link.State = Util.AndConnectionState(Util.GetConnectionState(pingA, link.StationA.PingMin, link.StationB.PingMax),
-                Util.GetConnectionState(pingB, link.StationB.PingMin, link.StationB.PingMax));
+            link.State = ConnectionStateFuncs.AndConnectionState(ConnectionStateFuncs.GetConnectionState(pingA, link.StationA.PingMin, link.StationB.PingMax),
+                ConnectionStateFuncs.GetConnectionState(pingB, link.StationB.PingMin, link.StationB.PingMax));
 
             if (pingA < 0 || pingB < 0)
             {
