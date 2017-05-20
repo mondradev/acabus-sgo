@@ -1,15 +1,13 @@
-﻿using Acabus.Models;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows.Data;
-using System.Windows.Media;
 
-namespace Acabus.Modules.TrunkMonitor
+namespace Acabus.Converters
 {
     /// <summary>
-    /// Permite la conversión de una valor del tipo AlertState a un color rojo si esta presenta una valor UNREAD.
+    /// 
     /// </summary>
-    public sealed class ConverterAlertStateToColor : IValueConverter
+    public sealed class DateTimeConverter : IValueConverter
     {
         /// <summary>
         /// 
@@ -21,13 +19,15 @@ namespace Acabus.Modules.TrunkMonitor
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((AlertState)value == AlertState.UNREAD)
-                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+            if (value is TimeSpan)
+                return new DateTime(((TimeSpan)value).Ticks);
+            if (value is DateTime)
+                return ((DateTime)value).TimeOfDay;
             return null;
         }
 
         /// <summary>
-        /// Función no implementada. No se requiere su uso.
+        /// 
         /// </summary>
         /// <param name="value"></param>
         /// <param name="targetType"></param>
@@ -36,8 +36,11 @@ namespace Acabus.Modules.TrunkMonitor
         /// <returns></returns>
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            if (value is TimeSpan)
+                return new DateTime(((TimeSpan)value).Ticks);
+            if (value is DateTime)
+                return ((DateTime)value).TimeOfDay;
+            return null;
         }
     }
 }
-

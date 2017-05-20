@@ -1,21 +1,12 @@
-﻿using Acabus.Utils.MVVM;
+﻿using Acabus.Utils;
 using System;
 using System.Collections.ObjectModel;
 
 namespace Acabus.Models
 {
-    public sealed class Trunk : NotifyPropertyChanged
+    [XmlAnnotation(Name = "Route")]
+    public sealed class Trunk : Route
     {
-        /// <summary>
-        /// Campo que provee a la propiedad 'ID'.
-        /// </summary>
-        private UInt16 _id;
-
-        /// <summary>
-        /// Obtiene el ID de la ruta troncal.
-        /// </summary>
-        public UInt16 ID => _id;
-
         /// <summary>
         /// Campo que provee a la propiedad 'Stations'.
         /// </summary>
@@ -33,29 +24,11 @@ namespace Acabus.Models
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Name'.
-        /// </summary>
-        private String _name;
-
-        /// <summary>
-        /// Obtiene o establece nombre de la ruta troncal.
-        /// </summary>
-        public String Name {
-            get => _name;
-            set {
-                _name = value;
-                OnPropertyChanged("Name");
-            }
-        }
-
-        /// <summary>
         /// Crea una instancia de ruta troncal.
         /// </summary>
         /// <param name="id">Identificador de la ruta troncal.</param>
-        public Trunk(UInt16 id)
-        {
-            this._id = id;
-        }
+        /// <param name="routeNumber">El número de la ruta troncal.</param>
+        public Trunk(UInt16 id, UInt16 routeNumber) : base(id, routeNumber, RouteType.TRUNK) { }
 
         /// <summary>
         /// Añade una estación a la ruta.
@@ -86,12 +59,6 @@ namespace Acabus.Models
         public UInt16 StationCount() => (UInt16)(Stations.Count);
 
         /// <summary>
-        /// Representa en una cadena la instancia actual.
-        /// </summary>
-        /// <returns>Una cadena que representa una instancia Trunk.</returns>
-        public new String ToString() => String.Format("Ruta T{0} - {1}", ID.ToString("D2"), Name);
-
-        /// <summary>
         /// Obtiene el número de dispositivos en la ruta troncal
         /// </summary>
         /// <returns>Número de dispositivos</returns>
@@ -108,7 +75,7 @@ namespace Acabus.Models
         /// </summary>
         /// <param name="id">ID de la ruta troncal.</param>
         /// <returns>Una instancia de ruta troncal.</returns>
-        public static Trunk CreateTrunk(UInt16 id) => new Trunk(id);
+        public static Trunk CreateTrunk(UInt16 id, UInt16 routeNumber) => new Trunk(id, routeNumber);
 
     }
 }

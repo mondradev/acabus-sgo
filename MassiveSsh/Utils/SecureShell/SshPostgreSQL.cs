@@ -62,7 +62,7 @@ namespace Acabus.Utils.SecureShell
                 catch (Exception ex)
                 {
                     attempts++;
-                    Trace.WriteLine(ex.Message, "ERROR");
+                    Trace.WriteLine(ex.Message, "DEBUG");
                     Trace.WriteLine(String.Format("El host {0} intentará nuevamente realizar la consulta: intento {1}/{2}", this.Host, attempts, Attempts), "INFO");
                 }
             }
@@ -82,7 +82,7 @@ namespace Acabus.Utils.SecureShell
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex.Message, "ERROR");
+                Trace.WriteLine(ex.Message, "DEBUG");
                 Trace.WriteLine(String.Format("Intentando en {0} por SSH con la credenciales\nUsername: {1}\nPassword: ******", Host, UsernameSsh), "DEBUG");
                 return ExecuteQuerySsh(statement);
             }

@@ -1,6 +1,6 @@
 ﻿using Acabus.DataAccess;
 using Acabus.Models;
-using Acabus.Utils.MVVM;
+using Acabus.Utils.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,8 +10,27 @@ using System.Windows.Input;
 
 namespace Acabus.Modules.OffDutyVehicles
 {
+    /// <summary>
+    /// Defiene el modelo de la vista para el cuadro de diálogo utilizado para la
+    /// adición de vehículos fuera de servicio.
+    /// </summary>
     public sealed class OffDutyVehiclesViewModel : NotifyPropertyChanged
     {
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedVehicle'.
+        /// </summary>
+        private Vehicle _selectedVehicle;
+
+        /// <summary>
+        /// Obtiene o establece el vehículo actualmente seleccionado en la tabla.
+        /// </summary>
+        public Vehicle SelectedVehicle {
+            get => _selectedVehicle;
+            set {
+                _selectedVehicle = value;
+                OnPropertyChanged("SelectedVehicle");
+            }
+        }
 
         /// <summary>
         /// Obtiene una lista de los vehículos con algún problema que impida enviar su localización.
@@ -56,28 +75,32 @@ namespace Acabus.Modules.OffDutyVehicles
         public IEnumerable<VehicleStatus> VehicleStatus => Enum.GetValues(typeof(VehicleStatus)).Cast<VehicleStatus>();
 
         /// <summary>
-        /// 
+        /// Comando para agregar vehículos al listado.
         /// </summary>
         public ICommand AddVehicleCommand { get; }
 
         /// <summary>
-        /// 
+        /// Comando para limpiar la lista de vehículos.
         /// </summary>
         public ICommand ClearVehicleCommand { get; }
 
         /// <summary>
-        /// 
+        /// Comando para guardar la información de los vehículos.
         /// </summary>
         public ICommand SaveVehicleCommand { get; }
 
         /// <summary>
-        /// 
+        /// Comando para recargar la información guardada en la lista de vehículos.
         /// </summary>
         public ICommand ReloadVehicleCommand { get; }
 
+        /// <summary>
+        /// Comando para remover un vehículo de la lista de vehículos.
+        /// </summary>
+        public ICommand RemoveVehicleCommand { get; }
 
         /// <summary>
-        /// 
+        /// Crea una instancia del modelo de la vista de <see cref="OffDutyVehiclesView"/>.
         /// </summary>
         public OffDutyVehiclesViewModel()
         {
@@ -85,7 +108,8 @@ namespace Acabus.Modules.OffDutyVehicles
             {
                 if (String.IsNullOrEmpty(EconomicNumber)) return;
 
-                var economicNumbers = EconomicNumber.Split('\n');
+                var economicNumbers = EconomicNumber.Split(new String[] { "\n", "\r\n" },
+                                                                StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var economicNumber in economicNumbers)
                 {
@@ -114,6 +138,12 @@ namespace Acabus.Modules.OffDutyVehicles
             SaveVehicleCommand = new CommandBase((param) => AcabusData.SaveOffDutyVehiclesList());
 
             ReloadVehicleCommand = new CommandBase((param) => AcabusData.LoadOffDutyVehicles());
+
+            RemoveVehicleCommand = new CommandBase((param) =>
+            {
+                Vehicles?.Remove(SelectedVehicle);
+                SelectedVehicle = null;
+            });
         }
 
     }

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace Acabus.Utils
 {
@@ -32,6 +35,38 @@ namespace Acabus.Utils
                     builder.Append(",");
             }
             return builder.ToString();
+        }
+
+        public static IList<T> SelectFromList<T>(IList<T> collection, Predicate<T> predicate)
+        {
+            IList<T> listTemp = (IList<T>)Activator.CreateInstance(collection.GetType());
+            foreach (var item in collection)
+                if (predicate.Invoke(item))
+                    listTemp.Add(item);
+            return listTemp;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dataSvg"></param>
+        /// <returns></returns>
+        public static Viewbox CreateIcon(String dataSvg)
+        {
+            Canvas canvas = new Canvas()
+            {
+                Width = 24,
+                Height = 24
+            };
+            canvas.Children.Add(new Path()
+            {
+                Data = Geometry.Parse(dataSvg),
+                Fill = Brushes.Black
+            });
+            return new Viewbox()
+            {
+                Child = canvas
+            };
         }
     }
 }

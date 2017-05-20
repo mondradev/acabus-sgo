@@ -1,5 +1,6 @@
 ﻿using Acabus.Models;
 using Acabus.Utils;
+using Acabus.Utils.SecureShell;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,8 +10,28 @@ using System.Xml;
 
 namespace Acabus.DataAccess
 {
-    internal sealed class AcabusData
+    /// <summary>
+    /// Esta clase permite el acceso a todas las configuraciones básicas y especificas de
+    /// la aplicación <c>AcabusControlCenter</c>.
+    /// </summary>
+    internal static class AcabusData
     {
+        /// <summary>
+        /// Campo que provee a la propiedad 'Companies'.
+        /// </summary>
+        private static ObservableCollection<String> _companies;
+
+        /// <summary>
+        /// Obtiene una lista de las empresas involucradas en la operación.
+        /// </summary>
+        public static ObservableCollection<String> Companies {
+            get {
+                if (_companies == null)
+                    _companies = new ObservableCollection<String>();
+                return _companies;
+            }
+        }
+
         /// <summary>
         /// Archivo de configuración de las rutas.
         /// </summary>
@@ -42,18 +63,24 @@ namespace Acabus.DataAccess
         public static String CmdCreateBackup => _cmdCreateBackup;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Trunks'.
-        /// </summary>
-        private static ObservableCollection<Trunk> _trunks;
-
-        /// <summary>
         /// Obtiene una lista de las rutas troncales.
         /// </summary>
-        public static ObservableCollection<Trunk> Trunks {
+        public static ObservableCollection<Route> Trunks
+            => (ObservableCollection<Route>)Util.SelectFromList(Routes, (route) => route.Type == RouteType.TRUNK);
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Routes'.
+        /// </summary>
+        private static ObservableCollection<Route> _routes;
+
+        /// <summary>
+        /// Obtiene una lista de las rutas.
+        /// </summary>
+        public static ObservableCollection<Route> Routes {
             get {
-                if (_trunks == null)
-                    _trunks = new ObservableCollection<Trunk>();
-                return _trunks;
+                if (_routes == null)
+                    _routes = new ObservableCollection<Route>();
+                return _routes;
             }
         }
 
@@ -139,9 +166,197 @@ namespace Acabus.DataAccess
         public static String BusDisconnectedQuery => _busDisconnectedQuery;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'Modules'.
+        /// </summary>
+        private static ObservableCollection<String> _modules;
+
+        /// <summary>
+        /// Obtiene una lista de los modulos instalados en la aplicación.
+        /// </summary>
+        public static ObservableCollection<String> Modules {
+            get {
+                if (_modules == null)
+                    _modules = new ObservableCollection<String>();
+                return _modules;
+            }
+        }
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'CommonFaults'.
+        /// </summary>
+        private static ObservableCollection<String> _commonFaults;
+
+        /// <summary>
+        /// Obtiene una lista de las fallas comunes de la operación.
+        /// </summary>
+        public static ObservableCollection<String> CommonFaults {
+            get {
+                if (_commonFaults == null)
+                    _commonFaults = new ObservableCollection<String>();
+                return _commonFaults;
+            }
+        }
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'TrunksQuery'.
+        /// </summary>
+        private static String _trunksQuery;
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las rutas troncales.
+        /// </summary>
+        public static String TrunksQuery => _trunksQuery;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'StationsQuery'.
+        /// </summary>
+        private static String _stationsQuery;
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las estaciones.
+        /// </summary>
+        public static String StationsQuery => _stationsQuery;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'LinesQuery'.
+        /// </summary>
+        private static String _linesQuery;
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las lineas validas.
+        /// </summary>
+        public static String LinesQuery => _linesQuery;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'DevicesQuery'.
+        /// </summary>
+        private static String _devicesQuery;
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la descarga de los datos de los equipos en operación.
+        /// </summary>
+        public static String DevicesQuery => _devicesQuery;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'VehiclesQuery'.
+        /// </summary>
+        private static String _vehiclesQuery;
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la descarga de los datos de los vehículos.
+        /// </summary>
+        public static String VehiclesQuery => _vehiclesQuery;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'RoutesQuery'.
+        /// </summary>
+        private static String _routesQuery;
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las rutas.
+        /// </summary>
+        public static String RoutesQuery => _routesQuery;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'VehicleAsignQuery'.
+        /// </summary>
+        private static String _vehicleAsignQuery;
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la descarga de la última asignación de ruta.
+        /// </summary>
+        public static String VehicleAsignQuery => _vehicleAsignQuery;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Technicians'.
+        /// </summary>
+        private static ObservableCollection<String> _technicians;
+
+        /// <summary>
+        /// Obtiene una lista de los técnicos.
+        /// </summary>
+        public static ObservableCollection<String> Technicians {
+            get {
+                if (_technicians == null)
+                    _technicians = new ObservableCollection<String>();
+                return _technicians;
+            }
+        }
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'FirstFolio'.
+        /// </summary>
+        private static UInt64 _firstFolio;
+
+        /// <summary>
+        /// Obtiene el folio que será el primero en utilizarse para reportes CCTV.
+        /// </summary>
+        public static UInt64 FirstFolio => _firstFolio;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'TimeMaxLowPriorityBus'.
+        /// </summary>
+        private static TimeSpan _timeMaxLowPriorityBus;
+
+        /// <summary>
+        /// Obtiene el tiempo máximo de una prioridad baja para alarma de autobus.
+        /// </summary>
+        public static TimeSpan TimeMaxLowPriorityBus => _timeMaxLowPriorityBus;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'TimeMaxMediumPriorityBus'.
+        /// </summary>
+        private static TimeSpan _timeMaxMediumPriorityBus;
+
+        /// <summary>
+        /// Obtiene el tiempo máximo de una prioridad media para alarma de autobus.
+        /// </summary>
+        public static TimeSpan TimeMaxMediumPriorityBus => _timeMaxMediumPriorityBus;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'TimeMaxLowPriorityIncidence'.
+        /// </summary>
+        private static TimeSpan _timeMaxLowPriorityIncidence;
+
+        /// <summary>
+        /// Obtiene el tiempo máximo para baja prioridad en una incidencia.
+        /// </summary>
+        public static TimeSpan TimeMaxLowPriorityIncidence => _timeMaxLowPriorityIncidence;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'TimeMaxMediumPriorityIncidence'.
+        /// </summary>
+        private static TimeSpan _timeMaxMediumPriorityIncidence;
+
+        /// <summary>
+        /// Obtiene el tiempo máximo para media prioridad de una incidencia.
+        /// </summary>
+        public static TimeSpan TimeMaxMediumPriorityIncidence => _timeMaxMediumPriorityIncidence;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'TimeMaxMediumPriorityIncidenceBus'.
+        /// </summary>
+        private static TimeSpan _timeMaxMediumPriorityIncidenceBus;
+
+        /// <summary>
+        /// Obtiene el tiempo máximo para media prioridad de una incidencia de autobus.
+        /// </summary>
+        public static TimeSpan TimeMaxMediumPriorityIncidenceBus => _timeMaxMediumPriorityIncidenceBus;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'TimeMaxLowPriorityIncidenceBus'.
+        /// </summary>
+        private static TimeSpan _timeMaxLowPriorityIncidenceBus;
+
+        /// <summary>
+        /// Obtiene el tiempo máximo para baja prioridad de una incidencia de autobus.
+        /// </summary>
+        public static TimeSpan TimeMaxLowPriorityIncidenceBus => _timeMaxLowPriorityIncidenceBus;
+
+        /// <summary>
         /// Crea una instancia de 'AcabusData' y realiza la carga del archivo de configuración.
         /// </summary>
-        public AcabusData()
+        static AcabusData()
         {
             LoadConfiguration();
         }
@@ -159,17 +374,77 @@ namespace Acabus.DataAccess
                 _xmlConfig.Load(CONFIG_FILENAME);
 
                 LoadSettings();
-                LoadTrunk();
+                LoadRoutes();
                 LoadCC();
                 LoadLinks();
+                LoadTechnicians();
                 LoadOffDutyVehicles();
+                LoadCommonFaults();
+                LoadCompanies();
+
+                LoadModuleNames();
 
                 _loadedData = true;
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex.Message, "ERROR");
+                Trace.WriteLine("Ocurrió un problema al cargar la configuración", "ERROR");
+                Trace.WriteLine(ex.Message, "DEBUG");
             }
+        }
+
+        /// <summary>
+        /// Carga una lista de los técnicos.
+        /// </summary>
+        private static void LoadTechnicians()
+        {
+            foreach (XmlNode technicianXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Technicians")?.SelectNodes("Technician"))
+                Technicians.Add(XmlUtils.GetAttribute(technicianXmlNode, "Name"));
+        }
+
+        /// <summary>
+        /// Permite guarda la información modificada en las listas de configuración.
+        /// </summary>
+        public static void SaveXml()
+        {
+            var data = XmlUtils.ToXml(Routes, "Routes");
+            var root = _xmlConfig.SelectSingleNode("Acabus");
+            var oldTrunks = root.SelectSingleNode("Routes");
+            var newNode = data.SelectSingleNode("Routes");
+            oldTrunks.InnerXml = newNode.InnerXml;
+            File.Delete(CONFIG_FILENAME);
+            File.WriteAllText(CONFIG_FILENAME, _xmlConfig.OuterXml);
+        }
+
+        /// <summary>
+        /// Carga los nombres de las empresas involucradas en la operación.
+        /// </summary>
+        private static void LoadCompanies()
+        {
+            Companies.Clear();
+            foreach (XmlNode companyXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Companies")?.SelectNodes("Company"))
+                Companies.Add(XmlUtils.GetAttribute(companyXmlNode, "Name"));
+        }
+
+        /// <summary>
+        /// Carga los nombres de los modulos disponibles en la aplicación.
+        /// </summary>
+        private static void LoadModuleNames()
+        {
+            Modules.Clear();
+            foreach (XmlNode moduleXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Modules")?.SelectNodes("Module"))
+                Modules.Add(XmlUtils.GetAttribute(moduleXmlNode, "Class"));
+        }
+
+
+        /// <summary>
+        /// Carga las fallas comunes de la operación.
+        /// </summary>
+        private static void LoadCommonFaults()
+        {
+            CommonFaults.Clear();
+            foreach (XmlNode faultXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Faults")?.SelectNodes("Fault"))
+                CommonFaults.Add(XmlUtils.GetAttribute(faultXmlNode, "Description"));
         }
 
         /// <summary>
@@ -254,12 +529,7 @@ namespace Acabus.DataAccess
         /// </summary>
         private static void LoadCC()
         {
-            var ccNode = _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("CC");
-            if (ccNode != null)
-            {
-                _cc = ToStation(ccNode, null);
-                LoadDevices(CC, ccNode.SelectSingleNode("Devices").SelectNodes("Device"));
-            }
+            _cc = FindStation((station) => station.Name.Contains("CENTRO DE CONTROL"));
         }
 
         /// <summary>
@@ -272,8 +542,8 @@ namespace Acabus.DataAccess
                 var stationA = XmlUtils.GetAttribute(xmlNode as XmlNode, "StationA");
                 var stationB = XmlUtils.GetAttribute(xmlNode as XmlNode, "StationB");
                 var link = Link.CreateLink(
-                    stationA.Equals("CC") ? CC : FindStation((station) => station.GetViaID().Equals(stationA)),
-                    stationB.Equals("CC") ? CC : FindStation((station) => station.GetViaID().Equals(stationB))
+                    FindStation((station) => station.GetViaID().Equals(stationA)),
+                    FindStation((station) => station.GetViaID().Equals(stationB))
                     );
             }
         }
@@ -289,21 +559,85 @@ namespace Acabus.DataAccess
             _pgPort = UInt16.Parse(GetProperty("Port", "PGSetting"));
             _trunkAlertQuery = GetProperty("TrunkAlert", "Command-Sql");
             _busDisconnectedQuery = GetProperty("BusDisconnected", "Command-Sql");
-        }
+
+            _trunksQuery = GetProperty("Trunks", "Command-Sql");
+            _stationsQuery = GetProperty("Stations", "Command-Sql");
+            _linesQuery = GetProperty("Lines", "Command-Sql");
+            _devicesQuery = GetProperty("Devices", "Command-Sql");
+            _routesQuery = GetProperty("Routes", "Command-Sql");
+            _vehiclesQuery = GetProperty("Vehicles", "Command-Sql");
+            _vehicleAsignQuery = GetProperty("VehicleAsign", "Command-Sql");
+
+            _firstFolio = UInt64.Parse(GetProperty("FirstFolio", "Setting"));
+            _timeMaxLowPriorityBus = TimeSpan.Parse(GetProperty("TimeMaxLowPriorityBus", "Setting"));
+            _timeMaxMediumPriorityBus = TimeSpan.Parse(GetProperty("TimeMaxMediumPriorityBus", "Setting"));
+
+
+            _timeMaxLowPriorityIncidence = TimeSpan.Parse(GetProperty("TimeMaxLowPriorityIncidence", "Setting"));
+            _timeMaxMediumPriorityIncidence = TimeSpan.Parse(GetProperty("TimeMaxMediumPriorityIncidence", "Setting"));
+
+
+            _timeMaxLowPriorityIncidenceBus = TimeSpan.Parse(GetProperty("TimeMaxLowPriorityIncidenceBus", "Setting"));
+            _timeMaxMediumPriorityIncidenceBus = TimeSpan.Parse(GetProperty("TimeMaxMediumPriorityIncidenceBus", "Setting"));
+        }        
 
         /// <summary>
         /// Carga la información leida del nodo Trunks del documento de configuración en XML.
         /// </summary>
-        public static void LoadTrunk()
+        public static void LoadRoutes()
         {
-            Trunks.Clear();
+            Routes.Clear();
 
-            foreach (XmlNode trunkXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Trunks").SelectNodes("Trunk"))
+            foreach (XmlNode routeXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Routes").SelectNodes("Route"))
             {
-                var trunk = ToTrunk(trunkXmlNode) as Trunk;
-                Trunks.Add(trunk);
-                LoadStations(trunk, trunkXmlNode.SelectSingleNode("Stations").SelectNodes("Station"));
+                var route = ToRoute(routeXmlNode) as Route;
+                Routes.Add(route);
+                LoadStations(route as Trunk, routeXmlNode.SelectSingleNode("Stations")?.SelectNodes("Station"));
+                LoadVehicles(route, routeXmlNode.SelectSingleNode("Vehicles")?.SelectNodes("Vehicle"));
             }
+        }
+
+        /// <summary>
+        /// Carga los vehículos a partir de una lista de nodos
+        /// XML.
+        /// </summary>
+        /// <param name="route"></param>
+        /// <param name="vehicleNode"></param>
+        private static void LoadVehicles(Route route, XmlNodeList vehicleNode)
+        {
+            if (vehicleNode != null)
+                foreach (XmlNode vehicleXmlNode in vehicleNode)
+                {
+                    var vehicle = ToVehicle(vehicleXmlNode, route) as Vehicle;
+                    route.AddVehicle(vehicle);
+                }
+        }
+
+        /// <summary>
+        /// Convierte un nodo XML con una estructura correspondiente a un
+        /// vehículo que pertenece a una ruta.
+        /// </summary>
+        /// <param name="vehicleXmlNode">Node XML que representa un vehículo.</param>
+        /// <param name="route">Instancia de ruta al que está asignado.</param>
+        /// <returns>Una instancia de vehículo.</returns>
+        private static Vehicle ToVehicle(XmlNode vehicleXmlNode, Route route)
+        {
+            try
+            {
+                var vehicle = Vehicle.CreateVehicle(route,
+                    XmlUtils.GetAttribute(vehicleXmlNode, "EconomicNumber"),
+                    (VehicleType)Enum.Parse(typeof(VehicleType), XmlUtils.GetAttribute(vehicleXmlNode, "BusType")));
+
+                vehicle.IP = XmlUtils.GetAttribute(vehicleXmlNode, "IP");
+                vehicle.Enabled = XmlUtils.GetAttributeBool(vehicleXmlNode, "Enabled");
+                vehicle.HasDataBase = XmlUtils.GetAttributeBool(vehicleXmlNode, "HasDataBase");
+                vehicle.SshEnabled = XmlUtils.GetAttributeBool(vehicleXmlNode, "SshEnabled");
+                vehicle.CanReplicate = XmlUtils.GetAttributeBool(vehicleXmlNode, "CanReplicate");
+
+                return vehicle;
+            }
+            catch (Exception) { }
+            return null;
         }
 
         /// <summary>
@@ -415,7 +749,9 @@ namespace Acabus.DataAccess
         {
             try
             {
-                var station = Station.CreateStation(trunk, (UInt16)XmlUtils.GetAttributeInt(stationXmlNode, "ID"));
+                var stationNumber = XmlUtils.GetAttribute(stationXmlNode, "StationNumber");
+                var id = UInt16.Parse(XmlUtils.GetAttribute(stationXmlNode, "ID"));
+                var station = Station.CreateStation(trunk, id, String.IsNullOrEmpty(stationNumber) ? id : UInt16.Parse(stationNumber));
                 station.Name = XmlUtils.GetAttribute(stationXmlNode, "Name");
                 station.IsConnected = XmlUtils.GetAttributeBool(stationXmlNode, "IsConnected");
                 station.PingMin = (UInt16)XmlUtils.GetAttributeInt(stationXmlNode, "PingMin");
@@ -444,7 +780,7 @@ namespace Acabus.DataAccess
             {
                 var device = Device.CreateDevice(station,
                     (UInt16)XmlUtils.GetAttributeInt(deviceXmlNode, "ID"),
-                    ParseType(XmlUtils.GetAttribute(deviceXmlNode, "Type")),
+                    (DeviceType)Enum.Parse(typeof(DeviceType), XmlUtils.GetAttribute(deviceXmlNode, "Type")),
                     XmlUtils.GetAttributeBool(deviceXmlNode, "CanReplicate"));
 
                 device.IP = XmlUtils.GetAttribute(deviceXmlNode, "IP");
@@ -470,63 +806,36 @@ namespace Acabus.DataAccess
         }
 
         /// <summary>
-        /// Hace la conversión de una cadena valida a una 
-        /// instancia tipo de equipo.
-        /// </summary>
-        /// <param name="value">Cadena a convertir</param>
-        /// <returns>Una instancia de tipo</returns>
-        private static DeviceType ParseType(String value)
-        {
-            switch (value)
-            {
-                case "KVR":
-                    return DeviceType.KVR;
-                case "PMR":
-                    return DeviceType.PMR;
-                case "TOR":
-                    return DeviceType.TOR;
-                case "TS":
-                    return DeviceType.TS;
-                case "TD":
-                    return DeviceType.TD;
-                case "NVR":
-                    return DeviceType.NVR;
-                case "SW":
-                    return DeviceType.SW;
-                case "CDE":
-                    return DeviceType.CDE;
-                case "APP":
-                    return DeviceType.APP;
-                case "PDE":
-                    return DeviceType.PDE;
-                case "DB":
-                    return DeviceType.DB;
-            }
-            return DeviceType.NONE;
-        }
-
-        /// <summary>
         /// Convierte un nodo XML con la estructura correspondiente a un
-        /// elemento de ruta troncal a una instancia Trunk.
+        /// elemento de ruta a una instancia Route.
         /// </summary>
-        /// <param name="trunkNode">Nodo XML a parsear.</param>
+        /// <param name="routeNode">Nodo XML a parsear.</param>
         /// <returns>Una instancia de ruta troncal correspondiente al nodo
         /// pasado como argumento.</returns>
-        public static Trunk ToTrunk(XmlNode trunkNode)
+        public static Route ToRoute(XmlNode routeNode)
         {
             try
             {
-                Trunk trunkTemp = Trunk.CreateTrunk(UInt16.Parse(XmlUtils.GetAttribute(trunkNode, "ID")));
-                trunkTemp.Name = XmlUtils.GetAttribute(trunkNode, "Name");
+                var id = UInt16.Parse(XmlUtils.GetAttribute(routeNode, "ID"));
+                var routeNumber = XmlUtils.GetAttribute(routeNode, "RouteNumber");
+                Route routeTemp = null;
+                RouteType type = (RouteType)Enum.Parse(typeof(RouteType), XmlUtils.GetAttribute(routeNode, "Type"));
+                switch (type)
+                {
+                    case RouteType.ALIM:
+                        routeTemp = new Route(id, String.IsNullOrEmpty(routeNumber) ? id : UInt16.Parse(routeNumber));
+                        break;
+                    case RouteType.TRUNK:
+                        routeTemp = Trunk.CreateTrunk(id, String.IsNullOrEmpty(routeNumber) ? id : UInt16.Parse(routeNumber));
+                        break;
+                    default:
+                        break;
+                }
+                routeTemp.Name = XmlUtils.GetAttribute(routeNode, "Name");
 
-                return trunkTemp;
+                return routeTemp;
             }
-            catch (Exception ex)
-            {
-                if (ex is FormatException || ex is ArgumentNullException)
-                    Trace.WriteLine("Un nodo 'Trunk' debe tener un ID ", "ERROR");
-
-            }
+            catch (Exception) { }
             return null;
         }
 
@@ -537,11 +846,26 @@ namespace Acabus.DataAccess
         /// <returns>Una estación que cumple el predicado.</returns>
         public static Station FindStation(Predicate<Station> predicate)
         {
-            foreach (var trunk in Trunks)
+            foreach (Trunk trunk in Trunks)
                 foreach (var station in trunk.Stations)
                     if (predicate.Invoke(station))
                         return station;
             return null;
+        }
+
+        /// <summary>
+        /// Obtiene las estaciones que cumple con las condiciones establecidas por el predicado.
+        /// </summary>
+        /// <param name="predicate">Predicado que evaluará a las estaciones.</param>
+        /// <returns>Un vector unidimensional de estaciones que cumple el predicado.</returns>
+        public static Station[] FindStations(Predicate<Station> predicate)
+        {
+            List<Station> stations = new List<Station>();
+            foreach (Trunk trunk in Trunks)
+                foreach (var station in trunk.Stations)
+                    if (predicate.Invoke(station))
+                        stations.Add(station);
+            return stations.ToArray();
         }
 
         /// <summary>
@@ -551,12 +875,126 @@ namespace Acabus.DataAccess
         /// <returns>Un dispositivo que cumple el predicado.</returns>
         public static Device FindDevice(Predicate<Device> predicate)
         {
-            foreach (var trunk in Trunks)
+            foreach (Trunk trunk in Trunks)
                 foreach (var station in trunk.Stations)
                     foreach (var device in station.Devices)
                         if (predicate.Invoke(device))
                             return device;
             return null;
+        }
+
+        /// <summary>
+        /// Obtiene los dispositivos que cumple con la condiciones establecidas por el predicado.
+        /// </summary>
+        /// <param name="predicate">Predicado que evaluará a los dispositivos.</param>
+        /// <returns>Un vector unidimensional de dispositivos que cumple el predicado.</returns>
+        public static IEnumerable<Device> FindDevices(Predicate<Device> predicate)
+        {
+            List<Device> devices = new List<Device>();
+            foreach (Trunk trunk in Trunks)
+                foreach (var station in trunk.Stations)
+                    foreach (var device in station.Devices)
+                        if (predicate.Invoke(device))
+                            devices.Add(device);
+            return devices.ToArray();
+        }
+
+        /// <summary>
+        /// Obtiene el vehículo que cumple con la condiciones establecidas por el predicado.
+        /// </summary>
+        /// <param name="predicate">Predicado que evaluará a los vehículos.</param>
+        /// <returns>Un vehículo que cumple el predicado.</returns>
+        public static Vehicle FindVehicle(Predicate<Vehicle> predicate)
+        {
+            foreach (Route route in Routes)
+                foreach (var vehicle in route.Vehicles)
+                    if (predicate.Invoke(vehicle))
+                        return vehicle;
+            return null;
+        }
+
+        /// <summary>
+        /// Obtiene los vehículos que cumple con la condiciones establecidas por el predicado.
+        /// </summary>
+        /// <param name="predicate">Predicado que evaluará a los vehículos.</param>
+        /// <returns>Un vector unidimensional de vehículos que cumple el predicado.</returns>
+        public static IEnumerable<Vehicle> FindVehicles(Predicate<Vehicle> predicate)
+        {
+            List<Vehicle> vehicles = new List<Vehicle>();
+            foreach (Route route in Routes)
+                foreach (var vehicle in route.Vehicles)
+                    if (predicate.Invoke(vehicle))
+                        vehicles.Add(vehicle);
+            return vehicles.ToArray();
+        }
+
+        /// <summary>
+        /// Obtiene la ruta troncal que cumple con la condiciones establecidas por el predicado.
+        /// </summary>
+        /// <param name="predicate">Predicado que evaluará a los dispositivos.</param>
+        /// <returns>Una ruta troncal que cumple el predicado.</returns>
+        public static Trunk FindTrunk(this IEnumerable<Route> trunks, Predicate<Trunk> predicate)
+        {
+            foreach (Trunk trunk in trunks)
+                if (trunk.Type == RouteType.TRUNK && predicate.Invoke(trunk))
+                    return trunk;
+            return null;
+        }
+
+        /// <summary>
+        /// Obtiene la ruta que cumple con la condiciones establecidas por el predicado.
+        /// </summary>
+        /// <param name="predicate">Predicado que evaluará a los dispositivos.</param>
+        /// <returns>Una ruta que cumple el predicado.</returns>
+        public static Route FindRoute(this IEnumerable<Route> routes, Predicate<Route> predicate)
+        {
+            foreach (Route route in routes)
+                if (predicate.Invoke(route))
+                    return route;
+            return null;
+        }
+
+
+        /// <summary>
+        /// Ejecuta una función por cada ruta que exista dentro de la lista.
+        /// </summary>
+        /// <param name="routes">Lista de rutas.</param>
+        /// <param name="action">Acción a ejecutar en la ruta.</param>
+        public static void ForEachRoute(this IEnumerable<Route> routes, Action<Route> action)
+        {
+            foreach (var route in routes)
+                action.Invoke(route);
+        }
+
+        /// <summary>
+        /// Ejecuta una consulta en el servidor de base de datos.
+        /// </summary>
+        /// <param name="query">Consulta a ejecutar.</param>
+        /// <returns>Un arreglo bidimensional que contiene el resultado de la consulta realizada.</returns>
+        public static String[][] ExecuteQueryInServerDB(String query)
+        {
+            var credentialDBServer = GetCredential("Server", "DataBase");
+            var credentialSshServer = GetCredential("Server", "Ssh");
+
+            if (query.ToUpper().Contains("UPDATE")
+                || query.ToUpper().Contains("DELETE")
+                || query.ToUpper().Contains("TRUNCATE")
+                || query.ToUpper().Contains("DROP")
+                || query.ToUpper().Contains("CREATE")
+                || query.ToUpper().Contains("ALTER")) return null;
+
+            SshPostgreSQL psql = SshPostgreSQL.CreateConnection(
+                PGPathPlus,
+                CC.FindDevice((device) => device.Type == DeviceType.DB).IP,
+                PGPort,
+                credentialDBServer.Username,
+                credentialDBServer.Password,
+                PGDatabaseName,
+                credentialSshServer.Username,
+                credentialSshServer.Password);
+
+            var response = psql.ExecuteQuery(query);
+            return response;
         }
 
 

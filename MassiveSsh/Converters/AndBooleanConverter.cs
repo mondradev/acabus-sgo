@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace Acabus.Utils.MVVM
+namespace Acabus.Converters
 {
     public class AndBooleanConverter : IMultiValueConverter
     {

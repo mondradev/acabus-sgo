@@ -1,5 +1,5 @@
 ﻿using Acabus.Utils;
-using Acabus.Utils.MVVM;
+using Acabus.Utils.Mvvm;
 using System;
 
 namespace Acabus.Models
@@ -239,6 +239,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene o establece el nombre de la base de datos cuando el equipo está sin conexión.
         /// </summary>
+        [XmlAnnotation(Ignore = true)]
         public String DataBaseName {
             get => _databaseName;
             set {
@@ -266,6 +267,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene el número de serie del equipo.
         /// </summary>
+        [XmlAnnotation(Ignore = true)]
         public String NumeSeri => GetNumeSeri();
 
         /// <summary>
@@ -276,6 +278,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene o establece el estado de la conexión a la red.
         /// </summary>
+        [XmlAnnotation(Ignore = true)]
         public StateValue State {
             get => _state;
             set {
@@ -292,6 +295,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene o establece la latencia de la comunicación con el equipo.
         /// </summary>
+        [XmlAnnotation(Ignore = true)]
         public Int16 Ping {
             get => _ping;
             set {
@@ -326,10 +330,9 @@ namespace Acabus.Models
         private String GetNumeSeri()
         {
             var type = Type.ToString();
-            var trunkID = this.Station.Trunk.ID.ToString("D2");
-            var stationID = this.Station.ID.ToString("D2");
+            var stationID = this.Station?.GetViaID();
             var deviceID = ID.ToString("D2");
-            return String.Format("{0}{1}{2}{3}", type, trunkID, stationID, deviceID);
+            return String.Format("{0}{1}{2}", type, stationID, deviceID);
         }
 
         /// <summary>
@@ -344,5 +347,30 @@ namespace Acabus.Models
             {
                 CanReplicate = canReplicate
             };
+
+        /// <summary>
+        /// Operador lógico de igualdad, determina si dos instancias <see cref="Device"/> son iguales.
+        /// </summary>
+        /// <param name="device">Una instancia.</param>
+        /// <param name="otherDevice">Otra instancia.</param>
+        /// <returns>Un valor <code>true</code> si el NumeSeri es igual en ambas instancias <see cref="Device"/>.</returns>
+        public static bool operator ==(Device device, Device otherDevice)
+        {
+            if (otherDevice?.NumeSeri == device?.NumeSeri) return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Operador lógico de desigualdad, determina si dos instancias <see cref="Device"/> son diferentes.
+        /// </summary>
+        /// <param name="device">Una instancia.</param>
+        /// <param name="otherDevice">Otra instancia.</param>
+        /// <returns>Un valor <code>true</code> si el NumeSeri es diferente en ambas instancias <see cref="Device"/>.</returns>
+        public static bool operator !=(Device device, Device otherDevice)
+        {
+            if (otherDevice?.NumeSeri == device?.NumeSeri) return false;
+            return true;
+        }
     }
 }

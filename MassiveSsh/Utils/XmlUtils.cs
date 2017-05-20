@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace Acabus.Utils
 {
-    public sealed class XmlUtils
+    public static class XmlUtils
     {
 
         public static String GetAttribute(XmlNode node, String name)
@@ -44,6 +44,8 @@ namespace Acabus.Utils
 
         private static XmlNode ToXmlNodeRecursive(Object instance, String Name, XmlDocument doc)
         {
+            if (instance == null) return null;
+
             Type type = instance.GetType();
             var attribute = GetCustomAttribute(type, typeof(XmlAnnotationAttribute));
             XmlNode node = doc.CreateElement(String.IsNullOrEmpty(Name)

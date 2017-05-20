@@ -9,7 +9,7 @@ namespace Acabus.Utils
     /// Esta clase contiene funciones básicas para evaluar la disponibilidad de un
     /// equipo remoto en la red.
     /// </summary>
-    public sealed class ConnectionTCP
+    public static class ConnectionTCP
     {
         /// <summary>
         /// Determina si el host está disponible en la red.

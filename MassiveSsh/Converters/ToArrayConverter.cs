@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
-using System.Windows.Input;
 
-namespace Acabus.Utils.MVVM
+namespace Acabus.Converters
 {
     /// <summary>
     /// 
     /// </summary>
-    public sealed class ConverterMultiCommand : IMultiValueConverter
+    public sealed class ToArrayConverter : IMultiValueConverter
     {
         /// <summary>
         /// 
@@ -24,15 +19,7 @@ namespace Acabus.Utils.MVVM
         /// <returns></returns>
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            var commands = values.Clone();
-            return new CommandBase((param) =>
-            {
-                foreach (var item in ((object[])commands))
-                {
-                    if (item is ICommand)
-                        ((ICommand)item).Execute(parameter);
-                }
-            });
+            return values.Clone();
         }
 
         /// <summary>

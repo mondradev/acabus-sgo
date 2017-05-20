@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace Acabus.Utils.MVVM
+namespace Acabus.Utils.Mvvm
 {
     public class NotifyPropertyChanged : INotifyPropertyChanged
     {

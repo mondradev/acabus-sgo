@@ -1,19 +1,21 @@
-﻿using Acabus.Utils.MVVM;
+﻿using Acabus.DataAccess;
+using Acabus.Models;
+using Acabus.Utils.Mvvm;
 using System;
 
-namespace Acabus.Models
+namespace Acabus.Modules.CctvReports.Models
 {
-    public sealed class BusDisconnectedAlert : NotifyPropertyChanged
+    public sealed class BusDisconnectedAlarm : NotifyPropertyChanged
     {
         /// <summary>
         /// Obtiene el tiempo máximo sin conexión para establecer prioridad baja.
         /// </summary>
-        private TimeSpan LOW_PRIORITY_TIME = TimeSpan.FromMinutes(60);
+        private TimeSpan LOW_PRIORITY_TIME = AcabusData.TimeMaxLowPriorityBus;
 
         /// <summary>
         /// Obtiene el tiempo máximo sin conexión para establecer prioridad media.
         /// </summary>
-        private TimeSpan MEDIUM_PRIORITY_TIME = TimeSpan.FromMinutes(300);
+        private TimeSpan MEDIUM_PRIORITY_TIME = AcabusData.TimeMaxMediumPriorityBus;
 
         /// <summary>
         /// Campo que provee a la propiedad 'EconomicNumber'.
@@ -70,7 +72,7 @@ namespace Acabus.Models
         /// <summary>
         /// Crea una nueva instancia de alerta de vehículo sin conexión.
         /// </summary>
-        public BusDisconnectedAlert(String economicNumber)
+        public BusDisconnectedAlarm(String economicNumber)
         {
             _economicNumber = economicNumber;
         }
@@ -81,9 +83,37 @@ namespace Acabus.Models
         /// <param name="economicNumber">Número económico del vehículo.</param>
         /// <param name="lastSentLocation">Fecha y hora de la última ubicación enviada.</param>
         /// <returns>Una nueva alerta de vehículo sin conexión.</returns>
-        public static BusDisconnectedAlert CreateBusAlert(String economicNumber, DateTime lastSentLocation)
+        public static BusDisconnectedAlarm CreateBusAlert(String economicNumber, DateTime lastSentLocation)
         {
-            return new BusDisconnectedAlert(economicNumber) { LastSentLocation = lastSentLocation };
+            return new BusDisconnectedAlarm(economicNumber) { LastSentLocation = lastSentLocation };
+        }
+
+        /// <summary>
+        /// Operador lógico de igualdad, determina si dos instancias <see cref="BusDisconnectedAlarm"/> son iguales.
+        /// </summary>
+        /// <param name="busAlarm">Una instancia.</param>
+        /// <param name="otherBusAlarm">Otra instancia.</param>
+        /// <returns>Un valor <code>true</code> si el EconomicNumber es igual en ambas instancias <see cref="BusDisconnectedAlarm"/>.</returns>
+        public static bool operator ==(BusDisconnectedAlarm busAlarm, BusDisconnectedAlarm otherBusAlarm)
+        {
+            if (otherBusAlarm.EconomicNumber == busAlarm.EconomicNumber)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Operador lógico de desigualdad, determina si dos instancias <see cref="BusDisconnectedAlarm"/> son diferentes.
+        /// </summary>
+        /// <param name="busAlarm">Una instancia.</param>
+        /// <param name="otherBusAlarm">Otra instancia.</param>
+        /// <returns>Un valor <code>true</code> si el EconomicNumber es diferente en ambas instancias <see cref="BusDisconnectedAlarm"/>.</returns>
+        public static bool operator !=(BusDisconnectedAlarm busAlarm, BusDisconnectedAlarm otherBusAlarm)
+        {
+            if (otherBusAlarm.EconomicNumber != busAlarm.EconomicNumber)
+                return true;
+
+            return false;
         }
     }
 }

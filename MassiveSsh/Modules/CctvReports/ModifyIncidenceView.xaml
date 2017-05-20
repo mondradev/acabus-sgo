@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="Acabus.Modules.CctvReports.ModifyIncidenceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:Acabus.Converters"
+             xmlns:da="clr-namespace:Acabus.DataAccess"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <converters:MultiCommandConverter x:Key="MultiCommandConverter"/>
+    </UserControl.Resources>
+    <Grid Margin="0" MinWidth="300" MaxWidth="400" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Margin="16,24,16,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="8"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="8"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock TextWrapping="Wrap" Text="Modificar incidencia" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height" 
+                                               Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+            <StackPanel Orientation="Vertical" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2">
+                <TextBox Margin="0,0,0,8" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" materialDesign:HintAssist.Hint="Folio" 
+                                                 Text="{Binding SelectedIncidence.Folio, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
+                <TextBox Margin="0,0,0,8" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" materialDesign:HintAssist.Hint="Descripción" 
+                                                 Text="{Binding SelectedIncidence.Description, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
+                <TextBox Margin="0,0,0,8" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" materialDesign:HintAssist.Hint="Equipo" 
+                                                 Text="{Binding SelectedIncidence.Device, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
+            </StackPanel>
+            <ComboBox Style="{DynamicResource MaterialDesignFloatingHintComboBox}" materialDesign:HintAssist.Hint="¿Quién reporta?" Grid.Row="4" 
+                                              HorizontalAlignment="Stretch" VerticalAlignment="Top" SelectedItem="{Binding NewWhoReporting}"  
+                                              ItemsSource="{x:Static da:AcabusData.Companies}"/>
+        </Grid>
+        <StackPanel Margin="0" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" >
+            <Button Margin="8 8 8 8" ToolTip="Descartar" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" 
+                                            Style="{StaticResource MaterialDesignFlatButton}" >
+                <materialDesign:PackIcon Kind="Delete" Width="24" Height="24" />
+            </Button>
+            <Button Margin="0 8 8 8" ToolTip="Modificar incidencia" Style="{StaticResource MaterialDesignFlatButton}"  
+                                            CommandParameter="{Binding SelectedIncidence}">
+                <Button.Command>
+                    <MultiBinding Converter="{StaticResource MultiCommandConverter}">
+                        <Binding Path="SaveIncidenceCommand"/>
+                        <Binding Path="UpdateDataCommand" />
+                    </MultiBinding>
+                </Button.Command>
+                <materialDesign:PackIcon Kind="Check" Width="24" Height="24" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -470,7 +469,7 @@ namespace Acabus.Modules.TrunkMonitor
             }
 
             /// <summary>
-            /// Función no implementado. No requiere su utilización.
+            /// Función no implementada. No se requiere.
             /// </summary>
             /// <param name="value"></param>
             /// <param name="targetType"></param>

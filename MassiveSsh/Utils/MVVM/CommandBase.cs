@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Acabus.Utils.MVVM
+namespace Acabus.Utils.Mvvm
 {
     public class CommandBase : ICommand
     {

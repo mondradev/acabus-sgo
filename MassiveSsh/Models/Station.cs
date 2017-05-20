@@ -1,5 +1,5 @@
 ﻿using Acabus.Utils;
-using Acabus.Utils.MVVM;
+using Acabus.Utils.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 
@@ -8,7 +8,7 @@ namespace Acabus.Models
     /// <summary>
     /// Esta clase define la estructura de una estación perteneciente a una ruta troncal.
     /// </summary>
-    public sealed class Station : NotifyPropertyChanged
+    public sealed class Station : Location
     {
         /// <summary>
         /// Campo que provee la ruta a la propiedad 'Trunk'.
@@ -45,22 +45,6 @@ namespace Acabus.Models
         /// Obtiene el identificador de estación.
         /// </summary>
         public UInt16 ID => _id;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Name'.
-        /// </summary>
-        private String _name;
-
-        /// <summary>
-        /// Obtiene o establece el nombre de la estación.
-        /// </summary>
-        public String Name {
-            get => _name;
-            set {
-                _name = value;
-                OnPropertyChanged("Name");
-            }
-        }
 
         /// <summary>
         /// Campo que provee a la propiedad 'IsConnected'.
@@ -145,15 +129,27 @@ namespace Acabus.Models
         }
 
         /// <summary>
+        /// Campo que provee a la propiedad 'StationNumber'.
+        /// </summary>
+        private UInt16 _stationNumber;
+
+        /// <summary>
+        /// Obtiene el número de estación.
+        /// </summary>
+        public UInt16 StationNumber => _stationNumber;
+
+        /// <summary>
         /// Crea una instancia de una estación indicando la ruta troncal 
         /// a la que pertence.
         /// </summary>
         /// <param name="trunk">Ruta troncal a la que pertenece la estación.</param>
-        public Station(Trunk trunk, UInt16 id)
+        /// <param name="id">Identificador único de la estación.</param>
+        /// <param name="stationNumber">Número de la estación.</param>
+        public Station(Trunk trunk, UInt16 id, UInt16 stationNumber)
         {
             _trunk = trunk;
             _id = id;
-
+            _stationNumber = stationNumber;
             State = StateValue.DISCONNECTED;
         }
 
@@ -187,16 +183,10 @@ namespace Acabus.Models
         public UInt16 DeviceCount() => (UInt16)(Devices.Count);
 
         /// <summary>
-        /// Representa la instancia en una cadena.
-        /// </summary>
-        /// <returns>El nombre de la estación actual.</returns>
-        public override string ToString() => Name;
-
-        /// <summary>
         /// Obtiene el ID de la estación en vía.
         /// </summary>
         /// <returns>ID de la estación en vía.</returns>
-        public String GetViaID() => String.Format("{0:00}{1:00}", Trunk?.ID, ID);
+        public String GetViaID() => String.Format("{0:00}{1:00}", Trunk?.RouteNumber, StationNumber);
 
         /// <summary>
         /// Obtiene el primer dispositivo de la estación que cumpla con el predicado.
@@ -225,7 +215,8 @@ namespace Acabus.Models
         /// </summary>
         /// <param name="trunk">Ruta troncal a la que pertenece.</param>
         /// <param name="id">ID de la estación.</param>
+        /// <param name="stationNumber">Número de la estación.</param>
         /// <returns>Una instancia de estación.</returns>
-        public static Station CreateStation(Trunk trunk, UInt16 id) => new Station(trunk, id);
+        public static Station CreateStation(Trunk trunk, UInt16 id, UInt16 stationNumber) => new Station(trunk, id, stationNumber);
     }
 }

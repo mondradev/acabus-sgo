@@ -3,16 +3,16 @@ using System;
 
 namespace Acabus.Services
 {
-    public sealed class LinkService
+    public static class LinkService
     {
-        public static Int16 DoPing(Link link)
+        public static Int16 DoPing(this Link link)
         {
             var pingA = StationService.DoPingLinkDevice(link.StationA);
             var pingB = StationService.DoPingLinkDevice(link.StationB);
             link.Ping = pingA > pingB ? pingA : pingB;
 
-            link.State = ConnectionStateFuncs.AndConnectionState(ConnectionStateFuncs.GetConnectionState(pingA, link.StationA.PingMin, link.StationB.PingMax),
-                ConnectionStateFuncs.GetConnectionState(pingB, link.StationB.PingMin, link.StationB.PingMax));
+            link.State = StateValueExtension.GetConnectionState(pingA, link.StationA.PingMin, link.StationB.PingMax)
+                .AndConnectionStete(StateValueExtension.GetConnectionState(pingB, link.StationB.PingMin, link.StationB.PingMax));
 
             if (pingA < 0 || pingB < 0)
             {

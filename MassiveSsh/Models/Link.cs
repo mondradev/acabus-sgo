@@ -1,6 +1,6 @@
 ﻿
 using Acabus.Utils;
-using Acabus.Utils.MVVM;
+using Acabus.Utils.Mvvm;
 using System;
 
 namespace Acabus.Models

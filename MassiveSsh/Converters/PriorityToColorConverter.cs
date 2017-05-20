@@ -1,19 +1,15 @@
 ﻿using Acabus.Models;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace Acabus.Utils.MVVM
+namespace Acabus.Converters
 {
     /// <summary>
     /// 
     /// </summary>
-    public sealed class ConverterPriorityToColor : IValueConverter
+    public sealed class PriorityToColorConverter : IValueConverter
     {
         /// <summary>
         /// 

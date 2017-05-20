@@ -5,7 +5,7 @@ namespace Acabus.Services
 {
     public static class StationService
     {
-        public static Int16 DoPing(Station station)
+        public static Int16 DoPing(this Station station)
         {
             var ping = 0;
             var nDevice = 0;
@@ -19,12 +19,12 @@ namespace Acabus.Services
                 }
             }
 
-            station.State = ConnectionStateFuncs.GetConnectionState((Int16)(ping / nDevice), station.PingMin, station.PingMax);
+            station.State = StateValueExtension.GetConnectionState((Int16)(ping / nDevice), station.PingMin, station.PingMax);
 
             return (Int16)(ping / nDevice);
         }
 
-        public static Int16 DoPingLinkDevice(Station station)
+        public static Int16 DoPingLinkDevice(this Station station)
         {
             var linkDevice = station.FindDevice((device) => device.Type == DeviceType.SW);
             if (linkDevice == null)

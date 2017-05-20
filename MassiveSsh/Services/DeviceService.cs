@@ -4,13 +4,13 @@ using System;
 
 namespace Acabus.Services
 {
-    public sealed class DeviceService
+    public static class DeviceService
     {
-        public static Int16 DoPing(Device device)
+        public static Int16 DoPing(this Device device)
         {
             device.Ping = ConnectionTCP.SendToPing(device.IP, 3);
 
-            device.State = ConnectionStateFuncs.GetConnectionState(device.Ping, device.Station.PingMin, device.Station.PingMax);
+            device.State = StateValueExtension.GetConnectionState(device.Ping, device.Station.PingMin, device.Station.PingMax);
 
             return device.Ping;
         }

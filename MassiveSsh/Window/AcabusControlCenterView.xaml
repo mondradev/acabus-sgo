@@ -1,0 +1,33 @@
+﻿<Controls:MetroWindow
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    x:Class="Acabus.Window.AcabusControlCenterView"
+        mc:Ignorable="d"
+        GlowBrush="Black"
+        BorderThickness="0"
+        ResizeMode="CanResizeWithGrip"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
+        Title="Acabus Centro de Operaciones"
+        WindowStartupLocation="CenterScreen" MinWidth="860" MinHeight="550" Height="auto" Width="auto" Icon="/AcabusControlCenter;component/Resources/acabus_icon.ico">
+    <materialDesign:DialogHost>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="56"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <ToolBarTray Margin="0" Grid.Row="0" >
+                <ToolBar x:FieldModifier="private" x:Name="_mainToolBar" Style="{DynamicResource MaterialDesignToolBar}" ClipToBounds="False"/>
+            </ToolBarTray>
+            <materialDesign:Card VerticalAlignment="Stretch" Margin="0" Grid.Row="1" x:Name="_content" x:FieldModifier="private"/>
+            <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="_snackBar" x:FieldModifier="private" Grid.Row="1" MaxWidth="800" MinWidth="300"/>
+        </Grid>
+    </materialDesign:DialogHost>
+</Controls:MetroWindow>

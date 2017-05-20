@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using Acabus.Window;
+using MaterialDesignThemes.Wpf;
+using System.Windows.Controls;
 
 namespace Acabus.Modules.TrunkMonitor
 {
@@ -7,10 +9,25 @@ namespace Acabus.Modules.TrunkMonitor
     /// </summary>
     public partial class TrunkMonitorView : UserControl
     {
+        /// <summary>
+        /// Crea una instancia nueva de la vista del monitor de vía.
+        /// </summary>
         public TrunkMonitorView()
         {
             InitializeComponent();
         }
-        
+
+        /// <summary>
+        /// Constructor estático de la clase, permite la carga del modulo en la aplicación.
+        /// </summary>
+        static TrunkMonitorView()
+        {
+            AcabusControlCenterViewModel.AddModule(
+                new TrunkMonitorView(),
+                new PackIcon() { Kind = PackIconKind.SourceMerge },
+                "Monitor de vía y equipos externos"
+                );
+        }
+
     }
 }

@@ -7,9 +7,8 @@ namespace Acabus
     /// </summary>
     public partial class App : Application
     {
-        static App()
+        public App()
         {
-            DataAccess.AcabusData.LoadConfiguration();
         }
     }
 }

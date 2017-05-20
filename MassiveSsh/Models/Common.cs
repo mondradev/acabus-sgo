@@ -3,6 +3,29 @@
 namespace Acabus.Models
 {
     /// <summary>
+    /// Define los tipos de vehículos disponibles.
+    /// </summary>
+    public enum VehicleType
+    {
+        /// <summary>
+        /// Sin tipo.
+        /// </summary>
+        NONE,
+        /// <summary>
+        /// Autobús convencional.
+        /// </summary>
+        CONVENTIONAL,
+        /// <summary>
+        /// Autobús padrón.
+        /// </summary>
+        STANDARD,
+        /// <summary>
+        /// Autobús articulado.
+        /// </summary>
+        ARTICULATED
+    }
+
+    /// <summary>
     /// Define los tipos de equipos disponibles.
     /// </summary>
     public enum DeviceType
@@ -23,6 +46,10 @@ namespace Acabus.Models
         /// Torniquete Simple de E/S.
         /// </summary>
         TS,
+        /// <summary>
+        /// Torniquete Simple de E/S.
+        /// </summary>
+        TSI,
         /// <summary>
         /// Puerta para personas de movilidad reducida.
         /// </summary>
@@ -51,6 +78,14 @@ namespace Acabus.Models
         /// Servidor base de datos.
         /// </summary>
         DB,
+        /// <summary>
+        /// Autobus
+        /// </summary>
+        VEHICLE,
+        /// <summary>
+        /// Display
+        /// </summary>
+        DISPLAY,
         /// <summary>
         /// Sin tipo definido.
         /// </summary>
@@ -83,7 +118,7 @@ namespace Acabus.Models
     /// <summary>
     /// Provee de funciones para el manejo de estados de conexión.
     /// </summary>
-    public static class ConnectionStateFuncs
+    public static class StateValueExtension
     {
         /// <summary>
         /// Obtiene el estado de conexión determinado por la latencia mínima y máxima aceptable.
@@ -120,21 +155,15 @@ namespace Acabus.Models
                 return state1;
             return state2;
         }
-    }
 
-    /// <summary>
-    /// Indica los estados de una alarma.
-    /// </summary>
-    public enum AlertState
-    {
         /// <summary>
-        /// Alarma sin leer
+        /// Obtiene un estado evaluando ambos estados de conexión devolviendo el menor valor.
         /// </summary>
-        UNREAD,
-        /// <summary>
-        /// Alarma leida
-        /// </summary>
-        READ
+        /// <param name="thisState">Este estado.</param>
+        /// <param name="otherState">Otro estado.</param>
+        /// <returns>El estado de menor valor.</returns>
+        public static StateValue AndConnectionStete(this StateValue thisState, StateValue otherState) =>
+            AndConnectionState(thisState, otherState);
     }
 
     /// <summary>
@@ -232,9 +261,23 @@ namespace Acabus.Models
         /// </summary>
         WITHOUT_ENERGY,
         /// <summary>
-        /// Operando.
+        /// Desconocido.
         /// </summary>
-        OPERATING
+        UNKNOWN
     }
 
+    /// <summary>
+    /// Define los tipos de rutas.
+    /// </summary>
+    public enum RouteType
+    {
+        /// <summary>
+        /// Ruta alimentadora.
+        /// </summary>
+        ALIM,
+        /// <summary>
+        /// Ruta troncal.
+        /// </summary>
+        TRUNK
+    }
 }

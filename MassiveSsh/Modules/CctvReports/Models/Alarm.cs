@@ -1,12 +1,13 @@
-﻿using Acabus.Utils.MVVM;
+﻿using Acabus.Models;
+using Acabus.Utils.Mvvm;
 using System;
 
-namespace Acabus.Models
+namespace Acabus.Modules.CctvReports.Models
 {
     /// <summary>
     /// Define la estructura de una alarma de dispositivo.
     /// </summary>
-    public sealed class Alert : NotifyPropertyChanged
+    public sealed class Alarm : NotifyPropertyChanged
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Description'.
@@ -17,7 +18,7 @@ namespace Acabus.Models
         /// Obtiene o establece la descripción de la alarma.
         /// </summary>
         public String Description {
-            get => _description;
+            get => _description?.ToUpper();
             set {
                 _description = value;
                 OnPropertyChanged("Description");
@@ -66,19 +67,20 @@ namespace Acabus.Models
         /// </summary>
         public UInt32 ID => _id;
 
-        /// <summary>
-        /// Campo que provee a la propiedad 'State'.
-        /// </summary>
-        private AlertState _state;
 
         /// <summary>
-        /// Obtiene o establece el estado de lectura de la alarma.
+        /// Campo que provee a la propiedad 'Priority'.
         /// </summary>
-        public AlertState State {
-            get => _state;
+        private Priority _priority;
+
+        /// <summary>
+        /// Obtiene o establece la prioridad de la incidencia.
+        /// </summary>
+        public Priority Priority {
+            get => _priority;
             set {
-                _state = value;
-                OnPropertyChanged("State");
+                _priority = value;
+                OnPropertyChanged("Priority");
             }
         }
 
@@ -86,7 +88,7 @@ namespace Acabus.Models
         /// Crea una instancia de alarma de dispositivo.
         /// </summary>
         /// <param name="id">Identificador de alarma.</param>
-        public Alert(UInt32 id) => _id = id;
+        public Alarm(UInt32 id) => _id = id;
 
         /// <summary>
         /// Crea una instancia nueva de alarma de dispositivo.
@@ -95,16 +97,17 @@ namespace Acabus.Models
         /// <param name="numeSeri">Número de serie que produce la alarma.</param>
         /// <param name="description">Descripción de la alarma.</param>
         /// <param name="dateTime">Fecha y hora de la alarma.</param>
+        /// <param name="priority">La prioridad que requiere de atención.</param>
         /// <returns>Una alarma de dispositivo.</returns>
-        public static Alert CreateAlert(UInt32 id, String numeSeri, String description, DateTime dateTime)
+        public static Alarm CreateAlarm(UInt32 id, String numeSeri, String description, DateTime dateTime, Priority priority)
         {
-            return new Alert(id)
+            return new Alarm(id)
             {
                 Description = description,
                 DateTime = dateTime,
                 Device = DataAccess.AcabusData.FindDevice((device)
                             => device.NumeSeri.Equals(numeSeri)),
-                State = AlertState.UNREAD
+                Priority = priority
             };
         }
 
@@ -114,7 +117,36 @@ namespace Acabus.Models
         /// <returns>Una cadena que representa una alarma.</returns>
         public override string ToString()
         {
-            return String.Format("{0} {1} {2}: {3} - {4}", ID, Device, DateTime, Description, State);
+            return String.Format("{0} {1} {2}: {3}", ID, Device, DateTime, Description);
         }
+
+        /// <summary>
+        /// Operador lógico de igualdad, determina si dos instancias <see cref="Alarm"/> son iguales.
+        /// </summary>
+        /// <param name="alarm">Una instancia.</param>
+        /// <param name="otherAlarm">Otra instancia.</param>
+        /// <returns>Un valor <code>true</code> si el ID y el Device es igual en ambas instancias <see cref="Alarm"/>.</returns>
+        public static bool operator ==(Alarm alarm, Alarm otherAlarm)
+        {
+            if (otherAlarm.ID == alarm.ID && otherAlarm.Device == alarm.Device)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Operador lógico de desigualdad, determina si dos instancias <see cref="Alarm"/> son diferentes.
+        /// </summary>
+        /// <param name="alarm">Una instancia.</param>
+        /// <param name="otherAlarm">Otra instancia.</param>
+        /// <returns>Un valor <code>true</code> si el ID o el Device es diferente en ambas instancias <see cref="Alarm"/>.</returns>
+        public static bool operator !=(Alarm alarm, Alarm otherAlarm)
+        {
+            if (otherAlarm.ID != alarm.ID || otherAlarm.Device != alarm.Device)
+                return true;
+
+            return false;
+        }
+
     }
 }
