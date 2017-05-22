@@ -25,10 +25,15 @@ namespace Acabus.Converters
             return new CommandBase((param) =>
             {
                 foreach (var item in ((object[])commands))
-                {
                     if (item is ICommand)
                         ((ICommand)item).Execute(param);
-                }
+            }, (param) =>
+            {
+                bool canExecute = true;
+                foreach (var item in ((object[])commands))
+                    if (item is ICommand)
+                        canExecute &= ((ICommand)item).CanExecute(param);
+                return canExecute;
             });
         }
 

@@ -84,6 +84,8 @@ namespace Acabus.Window
                     _messages.Dequeue();
                 }).Start();
             });
+
+
         }
     }
 }

@@ -16,7 +16,7 @@
         TextElement.FontSize="14"
         FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
         Title="Acabus Centro de Operaciones"
-        WindowStartupLocation="CenterScreen" MinWidth="860" MinHeight="550" Height="auto" Width="auto" Icon="/AcabusControlCenter;component/Resources/acabus_icon.ico">
+        WindowStartupLocation="CenterScreen" MinWidth="860" MinHeight="550" Height="auto" Width="auto" Icon="/AcabusControlCenter;component/acabus_icon.ico">
     <materialDesign:DialogHost>
         <Grid>
             <Grid.RowDefinitions>

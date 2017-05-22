@@ -36,12 +36,21 @@
     </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
-            <RowDefinition Height="5"/>
+            <RowDefinition Height="8"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
+        <Grid Margin="0" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <materialDesign:PackIcon Kind="Magnify" Width="24" Height="24" VerticalAlignment="Center" Margin="8" />
+            <TextBox materialDesign:HintAssist.Hint="Buscar folio" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0,0,-0.4,-0.2" Grid.Column="1" Text="{Binding FolioToSearch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
         <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource OpenedIncidencesCollection}}" IsReadOnly="True" 
-                  SelectedItem="{Binding SelectedIncidence}" SelectionMode="Single" CanUserResizeRows="False">
+                  SelectedItem="{Binding SelectedIncidence}" SelectionMode="Single" CanUserResizeRows="False" Grid.Row="1">
             <DataGrid.CommandBindings>
                 <CommandBinding Command="{x:Static ApplicationCommands.Copy}" Executed="CommandBindingExecuted" />
                 <CommandBinding Command="{x:Static ApplicationCommands.Cut}" Executed="CommandBindingExecuted" />
@@ -54,7 +63,7 @@
                     <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="MouseDoubleClick">
-                    <i:InvokeCommandAction Command="{Binding ModifyIncidenceDialogCommand}"  CommandParameter="{Binding  DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:CctvReportsView}}}"/>
+                    <i:InvokeCommandAction Command="{Binding ModifyIncidenceDialogCommand}"  CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:CctvReportsView}}}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <DataGrid.Columns>
@@ -74,9 +83,9 @@
                 </Style>
             </DataGrid.RowStyle>
         </DataGrid>
-        <GridSplitter HorizontalAlignment="Stretch" Margin="0" Grid.Row="1" ResizeDirection="Rows"/>
+        <GridSplitter HorizontalAlignment="Stretch" Margin="0" Grid.Row="2" ResizeDirection="Rows"/>
         <DataGrid  Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding IncidencesClosed}" IsReadOnly="True" 
-                   SelectedItem="{Binding SelectedIncidence}" Grid.Row="2" SelectionMode="Single" CanUserResizeRows="False">
+                   SelectedItem="{Binding SelectedIncidence}" Grid.Row="3" SelectionMode="Single" CanUserResizeRows="False">
             <DataGrid.CommandBindings>
                 <CommandBinding Command="{x:Static ApplicationCommands.Copy}" Executed="CommandBindingExecuted" />
                 <CommandBinding Command="{x:Static ApplicationCommands.Cut}" Executed="CommandBindingExecuted" />
@@ -108,27 +117,24 @@
                                  ToggleCheckedContentCommandParameter="{Binding Incidences}"
                                  PlacementMode="TopAndAlignCentres"
                                  Margin="0,0,16,16"
-                                 ToolTip="Agregar una nueva incidencia" Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" PopupMode="MouseOver">
+                                 ToolTip="Agregar una nueva incidencia" Grid.Row="3" VerticalAlignment="Bottom" HorizontalAlignment="Right" PopupMode="MouseOver">
             <materialDesign:PopupBox.ToggleCheckedContent>
                 <materialDesign:PackIcon Kind="NotePlus" Width="24" Height="24" />
             </materialDesign:PopupBox.ToggleCheckedContent>
             <StackPanel>
                 <!-- Exportar incidencias -->
-                <Button ToolTip="Exportar incidencias" Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
-                        Background="{DynamicResource AccentSelectedColorBrush}" BorderBrush="{DynamicResource AccentSelectedColorBrush}">
+                <Button ToolTip="Exportar incidencias" Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}" BorderBrush="White" Background="White">
                     <Button.CommandParameter>
                         <local:ExportDataView />
                     </Button.CommandParameter>
                     <materialDesign:PackIcon Kind="Export"  Width="24" Height="24"/>
                 </Button>
                 <!-- Unidades en taller o sin energía -->
-                <Button ToolTip="Unidades en taller o sin energía" Command="{Binding OpenOffDutyVehiclesDialog}" 
-                        Background="{DynamicResource AccentSelectedColorBrush}" BorderBrush="{DynamicResource AccentSelectedColorBrush}">
+                <Button ToolTip="Unidades en taller o sin energía" Command="{Binding OpenOffDutyVehiclesDialog}" BorderBrush="White" Background="White">
                     <materialDesign:PackIcon Kind="Bus" Width="24" Height="24"/>
                 </Button>
                 <!-- Cerrar incidencias -->
-                <Button ToolTip="Cerrar incidencia"  Command="{Binding CloseIncidenceDialogCommand}" Background="{DynamicResource AccentSelectedColorBrush}"
-                        BorderBrush="{DynamicResource AccentSelectedColorBrush}">
+                <Button ToolTip="Cerrar incidencia"  Command="{Binding CloseIncidenceDialogCommand}" BorderBrush="White" Background="White">
                     <materialDesign:PackIcon Kind="CloseBox" Width="24" Height="24"/>
                 </Button>
             </StackPanel>

@@ -70,7 +70,13 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         public ObservableCollection<Incidence> IncidencesOpened
             => (ObservableCollection<Incidence>)Util.SelectFromList(Incidences, (incidence)
-                => incidence.Status == IncidenceStatus.OPEN);
+                =>
+            {
+                Boolean isOpen = incidence.Status == IncidenceStatus.OPEN;
+                Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.Contains(FolioToSearch);
+
+                return isOpen && isMatch;
+            });
 
         /// <summary>
         /// Obtiene el comando que se ejecuta cuando el evento <c>SelectionChanged</c>
@@ -104,6 +110,23 @@ namespace Acabus.Modules.CctvReports
             set {
                 _selectedIncidence = value;
                 OnPropertyChanged("SelectedIncidence");
+            }
+        }
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'FolioToSearch'.
+        /// </summary>
+        private String _folioToSearch;
+
+        /// <summary>
+        /// Obtiene o establece el folio a buscar en las incidencias abiertas.
+        /// </summary>
+        public String FolioToSearch {
+            get => _folioToSearch;
+            set {
+                _folioToSearch = value;
+                OnPropertyChanged("FolioToSearch");
+                OnPropertyChanged("IncidencesOpened");
             }
         }
 
@@ -179,6 +202,8 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         public CctvReportsViewModel()
         {
+            ViewModelService.Register(this);
+
             CopyingRowClipboardHandlerCommand = new CommandBase((parameter) =>
             {
                 String incidenceData = SelectedIncidence?.ToReportString();
@@ -193,7 +218,6 @@ namespace Acabus.Modules.CctvReports
             UpdateDataCommand = new CommandBase((parameter) =>
             {
                 if ((parameter as Incidence).Status != IncidenceStatus.CLOSE) return;
-                SelectedIncidence = null;
                 OnPropertyChanged("IncidencesOpened");
                 OnPropertyChanged("IncidencesClosed");
             });
@@ -234,7 +258,7 @@ namespace Acabus.Modules.CctvReports
                 if (HasErrors) return;
 
                 SelectedIncidence.WhoReporting = NewWhoReporting;
-                SelectedIncidence.SaveInDataBase();
+                SelectedIncidence.Update();
                 NewWhoReporting = null;
 
                 DialogHost.CloseDialogCommand.Execute(parameter, null);
@@ -275,7 +299,7 @@ namespace Acabus.Modules.CctvReports
                      else if (time > maxLowPriority && item.Priority < Acabus.Models.Priority.HIGH)
                          item.Priority = Acabus.Models.Priority.MEDIUM;
 
-                     item.SaveInDataBase();
+                     item.UpdatePriority();
                  }
              }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
 
@@ -291,7 +315,7 @@ namespace Acabus.Modules.CctvReports
             _busAlarmsMonitor = new Timer(delegate
             {
                 Trace.WriteLine("Actualizando autobuses sin conexión", "DEBUG");
-                if (DateTime.Now.TimeOfDay > new TimeSpan(5, 30, 0))
+                if (DateTime.Now.TimeOfDay > new TimeSpan(6, 0, 0))
                     BusDisconnectedAlarms.GetBusDisconnectedAlarms();
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(0.5));
         }
@@ -341,7 +365,7 @@ namespace Acabus.Modules.CctvReports
                                 ? item.Location.ToString()
                                 : item.Device.ToString(),
                             item.Description));
-                    item.SaveInDataBase();
+                    item.CreateIncidence();
                 }
             }
             OnPropertyChanged("IncidencesOpened");
@@ -389,6 +413,11 @@ namespace Acabus.Modules.CctvReports
             if (_busAlarmsMonitor == null && AcabusData.OffDutyVehicles.Count == 0) return;
 
             InitBusAlarmsMonitor();
+        }
+
+        ~CctvReportsViewModel()
+        {
+            ViewModelService.UnRegister(this);
         }
 
     }

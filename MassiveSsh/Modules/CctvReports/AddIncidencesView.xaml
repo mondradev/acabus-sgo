@@ -10,6 +10,7 @@
              xmlns:converters="clr-namespace:Acabus.Converters"
              mc:Ignorable="d">
     <UserControl.Resources>
+        <converters:DateTimeConverter x:Key="DateTimeConverter"/>
         <converters:PriorityConverter x:Key="PriorityConverter" />
     </UserControl.Resources>
     <Grid Margin="0" Width="300">
@@ -42,6 +43,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <ToggleButton HorizontalAlignment="Right" Margin="0" IsChecked="{Binding IsBusIncidences}" />
             <TextBlock HorizontalAlignment="Right" Margin="0,0,42,0" TextWrapping="Wrap" Text="Incidencia de autobus" TextAlignment="Center" VerticalAlignment="Center"/>
@@ -54,8 +57,9 @@
             <ComboBox Style="{DynamicResource MaterialDesignFloatingHintComboBox}" materialDesign:HintAssist.Hint="{Binding HeaderTextDeviceOrVehicle}"
                                   VerticalAlignment="Top" Grid.Row="8" ItemsSource="{Binding Devices}" SelectedItem="{Binding Device, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
             <ComboBox Style="{DynamicResource MaterialDesignFloatingHintComboBox}" materialDesign:HintAssist.Hint="Prioridad" VerticalAlignment="Top"
-                                  Grid.Row="10" Margin="0" SelectedItem="{Binding Priority, Converter={StaticResource PriorityConverter}}" 
+                                  Grid.Row="12" Margin="0" SelectedItem="{Binding Priority, Converter={StaticResource PriorityConverter}}" 
                                   ItemsSource="{Binding Priorities, Converter={StaticResource PriorityConverter}}"/>
+            <materialDesign:TimePicker Grid.Row="10" materialDesign:HintAssist.Hint="Hora de la incidencia"  Style="{StaticResource MaterialDesignFloatingHintTimePicker}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedTime="{Binding StartTime, Converter={StaticResource DateTimeConverter}}" />
         </Grid>
         <StackPanel Margin="0,2,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" d:LayoutOverrides="Height">
             <Button Command="{Binding CloseCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left" 

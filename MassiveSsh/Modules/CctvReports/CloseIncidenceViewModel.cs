@@ -2,6 +2,7 @@
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils.Mvvm;
+using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.ObjectModel;
@@ -65,6 +66,11 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         private String _selectedTechnician;
 
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedIncidence'
+        /// </summary>
+        private Incidence _selectedIncidence;
+
 
         /// <summary>
         /// Obtiene o establece el nombre de la persona que solucionó la incidencia.
@@ -80,7 +86,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene la incidencia actualmente seleccionada en la tabla principal.
         /// </summary>
-        public Incidence SelectedIncidence => ViewModelService.GetViewModel<CctvReportsViewModel>().SelectedIncidence;
+        public Incidence SelectedIncidence => _selectedIncidence;
 
         /// <summary>
         /// Obtiene una lista de los técnicos seleccionables.
@@ -105,6 +111,7 @@ namespace Acabus.Modules.CctvReports
         {
             _finishDate = DateTime.Now;
             _finishTime = DateTime.Now.TimeOfDay;
+            _selectedIncidence = ViewModelService.GetViewModel<CctvReportsViewModel>().SelectedIncidence;
 
             CloseIncidenceCommand = new CommandBase(CloseIncidenceCommandExecute, CloseIncidenceCommandCanExec);
 
@@ -112,14 +119,14 @@ namespace Acabus.Modules.CctvReports
 
         private void CloseIncidenceCommandExecute(object parameter)
         {
-
             SelectedIncidence.Status = IncidenceStatus.CLOSE;
             SelectedIncidence.Technician = SelectedTechnician;
             SelectedIncidence.Observations = Observations;
             SelectedIncidence.FinishDate = FinishDate.AddTicks(FinishTime.Ticks);
-            SelectedIncidence.SaveInDataBase();
+            bool isDone = SelectedIncidence.Update();
 
-            DialogHost.CloseDialogCommand.Execute(parameter, null);
+            if (!isDone) AcabusControlCenterViewModel.ShowDialog("No se cerró la incidencia");
+            else DialogHost.CloseDialogCommand.Execute(parameter, null);
         }
 
         private bool CloseIncidenceCommandCanExec(object parameter)

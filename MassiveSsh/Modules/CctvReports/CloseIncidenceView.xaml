@@ -47,7 +47,7 @@
                                              Text="{Binding SelectedIncidence.Device, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
             </StackPanel>
             <ComboBox Style="{DynamicResource MaterialDesignFloatingHintComboBox}" materialDesign:HintAssist.Hint="Técnico que resolvió" IsEditable="True" 
-                                          Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Technicians}" SelectedItem="{Binding SelectedTechnician}" />
+                                          Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Technicians}" SelectedItem="{Binding SelectedTechnician , NotifyOnValidationError=True}" />
             <DatePicker Style="{StaticResource MaterialDesignFloatingHintDatePicker}" materialDesign:HintAssist.Hint="Fecha de solución" Grid.Row="6"
                                             HorizontalAlignment="Stretch" Margin="0,12,0,0" SelectedDate="{Binding FinishDate, NotifyOnValidationError=True}" />
             <materialDesign:TimePicker  Style="{StaticResource MaterialDesignFloatingHintTimePicker}" materialDesign:HintAssist.Hint="Hora de solución" 

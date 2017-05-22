@@ -3,6 +3,7 @@ using Acabus.Models;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils.Mvvm;
+using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
@@ -194,6 +195,22 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
+        /// Campo que provee a la propiedad 'StartTime'.
+        /// </summary>
+        private TimeSpan _startTime;
+
+        /// <summary>
+        /// Obtiene o establece el tiempo de inicio de la incidencia.
+        /// </summary>
+        public TimeSpan StartTime {
+            get => _startTime;
+            set {
+                _startTime = value;
+                OnPropertyChanged("StartTime");
+            }
+        }
+
+        /// <summary>
         /// Obtiene el nombre del cuadro de texto para vehículo o equipo.
         /// </summary>
         public String HeaderTextDeviceOrVehicle => IsBusIncidences ? "Vehículo" : "Equipo";
@@ -221,6 +238,8 @@ namespace Acabus.Modules.CctvReports
 
             AddCommand = new CommandBase(AddCommandExecute, AddCommandCanExec);
             CloseCommand = new CommandBase(parameter => DialogHost.CloseDialogCommand.Execute(parameter, null));
+
+            _startTime = DateTime.Now.TimeOfDay;
         }
 
         private bool AddCommandCanExec(object parameter)
@@ -235,10 +254,14 @@ namespace Acabus.Modules.CctvReports
                 if (incidence.Status == IncidenceStatus.CLOSE) continue;
 
                 if (exists = (incidence.Description == Description
-                    && incidence.Device == Device
+                  && (incidence.Device is Vehicle && Device is Vehicle
+                        ? (incidence.Device as Vehicle).EconomicNumber == (Device as Vehicle).EconomicNumber
+                        : incidence.Device.NumeSeri == Device.NumeSeri)
                     && incidence.Location == Location))
                     break;
             }
+            if (exists)
+                AddError("Description", "Ya existe una incidencia abierta igual para el equipo");
 
             return !exists;
         }
@@ -252,7 +275,7 @@ namespace Acabus.Modules.CctvReports
                 incidences.CreateIncidence(
                     Description,
                     Device,
-                    DateTime.Now,
+                    DateTime.Now.Date.AddTicks(StartTime.Ticks),
                     Priority,
                     Location,
                     WhoReporting

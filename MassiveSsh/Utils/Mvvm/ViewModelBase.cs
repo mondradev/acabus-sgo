@@ -11,18 +11,6 @@ namespace Acabus.Utils.Mvvm
     /// </summary>
     public class ViewModelBase : INotifyPropertyChanged, INotifyDataErrorInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public ViewModelBase()
-        {
-            ViewModelService.Register(this);
-        }
-
-        ~ViewModelBase()
-        {
-            ViewModelService.UnRegister(this);
-        }
 
         /// <summary>
         /// 
@@ -130,5 +118,6 @@ namespace Acabus.Utils.Mvvm
         /// </summary>
         /// <param name="propertyName"></param>
         protected virtual void OnValidation(string propertyName) { }
+
     }
 }
