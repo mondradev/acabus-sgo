@@ -2,6 +2,7 @@
 using Acabus.Models;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
+using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
 using MaterialDesignThemes.Wpf;
@@ -119,6 +120,10 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         public IEnumerable<Device> Devices {
             get {
+                if (IsRefundOfMoney)
+                    return Location is null
+                        ? AcabusData.FindDevices(device => device is Kvr)
+                        : (Location as Station).Devices.SelectFromList(device => device is Kvr);
                 if (!IsBusIncidences)
                     return Location is null || (!(Location is Route) && !(Location is Station))
                         ? AcabusData.FindDevices((device) => true) : (Location as Station).Devices;
@@ -138,22 +143,6 @@ namespace Acabus.Modules.CctvReports
                 if (!IsBusIncidences)
                     return AcabusData.FindStations((station) => true);
                 return AcabusData.Routes;
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'SelectedIndexLocation'.
-        /// </summary>
-        private Int32 _selectedIndexLocation;
-
-        /// <summary>
-        /// Obtiene o establece el indice de la lista de la ubicación actualmente seleccionada.
-        /// </summary>
-        public Int32 SelectedIndexLocation {
-            get => _selectedIndexLocation;
-            set {
-                _selectedIndexLocation = value;
-                OnPropertyChanged("SelectedIndexLocation");
             }
         }
 
@@ -230,6 +219,161 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         public ICommand CloseCommand { get; }
 
+
+        #region RefundOfCash
+        /// <summary>
+        /// Campo que provee a la propiedad 'TitleSection'.
+        /// </summary>
+        private String _titleSection;
+
+        /// <summary>
+        /// Obtiene el titulo del cuadro de dialogo
+        /// </summary>
+        public String TitleSection => _titleSection;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Quantity'.
+        /// </summary>
+        private String _quantity;
+
+        /// <summary>
+        /// Obtiene o establece la cantidad de dinero a devolver.
+        /// </summary>
+        public String Quantity {
+            get => _quantity;
+            set {
+                _quantity = value;
+                OnPropertyChanged("Quantity");
+                SetDescription();
+            }
+        }
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'CashDestiny'.
+        /// </summary>
+        private CashDestiny? _cashDestiny;
+
+        /// <summary>
+        /// Obtiene o establece el destino del dinero.
+        /// </summary>
+        public CashDestiny? CashDestiny {
+            get => _cashDestiny;
+            set {
+                _cashDestiny = value;
+                OnPropertyChanged("CashDestiny");
+                SetDescription();
+            }
+        }
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'IsMoney'.
+        /// </summary>
+        private Boolean _isMoney;
+
+        /// <summary>
+        /// Obtiene o establece si la devolución de dinero son monedas.
+        /// </summary>
+        public Boolean IsMoney {
+            get => _isMoney;
+            set {
+                _isMoney = value;
+                OnPropertyChanged("IsMoney");
+                OnPropertyChanged("CashDestinies");
+                SetDescription();
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista con los destino de dinero.
+        /// </summary>
+        public IEnumerable<CashDestiny> CashDestinies => AcabusData.CashDestiny.SelectFromList(cashDestiny =>
+        {
+            if (IsMoney && cashDestiny.Type == CashType.MONEY)
+                return true;
+            if (!IsMoney && cashDestiny.Type == CashType.BILL)
+                return true;
+            if (cashDestiny.Type == CashType.GENERAL)
+                return true;
+            return false;
+        });
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'IsNewIncidences'.
+        /// </summary>
+        private Boolean _isNewIncidences;
+
+        /// <summary>
+        /// Obtiene o establece si se está generando una incidencia nueva.
+        /// </summary>
+        public Boolean IsNewIncidences {
+            get => _isNewIncidences;
+            set {
+                _isNewIncidences = value;
+                OnPropertyChanged("IsNewIncidences");
+                _titleSection = _isNewIncidences ? "Nueva incidencia" : "Devolución de dinero";
+                SetDescription();
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece si se está devolviendo dinero.
+        /// </summary>
+        public Boolean IsRefundOfMoney {
+            get => !IsNewIncidences;
+            set {
+                IsNewIncidences = !value;
+                OnPropertyChanged("IsRefundOfMoney");
+                SetDescription();
+            }
+        }
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedTechnician'.
+        /// </summary>
+        private String _selectedTechnician;
+
+        /// <summary>
+        /// Obtiene o establece el nombre de la persona que solucionó la incidencia.
+        /// </summary>
+        public String SelectedTechnician {
+            get => _selectedTechnician;
+            set {
+                _selectedTechnician = value;
+                OnPropertyChanged("SelectedTechnician");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de los técnicos seleccionables.
+        /// </summary>
+        public ObservableCollection<String> Technicians => AcabusData.Technicians;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Observations'.
+        /// </summary>
+        private String _observations;
+
+        /// <summary>
+        /// Obtiene o establece las observaciones de la devolución.
+        /// </summary>
+        public String Observations {
+            get => _observations;
+            set {
+                _observations = value;
+                OnPropertyChanged("Observations");
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        private void SetDescription()
+        {
+            Single.TryParse(Quantity, out float quantity);
+            if (IsRefundOfMoney)
+                Description = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}", _isMoney ? "MONEDAS" : "BILLETE", quantity, CashDestiny?.Description);
+        }
+        #endregion
+
         /// <summary>
         /// 
         /// </summary>
@@ -240,14 +384,15 @@ namespace Acabus.Modules.CctvReports
             CloseCommand = new CommandBase(parameter => DialogHost.CloseDialogCommand.Execute(parameter, null));
 
             _startTime = DateTime.Now.TimeOfDay;
+
         }
 
         private bool AddCommandCanExec(object parameter)
         {
-            if (parameter is null) return false;
             if (!Validate()) return false;
+            if (IsRefundOfMoney) return true;
 
-            var incidences = (IList<Incidence>)parameter;
+            var incidences = ViewModelService.GetViewModel<CctvReportsViewModel>().Incidences;
             bool exists = false;
             foreach (var incidence in incidences)
             {
@@ -268,18 +413,35 @@ namespace Acabus.Modules.CctvReports
 
         private void AddCommandExecute(Object parameter)
         {
-            var incidences = (IList<Incidence>)parameter;
+            var incidences = ViewModelService.GetViewModel<CctvReportsViewModel>().Incidences;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                incidences.CreateIncidence(
+                var incidence = CctvService.CreateIncidence(incidences,
                     Description,
                     Device,
                     DateTime.Now.Date.AddTicks(StartTime.Ticks),
-                    Priority,
+                    IsRefundOfMoney ? Priority.NONE : Priority,
                     Location,
                     WhoReporting
                 );
+
+                if (IsRefundOfMoney)
+                {
+                    incidence.Status = CashDestiny.Value.Description == "CAU" ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
+                    incidence.Technician = SelectedTechnician;
+                    incidence.Observations = Observations;
+                    incidence.FinishDate = CashDestiny.Value.Description == "CAU" ? null : incidence.StartDate;
+                    var refundOfMoney = new RefundOfMoney(incidence)
+                    {
+                        Quantity = Single.Parse(Quantity),
+                        CashDestiny = CashDestiny.Value,
+                        Status = CashDestiny?.Description == "CAU" ? RefundOfMoneyStatus.UNCOMMIT : RefundOfMoneyStatus.COMMIT,
+                        RefundDate = CashDestiny?.Description == "CAU" ? null : incidence.StartDate
+                    };
+                    if (refundOfMoney.Save())
+                        ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateData();
+                }
 
             });
 
@@ -305,6 +467,24 @@ namespace Acabus.Modules.CctvReports
                 case "Device":
                     if (String.IsNullOrEmpty(Device?.ToString()))
                         AddError("Device", String.Format("Falta seleccionar el {0}", IsBusIncidences ? "vehículo" : "equipo"));
+                    if (IsRefundOfMoney && !(Device is Kvr))
+                        AddError("Device", "El equipo debe ser un KVR");
+                    break;
+                case "Priority":
+                    if (IsNewIncidences && Priority == Priority.NONE)
+                        AddError("Priority", "Debe asignar una prioridad a la incidencia.");
+                    break;
+                case "CashDestiny":
+                    if (IsRefundOfMoney && String.IsNullOrEmpty(CashDestiny?.ToString()))
+                        AddError("CashDestiny", "Falta agregar el destino del dinero.");
+                    break;
+                case "Quantity":
+                    if (IsRefundOfMoney && !Single.TryParse(Quantity, out float result))
+                        AddError("Quantity", "Falta agregar la cantidad.");
+                    break;
+                case "SelectedTechnician":
+                    if (IsRefundOfMoney && String.IsNullOrEmpty(SelectedTechnician))
+                        AddError("SelectedTechnician", "Falta agregar el técnico que hará la devolución.");
                     break;
             }
         }
@@ -315,6 +495,13 @@ namespace Acabus.Modules.CctvReports
             ValidateProperty("Description");
             ValidateProperty("Location");
             ValidateProperty("Device");
+            ValidateProperty("Priority");
+            if (IsRefundOfMoney)
+            {
+                ValidateProperty("CashDestiny");
+                ValidateProperty("Quantity");
+                ValidateProperty("SelectedTechnician");
+            }
 
             if (HasErrors) return false;
 

@@ -14,7 +14,7 @@ namespace Acabus.DataAccess
     /// Esta clase permite el acceso a todas las configuraciones básicas y especificas de
     /// la aplicación <c>AcabusControlCenter</c>.
     /// </summary>
-    internal static class AcabusData
+    internal static partial class AcabusData
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Companies'.
@@ -358,13 +358,13 @@ namespace Acabus.DataAccess
         /// </summary>
         static AcabusData()
         {
-            LoadConfiguration();
+            InitAcabusData();
         }
 
         /// <summary>
         /// Carga la configuración del XML en Trunk.Trunks.
         /// </summary>
-        public static void LoadConfiguration()
+        private static void InitAcabusData()
         {
             if (_loadedData) return;
             try
@@ -374,15 +374,13 @@ namespace Acabus.DataAccess
                 _xmlConfig.Load(CONFIG_FILENAME);
 
                 LoadSettings();
-                LoadRoutes();
-                LoadCC();
-                LoadLinks();
-                LoadTechnicians();
-                LoadOffDutyVehicles();
-                LoadCommonFaults();
-                LoadCompanies();
+                LoadTrunkSettings();
+                LoadTechniciansSettings();
+                LoadOffDutyVehiclesSettings();
+                LoadCommonFaultsSettings();
+                LoadCompaniesSettings();
 
-                LoadModuleNames();
+                LoadModuleSettings();
 
                 _loadedData = true;
             }
@@ -393,10 +391,17 @@ namespace Acabus.DataAccess
             }
         }
 
+        private static void LoadTrunkSettings()
+        {
+            ReadRoutesData();
+            ReadCCData();
+            ReadLinksData();
+        }
+
         /// <summary>
         /// Carga una lista de los técnicos.
         /// </summary>
-        private static void LoadTechnicians()
+        private static void LoadTechniciansSettings()
         {
             foreach (XmlNode technicianXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Technicians")?.SelectNodes("Technician"))
                 Technicians.Add(XmlUtils.GetAttribute(technicianXmlNode, "Name"));
@@ -419,7 +424,7 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Carga los nombres de las empresas involucradas en la operación.
         /// </summary>
-        private static void LoadCompanies()
+        private static void LoadCompaniesSettings()
         {
             Companies.Clear();
             foreach (XmlNode companyXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Companies")?.SelectNodes("Company"))
@@ -429,7 +434,7 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Carga los nombres de los modulos disponibles en la aplicación.
         /// </summary>
-        private static void LoadModuleNames()
+        private static void LoadModuleSettings()
         {
             Modules.Clear();
             foreach (XmlNode moduleXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Modules")?.SelectNodes("Module"))
@@ -440,7 +445,7 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Carga las fallas comunes de la operación.
         /// </summary>
-        private static void LoadCommonFaults()
+        private static void LoadCommonFaultsSettings()
         {
             CommonFaults.Clear();
             foreach (XmlNode faultXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Faults")?.SelectNodes("Fault"))
@@ -450,7 +455,7 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Carga la lista de unidades fuera de servicio.
         /// </summary>
-        public static void LoadOffDutyVehicles()
+        public static void LoadOffDutyVehiclesSettings()
         {
             var filename = String.Format(OFF_DUTY_VEHICLES_FILENAME, DateTime.Now);
 
@@ -527,7 +532,7 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Carga la información leida del nodo CC del documento de configuración en XML.
         /// </summary>
-        private static void LoadCC()
+        private static void ReadCCData()
         {
             _cc = FindStation((station) => station.Name.Contains("CENTRO DE CONTROL"));
         }
@@ -535,7 +540,7 @@ namespace Acabus.DataAccess
         /// <summary>
         /// Carga la información leida del nodo Links del documento de configuración en XML.
         /// </summary>
-        private static void LoadLinks()
+        private static void ReadLinksData()
         {
             foreach (var xmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Links").SelectNodes("Link"))
             {
@@ -579,12 +584,12 @@ namespace Acabus.DataAccess
 
             _timeMaxLowPriorityIncidenceBus = TimeSpan.Parse(GetProperty("TimeMaxLowPriorityIncidenceBus", "Setting"));
             _timeMaxMediumPriorityIncidenceBus = TimeSpan.Parse(GetProperty("TimeMaxMediumPriorityIncidenceBus", "Setting"));
-        }        
+        }
 
         /// <summary>
         /// Carga la información leida del nodo Trunks del documento de configuración en XML.
         /// </summary>
-        public static void LoadRoutes()
+        public static void ReadRoutesData()
         {
             Routes.Clear();
 
@@ -997,6 +1002,16 @@ namespace Acabus.DataAccess
             return response;
         }
 
+        #region BasicOperations
+        private static void FillList<T>(ref ICollection<T> list, Func<XmlNode, T> converterFunction, String collectionNode, String nodesName, XmlNode rootNode = null)
+        {
+            rootNode = rootNode is null ? _xmlConfig.SelectSingleNode("Acabus") : rootNode;
+
+            foreach (XmlNode xmlNode in rootNode?.SelectSingleNode(collectionNode)?.SelectNodes(nodesName))
+                list.Add(converterFunction.Invoke(xmlNode));
+
+        }
+        #endregion
 
     }
 }

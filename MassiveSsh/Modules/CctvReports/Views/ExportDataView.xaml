@@ -24,8 +24,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock TextWrapping="Wrap" Text="Exportar datos" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
-            <DatePicker Style="{StaticResource MaterialDesignFloatingHintDatePicker}" materialDesign:HintAssist.Hint="Fecha inicial" Grid.Row="2" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding StartDateTime}" SelectedDate="{Binding StartDateTime}" />
-            <DatePicker Style="{StaticResource MaterialDesignFloatingHintDatePicker}" materialDesign:HintAssist.Hint="Fecha final" Grid.Row="4" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding FinishDateTime}" SelectedDate="{Binding FinishDateTime}" />
+            <DatePicker materialDesign:HintAssist.Hint="Fecha inicial" Grid.Row="2" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding StartDateTime}" SelectedDate="{Binding StartDateTime}" />
+            <DatePicker materialDesign:HintAssist.Hint="Fecha final" Grid.Row="4" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding FinishDateTime}" SelectedDate="{Binding FinishDateTime}" />
         </Grid>
         <StackPanel Margin="8" Grid.Row="2" HorizontalAlignment="Right" Orientation="Horizontal">
             <Button ToolTip="Descartar" Height="Auto" Margin="0,0,8,0" VerticalAlignment="Top" HorizontalAlignment="Left" d:LayoutOverrides="TopPosition, BottomPosition" Style="{StaticResource MaterialDesignFlatButton}" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">

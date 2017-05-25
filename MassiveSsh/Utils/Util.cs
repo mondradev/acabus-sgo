@@ -37,9 +37,9 @@ namespace Acabus.Utils
             return builder.ToString();
         }
 
-        public static IList<T> SelectFromList<T>(IList<T> collection, Predicate<T> predicate)
+        public static ICollection<T> SelectFromList<T>(this ICollection<T> collection, Predicate<T> predicate)
         {
-            IList<T> listTemp = (IList<T>)Activator.CreateInstance(collection.GetType());
+            ICollection<T> listTemp = (IList<T>)Activator.CreateInstance(collection.GetType());
             foreach (var item in collection)
                 if (predicate.Invoke(item))
                     listTemp.Add(item);

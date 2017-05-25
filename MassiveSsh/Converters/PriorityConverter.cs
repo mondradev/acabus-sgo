@@ -15,7 +15,8 @@ namespace Acabus.Converters
         {
             { Priority.HIGH, "ALTA" },
             { Priority.MEDIUM, "MEDIA" },
-            { Priority.LOW, "BAJA" }
+            { Priority.LOW, "BAJA" },
+            { Priority.NONE, "NINGUNA" }
         })
         { }
     }

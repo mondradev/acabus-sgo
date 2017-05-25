@@ -10,12 +10,17 @@ namespace Acabus.DataAccess
         private static SQLiteCommand _command;
 
         private static Object _lock = new object();
+        private static SQLiteTransaction _transaction;
+        private static bool _inTransaction;
 
         static SQLiteAccess()
         {
+            _inTransaction = false;
             _connection = new SQLiteConnection("Data Source=Resources/acabus_data.dat;Version=3;Password=acabus*data*dat");
             _command = _connection.CreateCommand();
         }
+
+
 
         public static Object[][] ExecuteQuery(String query, out String[] header)
         {
@@ -23,8 +28,11 @@ namespace Acabus.DataAccess
             lock (_lock)
             {
                 if (_connection.State != System.Data.ConnectionState.Open) _connection.Open();
+                if (_inTransaction)
+                    _command.Transaction = _transaction;
                 _command.CommandText = query;
                 _command.CommandType = System.Data.CommandType.Text;
+
                 var response = _command.ExecuteReader();
                 int i = 0;
                 header = new string[response.FieldCount];
@@ -45,7 +53,9 @@ namespace Acabus.DataAccess
                     i++;
                 }
                 response.Close();
-                _connection.Close();
+
+                if (!_inTransaction)
+                    _connection.Close();
             }
             return responseData.ToArray();
         }
@@ -59,12 +69,39 @@ namespace Acabus.DataAccess
             lock (_lock)
             {
                 if (_connection.State != System.Data.ConnectionState.Open) _connection.Open();
+                if (_inTransaction)
+                    _command.Transaction = _transaction;
                 _command.CommandText = query;
 
                 rows = (Int16)_command.ExecuteNonQuery();
-                _connection.Close();
+                if (!_inTransaction)
+                    _connection.Close();
             }
             return rows;
+        }
+
+        public static void BeginTransaction()
+        {
+            if (_connection.State != System.Data.ConnectionState.Open) _connection.Open();
+
+            _transaction = _connection.BeginTransaction();
+            _inTransaction = true;
+        }
+
+        public static void RollBack()
+        {
+            _transaction.Rollback();
+            _inTransaction = false;
+            _transaction.Dispose();
+            _connection.Close();
+        }
+
+        public static void Commit()
+        {
+            _transaction.Commit();
+            _inTransaction = false;
+            _transaction.Dispose();
+            _connection.Close();
         }
 
         public static String ToSqliteFormat(this DateTime datetime)
@@ -72,5 +109,10 @@ namespace Acabus.DataAccess
             return String.Format("{0:yyyy-MM-dd HH:mm:ss}", datetime);
         }
 
+        public static object Select(string query)
+        {
+            object[][] response = ExecuteQuery(query);
+            return response?[0]?[0];
+        }
     }
 }

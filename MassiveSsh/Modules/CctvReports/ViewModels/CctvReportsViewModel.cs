@@ -72,8 +72,8 @@ namespace Acabus.Modules.CctvReports
             => (ObservableCollection<Incidence>)Util.SelectFromList(Incidences, (incidence)
                 =>
             {
-                Boolean isOpen = incidence.Status == IncidenceStatus.OPEN;
-                Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.Contains(FolioToSearch);
+                Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
+                Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.ToUpper().Contains(FolioToSearch.ToUpper());
 
                 return isOpen && isMatch;
             });
@@ -95,7 +95,15 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         public ObservableCollection<Incidence> IncidencesClosed
             => (ObservableCollection<Incidence>)Util.SelectFromList(Incidences, (incidence)
-                => incidence.Status == IncidenceStatus.CLOSE);
+                =>
+            {
+                Boolean isClosed = incidence.Status == IncidenceStatus.CLOSE;
+                Boolean isMatch = String.IsNullOrEmpty(ToSearchClosed)
+                            || incidence.Technician.ToUpper().Contains(ToSearchClosed.ToUpper())
+                            || incidence.Description.ToUpper().Contains(ToSearchClosed.ToUpper());
+
+                return isClosed && isMatch;
+            });
 
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedIncidence'.
@@ -127,6 +135,24 @@ namespace Acabus.Modules.CctvReports
                 _folioToSearch = value;
                 OnPropertyChanged("FolioToSearch");
                 OnPropertyChanged("IncidencesOpened");
+            }
+        }
+
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'ToSearchClosed'.
+        /// </summary>
+        private String _toSearchClosed;
+
+        /// <summary>
+        /// Obtiene o establece el criterio de busqueda la incidencia cerrada.
+        /// </summary>
+        public String ToSearchClosed {
+            get => _toSearchClosed;
+            set {
+                _toSearchClosed = value;
+                OnPropertyChanged("ToSearchClosed");
+                OnPropertyChanged("IncidencesClosed");
             }
         }
 
@@ -174,6 +200,11 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// 
         /// </summary>
+        public ICommand RefundCashDialogCommand { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public ICommand OpenDialogExportCommand { get; }
 
         /// <summary>
@@ -185,6 +216,11 @@ namespace Acabus.Modules.CctvReports
         /// Campo que provee a la propiedad 'NewWhoReporting'.
         /// </summary>
         private String _newWhoReporting;
+
+        /// <summary>
+        /// Indica si la actualización de los autobuses sin conexión esta ocurriendo.
+        /// </summary>
+        private bool _busUpdating;
 
         /// <summary>
         /// Obtiene o establece el nuevo valor de quién reporta.
@@ -215,11 +251,10 @@ namespace Acabus.Modules.CctvReports
                 }
             });
 
-            UpdateDataCommand = new CommandBase((parameter) =>
+            UpdateDataCommand = new CommandBase(parameter =>
             {
                 if ((parameter as Incidence).Status != IncidenceStatus.CLOSE) return;
-                OnPropertyChanged("IncidencesOpened");
-                OnPropertyChanged("IncidencesClosed");
+                UpdateData();
             });
 
             CloseIncidenceDialogCommand = new CommandBase((parameter) =>
@@ -231,8 +266,12 @@ namespace Acabus.Modules.CctvReports
 
             AddIncidenceCommand = new CommandBase((parameter) =>
             {
-                if (parameter is null) return;
-                AcabusControlCenterViewModel.ShowDialog(new AddIncidencesView() { DataContext = parameter });
+                AcabusControlCenterViewModel.ShowDialog(new AddIncidencesView() { DataContext = new AddIncidencesViewModel() { IsNewIncidences = true } });
+            });
+
+            RefundCashDialogCommand = new CommandBase((parameter) =>
+            {
+                AcabusControlCenterViewModel.ShowDialog(new AddIncidencesView() { DataContext = new AddIncidencesViewModel() { IsNewIncidences = false } });
             });
 
             ModifyIncidenceDialogCommand = new CommandBase((parameter) =>
@@ -251,9 +290,6 @@ namespace Acabus.Modules.CctvReports
                 ClearErrors();
 
                 if (SelectedIncidence is null) return;
-                if (String.IsNullOrEmpty(NewWhoReporting)
-                    || SelectedIncidence.WhoReporting.Equals(NewWhoReporting))
-                    AddError("NewWhoReporting", "Seleccione una entidad diferente a la que reporta previamente");
 
                 if (HasErrors) return;
 
@@ -287,6 +323,7 @@ namespace Acabus.Modules.CctvReports
              {
                  foreach (var item in IncidencesOpened)
                  {
+                     if (item.Status == IncidenceStatus.UNCOMMIT || item.Priority == Acabus.Models.Priority.NONE) continue;
                      var time = DateTime.Now - item.StartDate;
                      var type = item.Device?.Type;
                      var maxLowPriority = type == Acabus.Models.DeviceType.VEHICLE
@@ -305,6 +342,18 @@ namespace Acabus.Modules.CctvReports
 
         }
 
+        public void UpdateData()
+        {
+            OnPropertyChanged("IncidencesOpened");
+            OnPropertyChanged("IncidencesClosed");
+        }
+
+        public void ReloadData()
+        {
+            Incidences.Clear();
+            Incidences.LoadFromDataBase();
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -314,10 +363,61 @@ namespace Acabus.Modules.CctvReports
 
             _busAlarmsMonitor = new Timer(delegate
             {
+                if (_busUpdating) return;
+                _busUpdating = true;
                 Trace.WriteLine("Actualizando autobuses sin conexión", "DEBUG");
                 if (DateTime.Now.TimeOfDay > new TimeSpan(6, 0, 0))
+                {
                     BusDisconnectedAlarms.GetBusDisconnectedAlarms();
-            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(0.5));
+
+                    Incidence[] incidences;
+
+                    lock (Incidences)
+                    {
+                        incidences = new Incidence[Incidences.Count];
+                        Incidences.CopyTo(incidences, 0);
+                    }
+
+                    foreach (var incidence in incidences)
+                    {
+                        if (incidence.Status == IncidenceStatus.UNCOMMIT)
+
+                            if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
+                            {
+                                incidence.Status = IncidenceStatus.CLOSE;
+                                incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
+                                incidence.Update();
+                                continue;
+                            }
+
+                        if (incidence.Status != IncidenceStatus.OPEN) continue;
+
+                        if (incidence.Description != "SIN CONEXIÓN DE DATOS") continue;
+
+                        bool exists = false;
+
+                        foreach (var bus in BusDisconnectedAlarms)
+                            if (CctvService.Equals(bus, incidence))
+                            {
+                                exists = true;
+                                break;
+                            }
+
+                        if (!exists)
+                        {
+                            incidence.Status = IncidenceStatus.UNCOMMIT;
+                            incidence.FinishDate = DateTime.Now;
+                            incidence.Technician = "SISTEMA";
+                            incidence.Update();
+                            incidence.Priority = Acabus.Models.Priority.NONE;
+                            incidence.UpdatePriority();
+                        }
+                    }
+
+                }
+                UpdateData();
+                _busUpdating = false;
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
         }
 
         /// <summary>
@@ -365,7 +465,7 @@ namespace Acabus.Modules.CctvReports
                                 ? item.Location.ToString()
                                 : item.Device.ToString(),
                             item.Description));
-                    item.CreateIncidence();
+                    item.Save();
                 }
             }
             OnPropertyChanged("IncidencesOpened");

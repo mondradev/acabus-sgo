@@ -16,7 +16,11 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Incidencia cerrada.
         /// </summary>
-        CLOSE
+        CLOSE,
+        /// <summary>
+        /// Por confirmar.
+        /// </summary>
+        UNCOMMIT
     }
 
     /// <summary>

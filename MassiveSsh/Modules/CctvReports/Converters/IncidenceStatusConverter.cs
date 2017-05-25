@@ -15,7 +15,8 @@ namespace Acabus.Modules.CctvReports.Converters
         public IncidenceStatusConverter() : base(new Dictionary<IncidenceStatus, string>()
         {
             { IncidenceStatus.OPEN, "ABIERTA" },
-            { IncidenceStatus.CLOSE, "CERRADA" }
+            { IncidenceStatus.CLOSE, "CERRADA" },
+            { IncidenceStatus.UNCOMMIT, "POR CONFIRMAR" }
         })
         { }
     }

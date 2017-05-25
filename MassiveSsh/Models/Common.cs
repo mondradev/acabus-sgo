@@ -71,7 +71,7 @@ namespace Acabus.Models
         /// </summary>
         APP,
         /// <summary>
-        /// Servidor procesador de estación.
+        /// Servidor de patio de encierro.
         /// </summary>
         PDE,
         /// <summary>
@@ -244,7 +244,11 @@ namespace Acabus.Models
         /// <summary>
         /// Prioridad alta.
         /// </summary>
-        HIGH
+        HIGH,
+        /// <summary>
+        /// Sin prioridad.
+        /// </summary>
+        NONE
     }
 
     /// <summary>

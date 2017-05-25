@@ -29,18 +29,18 @@
             <TextBlock TextWrapping="Wrap" Text="Modificar incidencia" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height" 
                                                Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
             <StackPanel Orientation="Vertical" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2">
-                <TextBox Margin="0,0,0,8" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" materialDesign:HintAssist.Hint="Folio" 
+                <TextBox Margin="0,0,0,8"  materialDesign:HintAssist.Hint="Folio" 
                                                  Text="{Binding SelectedIncidence.Folio, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
-                <TextBox Margin="0,0,0,8" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" materialDesign:HintAssist.Hint="Descripción" 
+                <TextBox Margin="0,0,0,8"  materialDesign:HintAssist.Hint="Descripción" 
                                                  Text="{Binding SelectedIncidence.Description, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
-                <TextBox Margin="0,0,0,8" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" materialDesign:HintAssist.Hint="Equipo" 
+                <TextBox Margin="0,0,0,8"  materialDesign:HintAssist.Hint="Equipo" 
                                                  Text="{Binding SelectedIncidence.Device, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
             </StackPanel>
-            <ComboBox Style="{DynamicResource MaterialDesignFloatingHintComboBox}" materialDesign:HintAssist.Hint="¿Quién reporta?" Grid.Row="4" 
+            <ComboBox  materialDesign:HintAssist.Hint="¿Quién reporta?" Grid.Row="4" 
                                               HorizontalAlignment="Stretch" VerticalAlignment="Top" SelectedItem="{Binding NewWhoReporting}"  
                                               ItemsSource="{x:Static da:AcabusData.Companies}"/>
-            <!--<TextBox Margin="0,0,0,8" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" materialDesign:HintAssist.Hint="Observaciones" 
-                                                 Grid.Row="6" Text="{Binding SelectedIncidence.Observations, Mode=OneWay}"/>-->
+            <TextBox Margin="0,0,0,8"  materialDesign:HintAssist.Hint="Observaciones" 
+                                                 Grid.Row="6" Text="{Binding SelectedIncidence.Observations, Mode=TwoWay}"/>
         </Grid>
         <StackPanel Margin="0" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" >
             <Button Margin="8 8 8 8" ToolTip="Descartar" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" 

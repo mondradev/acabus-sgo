@@ -60,7 +60,7 @@
                 <materialDesign:PackIcon Kind="Check" Width="24" Height="24"/>
             </Button>
         </StackPanel>
-        <TextBox materialDesign:HintAssist.Hint="Número(s) Económico(s)" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" HorizontalAlignment="Left" Margin="16,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="{Binding EconomicNumber}" VerticalAlignment="Top" Width="260" AcceptsReturn="True" MinHeight="40" MaxHeight="75" VerticalScrollBarVisibility="Auto"/>
-        <ComboBox Height="40" materialDesign:HintAssist.Hint="Estado" Style="{DynamicResource MaterialDesignFloatingHintComboBox}" VerticalAlignment="Top" SelectedItem="{Binding SelectedStatus, Converter={StaticResource ConverterVehicleStatus}}" SelectedValue="{Binding SelectedStatus, Converter={StaticResource ConverterVehicleStatus}}" ItemsSource="{Binding Mode=OneWay, Source={StaticResource VehicleStatusCollection}}" Grid.Row="2" HorizontalAlignment="Right" Width="200" Margin="0,0,16,0"/>
+        <TextBox materialDesign:HintAssist.Hint="Número(s) Económico(s)" HorizontalAlignment="Left" Margin="16,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="{Binding EconomicNumber}" VerticalAlignment="Top" Width="260" AcceptsReturn="True" MinHeight="40" MaxHeight="75" VerticalScrollBarVisibility="Auto"/>
+        <ComboBox Height="40" materialDesign:HintAssist.Hint="Estado" VerticalAlignment="Top" SelectedItem="{Binding SelectedStatus, Converter={StaticResource ConverterVehicleStatus}}" SelectedValue="{Binding SelectedStatus, Converter={StaticResource ConverterVehicleStatus}}" ItemsSource="{Binding Mode=OneWay, Source={StaticResource VehicleStatusCollection}}" Grid.Row="2" HorizontalAlignment="Right" Width="200" Margin="0,0,16,0"/>
     </Grid>
 </UserControl>

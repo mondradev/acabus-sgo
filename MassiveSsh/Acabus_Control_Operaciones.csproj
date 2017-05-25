@@ -31,8 +31,8 @@
     <PublisherName>Javier de Jesús Flores Mondragón</PublisherName>
     <SuiteName>Acabus</SuiteName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>8</ApplicationRevision>
-    <ApplicationVersion>1.2.1.%2a</ApplicationVersion>
+    <ApplicationRevision>10</ApplicationRevision>
+    <ApplicationVersion>2.2.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -82,6 +82,9 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dragablz, Version=0.0.3.186, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dragablz.0.0.3.186\lib\net45\Dragablz.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -150,26 +153,30 @@
     <Compile Include="Converters\TranslateEnumConverter.cs" />
     <Compile Include="DataAccess\Csv.cs" />
     <Compile Include="DataAccess\SQLiteAccess.cs" />
-    <Compile Include="Modules\CctvReports\AddIncidencesView.xaml.cs">
+    <Compile Include="Modules\CctvReports\AcabusData.cs" />
+    <Compile Include="Modules\CctvReports\Models\RefundOfMoney.cs" />
+    <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
       <DependentUpon>AddIncidencesView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\CctvReports\AddIncidencesViewModel.cs" />
-    <Compile Include="Modules\CctvReports\CloseIncidenceViewModel.cs" />
-    <Compile Include="Modules\CctvReports\CloseIncidenceView.xaml.cs">
+    <Compile Include="Modules\CctvReports\ViewModels\AddIncidencesViewModel.cs" />
+    <Compile Include="Modules\CctvReports\Models\CashDestiny.cs" />
+    <Compile Include="Modules\CctvReports\ViewModels\CloseIncidenceViewModel.cs" />
+    <Compile Include="Modules\CctvReports\Views\CloseIncidenceView.xaml.cs">
       <DependentUpon>CloseIncidenceView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\CctvReports\Converters\CollapseBooleanConverter.cs" />
     <Compile Include="Modules\CctvReports\Converters\IncidenceStatusConverter.cs" />
-    <Compile Include="Modules\CctvReports\ExportDataView.xaml.cs">
+    <Compile Include="Modules\CctvReports\Views\ExportDataView.xaml.cs">
       <DependentUpon>ExportDataView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\CctvReports\ExportDataViewModel.cs" />
+    <Compile Include="Modules\CctvReports\ViewModels\ExportDataViewModel.cs" />
     <Compile Include="Modules\CctvReports\Models\Alarm.cs" />
     <Compile Include="Models\Location.cs" />
     <Compile Include="Models\Route.cs" />
     <Compile Include="Models\Staff.cs" />
     <Compile Include="Modules\CctvReports\Models\BusDisconnectedAlarm.cs" />
     <Compile Include="Modules\CctvReports\Models\Incidence.cs" />
-    <Compile Include="Modules\CctvReports\ModifyIncidenceView.xaml.cs">
+    <Compile Include="Modules\CctvReports\Views\ModifyIncidenceView.xaml.cs">
       <DependentUpon>ModifyIncidenceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\CctvReports\Services\CctvServices.cs" />
@@ -177,6 +184,7 @@
       <DependentUpon>ConfigurationsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Configurations\ConfigurationsViewModel.cs" />
+    <Compile Include="Modules\OffDutyVehicles\AcabusData.cs" />
     <Compile Include="Utils\Mvvm\NotifyPropertyChanged.cs" />
     <Compile Include="Utils\Mvvm\ViewModelBase.cs" />
     <Compile Include="Utils\Mvvm\ViewModelService.cs" />
@@ -189,20 +197,20 @@
     <Compile Include="Models\Station.cs" />
     <Compile Include="Models\Trunk.cs" />
     <Compile Include="Models\Vehicle.cs" />
-    <Compile Include="Modules\CctvReports\CctvReportsView.xaml.cs">
+    <Compile Include="Modules\CctvReports\Views\CctvReportsView.xaml.cs">
       <DependentUpon>CctvReportsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\CctvReports\CctvReportsViewModel.cs" />
+    <Compile Include="Modules\CctvReports\ViewModels\CctvReportsViewModel.cs" />
     <Compile Include="Converters\VehicleStatusConverter.cs" />
-    <Compile Include="Modules\OffDutyVehicles\OffDutyVehiclesView.xaml.cs">
+    <Compile Include="Modules\OffDutyVehicles\Views\OffDutyVehiclesView.xaml.cs">
       <DependentUpon>OffDutyVehiclesView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\OffDutyVehicles\OffDutyVehiclesViewModel.cs" />
+    <Compile Include="Modules\OffDutyVehicles\ViewModels\OffDutyVehiclesViewModel.cs" />
     <Compile Include="Modules\TrunkMonitor\TrunkMonitor.xaml.cs">
       <DependentUpon>TrunkMonitor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\TrunkMonitor\TrunkMonitorViewModel.cs" />
-    <Compile Include="Modules\TrunkMonitor\TrunkMonitorView.xaml.cs">
+    <Compile Include="Modules\TrunkMonitor\ViewModels\TrunkMonitorViewModel.cs" />
+    <Compile Include="Modules\TrunkMonitor\Views\TrunkMonitorView.xaml.cs">
       <DependentUpon>TrunkMonitorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\LinkService.cs" />
@@ -230,23 +238,23 @@
     <Compile Include="Window\DialogTemplateView.xaml.cs">
       <DependentUpon>DialogTemplateView.xaml</DependentUpon>
     </Compile>
-    <Page Include="Modules\CctvReports\AddIncidencesView.xaml">
+    <Page Include="Modules\CctvReports\Views\AddIncidencesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\CctvReports\CctvReportsView.xaml">
+    <Page Include="Modules\CctvReports\Views\CctvReportsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\CctvReports\CloseIncidenceView.xaml">
+    <Page Include="Modules\CctvReports\Views\CloseIncidenceView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\CctvReports\ExportDataView.xaml">
+    <Page Include="Modules\CctvReports\Views\ExportDataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\CctvReports\ModifyIncidenceView.xaml">
+    <Page Include="Modules\CctvReports\Views\ModifyIncidenceView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -254,7 +262,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\OffDutyVehicles\OffDutyVehiclesView.xaml">
+    <Page Include="Modules\OffDutyVehicles\Views\OffDutyVehiclesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -262,7 +270,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\TrunkMonitor\TrunkMonitorView.xaml">
+    <Page Include="Modules\TrunkMonitor\Views\TrunkMonitorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -310,7 +318,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trunks.Config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>

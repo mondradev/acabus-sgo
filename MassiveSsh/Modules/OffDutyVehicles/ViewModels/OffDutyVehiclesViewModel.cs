@@ -33,9 +33,20 @@ namespace Acabus.Modules.OffDutyVehicles
         }
 
         /// <summary>
-        /// Obtiene una lista de los vehículos con algún problema que impida enviar su localización.
+        /// Campo que provee a la propiedad 'Vehicles'.
         /// </summary>
-        public ObservableCollection<Vehicle> Vehicles => AcabusData.OffDutyVehicles;
+        private ObservableCollection<Vehicle> _vehicles;
+
+        /// <summary>
+        /// Obtiene una lista de los vehiculos en taller o sin enegía.
+        /// </summary>
+        public ObservableCollection<Vehicle> Vehicles {
+            get {
+                if (_vehicles == null)
+                    _vehicles = new ObservableCollection<Vehicle>();
+                return _vehicles;
+            }
+        }
 
         /// <summary>
         /// Campo que provee a la propiedad 'EconomicNumber'.
@@ -113,7 +124,7 @@ namespace Acabus.Modules.OffDutyVehicles
 
                 foreach (var economicNumber in economicNumbers)
                 {
-                    var matches = Regex.Match(economicNumber, "A[ACP]{1}-[0-9]{3}").Groups;
+                    var matches = Regex.Match(economicNumber.ToUpper(), "A[ACP]{1}-[0-9]{3}").Groups;
                     if (matches.Count < 1) continue;
                     foreach (var match in matches)
                         if (!String.IsNullOrEmpty(match.ToString()))
@@ -135,15 +146,30 @@ namespace Acabus.Modules.OffDutyVehicles
 
             ClearVehicleCommand = new CommandBase((param) => Vehicles?.Clear());
 
-            SaveVehicleCommand = new CommandBase((param) => AcabusData.SaveOffDutyVehiclesList());
+            SaveVehicleCommand = new CommandBase((param) =>
+            {
+                AcabusData.OffDutyVehicles.Clear();
+                foreach (Vehicle vehicle in Vehicles)
+                    AcabusData.OffDutyVehicles.Add(vehicle);
+                AcabusData.SaveOffDutyVehiclesList();
+            });
 
-            ReloadVehicleCommand = new CommandBase((param) => AcabusData.LoadOffDutyVehicles());
+            ReloadVehicleCommand = new CommandBase((param) =>
+            {
+                Vehicles.Clear();
+                foreach (Vehicle vehicle in AcabusData.OffDutyVehicles)
+                    Vehicles.Add(vehicle);
+            });
 
             RemoveVehicleCommand = new CommandBase((param) =>
             {
                 Vehicles?.Remove(SelectedVehicle);
                 SelectedVehicle = null;
             });
+
+            Vehicles.Clear();
+            foreach (Vehicle vehicle in AcabusData.OffDutyVehicles)
+                Vehicles.Add(vehicle);
         }
 
     }
