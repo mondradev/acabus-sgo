@@ -380,7 +380,7 @@ namespace Acabus.Modules.CctvReports
 
                     foreach (var incidence in incidences)
                     {
-                        if (incidence.Status == IncidenceStatus.UNCOMMIT)
+                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description == "SIN CONEXIÓN DE DATOS")
 
                             if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
                             {
