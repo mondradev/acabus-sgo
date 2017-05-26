@@ -1,4 +1,5 @@
 ﻿using Acabus.DataAccess;
+using Acabus.Models;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils;
@@ -323,18 +324,23 @@ namespace Acabus.Modules.CctvReports
              {
                  foreach (var item in IncidencesOpened)
                  {
-                     if (item.Status == IncidenceStatus.UNCOMMIT || item.Priority == Acabus.Models.Priority.NONE) continue;
+                     if (item.Status == IncidenceStatus.UNCOMMIT && item.Priority != Priority.NONE)
+                     {
+                         item.Priority = Priority.NONE;
+                         item.UpdatePriority();
+                     }
+                     if (item.Status == IncidenceStatus.UNCOMMIT || item.Priority == Priority.NONE) continue;
                      var time = DateTime.Now - item.StartDate;
                      var type = item.Device?.Type;
-                     var maxLowPriority = type == Acabus.Models.DeviceType.VEHICLE
+                     var maxLowPriority = type == DeviceType.VEHICLE
                                 ? AcabusData.TimeMaxLowPriorityIncidenceBus : AcabusData.TimeMaxLowPriorityIncidence;
-                     var maxMediumPriority = type == Acabus.Models.DeviceType.VEHICLE
+                     var maxMediumPriority = type == DeviceType.VEHICLE
                                 ? AcabusData.TimeMaxMediumPriorityIncidenceBus : AcabusData.TimeMaxMediumPriorityIncidence;
 
                      if (time > maxMediumPriority)
-                         item.Priority = Acabus.Models.Priority.HIGH;
-                     else if (time > maxLowPriority && item.Priority < Acabus.Models.Priority.HIGH)
-                         item.Priority = Acabus.Models.Priority.MEDIUM;
+                         item.Priority = Priority.HIGH;
+                     else if (time > maxLowPriority && item.Priority < Priority.HIGH)
+                         item.Priority = Priority.MEDIUM;
 
                      item.UpdatePriority();
                  }
@@ -380,19 +386,25 @@ namespace Acabus.Modules.CctvReports
 
                     foreach (var incidence in incidences)
                     {
-                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description == "SIN CONEXIÓN DE DATOS")
-
+                        /// Verificación de las incidencias de SIN CONEXIÓN DE DATOS por confirmar
+                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description == "SIN CONEXIÓN DE DATOS"
+                        && incidence.Device is Vehicle)
+                            /// A pasado el tiempo para cerrar automáticamente ? 30 MIN
                             if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
                             {
                                 incidence.Status = IncidenceStatus.CLOSE;
-                                incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
+                                if (AcabusData.OffDutyVehicles.SelectFromList(vehicle
+                                    => vehicle.EconomicNumber == (incidence.Device as Vehicle).EconomicNumber).Count > 0)
+                                    incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
+                                else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
                                 incidence.Update();
                                 continue;
                             }
 
-                        if (incidence.Status != IncidenceStatus.OPEN) continue;
+                        /// Verificación de las incidencias ABIERTAS
 
-                        if (incidence.Description != "SIN CONEXIÓN DE DATOS") continue;
+                        if (incidence.Status != IncidenceStatus.OPEN || incidence.Description != "SIN CONEXIÓN DE DATOS"
+                        || !(incidence.Device is Vehicle)) continue;
 
                         bool exists = false;
 
@@ -406,11 +418,10 @@ namespace Acabus.Modules.CctvReports
                         if (!exists)
                         {
                             incidence.Status = IncidenceStatus.UNCOMMIT;
+                            incidence.Priority = Priority.NONE;
                             incidence.FinishDate = DateTime.Now;
                             incidence.Technician = "SISTEMA";
                             incidence.Update();
-                            incidence.Priority = Acabus.Models.Priority.NONE;
-                            incidence.UpdatePriority();
                         }
                     }
 
