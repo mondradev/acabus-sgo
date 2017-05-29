@@ -398,6 +398,7 @@ namespace Acabus.Modules.CctvReports
                                     incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
                                 else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
                                 incidence.Update();
+                                UpdateData();
                                 continue;
                             }
 
@@ -426,7 +427,6 @@ namespace Acabus.Modules.CctvReports
                     }
 
                 }
-                UpdateData();
                 _busUpdating = false;
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
         }
@@ -519,7 +519,7 @@ namespace Acabus.Modules.CctvReports
             {
                 Trace.WriteLine("Actualizando alarmas", "DEBUG");
                 Alarms.GetAlarms();
-            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(0.5));
+            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(0.2));
 
             if (_busAlarmsMonitor == null && AcabusData.OffDutyVehicles.Count == 0) return;
 
