@@ -10,13 +10,13 @@ using System.Threading;
 
 namespace InnSyTech.Standard.Database
 {
-    internal sealed class DbSession
+    public sealed class DbSession
     {
         private DbConnection _connection;
 
         private List<DbTransaction> _transactions;
 
-        public DbSession(DbConnection connection)
+        internal DbSession(DbConnection connection)
         {
             if (connection is null)
                 throw new ArgumentNullException("El parametro 'connection' no puede ser un valor nulo.");
@@ -26,7 +26,7 @@ namespace InnSyTech.Standard.Database
             _transactions = new List<DbTransaction>();
         }
 
-        public long TransactionPerConnection { get; set; }
+        public IDbConfiguration Configuration { get; set; }
 
         public bool Delete(object instance)
         {
@@ -91,6 +91,7 @@ namespace InnSyTech.Standard.Database
         {
             DbTransaction transaction = null;
             DbCommand command = null;
+            DbDataReader reader = null;
             ValidateConnection();
             lock (_transactions)
             {
@@ -101,12 +102,13 @@ namespace InnSyTech.Standard.Database
                     command = _connection.CreateCommand();
                     command.Transaction = transaction;
 
-                    command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@{1}", GetTableName(typeOfInstance), DbField.GetPrimaryKey(typeOfInstance).Name);
+                    command.CommandText = String.Format("SELECT * FROM {0} T1 WHERE {1}=@{1}", GetTableName(typeOfInstance), DbField.GetPrimaryKey(typeOfInstance).Name);
                     CreateParameter(command, DbField.GetPrimaryKey(typeOfInstance).Name, idKey);
 
-                    DbDataReader reader = command.ExecuteReader();
+                    reader = command.ExecuteReader();
 
                     Object data = null;
+                    IEnumerable<DbField> fields = DbField.GetFields(typeOfInstance);
 
                     while (reader.Read())
                     {
@@ -114,9 +116,11 @@ namespace InnSyTech.Standard.Database
                             throw new InvalidOperationException("La consulta devolvió más de un elemento");
 
                         data = Activator.CreateInstance(typeOfInstance);
-                        foreach (DbField field in DbField.GetFields(typeOfInstance))
-                            field.SetValue(data, reader[field.Name]);
+                        foreach (DbField field in fields)
+                            try { field.SetValue(data, reader[field.Name]); } catch { }
                     }
+
+                    reader.Close();
 
                     transaction.Commit();
 
@@ -125,10 +129,14 @@ namespace InnSyTech.Standard.Database
                 catch (Exception ex)
                 {
                     Trace.WriteLine(String.Format("Error al realizar la extracción de datos: {0}; Mensaje: {1}", typeOfInstance.Name, ex.Message), "ERROR");
+
+                    if (reader != null)
+                        reader.Close();
+
                     if (transaction != null)
                         transaction.Rollback();
 
-                    return false;
+                    return null;
                 }
                 finally
                 {
@@ -151,9 +159,70 @@ namespace InnSyTech.Standard.Database
 
         public IEnumerable<object> GetObjects(Type typeOfInstance)
         {
+            ICollection<object> objects = new List<object>();
+            DbTransaction transaction = null;
+            DbCommand command = null;
+            DbDataReader reader = null;
             ValidateConnection();
+            lock (_transactions)
+            {
+                try
+                {
+                    transaction = BeginTransaction();
 
-            throw new NotImplementedException();
+                    command = _connection.CreateCommand();
+                    command.Transaction = transaction;
+
+                    command.CommandText = String.Format("SELECT * FROM {0}", GetTableName(typeOfInstance));
+
+                    reader = command.ExecuteReader();
+
+                    Object data = null;
+                    IEnumerable<DbField> fields = DbField.GetFields(typeOfInstance);
+
+                    while (reader.Read())
+                    {
+                        data = Activator.CreateInstance(typeOfInstance);
+                        foreach (DbField field in fields)
+                            try { field.SetValue(data, reader[field.Name]); } catch { }
+                        objects.Add(data);
+                    }
+
+                    reader.Close();
+
+                    transaction.Commit();
+
+                    return objects;
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(String.Format("Error al realizar la extracción multiple de datos: {0}; Mensaje: {1}", typeOfInstance.Name, ex.Message), "ERROR");
+
+                    if (reader != null)
+                        reader.Close();
+
+                    if (transaction != null)
+                        transaction.Rollback();
+
+                    return objects;
+                }
+                finally
+                {
+                    if (command != null)
+                        command.Dispose();
+
+                    if (transaction != null)
+                    {
+                        _transactions.Remove(transaction);
+                        transaction.Dispose();
+                    }
+
+                    if (_connection != null)
+                        _connection.Close();
+
+                    Monitor.Pulse(_transactions);
+                }
+            }
         }
 
         public bool Save(object instance)
@@ -176,7 +245,7 @@ namespace InnSyTech.Standard.Database
                     int rows = command.ExecuteNonQuery();
 
                     command.Parameters.Clear();
-                    command.CommandText = String.Format("SELECT {0}()", DbManager.LastInsertFunctionName);
+                    command.CommandText = String.Format("SELECT {0}()", Configuration.LastInsertFunctionName);
 
                     DbField.GetPrimaryKey(instance.GetType()).SetValue(instance, command.ExecuteScalar());
 
@@ -237,7 +306,7 @@ namespace InnSyTech.Standard.Database
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(String.Format("Error al realizar el borrado de la instancia: {0}; Mensaje: {1}", instance.ToString(), ex.Message), "ERROR");
+                    Trace.WriteLine(String.Format("Error al realizar la actualzación de la instancia: {0}; Mensaje: {1}", instance.ToString(), ex.Message), "ERROR");
                     if (transaction != null)
                         transaction.Rollback();
 
@@ -265,7 +334,7 @@ namespace InnSyTech.Standard.Database
         private DbTransaction BeginTransaction()
         {
             if (_transactions.Count >
-                        TransactionPerConnection)
+                        Configuration.TransactionPerConnection)
                 Monitor.Wait(_transactions);
 
             if (!OpenConnection())
@@ -285,6 +354,7 @@ namespace InnSyTech.Standard.Database
 
             command.Parameters.Add(parameter);
         }
+
         private void CreateParameters(DbCommand command, object instance)
         {
             var matches = Regex.Matches(command.CommandText, "@[0-9a-zA-Z]*");
@@ -306,7 +376,7 @@ namespace InnSyTech.Standard.Database
 
             foreach (DbField field in DbField.GetFields(typeOfInstance))
             {
-                if (field.IsPrimaryKey) continue;
+                if (field.IsPrimaryKey ) continue;
                 statement.AppendFormat("{0},", field.Name);
                 parameters.AppendFormat("@{0},", field.Name);
             }

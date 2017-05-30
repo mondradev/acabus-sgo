@@ -40,11 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Database\DbDao.cs" />
     <Compile Include="Database\DbAttribute.cs" />
+    <Compile Include="Database\DbEnumConverter.cs" />
+    <Compile Include="Database\IDbConverter.cs" />
     <Compile Include="Database\DbField.cs" />
     <Compile Include="Database\DbManager.cs" />
     <Compile Include="Database\DbSession.cs" />
+    <Compile Include="Database\IDbConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -5,12 +5,16 @@ using System.Reflection;
 
 namespace InnSyTech.Standard.Database
 {
+    /// <summary>
+    /// Define una estructura que permite establecer como se manejan los datos correspondientes a un
+    /// campo dentro de la base de datos.
+    /// </summary>
     internal class DbField
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Converter'.
         /// </summary>
-        private Func<object, object> _converter;
+        private IDbConverter _converter;
 
         /// <summary>
         /// Campo que provee a la propiedad 'IsPrimaryKey'.
@@ -22,17 +26,31 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         private String _name;
 
-        public DbField(String name, Boolean isPrimaryKey = false, Func<object, object> converter = null)
+        /// <summary>
+        /// Obtiene toda la información que representa la propiedad enlazada al campo de la base de datos.
+        /// </summary>
+        private PropertyInfo _propertyInfo;
+
+        /// <summary>
+        /// Crea una nueva instancia de un campo enlazado a una propiedad.
+        /// </summary>
+        /// <param name="name">Nombre del campo.</param>
+        /// <param name="isPrimaryKey">Si es llave primaria.</param>
+        /// <param name="converter">Convertidor de datos para el enlace.</param>
+        public DbField(String name, PropertyInfo propertyInfo, Boolean isPrimaryKey = false, Type converter = null)
         {
             _name = name;
             _isPrimaryKey = isPrimaryKey;
-            _converter = converter;
+            _propertyInfo = propertyInfo;
+
+            if (converter != null)
+                _converter = (IDbConverter)Activator.CreateInstance(converter);
         }
 
         /// <summary>
         /// Obtiene el convertidor de datos para el campo en la base de datos.
         /// </summary>
-        public Func<object, object> Converter => _converter;
+        public IDbConverter Converter => _converter;
 
         /// <summary>
         /// Obtiene si el campo es llave primaria en la base de datos.
@@ -65,11 +83,11 @@ namespace InnSyTech.Standard.Database
                             String name = columnAttribute.Name;
                             name = String.IsNullOrEmpty(name) ? property.Name : name;
 
-                            yield return new DbField(name, columnAttribute.IsPrimaryKey, columnAttribute.Converter);
+                            yield return new DbField(name, property, columnAttribute.IsPrimaryKey, columnAttribute.Converter);
                         }
                 }
                 else
-                    yield return new DbField(property.Name);
+                    yield return new DbField(property.Name, property);
             }
         }
 
@@ -93,28 +111,7 @@ namespace InnSyTech.Standard.Database
             if (instance is null)
                 throw new ArgumentNullException("La instancia no puede ser nula");
 
-            Type type = instance.GetType();
-
-            Boolean isTable = false;
-            foreach (Attribute attribute in type.GetCustomAttributes())
-                if (isTable = attribute is TableAttribute)
-                    break;
-
-            if (!isTable)
-                throw new ArgumentException("La instancia debe tener el atributo 'TableAttribute'.");
-
-            foreach (PropertyInfo property in type.GetProperties())
-                if (property.GetCustomAttributes().Count() > 0)
-                {
-                    foreach (Attribute attribute in property.GetCustomAttributes())
-                        if (attribute is ColumnAttribute)
-                            if ((attribute as ColumnAttribute).Name == Name)
-                                return property.GetValue(instance);
-                }
-                else if (property.Name == Name)
-                    return property.GetValue(instance);
-
-            throw new ArgumentException("El tipo de la instancia no tiene definido el campo actual.");
+            return _propertyInfo.GetValue(instance);
         }
 
         /// <summary>
@@ -127,34 +124,7 @@ namespace InnSyTech.Standard.Database
             if (instance is null)
                 throw new ArgumentNullException("La instancia no puede ser nula");
 
-            Type type = instance.GetType();
-
-            Boolean isTable = false;
-            foreach (Attribute attribute in type.GetCustomAttributes())
-                if (isTable = attribute is TableAttribute)
-                    break;
-
-            if (!isTable)
-                throw new ArgumentException("La instancia debe tener el atributo 'TableAttribute'.");
-
-            foreach (PropertyInfo property in type.GetProperties())
-                if (property.GetCustomAttributes().Count() > 0)
-                {
-                    foreach (Attribute attribute in property.GetCustomAttributes())
-                        if (attribute is ColumnAttribute)
-                            if ((attribute as ColumnAttribute).Name == Name)
-                            {
-                                property.SetValue(instance, value);
-                                return;
-                            }
-                }
-                else if (property.Name == Name)
-                {
-                    property.SetValue(instance, value);
-                    return;
-                }
-
-            throw new ArgumentException("El tipo de la instancia no tiene definido el campo actual.");
+            _propertyInfo.SetValue(instance, value);
         }
     }
 }
