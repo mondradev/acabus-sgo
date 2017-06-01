@@ -147,12 +147,32 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\DateTimeConverter.cs" />
+    <Compile Include="Converters\EnumToColorConverter.cs" />
     <Compile Include="Converters\IsNullConverter.cs" />
     <Compile Include="Converters\NotIsNullConverter.cs" />
     <Compile Include="Converters\PriorityConverter.cs" />
     <Compile Include="Converters\TranslateEnumConverter.cs" />
     <Compile Include="DataAccess\Csv.cs" />
     <Compile Include="DataAccess\SQLiteAccess.cs" />
+    <Compile Include="Modules\Attendances\AcabusData.cs" />
+    <Compile Include="Modules\Attendances\Models\Attendance.cs" />
+    <Compile Include="Modules\Attendances\Services\AttendanceService.cs" />
+    <Compile Include="Modules\Attendances\ViewModels\AttendanceDepartureViewModel.cs" />
+    <Compile Include="Modules\Attendances\ViewModels\AttendanceEntryViewModel.cs" />
+    <Compile Include="Modules\Attendances\ViewModels\AttendanceModifyViewModel.cs" />
+    <Compile Include="Modules\Attendances\ViewModels\AttendanceViewModel.cs" />
+    <Compile Include="Modules\Attendances\Views\AttendanceDepartureView.xaml.cs">
+      <DependentUpon>AttendanceDepartureView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Attendances\Views\AttendanceEntryView.xaml.cs">
+      <DependentUpon>AttendanceEntryView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Attendances\Views\AttendanceModifyView.xaml.cs">
+      <DependentUpon>AttendanceModifyView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Attendances\Views\AttendanceView.xaml.cs">
+      <DependentUpon>AttendanceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\CctvReports\AcabusData.cs" />
     <Compile Include="Modules\CctvReports\Models\RefundOfMoney.cs" />
     <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
@@ -238,6 +258,22 @@
     <Compile Include="Window\DialogTemplateView.xaml.cs">
       <DependentUpon>DialogTemplateView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Modules\Attendances\Views\AttendanceDepartureView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Attendances\Views\AttendanceEntryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Attendances\Views\AttendanceModifyView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Attendances\Views\AttendanceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Modules\CctvReports\Views\AddIncidencesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -1,7 +1,9 @@
 ﻿using Acabus.DataAccess;
 using Acabus.Models;
+using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils;
+using Acabus.Utils.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,7 +34,8 @@ namespace Acabus.Modules.CctvReports.Services
                     Priority = priority,
                     Location = location,
                     WhoReporting = whoReporting,
-                    Status = IncidenceStatus.OPEN
+                    Status = IncidenceStatus.OPEN,
+                    AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?.GetTechnicianAssigned(location, device, startTime)
                 };
 
                 incidences.Add(incidence);
@@ -61,9 +64,10 @@ namespace Acabus.Modules.CctvReports.Services
                     StartDate = (DateTime)incidenceData[5],
                     FinishDate = String.IsNullOrEmpty(incidenceData[6].ToString()) ? null : (DateTime?)incidenceData[6],
                     Status = (IncidenceStatus)UInt16.Parse(incidenceData[7].ToString()),
-                    Technician = incidenceData[8].ToString(),
-                    Observations = incidenceData[9].ToString(),
-                    Priority = (Priority)incidenceData[10]
+                    AssignedAttendance = incidenceData[8].ToString(),
+                    Technician = incidenceData[9].ToString(),
+                    Observations = incidenceData[10].ToString(),
+                    Priority = (Priority)incidenceData[11]
                 });
             }
         }
@@ -149,15 +153,18 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Update(this Incidence incidence)
         {
-            var query = String.Format("UPDATE Incidences SET WhoReporting='{0}', FinishDate='{1}', Status={2}, Technician='{3}', Observations='{4}', Priority={5} WHERE Folio='{6}' AND Status<>1",
+            var query = String.Format("UPDATE Incidences SET WhoReporting='{0}', FinishDate='{1}', Status={2}, Technician='{3}', Observations='{4}', Priority={5}, AssignedTechnician='{6}' WHERE Folio='{7}' AND Status<>1",
                 incidence.WhoReporting,
                 incidence.FinishDate?.ToSqliteFormat(),
                 (UInt16)incidence.Status,
                 incidence.Technician,
                 incidence.Observations,
                 (UInt16)incidence.Priority,
+                incidence.AssignedAttendance,
                 incidence.Folio
                 );
+
+            Trace.WriteLine(query, "DEBUG");
 
             return SQLiteAccess.Execute(query) > 0;
         }
@@ -170,7 +177,7 @@ namespace Acabus.Modules.CctvReports.Services
 
             if (response[0][0].ToString() != "0") return false;
 
-            query = String.Format("INSERT INTO Incidences VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},'{8}','{9}',{10})",
+            query = String.Format("INSERT INTO Incidences VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},'{8}','{9}','{10}',{11})",
                incidence.Folio,
                incidence.Description,
                incidence.WhoReporting,
@@ -179,6 +186,7 @@ namespace Acabus.Modules.CctvReports.Services
                incidence.StartDate.ToSqliteFormat(),
                incidence.FinishDate?.ToSqliteFormat(),
                (UInt16)incidence.Status,
+               incidence.AssignedAttendance,
                incidence.Technician,
                incidence.Observations,
                (UInt16)incidence.Priority
@@ -190,12 +198,13 @@ namespace Acabus.Modules.CctvReports.Services
         {
             var result = 0;
             var incidence = refundOfMoney.Incidence;
-            var queryRefund = String.Format("INSERT INTO RefundOfMoney(Quantity, CashDestiny, Fk_Folio, Status, RefundDate) VALUES({0},'{1}','{2}', {3}, '{4}')",
+            var queryRefund = String.Format("INSERT INTO RefundOfMoney(Quantity, CashDestiny, Fk_Folio, Status, RefundDate, CashType) VALUES({0},'{1}','{2}', {3}, '{4}', '{5}')",
                 refundOfMoney.Quantity,
-                refundOfMoney.CashDestiny,
+                refundOfMoney.CashDestiny.Description,
                 refundOfMoney.Incidence.Folio,
                 (UInt16)refundOfMoney.Status,
-                refundOfMoney.RefundDate?.ToSqliteFormat()
+                refundOfMoney.RefundDate?.ToSqliteFormat(),
+                refundOfMoney.CashDestiny.Type
                 );
             SQLiteAccess.BeginTransaction();
             try

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Acabus.Utils.Mvvm
 {
@@ -28,15 +29,15 @@ namespace Acabus.Utils.Mvvm
             _viewModelRegisted.Remove(instance);
         }
 
-        public static dynamic GetViewModel<T>()
+        public static T GetViewModel<T>()
         {
-            dynamic instance = null;
+            Object instance = null;
             _viewModelRegisted.ForEach(viewModel =>
             {
                 if (viewModel.GetType() == typeof(T) && instance is null)
                     instance = viewModel;
             });
-            return instance;
+            return (T)instance;
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using Acabus.DataAccess;
 using Acabus.Models;
+using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils;
 using Acabus.Utils.Mvvm;
-using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
@@ -18,25 +18,70 @@ namespace Acabus.Modules.CctvReports
     public sealed class AddIncidencesViewModel : ViewModelBase
     {
         /// <summary>
+        /// Campo que provee a la propiedad 'Description'.
+        /// </summary>
+        private String _description;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Device'.
+        /// </summary>
+        private Device _device;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Incidences'.
+        /// </summary>
+        private ObservableCollection<Incidence> _incidences;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'IsBusIncidences'.
+        /// </summary>
+        private Boolean _isBusIncidences;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Location'.
+        /// </summary>
+        private Location _location;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Priority'.
+        /// </summary>
+        private Priority _priority;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'StartTime'.
+        /// </summary>
+        private TimeSpan _startTime;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'WhoReport'.
         /// </summary>
         private String _whoReporting;
 
         /// <summary>
-        /// Obtiene o establece quien reporta la incidencia.
+        ///
         /// </summary>
-        public String WhoReporting {
-            get => _whoReporting;
-            set {
-                _whoReporting = value;
-                OnPropertyChanged("WhoReporting");
-            }
+        public AddIncidencesViewModel()
+        {
+            AddCommand = new CommandBase(AddCommandExecute, AddCommandCanExec);
+            CloseCommand = new CommandBase(parameter => DialogHost.CloseDialogCommand.Execute(parameter, null));
+
+            _startTime = DateTime.Now.TimeOfDay;
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Description'.
+        ///
         /// </summary>
-        private String _description;
+        public ICommand AddCommand { get; }
+
+        /// <summary>
+        /// Obtiene una lista de empresas que realizan reportes habitualmente.
+        /// </summary>
+        public ObservableCollection<String> Business => AcabusData.Companies;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand CloseCommand { get; }
 
         /// <summary>
         /// Obtiene o establece la descripción de la incidencia.
@@ -48,28 +93,6 @@ namespace Acabus.Modules.CctvReports
                 OnPropertyChanged("Description");
             }
         }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Location'.
-        /// </summary>
-        private Location _location;
-
-        /// <summary>
-        /// Obtiene o establece la ubicación de la incidencia.
-        /// </summary>
-        public Location Location {
-            get => _location;
-            set {
-                _location = value;
-                OnPropertyChanged("Location");
-                OnPropertyChanged("Devices");
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Device'.
-        /// </summary>
-        private Device _device;
 
         /// <summary>
         /// Obtiene o establece el equipo que presenta la incidencia.
@@ -90,32 +113,6 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Priority'.
-        /// </summary>
-        private Priority _priority;
-
-        /// <summary>
-        /// Obtiene o establece la prioridad de la incidencia.
-        /// </summary>
-        public Priority Priority {
-            get => _priority;
-            set {
-                _priority = value;
-                OnPropertyChanged("Priority");
-            }
-        }
-
-        /// <summary>
-        /// Obtiene una lista de empresas que realizan reportes habitualmente.
-        /// </summary>
-        public ObservableCollection<String> Business => AcabusData.Companies;
-
-        /// <summary>
-        /// Obtiene una lista de las prioridades de incidencias.
-        /// </summary>
-        public IEnumerable<Priority> Priorities => Enum.GetValues(typeof(Priority)).Cast<Priority>();
-
-        /// <summary>
         /// Obtiene una lista de equipos disponibles en la estación.
         /// </summary>
         public IEnumerable<Device> Devices {
@@ -123,7 +120,7 @@ namespace Acabus.Modules.CctvReports
                 if (IsRefundOfMoney)
                     return Location is null
                         ? AcabusData.FindDevices(device => device is Kvr)
-                        : (Location as Station).Devices.SelectFromList(device => device is Kvr);
+                        : (Location as Station).Devices.Where(device => device is Kvr);
                 if (!IsBusIncidences)
                     return Location is null || (!(Location is Route) && !(Location is Station))
                         ? AcabusData.FindDevices((device) => true) : (Location as Station).Devices;
@@ -136,20 +133,25 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// Obtiene una lista de todas las ubicaciones disponibles.
+        /// Obtiene el nombre del cuadro de texto para vehículo o equipo.
         /// </summary>
-        public IEnumerable<Location> Locations {
-            get {
-                if (!IsBusIncidences)
-                    return AcabusData.FindStations((station) => true);
-                return AcabusData.Routes;
-            }
-        }
+        public String HeaderTextDeviceOrVehicle => IsBusIncidences ? "Vehículo" : "Equipo";
 
         /// <summary>
-        /// Campo que provee a la propiedad 'IsBusIncidences'.
+        /// Obtiene el nombre del cuadro de texto para ubicación.
         /// </summary>
-        private Boolean _isBusIncidences;
+        public String HeaderTextRouteOrStation => IsBusIncidences ? "Ruta" : "Estación";
+
+        /// <summary>
+        /// Obtiene o establece la lista de incidencias.
+        /// </summary>
+        public ObservableCollection<Incidence> Incidences {
+            get => _incidences;
+            set {
+                _incidences = value;
+                OnPropertyChanged("Incidences");
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece si la incidencias es originada en un autobus.
@@ -168,25 +170,43 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Incidences'.
+        /// Obtiene o establece la ubicación de la incidencia.
         /// </summary>
-        private ObservableCollection<Incidence> _incidences;
-
-        /// <summary>
-        /// Obtiene o establece la lista de incidencias.
-        /// </summary>
-        public ObservableCollection<Incidence> Incidences {
-            get => _incidences;
+        public Location Location {
+            get => _location;
             set {
-                _incidences = value;
-                OnPropertyChanged("Incidences");
+                _location = value;
+                OnPropertyChanged("Location");
+                OnPropertyChanged("Devices");
             }
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'StartTime'.
+        /// Obtiene una lista de todas las ubicaciones disponibles.
         /// </summary>
-        private TimeSpan _startTime;
+        public IEnumerable<Location> Locations {
+            get {
+                if (!IsBusIncidences)
+                    return AcabusData.FindStations((station) => true);
+                return AcabusData.Routes;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de las prioridades de incidencias.
+        /// </summary>
+        public IEnumerable<Priority> Priorities => Enum.GetValues(typeof(Priority)).Cast<Priority>();
+
+        /// <summary>
+        /// Obtiene o establece la prioridad de la incidencia.
+        /// </summary>
+        public Priority Priority {
+            get => _priority;
+            set {
+                _priority = value;
+                OnPropertyChanged("Priority");
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece el tiempo de inicio de la incidencia.
@@ -200,36 +220,37 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// Obtiene el nombre del cuadro de texto para vehículo o equipo.
+        /// Obtiene o establece quien reporta la incidencia.
         /// </summary>
-        public String HeaderTextDeviceOrVehicle => IsBusIncidences ? "Vehículo" : "Equipo";
-
-        /// <summary>
-        /// Obtiene el nombre del cuadro de texto para ubicación.
-        /// </summary>
-        public String HeaderTextRouteOrStation => IsBusIncidences ? "Ruta" : "Estación";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public ICommand AddCommand { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public ICommand CloseCommand { get; }
-
+        public String WhoReporting {
+            get => _whoReporting;
+            set {
+                _whoReporting = value;
+                OnPropertyChanged("WhoReporting");
+            }
+        }
 
         #region RefundOfCash
-        /// <summary>
-        /// Campo que provee a la propiedad 'TitleSection'.
-        /// </summary>
-        private String _titleSection;
 
         /// <summary>
-        /// Obtiene el titulo del cuadro de dialogo
+        /// Campo que provee a la propiedad 'CashDestiny'.
         /// </summary>
-        public String TitleSection => _titleSection;
+        private CashDestiny? _cashDestiny;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'IsMoney'.
+        /// </summary>
+        private Boolean _isMoney;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'IsNewIncidences'.
+        /// </summary>
+        private Boolean _isNewIncidences;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Observations'.
+        /// </summary>
+        private String _observations;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Quantity'.
@@ -237,21 +258,26 @@ namespace Acabus.Modules.CctvReports
         private String _quantity;
 
         /// <summary>
-        /// Obtiene o establece la cantidad de dinero a devolver.
+        /// Campo que provee a la propiedad 'SelectedTechnician'.
         /// </summary>
-        public String Quantity {
-            get => _quantity;
-            set {
-                _quantity = value;
-                OnPropertyChanged("Quantity");
-                SetDescription();
-            }
-        }
+        private String _selectedTechnician;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'CashDestiny'.
+        /// Campo que provee a la propiedad 'TitleSection'.
         /// </summary>
-        private CashDestiny? _cashDestiny;
+        private String _titleSection;
+
+        /// <summary>
+        /// Obtiene una lista con los destino de dinero.
+        /// </summary>
+        public IEnumerable<CashDestiny> CashDestinies => AcabusData.CashDestiny.Where(cashDestiny =>
+        {
+            if (IsMoney && cashDestiny.Type == CashType.MONEY)
+                return true;
+            if (!IsMoney && cashDestiny.Type == CashType.BILL)
+                return true;
+            return false;
+        });
 
         /// <summary>
         /// Obtiene o establece el destino del dinero.
@@ -261,14 +287,9 @@ namespace Acabus.Modules.CctvReports
             set {
                 _cashDestiny = value;
                 OnPropertyChanged("CashDestiny");
-                SetDescription();
+                SetDescriptionAndObservation();
             }
         }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'IsMoney'.
-        /// </summary>
-        private Boolean _isMoney;
 
         /// <summary>
         /// Obtiene o establece si la devolución de dinero son monedas.
@@ -279,28 +300,9 @@ namespace Acabus.Modules.CctvReports
                 _isMoney = value;
                 OnPropertyChanged("IsMoney");
                 OnPropertyChanged("CashDestinies");
-                SetDescription();
+                SetDescriptionAndObservation();
             }
         }
-
-        /// <summary>
-        /// Obtiene una lista con los destino de dinero.
-        /// </summary>
-        public IEnumerable<CashDestiny> CashDestinies => AcabusData.CashDestiny.SelectFromList(cashDestiny =>
-        {
-            if (IsMoney && cashDestiny.Type == CashType.MONEY)
-                return true;
-            if (!IsMoney && cashDestiny.Type == CashType.BILL)
-                return true;
-            if (cashDestiny.Type == CashType.GENERAL)
-                return true;
-            return false;
-        });
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'IsNewIncidences'.
-        /// </summary>
-        private Boolean _isNewIncidences;
 
         /// <summary>
         /// Obtiene o establece si se está generando una incidencia nueva.
@@ -311,7 +313,7 @@ namespace Acabus.Modules.CctvReports
                 _isNewIncidences = value;
                 OnPropertyChanged("IsNewIncidences");
                 _titleSection = _isNewIncidences ? "Nueva incidencia" : "Devolución de dinero";
-                SetDescription();
+                SetDescriptionAndObservation();
             }
         }
 
@@ -323,14 +325,32 @@ namespace Acabus.Modules.CctvReports
             set {
                 IsNewIncidences = !value;
                 OnPropertyChanged("IsRefundOfMoney");
-                SetDescription();
+                SetDescriptionAndObservation();
             }
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'SelectedTechnician'.
+        /// Obtiene o establece las observaciones de la devolución.
         /// </summary>
-        private String _selectedTechnician;
+        public String Observations {
+            get => _observations;
+            set {
+                _observations = value;
+                OnPropertyChanged("Observations");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la cantidad de dinero a devolver.
+        /// </summary>
+        public String Quantity {
+            get => _quantity;
+            set {
+                _quantity = value;
+                OnPropertyChanged("Quantity");
+                SetDescriptionAndObservation();
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece el nombre de la persona que solucionó la incidencia.
@@ -349,42 +369,71 @@ namespace Acabus.Modules.CctvReports
         public ObservableCollection<String> Technicians => AcabusData.Technicians;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Observations'.
+        /// Obtiene el titulo del cuadro de dialogo
         /// </summary>
-        private String _observations;
+        public String TitleSection => _titleSection;
 
         /// <summary>
-        /// Obtiene o establece las observaciones de la devolución.
+        ///
         /// </summary>
-        public String Observations {
-            get => _observations;
-            set {
-                _observations = value;
-                OnPropertyChanged("Observations");
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        private void SetDescription()
+        private void SetDescriptionAndObservation()
         {
             Single.TryParse(Quantity, out float quantity);
             if (IsRefundOfMoney)
-                Description = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}", _isMoney ? "MONEDAS" : "BILLETE", quantity, CashDestiny?.Description);
+            {
+                Description = String.Format("{0}", _isMoney ? "MONEDAS DEVUELTAS" : "BILLETE DEVUELTO");
+                Observations = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}", _isMoney ? "MONEDAS" : "BILLETE", quantity, CashDestiny?.Description);
+            }
         }
-        #endregion
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public AddIncidencesViewModel()
+        #endregion RefundOfCash
+
+        protected override void OnValidation(string propertyName)
         {
+            switch (propertyName)
+            {
+                case "WhoReporting":
+                    if (String.IsNullOrEmpty(WhoReporting))
+                        AddError("WhoReporting", "Falta ingresar quién reporta");
+                    break;
 
-            AddCommand = new CommandBase(AddCommandExecute, AddCommandCanExec);
-            CloseCommand = new CommandBase(parameter => DialogHost.CloseDialogCommand.Execute(parameter, null));
+                case "Description":
+                    if (String.IsNullOrEmpty(Description))
+                        AddError("Description", "Falta ingresar la descripción de la incidencia");
+                    break;
 
-            _startTime = DateTime.Now.TimeOfDay;
+                case "Location":
+                    if (String.IsNullOrEmpty(Location?.ToString()))
+                        AddError("Location", String.Format("Falta seleccionar la {0}", IsBusIncidences ? "ruta" : "estación"));
+                    break;
 
+                case "Device":
+                    if (String.IsNullOrEmpty(Device?.ToString()))
+                        AddError("Device", String.Format("Falta seleccionar el {0}", IsBusIncidences ? "vehículo" : "equipo"));
+                    if (IsRefundOfMoney && !(Device is Kvr))
+                        AddError("Device", "El equipo debe ser un KVR");
+                    break;
+
+                case "Priority":
+                    if (IsNewIncidences && Priority == Priority.NONE)
+                        AddError("Priority", "Debe asignar una prioridad a la incidencia.");
+                    break;
+
+                case "CashDestiny":
+                    if (IsRefundOfMoney && String.IsNullOrEmpty(CashDestiny?.ToString()))
+                        AddError("CashDestiny", "Falta agregar el destino del dinero.");
+                    break;
+
+                case "Quantity":
+                    if (IsRefundOfMoney && !Single.TryParse(Quantity, out float result))
+                        AddError("Quantity", "Falta agregar la cantidad.");
+                    break;
+
+                case "SelectedTechnician":
+                    if (IsRefundOfMoney && String.IsNullOrEmpty(SelectedTechnician))
+                        AddError("SelectedTechnician", "Falta agregar el técnico que hará la devolución.");
+                    break;
+            }
         }
 
         private bool AddCommandCanExec(object parameter)
@@ -431,62 +480,20 @@ namespace Acabus.Modules.CctvReports
                     incidence.Status = CashDestiny.Value.Description == "CAU" ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
                     incidence.Technician = SelectedTechnician;
                     incidence.Observations = Observations;
-                    incidence.FinishDate = CashDestiny.Value.Description == "CAU" ? null : incidence.StartDate;
+                    incidence.FinishDate = CashDestiny.Value.Description == "CAU" ? null : (DateTime?)incidence.StartDate;
                     var refundOfMoney = new RefundOfMoney(incidence)
                     {
                         Quantity = Single.Parse(Quantity),
                         CashDestiny = CashDestiny.Value,
                         Status = CashDestiny?.Description == "CAU" ? RefundOfMoneyStatus.UNCOMMIT : RefundOfMoneyStatus.COMMIT,
-                        RefundDate = CashDestiny?.Description == "CAU" ? null : incidence.StartDate
+                        RefundDate = CashDestiny?.Description == "CAU" ? null : (DateTime?)incidence.StartDate
                     };
                     if (refundOfMoney.Save())
                         ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateData();
                 }
-
             });
-
+            ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
             CloseCommand.Execute(parameter);
-        }
-
-        protected override void OnValidation(string propertyName)
-        {
-            switch (propertyName)
-            {
-                case "WhoReporting":
-                    if (String.IsNullOrEmpty(WhoReporting))
-                        AddError("WhoReporting", "Falta ingresar quién reporta");
-                    break;
-                case "Description":
-                    if (String.IsNullOrEmpty(Description))
-                        AddError("Description", "Falta ingresar la descripción de la incidencia");
-                    break;
-                case "Location":
-                    if (String.IsNullOrEmpty(Location?.ToString()))
-                        AddError("Location", String.Format("Falta seleccionar la {0}", IsBusIncidences ? "ruta" : "estación"));
-                    break;
-                case "Device":
-                    if (String.IsNullOrEmpty(Device?.ToString()))
-                        AddError("Device", String.Format("Falta seleccionar el {0}", IsBusIncidences ? "vehículo" : "equipo"));
-                    if (IsRefundOfMoney && !(Device is Kvr))
-                        AddError("Device", "El equipo debe ser un KVR");
-                    break;
-                case "Priority":
-                    if (IsNewIncidences && Priority == Priority.NONE)
-                        AddError("Priority", "Debe asignar una prioridad a la incidencia.");
-                    break;
-                case "CashDestiny":
-                    if (IsRefundOfMoney && String.IsNullOrEmpty(CashDestiny?.ToString()))
-                        AddError("CashDestiny", "Falta agregar el destino del dinero.");
-                    break;
-                case "Quantity":
-                    if (IsRefundOfMoney && !Single.TryParse(Quantity, out float result))
-                        AddError("Quantity", "Falta agregar la cantidad.");
-                    break;
-                case "SelectedTechnician":
-                    if (IsRefundOfMoney && String.IsNullOrEmpty(SelectedTechnician))
-                        AddError("SelectedTechnician", "Falta agregar el técnico que hará la devolución.");
-                    break;
-            }
         }
 
         private Boolean Validate()

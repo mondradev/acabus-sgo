@@ -128,7 +128,7 @@ namespace Acabus.Window
         public async static void ShowDialog(String message)
         {
             DialogHost.CloseDialogCommand.Execute(null, null);
-            System.Threading.Thread.Sleep(1);
+            System.Threading.Thread.Sleep(500);
             await DialogHost.Show(new DialogTemplateView() { Message = message });
         }
 

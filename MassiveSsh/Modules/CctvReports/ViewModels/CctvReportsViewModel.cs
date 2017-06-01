@@ -11,7 +11,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Threading;
-using System.Windows;
 using System.Windows.Input;
 
 namespace Acabus.Modules.CctvReports
@@ -70,7 +69,7 @@ namespace Acabus.Modules.CctvReports
         /// Obtiene una lista de las incidencias abiertas.
         /// </summary>
         public ObservableCollection<Incidence> IncidencesOpened
-            => (ObservableCollection<Incidence>)Util.SelectFromList(Incidences, (incidence)
+            => (ObservableCollection<Incidence>)Util.Where(Incidences, (incidence)
                 =>
             {
                 Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
@@ -95,7 +94,7 @@ namespace Acabus.Modules.CctvReports
         /// Obtiene una lista de la incidencias generadas por alarmas.
         /// </summary>
         public ObservableCollection<Incidence> IncidencesClosed
-            => (ObservableCollection<Incidence>)Util.SelectFromList(Incidences, (incidence)
+            => (ObservableCollection<Incidence>)Util.Where(Incidences, (incidence)
                 =>
             {
                 Boolean isClosed = incidence.Status == IncidenceStatus.CLOSE;
@@ -247,8 +246,12 @@ namespace Acabus.Modules.CctvReports
 
                 if (!String.IsNullOrWhiteSpace(incidenceData))
                 {
-                    Clipboard.Clear();
-                    Clipboard.SetDataObject(incidenceData.ToUpper());
+                    try
+                    {
+                        System.Windows.Forms.Clipboard.Clear();
+                        System.Windows.Forms.Clipboard.SetDataObject(incidenceData.ToUpper());
+                    }
+                    catch { }
                 }
             });
 
@@ -393,7 +396,7 @@ namespace Acabus.Modules.CctvReports
                             if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
                             {
                                 incidence.Status = IncidenceStatus.CLOSE;
-                                if (AcabusData.OffDutyVehicles.SelectFromList(vehicle
+                                if (AcabusData.OffDutyVehicles.Where(vehicle
                                     => vehicle.EconomicNumber == (incidence.Device as Vehicle).EconomicNumber).Count > 0)
                                     incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
                                 else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";

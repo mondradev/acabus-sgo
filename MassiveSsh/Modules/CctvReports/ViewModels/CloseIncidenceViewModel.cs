@@ -1,5 +1,6 @@
 ﻿using Acabus.DataAccess;
 using Acabus.Models;
+using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils;
@@ -225,13 +226,11 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene una lista de destinos posibles para devolución de dinero.
         /// </summary>
-        public ICollection<CashDestiny> Destinies => AcabusData.CashDestiny.SelectFromList(cashDestiny =>
+        public ICollection<CashDestiny> Destinies => AcabusData.CashDestiny.Where(cashDestiny =>
         {
             if (IsMoney && cashDestiny.Type == CashType.MONEY)
                 return true;
             if (!IsMoney && cashDestiny.Type == CashType.BILL)
-                return true;
-            if (cashDestiny.Type == CashType.GENERAL)
                 return true;
             return false;
         });
@@ -302,7 +301,9 @@ namespace Acabus.Modules.CctvReports
                 AcabusControlCenterViewModel.ShowDialog("No se cerró la incidencia");
                 ViewModelService.GetViewModel<CctvReportsViewModel>().ReloadData();
             }
-            else DialogHost.CloseDialogCommand.Execute(parameter, null);
+            else
+                DialogHost.CloseDialogCommand.Execute(parameter, null);
+            ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
         }
 
         private bool CloseIncidenceCommandCanExec(object parameter)

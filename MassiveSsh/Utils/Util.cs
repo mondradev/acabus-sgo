@@ -16,6 +16,42 @@ namespace Acabus.Utils
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="toComparer"></param>
+        /// <param name="value1"></param>
+        /// <param name="value2"></param>
+        /// <returns></returns>
+        public static Boolean Between(this DateTime toComparer, DateTime? value1, DateTime? value2)
+        {
+            if (value1 is null)
+                return toComparer <= value2;
+
+            if (value2 is null)
+                return toComparer >= value1;
+
+            return toComparer >= value1 && toComparer <= value2;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toComparer"></param>
+        /// <param name="value1"></param>
+        /// <param name="value2"></param>
+        /// <returns></returns>
+        public static Boolean Between(this TimeSpan toComparer, TimeSpan? value1, TimeSpan? value2)
+        {
+            if (value1 is null)
+                return toComparer <= value2;
+
+            if (value2 is null)
+                return toComparer >= value1;
+
+            return toComparer >= value1 && toComparer <= value2;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="collection"></param>
         /// <returns></returns>
@@ -37,7 +73,7 @@ namespace Acabus.Utils
             return builder.ToString();
         }
 
-        public static ICollection<T> SelectFromList<T>(this ICollection<T> collection, Predicate<T> predicate)
+        public static ICollection<T> Where<T>(this ICollection<T> collection, Predicate<T> predicate)
         {
             ICollection<T> listTemp = (IList<T>)Activator.CreateInstance(collection.GetType());
             foreach (var item in collection)

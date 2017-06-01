@@ -1,4 +1,6 @@
 ﻿using Acabus.Models;
+using Acabus.Modules.Attendances.Models;
+using Acabus.Modules.Attendances.Services;
 using Acabus.Utils.Mvvm;
 using System;
 
@@ -13,10 +15,12 @@ namespace Acabus.Modules.CctvReports.Models
         /// Incidencia abierta.
         /// </summary>
         OPEN,
+
         /// <summary>
         /// Incidencia cerrada.
         /// </summary>
         CLOSE,
+
         /// <summary>
         /// Por confirmar.
         /// </summary>
@@ -24,30 +28,90 @@ namespace Acabus.Modules.CctvReports.Models
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class Incidence : NotifyPropertyChanged
     {
+        /// <summary>
+        /// Campo que provee a la propiedad 'AssignedAttendance'.
+        /// </summary>
+        private String _assignedAttendance;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Description'.
+        /// </summary>
+        private String _description;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Device'.
+        /// </summary>
+        private Device _device;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'FinishDate'.
+        /// </summary>
+        private DateTime? _finishDate;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Folio'.
+        /// </summary>
+        private String _folio;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Location'.
+        /// </summary>
+        private Location _location;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Observations'.
+        /// </summary>
+        private String _observations;
+
         /// <summary>
         /// Campo que provee a la propiedad 'Priority'.
         /// </summary>
         private Priority _priority;
 
         /// <summary>
-        /// Obtiene o establece la prioridad de la incidencia.
+        /// Campo que provee a la propiedad 'StartDate'.
         /// </summary>
-        public Priority Priority {
-            get => _priority;
-            set {
-                _priority = value;
-                OnPropertyChanged("Priority");
-            }
+        private DateTime _startDate;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Status'.
+        /// </summary>
+        private IncidenceStatus _status;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Technician'.
+        /// </summary>
+        private String _technician;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Bussines'.
+        /// </summary>
+        private String whoReporting;
+
+        /// <summary>
+        /// Crea una instancia nueva de una incidencia.
+        /// </summary>
+        public Incidence(String folio)
+        {
+            this._folio = folio;
+            this._status = IncidenceStatus.OPEN;
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Description'.
+        /// Obtiene o establece la asistencia correspondiente.
         /// </summary>
-        private String _description;
+        public String AssignedAttendance {
+            get => _assignedAttendance;
+            set {
+                _assignedAttendance = value;
+                OnPropertyChanged("AssignedAttendance");
+                AttendanceService.CountIncidences(value);
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece la descripción de la incidencia.
@@ -61,26 +125,15 @@ namespace Acabus.Modules.CctvReports.Models
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'StartDate'.
+        /// Obtiene o establece el equipo el cual presenta la incidencia.
         /// </summary>
-        private DateTime _startDate;
-
-        /// <summary>
-        /// Obtiene o establece la fecha y hora de inicio de la incidencia.
-        /// </summary>
-        public DateTime StartDate {
-            get => _startDate;
+        public Device Device {
+            get => _device;
             set {
-                _startDate = value;
-                OnPropertyChanged("StartDate");
-                OnPropertyChanged("TotalTime");
+                _device = value;
+                OnPropertyChanged("Device");
             }
         }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'FinishDate'.
-        /// </summary>
-        private DateTime? _finishDate;
 
         /// <summary>
         /// Obtiene o establece la fecha de finalización de la incidencia.
@@ -95,25 +148,9 @@ namespace Acabus.Modules.CctvReports.Models
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Bussines'.
+        /// Obtiene el folio de la incidencia.
         /// </summary>
-        private String whoReporting;
-
-        /// <summary>
-        /// Obtiene o establece quien realiza el reporte.
-        /// </summary>
-        public String WhoReporting {
-            get => whoReporting;
-            set {
-                whoReporting = value;
-                OnPropertyChanged("WhoReporting");
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Location'.
-        /// </summary>
-        private Location _location;
+        public String Folio => _folio;
 
         /// <summary>
         /// Obtiene o establece la ubicación de la inicidencia.
@@ -127,25 +164,49 @@ namespace Acabus.Modules.CctvReports.Models
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Device'.
+        /// Obtiene o establece las observaciones de la incidencia.
         /// </summary>
-        private Device _device;
-
-        /// <summary>
-        /// Obtiene o establece el equipo el cual presenta la incidencia.
-        /// </summary>
-        public Device Device {
-            get => _device;
+        public String Observations {
+            get => _observations;
             set {
-                _device = value;
-                OnPropertyChanged("Device");
+                _observations = value;
+                OnPropertyChanged("Observations");
             }
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Technician'.
+        /// Obtiene o establece la prioridad de la incidencia.
         /// </summary>
-        private String _technician;
+        public Priority Priority {
+            get => _priority;
+            set {
+                _priority = value;
+                OnPropertyChanged("Priority");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la fecha y hora de inicio de la incidencia.
+        /// </summary>
+        public DateTime StartDate {
+            get => _startDate;
+            set {
+                _startDate = value;
+                OnPropertyChanged("StartDate");
+                OnPropertyChanged("TotalTime");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el estado de la incidencia (Abierta|Cerrada).
+        /// </summary>
+        public IncidenceStatus Status {
+            get => _status;
+            set {
+                _status = value;
+                OnPropertyChanged("Status");
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece el técnico que resolvió la incidencia.
@@ -164,54 +225,14 @@ namespace Acabus.Modules.CctvReports.Models
         public TimeSpan? TotalTime => FinishDate - StartDate;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Folio'.
+        /// Obtiene o establece quien realiza el reporte.
         /// </summary>
-        private String _folio;
-
-        /// <summary>
-        /// Obtiene el folio de la incidencia.
-        /// </summary>
-        public String Folio => _folio;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Observations'.
-        /// </summary>
-        private String _observations;
-
-        /// <summary>
-        /// Obtiene o establece las observaciones de la incidencia.
-        /// </summary>
-        public String Observations {
-            get => _observations;
+        public String WhoReporting {
+            get => whoReporting;
             set {
-                _observations = value;
-                OnPropertyChanged("Observations");
+                whoReporting = value;
+                OnPropertyChanged("WhoReporting");
             }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Status'.
-        /// </summary>
-        private IncidenceStatus _status;
-
-        /// <summary>
-        /// Obtiene o establece el estado de la incidencia (Abierta|Cerrada).
-        /// </summary>
-        public IncidenceStatus Status {
-            get => _status;
-            set {
-                _status = value;
-                OnPropertyChanged("Status");
-            }
-        }
-
-        /// <summary>
-        /// Crea una instancia nueva de una incidencia.
-        /// </summary>
-        public Incidence(String folio)
-        {
-            this._folio = folio;
-            this._status = IncidenceStatus.OPEN;
         }
 
         /// <summary>
@@ -220,7 +241,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <returns></returns>
         public String ToReportString()
         {
-            return String.Format("*{0}* {1} {2}",
+            return String.Format("*{0}* {1} {2} {3}",
                 Folio,
                 Location is Route
                     ? String.Format("{0} {1}",
@@ -229,7 +250,10 @@ namespace Acabus.Modules.CctvReports.Models
                     : Device is null
                         ? Location.Name
                         : Device.NumeSeri,
-                Description);
+                Description,
+                AssignedAttendance is null
+                ? String.Empty
+                : String.Format("\n*Asignado:* {0}", AssignedAttendance));
         }
     }
 }

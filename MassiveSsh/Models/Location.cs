@@ -26,5 +26,22 @@ namespace Acabus.Models
         /// </summary>
         /// <returns>El nombre de la ubicación actual.</returns>
         public override string ToString() => Name;
+
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Section'.
+        /// </summary>
+        private String _section;
+
+        /// <summary>
+        /// Obtiene o establece la sección correspondiente.
+        /// </summary>
+        public String Section {
+            get => _section?.ToUpper();
+            set {
+                _section = value;
+                OnPropertyChanged("Section");
+            }
+        }
     }
 }

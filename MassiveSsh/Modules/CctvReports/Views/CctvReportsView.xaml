@@ -10,6 +10,7 @@
     xmlns:Converters="clr-namespace:Acabus.Modules.CctvReports.Converters"
     xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     x:Class="Acabus.Modules.CctvReports.CctvReportsView"
+    Name="CctvReports"
     mc:Ignorable="d" 
     MinWidth="600" MinHeight="480">
     <UserControl.Resources>
@@ -78,7 +79,7 @@
                     <DataGridTextColumn Binding="{Binding Device}" Header="Equipo/Vehículo"/>
                     <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia"/>
                     <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución"/>
-                    <DataGridTextColumn Binding="{Binding Technician}" Header="Técnico"/>
+                    <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado"/>
                     <DataGridTextColumn Binding="{Binding Status, Converter={StaticResource IncidenceStatusConverter}}" Header="Estado"/>
                     <DataGridTextColumn Binding="{Binding Observations}" Header="Observaciones"/>
                 </DataGrid.Columns>
@@ -123,7 +124,8 @@
                     <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta"/>
                     <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Ruta"/>
                     <DataGridTextColumn Binding="{Binding Device}" Header="Equipo/Vehículo"/>
-                    <DataGridTextColumn Binding="{Binding Technician}" Header="Técnico"/>
+                    <DataGridTextColumn Binding="{Binding AssignedTechnician}" Header="Técnico asignado"/>
+                    <DataGridTextColumn Binding="{Binding Technician}" Header="Técnico que soluciona"/>
                     <DataGridTextColumn Binding="{Binding TotalTime}" Header="Tiempo de solución"/>
                     <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia"/>
                     <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución"/>
