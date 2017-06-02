@@ -243,15 +243,13 @@ namespace Acabus.Modules.CctvReports.Models
         {
             return String.Format("*{0}* {1} {2} {3}",
                 Folio,
-                Location is Route
+                Location is Vehicle
                     ? String.Format("{0} {1}",
-                        (Location as Route).GetCodeRoute(),
-                        (Device as Vehicle).EconomicNumber)
-                    : Device is null
-                        ? Location.Name
-                        : Device.NumeSeri,
+                        (Location as Vehicle),
+                        Device)
+                    : Device.NumeSeri,
                 Description,
-                AssignedAttendance is null
+                String.IsNullOrEmpty(AssignedAttendance)
                 ? String.Empty
                 : String.Format("\n*Asignado:* {0}", AssignedAttendance));
         }

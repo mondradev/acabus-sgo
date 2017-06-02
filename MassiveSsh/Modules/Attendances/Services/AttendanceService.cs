@@ -13,10 +13,10 @@ namespace Acabus.Modules.Attendances.Services
     {
         public static WorkShift GetTurn(DateTime startTime)
         {
-            if (startTime.TimeOfDay.Between(TimeSpan.FromHours(6), new TimeSpan(13, 59, 0)))
+            if (startTime.TimeOfDay.Between(TimeSpan.FromHours(6), new TimeSpan(13, 59, 59)))
                 return WorkShift.MONING_SHIFT;
 
-            if (startTime.TimeOfDay.Between(TimeSpan.FromHours(14), new TimeSpan(21, 59, 0)))
+            if (startTime.TimeOfDay.Between(TimeSpan.FromHours(14), new TimeSpan(21, 59, 59)))
                 return WorkShift.AFTERNOON_SHIFT;
 
             return WorkShift.NIGHT_SHIFT;
@@ -34,7 +34,8 @@ namespace Acabus.Modules.Attendances.Services
                             DateTimeEntry,
                             DateTimeDeparture,
                             HasKvrKey,
-                            HasNemaKey
+                            HasNemaKey,
+                            Observations
                         )
                         VALUES (
                             '{0}',
@@ -43,7 +44,8 @@ namespace Acabus.Modules.Attendances.Services
                             '{3}',
                             '{4}',
                             {5},
-                            {6}
+                            {6},
+                            '{7}'
                         )",
                   attendance.Technician,
                   (UInt16)attendance.Turn,
@@ -51,7 +53,8 @@ namespace Acabus.Modules.Attendances.Services
                   attendance.DateTimeEntry?.ToSqliteFormat(),
                   attendance.DateTimeDeparture?.ToSqliteFormat(),
                   attendance.HasKvrKey ? 1 : 0,
-                  attendance.HasNemaKey ? 1 : 0
+                  attendance.HasNemaKey ? 1 : 0,
+                  attendance.Observations
                   );
             return SQLiteAccess.Execute(query) > 0;
         }
@@ -66,13 +69,17 @@ namespace Acabus.Modules.Attendances.Services
                                                Section = '{0}',
                                                DateTimeDeparture = '{1}',
                                                HasKvrKey = {2},
-                                               HasNemaKey = {3}
-                                         WHERE Technician = '{4}' AND 
-                                               DateTimeEntry = '{5}'",
+                                               HasNemaKey = {3},
+                                               OpenedIncidences={4},
+                                               Observations='{5}'
+                                         WHERE Technician = '{6}' AND 
+                                               DateTimeEntry = '{7}'",
                   attendance.Section,
                   attendance.DateTimeDeparture?.ToSqliteFormat(),
                   attendance.HasKvrKey ? 1 : 0,
                   attendance.HasNemaKey ? 1 : 0,
+                  attendance.CountOpenedIncidences,
+                  attendance.Observations,
                   attendance.Technician,
                   attendance.DateTimeEntry?.ToSqliteFormat()
                   );
@@ -101,7 +108,8 @@ namespace Acabus.Modules.Attendances.Services
                     Section = incidenceData[3].ToString(),
                     DateTimeEntry = (DateTime)incidenceData[4],
                     HasKvrKey = (Boolean)incidenceData[6],
-                    HasNemaKey = (Boolean)incidenceData[7]
+                    HasNemaKey = (Boolean)incidenceData[7],
+                    Observations=incidenceData[9].ToString()
                 });
             }
         }

@@ -75,8 +75,8 @@
                     <DataGridTextColumn Binding="{Binding Folio}" Header="Folio"/>
                     <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia"/>
                     <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta"/>
-                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Ruta"/>
-                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo/Vehículo"/>
+                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo"/>
+                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo"/>
                     <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia"/>
                     <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución"/>
                     <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado"/>
@@ -122,9 +122,9 @@
                     <DataGridTextColumn Binding="{Binding Folio}" Header="Folio"/>
                     <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia"/>
                     <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta"/>
-                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Ruta"/>
-                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo/Vehículo"/>
-                    <DataGridTextColumn Binding="{Binding AssignedTechnician}" Header="Técnico asignado"/>
+                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo"/>
+                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo"/>
+                    <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado"/>
                     <DataGridTextColumn Binding="{Binding Technician}" Header="Técnico que soluciona"/>
                     <DataGridTextColumn Binding="{Binding TotalTime}" Header="Tiempo de solución"/>
                     <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia"/>
@@ -153,6 +153,14 @@
                 <!-- Unidades en taller o sin energía -->
                 <Button ToolTip="Unidades en taller o sin energía" Command="{Binding OpenOffDutyVehiclesDialog}" BorderBrush="White" Background="White">
                     <materialDesign:PackIcon Kind="Bus" Width="24" Height="24"/>
+                </Button>
+                <!-- Reasignación de técnicos -->
+                <Button ToolTip="Reasignación de incidencias abiertas" Command="{Binding ReassignTechnician}" BorderBrush="White" Background="White">
+                    <Viewbox Width="24" Height="24">
+                        <Canvas Width="24" Height="24">
+                            <Path Data="M3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7M11,15H21V17H11V15M5,20L1.5,16.5L2.91,15.09L5,17.17L9.59,12.59L11,14L5,20Z" Fill="Black" />
+                        </Canvas>
+                    </Viewbox>
                 </Button>
                 <!-- Devolución de dinero -->
                 <Button ToolTip="Devolución de dinero"  Command="{Binding RefundCashDialogCommand}" BorderBrush="White" Background="White">

@@ -1,15 +1,18 @@
-﻿using Acabus.DataAccess;
-using Acabus.Models;
+﻿using Acabus.Models;
 using Acabus.Modules.Attendances.Models;
 using Acabus.Modules.Attendances.Services;
 using Acabus.Modules.Attendances.Views;
+using Acabus.Modules.CctvReports.Models;
+using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils;
 using Acabus.Utils.Mvvm;
+using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Windows.Input;
 using static Acabus.Modules.Attendances.Models.Attendance;
 
@@ -42,15 +45,34 @@ namespace Acabus.Modules.Attendances.ViewModels
             ModifyAttendanceCommand = new CommandBase(parameter =>
             {
                 if (SelectedAttendance is null) return;
+                if (SelectedAttendance.DateTimeDeparture != null) return;
                 DialogHost.OpenDialogCommand.Execute(new AttendanceModifyView(), null);
             });
             RegisterEntryCommand = new CommandBase(parameter =>
             {
                 DialogHost.OpenDialogCommand.Execute(new AttendanceEntryView(), null);
             });
-        }
+            OpenedIncidenceToClipboardCommand = new CommandBase(parameter =>
+            {
+                if (SelectedAttendance is null) return;
+                if (SelectedAttendance.CountOpenedIncidences == 0)
+                {
+                    AcabusControlCenterViewModel.ShowDialog("No hay incidencias asignadas.");
+                    return;
+                }
+                StringBuilder openedIncidence = new StringBuilder();
+                foreach (Incidence incidence in SelectedAttendance.OpenedIncidences)
+                    openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]);
+                openedIncidence.AppendFormat("*ASIGNADO:* {0}", SelectedAttendance.Technician);
 
-        public ICommand ModifyAttendanceCommand { get; }
+                try
+                {
+                    System.Windows.Forms.Clipboard.Clear();
+                    System.Windows.Forms.Clipboard.SetDataObject(openedIncidence.ToString());
+                }
+                catch { }
+            });
+        }
 
         ~AttendanceViewModel()
         {
@@ -68,9 +90,14 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
         }
 
+        public ICommand ModifyAttendanceCommand { get; }
+
         public ICommand RegisterDepartureCommand { get; }
 
         public ICommand RegisterEntryCommand { get; }
+
+        public ICommand OpenedIncidenceToClipboardCommand { get; }
+
 
         /// <summary>
         /// Obtiene o establece la asistencia seleccionada en la tabla.
@@ -84,6 +111,46 @@ namespace Acabus.Modules.Attendances.ViewModels
         }
 
         /// <summary>
+        /// Reasigna tecnicos a las incidencias abiertas.
+        /// </summary>
+        public void ReassignTechnician()
+        {
+            IEnumerable<Incidence> openedIncidences
+                   = ViewModelService.GetViewModel<CctvReports.CctvReportsViewModel>()?.IncidencesOpened;
+
+            foreach (Incidence incidence in openedIncidences)
+            {
+                if (incidence.Status != IncidenceStatus.OPEN) continue;
+
+                incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
+                    .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
+                incidence.Update();
+            }
+            UpdateCounters();
+        }
+
+        /// <summary>
+        /// Reasigna tecnicos a las incidencias abiertas.
+        /// </summary>
+        public void AssignTechnicianIncoming()
+        {
+            IEnumerable<Incidence> openedIncidences
+                   = ViewModelService.GetViewModel<CctvReports.CctvReportsViewModel>()?.IncidencesOpened;
+
+            foreach (Incidence incidence in openedIncidences)
+            {
+                if (incidence.Status != IncidenceStatus.OPEN) continue;
+                if (AttendanceService.GetTurn(incidence.StartDate) 
+                    != AttendanceService.GetTurn(DateTime.Now)) continue;
+
+                incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
+                    .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
+                incidence.Update();
+            }
+            UpdateCounters();
+        }
+
+        /// <summary>
         /// Obtiene una lista de el valor de esta propiedad.
         /// </summary>
         public IEnumerable<WorkShift> Turns => Enum.GetValues(typeof(WorkShift)).Cast<WorkShift>();
@@ -93,10 +160,10 @@ namespace Acabus.Modules.Attendances.ViewModels
         /// </summary>
         public String GetTechnicianAssigned(Location location, Device device, DateTime startTime)
         {
-
             /// Asignación cuando al menos hay un tecnico en turno.
             var attendances = (IEnumerable<Attendance>)Attendances
-                .Where(attendance => attendance.DateTimeDeparture is null);
+                .Where(attendance => attendance.DateTimeDeparture is null
+                && AttendanceService.GetTurn(DateTime.Now) == attendance.Turn);
             var attendancesPrevious = attendances;
 
             if (attendances.Count() == 1)
@@ -132,12 +199,12 @@ namespace Acabus.Modules.Attendances.ViewModels
                     attendancesPrevious = attendances;
 
                 /// Asignación por llave.
-                if (device is Vehicle)
+                if (location is Vehicle)
                     attendances = attendances.Where(attendance
-                          => attendance.HasNemaKey);
+                          => attendance.HasNemaKey || attendance.Section.Contains("AUTOBUS"));
                 else
                     attendances = attendances.Where(attendance
-                          => attendance.HasKvrKey);
+                          => attendance.HasKvrKey || attendance.Section.Contains("ESTACI"));
 
                 if (attendances.Count() == 1)
                     return attendances.First()?.Technician;
@@ -148,15 +215,15 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
             else
             {
-                if (device.GetType() != typeof(Vehicle) || !location.Name.Contains("RENA"))
+                if (location.GetType() != typeof(Vehicle) && !location.Name.Contains("RENA"))
                     return null;
 
-                if ((device as Vehicle).BusType == VehicleType.ARTICULATED
-                       || (device as Vehicle).BusType == VehicleType.STANDARD)
+                if ((location as Vehicle).BusType == VehicleType.ARTICULATED
+                       || (location as Vehicle).BusType == VehicleType.STANDARD)
                     attendances = attendances.Where(attendance
                        => attendance.DateTimeDeparture is null
                            && attendance.Section.Contains("PATIO"));
-                else if ((device as Vehicle).BusType == VehicleType.CONVENTIONAL)
+                else if ((location as Vehicle).BusType == VehicleType.CONVENTIONAL)
                     attendances = attendances.Where(attendance
                        => attendance.DateTimeDeparture is null
                            && attendance.Section.Contains("RENA"));
@@ -168,8 +235,6 @@ namespace Acabus.Modules.Attendances.ViewModels
                 else
                     attendancesPrevious = attendances;
             }
-
-
 
             /// Asignación por carga.
             return attendances.Aggregate((attendance1, attendance2)

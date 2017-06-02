@@ -38,7 +38,7 @@ namespace Acabus.DataAccess
             StringBuilder header = new StringBuilder();
             var properties = type.GetProperties();
             foreach (var property in properties)
-                header.Append(property.Name).Append(",");
+                header.Append(property.Name).Append("|");
             header.Remove(header.Length - 1, 1);
             return header.ToString();
         }
@@ -55,7 +55,7 @@ namespace Acabus.DataAccess
         {
             StringBuilder row = new StringBuilder();
             foreach (var dataItem in data)
-                row.Append(dataItem).Append(",");
+                row.AppendFormat("\"{0}\"", dataItem).Append(",");
             row.Remove(row.Length - 1, 1);
             return row.ToString();
         }

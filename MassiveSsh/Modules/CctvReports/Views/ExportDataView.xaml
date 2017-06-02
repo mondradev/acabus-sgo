@@ -5,6 +5,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Acabus.Modules.CctvReports"
+             xmlns:dt="clr-namespace:Acabus.DataAccess"
              mc:Ignorable="d">
     <UserControl.DataContext>
         <local:ExportDataViewModel/>
@@ -20,12 +21,15 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="8"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="8"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock TextWrapping="Wrap" Text="Exportar datos" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
-            <DatePicker materialDesign:HintAssist.Hint="Fecha inicial" Grid.Row="2" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding StartDateTime}" SelectedDate="{Binding StartDateTime}" />
-            <DatePicker materialDesign:HintAssist.Hint="Fecha final" Grid.Row="4" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding FinishDateTime}" SelectedDate="{Binding FinishDateTime}" />
+            <ComboBox materialDesign:HintAssist.Hint="Reporte" Grid.Row="2" HorizontalAlignment="Stretch" Margin="0" ItemsSource="{x:Static dt:AcabusData.ReportQueries}" SelectedItem="{Binding SelectedReport}" />
+            <DatePicker materialDesign:HintAssist.Hint="Fecha inicial" Grid.Row="4" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding StartDateTime}" SelectedDate="{Binding StartDateTime}" />
+            <DatePicker materialDesign:HintAssist.Hint="Fecha final" Grid.Row="6" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding FinishDateTime}" SelectedDate="{Binding FinishDateTime}" />
         </Grid>
         <StackPanel Margin="8" Grid.Row="2" HorizontalAlignment="Right" Orientation="Horizontal">
             <Button ToolTip="Descartar" Height="Auto" Margin="0,0,8,0" VerticalAlignment="Top" HorizontalAlignment="Left" d:LayoutOverrides="TopPosition, BottomPosition" Style="{StaticResource MaterialDesignFlatButton}" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">

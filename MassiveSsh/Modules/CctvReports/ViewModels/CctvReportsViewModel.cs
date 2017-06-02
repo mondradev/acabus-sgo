@@ -1,5 +1,6 @@
 ﻿using Acabus.DataAccess;
 using Acabus.Models;
+using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils;
@@ -32,6 +33,8 @@ namespace Acabus.Modules.CctvReports
                 return _alarms;
             }
         }
+
+        public ICommand ReassignTechnician { get; }
 
         /// <summary>
         /// Campo que provee a la propiedad 'BusDisconnectedAlarms'.
@@ -240,6 +243,13 @@ namespace Acabus.Modules.CctvReports
         {
             ViewModelService.Register(this);
 
+            ReassignTechnician = new CommandBase(parameter =>
+            {
+                if (IncidencesOpened.Count == 0) return;
+                ViewModelService.GetViewModel<AttendanceViewModel>()?.ReassignTechnician();
+                AcabusControlCenterViewModel.ShowDialog("Reasignación completada.");
+            });
+
             CopyingRowClipboardHandlerCommand = new CommandBase((parameter) =>
             {
                 String incidenceData = SelectedIncidence?.ToReportString();
@@ -335,9 +345,9 @@ namespace Acabus.Modules.CctvReports
                      if (item.Status == IncidenceStatus.UNCOMMIT || item.Priority == Priority.NONE) continue;
                      var time = DateTime.Now - item.StartDate;
                      var type = item.Device?.Type;
-                     var maxLowPriority = type == DeviceType.VEHICLE
+                     var maxLowPriority = type == DeviceType.DEVICE_BUS
                                 ? AcabusData.TimeMaxLowPriorityIncidenceBus : AcabusData.TimeMaxLowPriorityIncidence;
-                     var maxMediumPriority = type == DeviceType.VEHICLE
+                     var maxMediumPriority = type == DeviceType.DEVICE_BUS
                                 ? AcabusData.TimeMaxMediumPriorityIncidenceBus : AcabusData.TimeMaxMediumPriorityIncidence;
 
                      if (time > maxMediumPriority)
@@ -391,13 +401,13 @@ namespace Acabus.Modules.CctvReports
                     {
                         /// Verificación de las incidencias de SIN CONEXIÓN DE DATOS por confirmar
                         if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description == "SIN CONEXIÓN DE DATOS"
-                        && incidence.Device is Vehicle)
+                        && incidence.Location is Vehicle)
                             /// A pasado el tiempo para cerrar automáticamente ? 30 MIN
                             if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
                             {
                                 incidence.Status = IncidenceStatus.CLOSE;
                                 if (AcabusData.OffDutyVehicles.Where(vehicle
-                                    => vehicle.EconomicNumber == (incidence.Device as Vehicle).EconomicNumber).Count > 0)
+                                    => vehicle.EconomicNumber == (incidence.Location as Vehicle).EconomicNumber).Count > 0)
                                     incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
                                 else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
                                 incidence.Update();
@@ -408,7 +418,7 @@ namespace Acabus.Modules.CctvReports
                         /// Verificación de las incidencias ABIERTAS
 
                         if (incidence.Status != IncidenceStatus.OPEN || incidence.Description != "SIN CONEXIÓN DE DATOS"
-                        || !(incidence.Device is Vehicle)) continue;
+                        || !(incidence.Location is Vehicle)) continue;
 
                         bool exists = false;
 
@@ -451,10 +461,10 @@ namespace Acabus.Modules.CctvReports
                     if (!exists)
                         Incidences.CreateIncidence(
                             "SIN CONEXIÓN DE DATOS",
-                            AcabusData.FindVehicle((vehicle) => vehicle.EconomicNumber == alarm.EconomicNumber),
+                            AcabusData.FindDeviceInVehicle((deviceBus) => deviceBus.Description.Contains("PC ABORDO")),
                             DateTime.Now,
                             alarm.Priority,
-                            AcabusData.FindVehicle((vehicle) => vehicle.EconomicNumber == alarm.EconomicNumber)?.Route,
+                            AcabusData.FindVehicle((vehicle) => vehicle.EconomicNumber == alarm.EconomicNumber),
                             "SISTEMA"
                         );
                 }
@@ -475,8 +485,8 @@ namespace Acabus.Modules.CctvReports
                     if (item.Status == IncidenceStatus.OPEN)
                         AcabusControlCenterViewModel.AddNotify(String.Format("{0:dd/MM/yyyy HH:mm:ss} {1} - {2}",
                             item.StartDate,
-                            item.Device is null
-                                ? item.Location.ToString()
+                            item.Location is Vehicle
+                                ? String.Format("{0} {1}", item.Location, item.Device)
                                 : item.Device.ToString(),
                             item.Description));
                     item.Save();

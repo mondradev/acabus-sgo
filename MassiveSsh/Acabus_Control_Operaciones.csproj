@@ -154,6 +154,7 @@
     <Compile Include="Converters\TranslateEnumConverter.cs" />
     <Compile Include="DataAccess\Csv.cs" />
     <Compile Include="DataAccess\SQLiteAccess.cs" />
+    <Compile Include="Models\DeviceBus.cs" />
     <Compile Include="Modules\Attendances\AcabusData.cs" />
     <Compile Include="Modules\Attendances\Models\Attendance.cs" />
     <Compile Include="Modules\Attendances\Services\AttendanceService.cs" />
@@ -175,6 +176,7 @@
     </Compile>
     <Compile Include="Modules\CctvReports\AcabusData.cs" />
     <Compile Include="Modules\CctvReports\Models\RefundOfMoney.cs" />
+    <Compile Include="Modules\CctvReports\Models\ReportQuery.cs" />
     <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
       <DependentUpon>AddIncidencesView.xaml</DependentUpon>
     </Compile>

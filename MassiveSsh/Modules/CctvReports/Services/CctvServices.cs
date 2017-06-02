@@ -49,10 +49,10 @@ namespace Acabus.Modules.CctvReports.Services
             foreach (var incidenceData in response)
             {
                 Device deviceData = AcabusData.FindDevice((device) => device.NumeSeri == incidenceData[3].ToString());
-                deviceData = deviceData is null ? AcabusData.FindVehicle((vehicle) => vehicle.EconomicNumber == incidenceData[3].ToString()) : deviceData;
+                deviceData = deviceData is null ? AcabusData.FindDeviceInVehicle((device) => device.Description == incidenceData[3].ToString()) : deviceData;
 
-                Location locationData = deviceData is Vehicle
-                    ? (Location)AcabusData.Routes.FindRoute((route) => route.ToString() == incidenceData[4].ToString())
+                Location locationData = deviceData is DeviceBus
+                    ? (Location)AcabusData.FindVehicle((vehicle) => vehicle.EconomicNumber == incidenceData[4].ToString())
                     : AcabusData.FindStation((station) => station.Name == incidenceData[4].ToString());
 
                 incidences.Add(new Incidence(incidenceData[0].ToString())
@@ -135,8 +135,8 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Equals(BusDisconnectedAlarm alarm, Incidence incidence)
         {
-            if (incidence.Device is Vehicle)
-                if (alarm.EconomicNumber == ((Vehicle)incidence.Device).EconomicNumber
+            if (incidence.Location is Vehicle)
+                if (alarm.EconomicNumber == ((Vehicle)incidence.Location).EconomicNumber
                     && incidence.Status != IncidenceStatus.CLOSE)
                     return true;
             return false;
@@ -181,8 +181,8 @@ namespace Acabus.Modules.CctvReports.Services
                incidence.Folio,
                incidence.Description,
                incidence.WhoReporting,
-               incidence.Device is Vehicle ? (incidence.Device as Vehicle).EconomicNumber : incidence.Device?.NumeSeri,
-               incidence.Location is Route ? (incidence.Location as Route).ToString() : incidence.Location.Name,
+               incidence.Device is DeviceBus ? (incidence.Device as DeviceBus)?.Description : incidence.Device?.NumeSeri,
+               incidence.Location is Vehicle ? (incidence.Location as Vehicle).EconomicNumber : incidence.Location.Name,
                incidence.StartDate.ToSqliteFormat(),
                incidence.FinishDate?.ToSqliteFormat(),
                (UInt16)incidence.Status,

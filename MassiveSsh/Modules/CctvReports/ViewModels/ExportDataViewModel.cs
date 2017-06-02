@@ -1,4 +1,5 @@
 ﻿using Acabus.DataAccess;
+using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
 using System;
@@ -41,7 +42,7 @@ namespace Acabus.Modules.CctvReports
             }
         }
 
-        private String FileName => String.Format("acabus_incidencias_{0:yyyyMMdd}_{1:yyyyMMdd}.csv", StartDateTime, FinishDateTime);
+        private String FileName => String.Format("acabus_{{0}}_{0:yyyyMMdd}_{1:yyyyMMdd}.csv", StartDateTime, FinishDateTime);
 
         public ICommand GenerateExportCommand { get; }
 
@@ -53,9 +54,28 @@ namespace Acabus.Modules.CctvReports
             GenerateExportCommand = new CommandBase(Export);
         }
 
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedReport'.
+        /// </summary>
+        private ReportQuery _selectedReport;
+
+        /// <summary>
+        /// Obtiene o establece el reporte seleccionado.
+        /// </summary>
+        public ReportQuery SelectedReport {
+            get => _selectedReport;
+            set {
+                _selectedReport = value;
+                OnPropertyChanged("SelectedReport");
+            }
+        }
+
         private void Export(object parameter)
         {
-            String query = String.Format("SELECT * FROM Incidences WHERE DATE(StartDate) BETWEEN DATE('{0:yyyy-MM-dd}') AND DATE('{1:yyyy-MM-dd}')", StartDateTime, FinishDateTime);
+            if (SelectedReport is null) return;
+
+            String query = String.Format(SelectedReport.Query,
+                                     StartDateTime, FinishDateTime);
 
             var response = SQLiteAccess.ExecuteQuery(query, out String[] header);
 
@@ -69,7 +89,7 @@ namespace Acabus.Modules.CctvReports
                 => item.Select((subitem)
                     => subitem.ToString()).ToArray()).ToArray(),
                 header,
-                FileName);
+                String.Format(FileName, SelectedReport.Description));
 
             AcabusControlCenterViewModel.ShowDialog("Información fue exportada correctamente.");
         }

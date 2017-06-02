@@ -49,8 +49,17 @@
                     Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
                 <materialDesign:PackIcon Kind="Delete" Width="24" Height="24"/>
             </Button>
-            <Button ToolTip="Entrada" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterEntryCommand}">
-                <materialDesign:PackIcon Kind="ArrowRightBold" Width="24" Height="24"/>
+            <Button ToolTip="Asistencia de Entrada" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterEntryCommand}">
+                <materialDesign:PackIcon Kind="Walk" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
+                    <materialDesign:PackIcon.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleY="1" ScaleX="1"/>
+                            <SkewTransform AngleY="0" AngleX="0"/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </materialDesign:PackIcon.RenderTransform>
+                </materialDesign:PackIcon>
             </Button>
         </StackPanel>
     </StackPanel>

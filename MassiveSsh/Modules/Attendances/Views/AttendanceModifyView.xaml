@@ -41,8 +41,8 @@
                     Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
                 <materialDesign:PackIcon Kind="Delete" Width="24" Height="24"/>
             </Button>
-            <Button ToolTip="Entrada" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding ModifyCommand}">
-                <materialDesign:PackIcon Kind="ContentSave" Width="24" Height="24"/>
+            <Button ToolTip="Modificar asignación" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding ModifyCommand}">
+                <materialDesign:PackIcon Kind="CheckboxMarkedOutline" Width="24" Height="24"/>
             </Button>
         </StackPanel>
     </StackPanel>

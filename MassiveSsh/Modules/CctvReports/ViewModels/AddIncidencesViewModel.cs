@@ -48,6 +48,11 @@ namespace Acabus.Modules.CctvReports
         private Priority _priority;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'SelectedRoute'.
+        /// </summary>
+        private Route _selectedRoute;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'StartTime'.
         /// </summary>
         private TimeSpan _startTime;
@@ -102,13 +107,8 @@ namespace Acabus.Modules.CctvReports
             set {
                 _device = value;
                 OnPropertyChanged("Device");
-                if (Device != null)
-                {
-                    if (Device is Vehicle && (Device as Vehicle).Route != Location)
-                        Location = (Device as Vehicle).Route;
-                    if (!(Device is Vehicle) && Device.Station != Location)
-                        Location = Device.Station;
-                }
+                if (!IsBusIncidences && Device != null && Device.Station != Location)
+                    Location = Device.Station;
             }
         }
 
@@ -122,25 +122,22 @@ namespace Acabus.Modules.CctvReports
                         ? AcabusData.FindDevices(device => device is Kvr)
                         : (Location as Station).Devices.Where(device => device is Kvr);
                 if (!IsBusIncidences)
-                    return Location is null || (!(Location is Route) && !(Location is Station))
+                    return Location is null || (!(Location is Vehicle) && !(Location is Station))
                         ? AcabusData.FindDevices((device) => true) : (Location as Station).Devices;
                 else
-                    return Location is null ?
-                        (IEnumerable<Vehicle>)(AcabusData.FindVehicles((vehicle) => true))
-                            .OrderBy((vehicle) => vehicle.EconomicNumber)
-                        : (Location as Route).Vehicles;
+                    return AcabusData.DevicesBus;
             }
         }
 
         /// <summary>
         /// Obtiene el nombre del cuadro de texto para vehículo o equipo.
         /// </summary>
-        public String HeaderTextDeviceOrVehicle => IsBusIncidences ? "Vehículo" : "Equipo";
+        public String HeaderTextDeviceOrVehicle => IsBusIncidences ? "Equipo abordo" : "Equipo";
 
         /// <summary>
         /// Obtiene el nombre del cuadro de texto para ubicación.
         /// </summary>
-        public String HeaderTextRouteOrStation => IsBusIncidences ? "Ruta" : "Estación";
+        public String HeaderTextRouteOrStation => IsBusIncidences ? "Vehículo" : "Estación";
 
         /// <summary>
         /// Obtiene o establece la lista de incidencias.
@@ -178,6 +175,11 @@ namespace Acabus.Modules.CctvReports
                 _location = value;
                 OnPropertyChanged("Location");
                 OnPropertyChanged("Devices");
+                if (value is Vehicle)
+                {
+                    SelectedRoute = (value as Vehicle).Route;
+                    OnPropertyChanged("SelectedRoute");
+                }
             }
         }
 
@@ -188,7 +190,10 @@ namespace Acabus.Modules.CctvReports
             get {
                 if (!IsBusIncidences)
                     return AcabusData.FindStations((station) => true);
-                return AcabusData.Routes;
+                if (SelectedRoute is null)
+                    return AcabusData.FindVehicles(vehi => true);
+                else
+                    return SelectedRoute.Vehicles;
             }
         }
 
@@ -205,6 +210,23 @@ namespace Acabus.Modules.CctvReports
             set {
                 _priority = value;
                 OnPropertyChanged("Priority");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista las rutas disponibles.
+        /// </summary>
+        public IEnumerable<Route> Routes => AcabusData.Routes;
+
+        /// <summary>
+        /// Obtiene o establece la ruta seleccionada.
+        /// </summary>
+        public Route SelectedRoute {
+            get => _selectedRoute;
+            set {
+                _selectedRoute = value;
+                OnPropertyChanged("SelectedRoute");
+                OnPropertyChanged("Locations");
             }
         }
 
@@ -399,17 +421,17 @@ namespace Acabus.Modules.CctvReports
 
                 case "Description":
                     if (String.IsNullOrEmpty(Description))
-                        AddError("Description", "Falta ingresar la descripción de la incidencia");
+                        AddError("Description", "Falta ingresar la descripción de la incidencia.");
                     break;
 
                 case "Location":
                     if (String.IsNullOrEmpty(Location?.ToString()))
-                        AddError("Location", String.Format("Falta seleccionar la {0}", IsBusIncidences ? "ruta" : "estación"));
+                        AddError("Location", String.Format("Falta seleccionar {0}.", IsBusIncidences ? "el autobus" : "la estación"));
                     break;
 
                 case "Device":
                     if (String.IsNullOrEmpty(Device?.ToString()))
-                        AddError("Device", String.Format("Falta seleccionar el {0}", IsBusIncidences ? "vehículo" : "equipo"));
+                        AddError("Device", "Falta seleccionar el equipo.");
                     if (IsRefundOfMoney && !(Device is Kvr))
                         AddError("Device", "El equipo debe ser un KVR");
                     break;
@@ -448,8 +470,8 @@ namespace Acabus.Modules.CctvReports
                 if (incidence.Status == IncidenceStatus.CLOSE) continue;
 
                 if (exists = (incidence.Description == Description
-                  && (incidence.Device is Vehicle && Device is Vehicle
-                        ? (incidence.Device as Vehicle).EconomicNumber == (Device as Vehicle).EconomicNumber
+                  && (incidence.Location is Vehicle && Location is Vehicle
+                        ? (incidence.Location as Vehicle).EconomicNumber == (Location as Vehicle).EconomicNumber
                         : incidence.Device.NumeSeri == Device.NumeSeri)
                     && incidence.Location == Location))
                     break;

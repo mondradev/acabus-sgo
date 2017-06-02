@@ -18,6 +18,11 @@ namespace Acabus.Modules.Attendances.ViewModels
         private Attendance _attendance;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'Observations'.
+        /// </summary>
+        private String _observations;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'TimeDeparture'.
         /// </summary>
         private TimeSpan _timeDeparture;
@@ -37,6 +42,17 @@ namespace Acabus.Modules.Attendances.ViewModels
             set {
                 _attendance = value;
                 OnPropertyChanged("Attendance");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece las observaciones.
+        /// </summary>
+        public String Observations {
+            get => _observations;
+            set {
+                _observations = value;
+                OnPropertyChanged("Observations");
             }
         }
 
@@ -75,8 +91,10 @@ namespace Acabus.Modules.Attendances.ViewModels
         {
             System.Collections.Generic.ICollection<Incidence> openedIncidences = Attendance.OpenedIncidences;
             Attendance.DateTimeDeparture = DateTime.Now.Date.AddTicks(TimeDeparture.Ticks);
+            Attendance.Observations = Observations;
             if (Attendance.Update())
             {
+
                 foreach (Incidence incidence in openedIncidences)
                 {
                     incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?

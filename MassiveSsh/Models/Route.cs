@@ -120,12 +120,12 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene el vehículo que coincide con el número económico especificado.
         /// </summary>
-        /// <param name="idVehicle">Número económico del vehículo a buscar</param>
+        /// <param name="economicNumber">Número económico del vehículo a buscar</param>
         /// <returns>Un vehículo de la ruta.</returns>
-        public Vehicle GetVehicle(UInt16 idVehicle)
+        public Vehicle GetVehicle(String economicNumber)
         {
             foreach (var item in Vehicles)
-                if (item.ID == idVehicle)
+                if (item.EconomicNumber == economicNumber)
                     return item;
             return null;
         }

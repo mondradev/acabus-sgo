@@ -36,20 +36,23 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="Asistencia (Salida)" FontSize="24" FontWeight="Normal" />
                 <TextBox Focusable="False" materialDesign:HintAssist.Hint="Nombre del técnico" Grid.Row="2" IsReadOnly="True" Text="{Binding Attendance.Technician}"/>
                 <TextBox Focusable="False"  materialDesign:HintAssist.Hint="Turno" Grid.Row="4" IsReadOnly="True" Text="{Binding Attendance.Turn, Converter={StaticResource TurnsConverter}}"/>
                 <materialDesign:TimePicker materialDesign:HintAssist.Hint="Hora de salida" Grid.Row="8" SelectedTime="{Binding TimeDeparture, Converter={StaticResource DateTimeConverter}}"/>
                 <TextBox Focusable="False" materialDesign:HintAssist.Hint="Asignación" Grid.Row="6" IsReadOnly="True" Text="{Binding Attendance.Section}"/>
-                <TextBlock Text="{Binding Attendance.CountOpenedIncidences, StringFormat=Incidencias abiertas: \{0\}}" Grid.Row="10" />
-                <DataGrid Grid.Row="12" ItemsSource="{Binding Attendance.OpenedIncidences}" MaxHeight="250"
+                <TextBox materialDesign:HintAssist.Hint="Observaciones" Grid.Row="10" Text="{Binding Observations}"/>
+                <TextBlock Text="{Binding Attendance.CountOpenedIncidences, StringFormat=Incidencias abiertas: \{0\}}" Grid.Row="12" />
+                <DataGrid Grid.Row="14" ItemsSource="{Binding Attendance.OpenedIncidences}" MaxHeight="250"
                            SelectionMode="Single" CanUserResizeRows="False" IsReadOnly="True" AutoGenerateColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Binding="{Binding Folio}" Header="Folio"/>
                         <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia"/>
-                        <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Ruta"/>
-                        <DataGridTextColumn Binding="{Binding Device}" Header="Equipo/Vehículo"/>
+                        <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo"/>
+                        <DataGridTextColumn Binding="{Binding Device}" Header="Equipo"/>
                         <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia"/>
                     </DataGrid.Columns>
                 </DataGrid>
@@ -59,8 +62,17 @@
                         Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
                     <materialDesign:PackIcon Kind="Delete" Width="24" Height="24"/>
                 </Button>
-                <Button ToolTip="Salida" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterDepartureCommand}">
-                    <materialDesign:PackIcon Kind="ArrowLeftBold" Width="24" Height="24"/>
+                <Button ToolTip="Asistencia de Salida" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterDepartureCommand}">
+                    <materialDesign:PackIcon Kind="Walk" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
+                        <materialDesign:PackIcon.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleY="1" ScaleX="-1"/>
+                                <SkewTransform AngleY="0" AngleX="0"/>
+                                <RotateTransform Angle="0"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </materialDesign:PackIcon.RenderTransform>
+                    </materialDesign:PackIcon>
                 </Button>
             </StackPanel>
         </StackPanel>

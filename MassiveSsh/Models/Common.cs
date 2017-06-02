@@ -81,11 +81,11 @@ namespace Acabus.Models
         /// <summary>
         /// Autobus
         /// </summary>
-        VEHICLE,
+        DEVICE_BUS,
         /// <summary>
         /// Display
         /// </summary>
-        DISPLAY,
+        DSPL,
         /// <summary>
         /// Sin tipo definido.
         /// </summary>

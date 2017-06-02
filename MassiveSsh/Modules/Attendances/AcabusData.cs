@@ -27,7 +27,7 @@ namespace Acabus.DataAccess
 
         private static String XmlToSections(XmlNode xmlNode)
         {
-            return XmlUtils.GetAttribute(xmlNode, "Name");
+            return XmlUtils.GetAttribute(xmlNode, "Name")?.ToUpper();
         }
     }
 }

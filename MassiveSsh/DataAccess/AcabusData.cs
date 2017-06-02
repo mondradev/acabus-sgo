@@ -57,6 +57,11 @@ namespace Acabus.DataAccess
         private static ObservableCollection<String> _companies;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'DevicesBus'.
+        /// </summary>
+        private static ICollection<DeviceBus> _devicesBus;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'DevicesQuery'.
         /// </summary>
         private static String _devicesQuery;
@@ -218,6 +223,17 @@ namespace Acabus.DataAccess
                 if (_companies == null)
                     _companies = new ObservableCollection<String>();
                 return _companies;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de los dispositivos de un autobus.
+        /// </summary>
+        public static ICollection<DeviceBus> DevicesBus {
+            get {
+                if (_devicesBus == null)
+                    _devicesBus = new ObservableCollection<DeviceBus>();
+                return _devicesBus;
             }
         }
 
@@ -408,6 +424,19 @@ namespace Acabus.DataAccess
         }
 
         /// <summary>
+        /// Obtiene un dispositivo de autobus que cumple con la condiciones establecidas por el predicado.
+        /// </summary>
+        /// <param name="predicate">Predicado que evaluará a los dispositivos.</param>
+        /// <returns>Un dispositivo que cumple el predicado.</returns>
+        public static DeviceBus FindDeviceInVehicle(Predicate<DeviceBus> predicate)
+        {
+            foreach (var device in AcabusData.DevicesBus)
+                if (predicate.Invoke(device))
+                    return device;
+            return null;
+        }
+
+        /// <summary>
         /// Obtiene los dispositivos que cumple con la condiciones establecidas por el predicado.
         /// </summary>
         /// <param name="predicate">Predicado que evaluará a los dispositivos.</param>
@@ -549,6 +578,15 @@ namespace Acabus.DataAccess
                     return XmlUtils.GetAttribute(item as XmlNode, "Value");
             }
             return null;
+        }
+
+        /// <summary>
+        /// Carga todos los dispositivos montados un autobus.
+        /// </summary>
+        public static void LoadDevicesBus()
+        {
+            DevicesBus.Clear();
+            FillList(ref _devicesBus, ToDeviceBus, "DevicesBus", "DeviceBus");
         }
 
         /// <summary>
@@ -823,6 +861,7 @@ namespace Acabus.DataAccess
                 _xmlConfig.Load(CONFIG_FILENAME);
 
                 LoadSettings();
+                LoadDevicesBus();
                 LoadTrunkSettings();
                 LoadTechniciansSettings();
                 LoadOffDutyVehiclesSettings();
@@ -972,6 +1011,14 @@ namespace Acabus.DataAccess
             return new Credential(username, password, type, isRoot);
         }
 
+        private static DeviceBus ToDeviceBus(XmlNode arg)
+        {
+            return new DeviceBus()
+            {
+                Description = XmlUtils.GetAttribute(arg, "Description")
+            };
+        }
+
         /// <summary>
         /// Convierte un nodo XML con una estructura correspondiente a un
         /// vehículo que pertenece a una ruta.
@@ -989,13 +1036,10 @@ namespace Acabus.DataAccess
 
                 vehicle.IP = XmlUtils.GetAttribute(vehicleXmlNode, "IP");
                 vehicle.Enabled = XmlUtils.GetAttributeBool(vehicleXmlNode, "Enabled");
-                vehicle.HasDataBase = XmlUtils.GetAttributeBool(vehicleXmlNode, "HasDataBase");
-                vehicle.SshEnabled = XmlUtils.GetAttributeBool(vehicleXmlNode, "SshEnabled");
-                vehicle.CanReplicate = XmlUtils.GetAttributeBool(vehicleXmlNode, "CanReplicate");
 
                 return vehicle;
             }
-            catch (Exception) { }
+            catch { }
             return null;
         }
 

@@ -31,6 +31,11 @@ namespace Acabus.Modules.Attendances.Models
         private Boolean _hasNemaKey;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'Observations'.
+        /// </summary>
+        private String _observations;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'Section'.
         /// </summary>
         private String _section;
@@ -57,6 +62,12 @@ namespace Acabus.Modules.Attendances.Models
         /// </summary>
         public int CountClosedIncidences => Incidences.Where(incidence
             => incidence.Status == IncidenceStatus.CLOSE).Count;
+
+        /// <summary>
+        /// Obtiene el número de incidencias asiganadas abiertas.
+        /// </summary>
+        public int CountOpenedIncidences => Incidences.Where(incidence
+            => incidence.Status != IncidenceStatus.CLOSE).Count;
 
         /// <summary>
         /// Obtiene o establece la fecha/hora de salida de la asistencia.
@@ -113,14 +124,19 @@ namespace Acabus.Modules.Attendances.Models
             }
         }
 
-        public ICollection<Incidence> OpenedIncidences
-            => Incidences.Where(incidence => incidence.Status != IncidenceStatus.CLOSE);
-
         /// <summary>
-        /// Obtiene el número de incidencias asiganadas abiertas.
+        /// Obtiene o establece las observaciones de la asistencia.
         /// </summary>
-        public int CountOpenedIncidences => Incidences.Where(incidence
-            => incidence.Status != IncidenceStatus.CLOSE).Count;
+        public String Observations {
+            get => _observations;
+            set {
+                _observations = value;
+                OnPropertyChanged("Observations");
+            }
+        }
+
+        public ICollection<Incidence> OpenedIncidences
+                    => Incidences.Where(incidence => incidence.Status != IncidenceStatus.CLOSE);
 
         /// <summary>
         /// Obtiene o establece el tramo asignado.

@@ -105,7 +105,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
         }
 
-        public IEnumerable<String> Technicians => AcabusData.Technicians;
+        public IEnumerable<String> Technicians => AcabusData.Technicians.OrderBy(technician => technician);
 
         /// <summary>
         /// Obtiene o establece la hora de entrada del técnico.
@@ -162,17 +162,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             if (attendance.Save())
             {
                 Attendances.Add(attendance);
-                IEnumerable<Incidence> openedIncidences
-                    = ViewModelService.GetViewModel<CctvReports.CctvReportsViewModel>()?.IncidencesOpened;
-
-                foreach (Incidence incidence in openedIncidences)
-                {
-                    incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                        .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
-                    incidence.Update();
-                }
-
-                ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
+                ViewModelService.GetViewModel<AttendanceViewModel>()?.AssignTechnicianIncoming();
 
             }
             else
