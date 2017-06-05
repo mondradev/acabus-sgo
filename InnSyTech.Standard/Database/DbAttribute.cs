@@ -3,6 +3,43 @@
 namespace InnSyTech.Standard.Database
 {
     /// <summary>
+    ///
+    /// </summary>
+    public enum RelationMode
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        UNIDIRECTIONAL,
+
+        /// <summary>
+        ///
+        /// </summary>
+        BIDIRECTIONAL
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public enum RelationType
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        ONE_TO_ONE,
+
+        /// <summary>
+        ///
+        /// </summary>
+        ONE_TO_VARIOUS,
+
+        /// <summary>
+        ///
+        /// </summary>
+        VARIOUS_TO_VARIOUS
+    }
+
+    /// <summary>
     /// Representa un atributo que permite indicar como se maneja la propiedad de una estructura dentro de la base de datos.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
@@ -14,14 +51,14 @@ namespace InnSyTech.Standard.Database
         public ColumnAttribute() { }
 
         /// <summary>
-        /// Obtiene o establece si el campo es autoincremental.
-        /// </summary>
-        public Boolean Autonumerical { get; set; }
-
-        /// <summary>
         /// Obtiene o establece el convertidor del valor de la propiedad.
         /// </summary>
         public Type Converter { get; set; }
+
+        /// <summary>
+        /// Obtiene o establece si el campo es autoincremental.
+        /// </summary>
+        public Boolean IsAutonumerical { get; set; }
 
         /// <summary>
         /// Obtiene o establece si el campo es una llave foranea a otra tabla.
@@ -48,22 +85,38 @@ namespace InnSyTech.Standard.Database
     /// Representa un atributo que indica algunas caracteristicas de una tabla dentro de una base de datos.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    public sealed class TableAttribute : Attribute
+    public sealed class EntityAttribute : Attribute
     {
-        private readonly string name;
-
         /// <summary>
         /// Crea una instancia nueva de un atributo Tabla.
         /// </summary>
-        /// <param name="name">Nombre de la tabla.</param>
-        public TableAttribute(string name)
-        {
-            this.name = name;
-        }
+        public EntityAttribute() { }
 
         /// <summary>
         /// Obtiene el nombre de la tabla.
         /// </summary>
-        public string Name => name;
+        public string TableName { get; set; }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    [System.AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+    public sealed class RelationAttribute : Attribute
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public RelationMode Mode { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public Type ParentEntity { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public RelationType Type { get; set; }
     }
 }

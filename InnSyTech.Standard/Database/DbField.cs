@@ -17,6 +17,16 @@ namespace InnSyTech.Standard.Database
         private IDbConverter _converter;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'IsAutonumerical'.
+        /// </summary>
+        private Boolean _isAutonumerical;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'IsForeignKey'.
+        /// </summary>
+        private Boolean _isForeignKey;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'IsPrimaryKey'.
         /// </summary>
         private Boolean _isPrimaryKey;
@@ -42,6 +52,8 @@ namespace InnSyTech.Standard.Database
             _name = name;
             _isPrimaryKey = isPrimaryKey;
             _propertyInfo = propertyInfo;
+            _isAutonumerical = false;
+            _isForeignKey = false;
 
             if (converter != null)
                 _converter = (IDbConverter)Activator.CreateInstance(converter);
@@ -53,6 +65,16 @@ namespace InnSyTech.Standard.Database
         public IDbConverter Converter => _converter;
 
         /// <summary>
+        /// Obtiene si el campo es autonumerico.
+        /// </summary>
+        public Boolean IsAutonumerical => _isAutonumerical;
+
+        /// <summary>
+        /// Obtiene si el campo es llave foranea en la base de datos.
+        /// </summary>
+        public Boolean IsForeignKey => _isForeignKey;
+
+        /// <summary>
         /// Obtiene si el campo es llave primaria en la base de datos.
         /// </summary>
         public Boolean IsPrimaryKey => _isPrimaryKey;
@@ -61,6 +83,11 @@ namespace InnSyTech.Standard.Database
         /// Obtiene el nombre del campo en la base de datos.
         /// </summary>
         public String Name => _name;
+
+        /// <summary>
+        /// Obtiene el tipo de la propiedad enlazada al campo.
+        /// </summary>
+        public Type PropertyType => _propertyInfo.PropertyType;
 
         /// <summary>
         /// Obtiene todo los campos especificados de un tipo de dato.
@@ -83,7 +110,11 @@ namespace InnSyTech.Standard.Database
                             String name = columnAttribute.Name;
                             name = String.IsNullOrEmpty(name) ? property.Name : name;
 
-                            yield return new DbField(name, property, columnAttribute.IsPrimaryKey, columnAttribute.Converter);
+                            yield return new DbField(name, property, columnAttribute.IsPrimaryKey, columnAttribute.Converter)
+                            {
+                                _isForeignKey = columnAttribute.IsForeignKey,
+                                _isAutonumerical = columnAttribute.IsAutonumerical
+                            };
                         }
                 }
                 else
@@ -110,8 +141,10 @@ namespace InnSyTech.Standard.Database
         {
             if (instance is null)
                 throw new ArgumentNullException("La instancia no puede ser nula");
+            if (Converter is null)
+                return _propertyInfo.GetValue(instance);
 
-            return _propertyInfo.GetValue(instance);
+            return Converter.ConverterToDbData(_propertyInfo.GetValue(instance));
         }
 
         /// <summary>
@@ -123,8 +156,14 @@ namespace InnSyTech.Standard.Database
         {
             if (instance is null)
                 throw new ArgumentNullException("La instancia no puede ser nula");
-
-            _propertyInfo.SetValue(instance, value);
+            try
+            {
+                if (Converter is null)
+                    _propertyInfo.SetValue(instance, value);
+                else
+                    _propertyInfo.SetValue(instance, Converter.ConverterFromDb(value));
+            }
+            catch { }
         }
     }
 }
