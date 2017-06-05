@@ -528,8 +528,17 @@ namespace InnSyTech.Standard.Database
                     command.Dispose();
             }
         }
-        #endregion
 
+        #endregion DeleteUndirectional
+
+        #region GetUnidirectional
+
+        /// <summary>
+        /// Obtiene la instancia que tenga asignada la llave primaria especificada.
+        /// </summary>
+        /// <param name="typeOfInstance">Tipo de la instancia.</param>
+        /// <param name="idKey">Valor de la llave primaria de la instancia.</param>
+        /// <returns>Una instancia del tipo especificada.</returns>
         public object GetObject(Type typeOfInstance, Object idKey)
         {
             DbTransaction transaction = null;
@@ -546,7 +555,8 @@ namespace InnSyTech.Standard.Database
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(String.Format("Error al realizar la extracción de datos: {0}; Mensaje: {1}", typeOfInstance.Name, ex.Message), "ERROR");
+                    Trace.WriteLine(String.Format("Error al realizar la extracción de datos: {0}; Mensaje: {1}",
+                        typeOfInstance.Name, ex.Message), "ERROR");
 
                     if (transaction != null)
                         transaction.Rollback();
@@ -569,7 +579,12 @@ namespace InnSyTech.Standard.Database
             }
         }
 
-        public IEnumerable<object> GetObjects(Type typeOfInstance)
+        /// <summary>
+        /// Obtiene una colección de elementos del tipo especificado.
+        /// </summary>
+        /// <param name="typeOfInstance">Tipo a devolver de la base de datos.</param>
+        /// <returns>Una colección de instancias del tipo especificado.</returns>
+        public ICollection<object> GetObjects(Type typeOfInstance)
         {
             ICollection<object> objects = new List<object>();
             DbTransaction transaction = null;
@@ -580,7 +595,7 @@ namespace InnSyTech.Standard.Database
                 {
                     transaction = BeginTransaction();
 
-                    ReadList(typeOfInstance, objects, transaction, null);
+                    ReadList(typeOfInstance, objects, transaction);
 
                     transaction.Commit();
 
@@ -588,7 +603,8 @@ namespace InnSyTech.Standard.Database
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(String.Format("Error al realizar la extracción multiple de datos: {0}; Mensaje: {1}", typeOfInstance.Name, ex.Message), "ERROR");
+                    Trace.WriteLine(String.Format("Error al realizar la extracción multiple de datos: {0}; Mensaje: {1}",
+                        typeOfInstance.Name, ex.Message), "ERROR");
 
                     if (transaction != null)
                         transaction.Rollback();
@@ -611,12 +627,21 @@ namespace InnSyTech.Standard.Database
             }
         }
 
-        private Object ReadData(Type typeOfInstance, object idKey, DbTransaction transaction, Object parentInstance)
+        /// <summary>
+        /// Lee la información de una instancia que contenga la llave primaria especificada por el parametro.
+        /// </summary>
+        /// <param name="typeOfInstance">Tipo de la instancia a obtener.</param>
+        /// <param name="idKey">Valor de la llave primaria de la instancia.</param>
+        /// <param name="transaction">Instancia <see cref="DbTransaction"/> que administra la transacción actual.</param>
+        /// <param name="childInstance">Instancia dependiente.</param>
+        /// <returns>Una instancia del tipo especificado.</returns>
+        private Object ReadData(Type typeOfInstance, object idKey, DbTransaction transaction, Object childInstance = null)
         {
             DbCommand command = _connection.CreateCommand();
             command.Transaction = transaction;
 
-            command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@{1}", GetTableName(typeOfInstance), DbField.GetPrimaryKey(typeOfInstance).Name);
+            command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@{1}", GetTableName(typeOfInstance),
+                DbField.GetPrimaryKey(typeOfInstance).Name);
             CreateParameter(command, DbField.GetPrimaryKey(typeOfInstance).Name, idKey);
 
             IEnumerable<DbField> fields = DbField.GetFields(typeOfInstance);
@@ -634,12 +659,17 @@ namespace InnSyTech.Standard.Database
                         try
                         {
                             Object fieldValue = reader[field.Name];
-
+                            //if (field.PropertyType is IEnumerable)
+                            //    ReadList(field.PropertyType.GetGenericArguments()?[0],
+                            //        (ICollection<object>)field.GetValue(data),
+                            //        transaction,
+                            //        data);
+                            //else
                             if (!field.IsForeignKey)
                                 field.SetValue(data, reader[field.Name]);
-                            else if (parentInstance != null && field.PropertyType == parentInstance.GetType()
-                                && fieldValue.Equals(DbField.GetPrimaryKey(parentInstance.GetType()).GetValue(parentInstance)))
-                                field.SetValue(data, parentInstance);
+                            else if (childInstance != null && field.PropertyType == childInstance.GetType()
+                                && fieldValue.Equals(DbField.GetPrimaryKey(childInstance.GetType()).GetValue(childInstance)))
+                                field.SetValue(data, childInstance);
                             else
                                 field.SetValue(data, ReadData(field.PropertyType, reader[field.Name], transaction, data));
                         }
@@ -659,7 +689,14 @@ namespace InnSyTech.Standard.Database
             }
         }
 
-        private void ReadList(Type typeOfInstance, ICollection<object> objects, DbTransaction transaction, Object parentInstance)
+        /// <summary>
+        /// Obtiene una lista de las instancias especificadas por el parametro.
+        /// </summary>
+        /// <param name="typeOfInstance"></param>
+        /// <param name="objects"></param>
+        /// <param name="transaction"></param>
+        /// <param name="parentInstance"></param>
+        private void ReadList(Type typeOfInstance, ICollection<object> objects, DbTransaction transaction, Object parentInstance = null)
         {
             DbCommand command = _connection.CreateCommand();
             command.Transaction = transaction;
@@ -702,5 +739,7 @@ namespace InnSyTech.Standard.Database
                     command.Dispose();
             }
         }
+
+        #endregion GetUnidirectional
     }
 }
