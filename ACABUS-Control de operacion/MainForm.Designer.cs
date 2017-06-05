@@ -152,7 +152,6 @@
             // weekReportButton
             // 
             this.weekReportButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.weekReportButton.Enabled = false;
             this.weekReportButton.Image = ((System.Drawing.Image)(resources.GetObject("weekReportButton.Image")));
             this.weekReportButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.weekReportButton.Name = "weekReportButton";

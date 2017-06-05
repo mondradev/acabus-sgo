@@ -658,6 +658,14 @@ namespace InnSyTech.Standard.Database
                     {
                         try
                         {
+                            if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
+                                continue;
+
+                            if (reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(DateTime)
+                                || reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(TimeSpan))
+                                if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
+                                    continue;
+
                             Object fieldValue = reader[field.Name];
                             //if (field.PropertyType is IEnumerable)
                             //    ReadList(field.PropertyType.GetGenericArguments()?[0],
@@ -716,6 +724,14 @@ namespace InnSyTech.Standard.Database
                     data = Activator.CreateInstance(typeOfInstance);
                     foreach (DbField field in fields)
                     {
+                        if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
+                            continue;
+
+                        if (reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(DateTime)
+                            || reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(TimeSpan))
+                            if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
+                                continue;
+
                         Object fieldValue = reader[field.Name];
 
                         if (!field.IsForeignKey)

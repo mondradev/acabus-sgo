@@ -15,7 +15,6 @@ namespace ACABUS_Control_de_operacion
         public WeekReport()
         {
             InitializeComponent();
-            FillReport();
         }
 
         private void FillReport()
@@ -201,6 +200,12 @@ namespace ACABUS_Control_de_operacion
 
             excel.Close();
             Excel.Quit();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            weekFirstDay = String.Format("{0:yyyy-MM-dd}", dateTimePicker1.Value);
+            FillReport();
         }
     }
 }
