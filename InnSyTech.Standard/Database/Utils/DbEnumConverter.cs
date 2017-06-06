@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InnSyTech.Standard.Database
+namespace InnSyTech.Standard.Database.Utils
 {
     /// <summary>
     /// Define un convertidor de datos para enumeraciones a enteros y así poder ingresarlos a la base de datos.
