@@ -7,10 +7,9 @@ using System;
 namespace Acabus.Models
 {
     /// <summary>
-    /// Esta clase define la estructura básica de un equipo
-    /// en ruta troncal.
+    /// Esta clase define la estructura básica de un equipo en ruta troncal.
     /// </summary>
-    [Entity(TableName ="Devices")]
+    [Entity(TableName = "Devices")]
     public class Device : NotifyPropertyChanged
     {
         /// <summary>
@@ -108,25 +107,22 @@ namespace Acabus.Models
         /// </summary>
         private DeviceType _type;
 
-        /// <summary>
-        /// Campo que provee a la propiedad 'Vehicle'.
-        /// </summary>
-        private Vehicle _vehicle;
 
         /// <summary>
         /// Crea una instancia nueva de un equipo.
         /// </summary>
         /// <param name="station">Estación a la que pertence
         /// el equipo.</param>
-        public Device(UInt16 id, DeviceType type, Station station)
+        public Device(UInt16 id, DeviceType type, Station station, String numeSeri)
         {
             _id = id;
             _type = type;
             _station = station;
+            _numeSeri = numeSeri;
         }
 
         /// <summary>
-        ///
+        /// Crea una instancia básica de <see cref="Device"/>.
         /// </summary>
         public Device()
         {
@@ -184,7 +180,7 @@ namespace Acabus.Models
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
         public UInt16 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged("ID");
             }
@@ -261,7 +257,7 @@ namespace Acabus.Models
         [Column(Name = "SerialNumber")]
         public String NumeSeri {
             get => _numeSeri;
-            private set {
+            protected set {
                 _numeSeri = value;
                 OnPropertyChanged("NumeSeri");
             }
@@ -338,7 +334,7 @@ namespace Acabus.Models
         [XmlAnnotation(Ignore = true)]
         public Station Station {
             get => _station;
-            private set {
+            protected set {
                 _station = value;
                 OnPropertyChanged("Station");
             }
@@ -370,23 +366,12 @@ namespace Acabus.Models
         [Column(Converter = typeof(DbEnumConverter<DeviceType>))]
         public DeviceType Type {
             get => _type;
-            private set {
+            protected set {
                 _type = value;
                 OnPropertyChanged("Type");
             }
         }
 
-        /// <summary>
-        /// Obtiene o establece el vehículo donde se encuentra el dispositivo.
-        /// </summary>
-        [Column(IsForeignKey = true, IsAutonumerical = true, Name = "Fk_Vehicle_No_Econ")]
-        public Vehicle Vehicle {
-            get => _vehicle;
-            set {
-                _vehicle = value;
-                OnPropertyChanged("Vehicle");
-            }
-        }
 
         /// <summary>
         /// Operador lógico de desigualdad, determina si dos instancias <see cref="Device"/> son diferentes.
@@ -420,27 +405,29 @@ namespace Acabus.Models
         }
 
         /// <summary>
-        ///
+        /// Compara dos instancias y determina si estas son iguales.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">Instancia a comparar con la actual.</param>
+        /// <returns>Un valor <see cref="true"/> si las instancias son iguales.</returns>
         public override bool Equals(object obj)
         {
-            return base.Equals(obj);
+            if (GetType() != obj.GetType())
+                return false;
+
+            return this == (Device)obj;
         }
 
         /// <summary>
+        /// Obtiene un código HASH de la instancia actual.
         /// </summary>
-        /// <returns></returns>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        /// <returns>Un código HASH de la instancia.</returns>
+        public override int GetHashCode() => base.GetHashCode();
 
         /// <summary>
         /// Una cadena que representa a este equipo.
         /// </summary>
         /// <returns>Un número de serie que identifica al equipo.</returns>
         public override String ToString() => NumeSeri;
+
     }
 }

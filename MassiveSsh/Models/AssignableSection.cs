@@ -3,7 +3,7 @@ using System;
 
 namespace Acabus.Models
 {
-    public class Location : NotifyPropertyChanged
+    public class AssignableSection : NotifyPropertyChanged
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Name'.

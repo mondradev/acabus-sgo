@@ -28,7 +28,7 @@ namespace Acabus.Modules.CctvReports.Services
         }
 
         public static Incidence CreateIncidence(this IList<Incidence> incidences, DeviceFault description, Device device, DateTime startTime,
-                    Priority priority, Location location, string whoReporting)
+                    Priority priority, string whoReporting)
         {
             lock (incidences)
             {
@@ -48,7 +48,7 @@ namespace Acabus.Modules.CctvReports.Services
                     WhoReporting = whoReporting,
                     Status = IncidenceStatus.OPEN,
                     AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                                .GetTechnicianAssigned(location, device, startTime)
+                                .GetTechnicianAssigned(device, startTime)
                 };
 
                 incidences.Add(incidence);
@@ -58,9 +58,8 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Equals(Alarm alarm, Incidence incidence)
         {
-            if (alarm.Device.GetType() != incidence.Device.GetType()) return false;
-            if (alarm.Device == incidence.Device
-                && alarm.Description == incidence.Description.ToString())
+            if (!alarm.Device.Equals(incidence?.Device)) return false;
+            if (alarm.Description == incidence.Description.ToString())
                 if (incidence.Status != IncidenceStatus.CLOSE
                     || alarm.DateTime == incidence.StartDate)
                     return true;
@@ -70,8 +69,8 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Equals(BusDisconnectedAlarm alarm, Incidence incidence)
         {
-            if (incidence.Device.Station is null)
-                if (alarm.EconomicNumber == incidence.Device.Vehicle.EconomicNumber
+            if (incidence.Device is DeviceBus)
+                if (alarm.EconomicNumber == (incidence.Device as DeviceBus)?.Vehicle.EconomicNumber
                     && incidence.Status != IncidenceStatus.CLOSE)
                     return true;
             return false;

@@ -141,7 +141,6 @@ namespace Acabus.Modules.CctvReports
             }
         }
 
-
         /// <summary>
         /// Campo que provee a la propiedad 'ToSearchClosed'.
         /// </summary>
@@ -160,58 +159,57 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private Timer _alarmsMonitor;
 
-
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private Timer _busAlarmsMonitor;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private Timer _updatePriority;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand UpdateDataCommand { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand CloseIncidenceDialogCommand { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand ModifyIncidenceDialogCommand { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand SaveIncidenceCommand { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand AddIncidenceCommand { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand RefundCashDialogCommand { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand OpenDialogExportCommand { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand OpenOffDutyVehiclesDialog { get; }
 
@@ -237,7 +235,7 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public CctvReportsViewModel()
         {
@@ -358,7 +356,6 @@ namespace Acabus.Modules.CctvReports
                      item.Update();
                  }
              }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
-
         }
 
         public void UpdateData()
@@ -374,7 +371,7 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private void InitBusAlarmsMonitor()
         {
@@ -407,7 +404,7 @@ namespace Acabus.Modules.CctvReports
                             {
                                 incidence.Status = IncidenceStatus.CLOSE;
                                 if (AcabusData.OffDutyVehicles.Where(vehicle
-                                    => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count > 0)
+                                    => vehicle.EconomicNumber == (incidence.Device as DeviceBus)?.Vehicle.EconomicNumber).Count > 0)
                                     incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
                                 else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
                                 incidence.Update();
@@ -438,14 +435,13 @@ namespace Acabus.Modules.CctvReports
                             incidence.Update();
                         }
                     }
-
                 }
                 _busUpdating = false;
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -464,7 +460,6 @@ namespace Acabus.Modules.CctvReports
                             AcabusData.FindDeviceInVehicle((deviceBus) => deviceBus.Description.Contains("PC ABORDO")),
                             DateTime.Now,
                             alarm.Priority,
-                            AcabusData.FindVehicle((vehicle) => vehicle.EconomicNumber == alarm.EconomicNumber),
                             "SISTEMA"
                         );
                 }
@@ -472,7 +467,7 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -497,7 +492,7 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -516,7 +511,6 @@ namespace Acabus.Modules.CctvReports
                             alarm.Device,
                             alarm.DateTime,
                             alarm.Priority,
-                            alarm.Device.Station,
                             "SISTEMA"
                         );
                 }
@@ -543,6 +537,5 @@ namespace Acabus.Modules.CctvReports
         {
             ViewModelService.UnRegister(this);
         }
-
     }
 }

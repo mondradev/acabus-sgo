@@ -1,4 +1,7 @@
 ﻿using Acabus.Utils;
+using Acabus.Utils.Mvvm;
+using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database.Utils;
 using System;
 using System.Collections.ObjectModel;
 
@@ -7,8 +10,13 @@ namespace Acabus.Models
     /// <summary>
     /// Provee de una estructura para el manejo de los vehiculos.
     /// </summary>
-    public sealed class Vehicle : Location
+    [Entity(TableName = "Vehicles")]
+    public sealed class Vehicle : NotifyPropertyChanged
     {
+        /// <summary>
+        /// Campo que provee a la propiedad 'Devices'.
+        /// </summary>
+        private ObservableCollection<Device> _devices;
 
         /// <summary>
         /// Campo que provee a la propiedad 'EconomicNumber'.
@@ -48,13 +56,13 @@ namespace Acabus.Models
         public Vehicle(String economicNumber, VehicleStatus status = VehicleStatus.UNKNOWN)
         {
             this._economicNumber = economicNumber;
-            this.Name = economicNumber;
             this._status = status;
         }
 
         /// <summary>
         /// Obtiene o establece el tipo de autobus.
         /// </summary>
+        [Column(Converter = typeof(DbEnumConverter<VehicleType>))]
         public VehicleType BusType {
             get => _type;
             set {
@@ -64,9 +72,28 @@ namespace Acabus.Models
         }
 
         /// <summary>
+        /// Obtiene una lista de los dispositivos dentro de la unidad.
+        /// </summary>
+        [Column(IsIgnored = true)]
+        public ObservableCollection<Device> Devices {
+            get {
+                if (_devices == null)
+                    _devices = new ObservableCollection<Device>();
+                return _devices;
+            }
+        }
+
+        /// <summary>
         /// Obtiene el número económico de la unidad.
         /// </summary>
-        public String EconomicNumber => _economicNumber;
+        [Column(IsPrimaryKey = true)]
+        public String EconomicNumber {
+            get => _economicNumber;
+            private set {
+                _economicNumber = value;
+                OnPropertyChanged("EconomicNumber");
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece si el vehículo está activo.
@@ -94,12 +121,12 @@ namespace Acabus.Models
         /// Obtiene o establece la ruta asignada de la unidad.
         /// </summary>
         [XmlAnnotation(Ignore = true)]
+        [Column(Name = "Fk_Route_ID", IsForeignKey = true)]
         public Route Route {
             get => _route;
             set {
                 _route = value;
                 OnPropertyChanged("Route");
-                Section = value?.Section;
             }
         }
 
@@ -107,6 +134,7 @@ namespace Acabus.Models
         /// Obtiene o establece el estado de la unidad.
         /// </summary>
         [XmlAnnotation(Ignore = true)]
+        [Column(IsIgnored = true)]
         public VehicleStatus Status {
             get => _status;
             set {
@@ -115,6 +143,13 @@ namespace Acabus.Models
             }
         }
 
+        /// <summary>
+        /// Crea una instancai de <see cref="Vehicle"/> especificando sus atributos más importantes.
+        /// </summary>
+        /// <param name="route">Ruta asignada a la unidad.</param>
+        /// <param name="economicNumber">Número Económico de la unidad.</param>
+        /// <param name="busType">Tipo de autobus <seealso cref="VehicleType"/>.</param>
+        /// <returns></returns>
         public static Vehicle CreateVehicle(Route route, String economicNumber, VehicleType busType) => new Vehicle(economicNumber)
         {
             BusType = busType,

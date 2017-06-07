@@ -3,9 +3,8 @@ using Acabus.Modules.Attendances.Models;
 using Acabus.Modules.Attendances.Services;
 using Acabus.Utils.Mvvm;
 using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database.Utils;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Acabus.Modules.CctvReports.Models
 {
@@ -31,7 +30,7 @@ namespace Acabus.Modules.CctvReports.Models
     }
 
     /// <summary>
-    ///
+    /// Define la estructura de la incidencias de la operación de Acabus.
     /// </summary>
     [Entity(TableName = "Incidences")]
     public class Incidence : NotifyPropertyChanged
@@ -96,12 +95,12 @@ namespace Acabus.Modules.CctvReports.Models
         /// </summary>
         public Incidence(String folio)
         {
-            this._folio = folio;
-            this._status = IncidenceStatus.OPEN;
+            _folio = folio;
+            _status = IncidenceStatus.OPEN;
         }
 
         /// <summary>
-        /// 
+        /// Crea una instancia básica de <see cref="Incidence"/>.
         /// </summary>
         public Incidence()
         {
@@ -145,8 +144,6 @@ namespace Acabus.Modules.CctvReports.Models
             }
         }
 
-
-
         /// <summary>
         /// Obtiene o establece la fecha de finalización de la incidencia.
         /// </summary>
@@ -170,7 +167,6 @@ namespace Acabus.Modules.CctvReports.Models
             }
         }
 
-
         /// <summary>
         /// Obtiene o establece las observaciones de la incidencia.
         /// </summary>
@@ -185,7 +181,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece la prioridad de la incidencia.
         /// </summary>
-        [Column(Converter = typeof(DbPriorityConverter))]
+        [Column(Converter = typeof(DbEnumConverter<Priority>))]
         public Priority Priority {
             get => _priority;
             set {
@@ -209,7 +205,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el estado de la incidencia (Abierta|Cerrada).
         /// </summary>
-        [Column(Converter = typeof(DbIncidenceStatusConverter))]
+        [Column(Converter = typeof(DbEnumConverter<IncidenceStatus>))]
         public IncidenceStatus Status {
             get => _status;
             set {
@@ -232,6 +228,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene el tiempo total de la solución.
         /// </summary>
+        [Column(IsIgnored = true)]
         public TimeSpan? TotalTime => FinishDate - StartDate;
 
         /// <summary>
@@ -248,20 +245,29 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Representa la instancia de incidencia en una cadena utilizable para subir el reporte.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Una cadena que representa la incidencia.</returns>
         public String ToReportString()
         {
-            return String.Format("*{0}* {1} {2} {3}",
+            return String.Format("*{0}* {1} {2} {3} {4}",
                 Folio,
-                Device.Vehicle is null
+                Device is DeviceBus
                     ? String.Format("{0} {1}",
-                        Device.Vehicle,
+                        (Device as DeviceBus)?.Vehicle,
                         Device)
                     : Device.NumeSeri,
                 Description,
                 AssignedAttendance is null
                 ? String.Empty
-                : String.Format("\n*Asignado:* {0}", AssignedAttendance));
+                : String.Format("\n*Asignado:* {0}", AssignedAttendance),
+                String.IsNullOrEmpty(Observations.Trim())
+                ? String.Empty
+                : Observations.Trim().ToUpper());
         }
+
+        /// <summary>
+        /// Representa la instancia actual como una cadena.
+        /// </summary>
+        /// <returns>Una cadena que representa la instancia actual.</returns>
+        public override string ToString() => ToReportString();
     }
 }

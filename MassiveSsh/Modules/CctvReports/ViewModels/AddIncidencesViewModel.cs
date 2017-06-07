@@ -40,7 +40,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Campo que provee a la propiedad 'Location'.
         /// </summary>
-        private Location _location;
+        private AssignableSection _location;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Priority'.
@@ -169,31 +169,31 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene o establece la ubicación de la incidencia.
         /// </summary>
-        public Location Location {
+        public AssignableSection Location {
             get => _location;
             set {
                 _location = value;
                 OnPropertyChanged("Location");
                 OnPropertyChanged("Devices");
-                if (value is Vehicle)
-                {
-                    SelectedRoute = (value as Vehicle).Route;
-                    OnPropertyChanged("SelectedRoute");
-                }
+                //if (value is Vehicle)
+                //{
+                //    SelectedRoute = (value as Vehicle).Route;
+                //    OnPropertyChanged("SelectedRoute");
+                //}
             }
         }
 
         /// <summary>
         /// Obtiene una lista de todas las ubicaciones disponibles.
         /// </summary>
-        public IEnumerable<Location> Locations {
+        public IEnumerable<AssignableSection> Locations {
             get {
-                if (!IsBusIncidences)
+                //if (!IsBusIncidences)
                     return AcabusData.FindStations((station) => true);
-                if (SelectedRoute is null)
-                    return AcabusData.FindVehicles(vehi => true);
-                else
-                    return SelectedRoute.Vehicles;
+                //if (SelectedRoute is null)
+                //    return AcabusData.FindVehicles(vehi => true);
+                //else
+                //    return SelectedRoute.Vehicles;
             }
         }
 
@@ -257,7 +257,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Campo que provee a la propiedad 'CashDestiny'.
         /// </summary>
-        private CashDestiny? _cashDestiny;
+        private CashDestiny _cashDestiny;
 
         /// <summary>
         /// Campo que provee a la propiedad 'IsMoney'.
@@ -304,7 +304,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene o establece el destino del dinero.
         /// </summary>
-        public CashDestiny? CashDestiny {
+        public CashDestiny CashDestiny {
             get => _cashDestiny;
             set {
                 _cashDestiny = value;
@@ -469,12 +469,12 @@ namespace Acabus.Modules.CctvReports
             {
                 if (incidence.Status == IncidenceStatus.CLOSE) continue;
 
-                if (exists = (incidence.Description?.ID == Description?.ID
-                  && (incidence.Device.Station is null && Location is Vehicle
-                        ? incidence.Device.Vehicle.EconomicNumber == (Location as Vehicle).EconomicNumber
-                        : incidence.Device.NumeSeri == Device.NumeSeri)
-                    && (incidence.Device.Vehicle == Location || incidence.Device.Station == Location))
-                    ) break;
+                //if (exists = (incidence.Description?.ID == Description?.ID
+                //  && (incidence.Device.Station is null && Location is Vehicle
+                //        ? incidence.Device.Vehicle.EconomicNumber == (Location as Vehicle).EconomicNumber
+                //        : incidence.Device.NumeSeri == Device.NumeSeri)
+                //    && (incidence.Device.Vehicle == Location || incidence.Device.Station == Location))
+                //    ) break;
             }
             if (exists)
                 AddError("Description", "Ya existe una incidencia abierta igual para el equipo");
@@ -492,26 +492,25 @@ namespace Acabus.Modules.CctvReports
                     Description,
                     Device,
                     DateTime.Now.Date.AddTicks(StartTime.Ticks),
-                    IsRefundOfMoney ? Priority.NONE : Priority,
-                    Location,
+                    IsRefundOfMoney ? Priority.NONE : Priority,                    
                     WhoReporting
                 );
 
                 if (IsRefundOfMoney)
                 {
-                    incidence.Status = CashDestiny.Value.Description == "CAU" ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
-                    incidence.Technician = SelectedTechnician;
-                    incidence.Observations = Observations;
-                    incidence.FinishDate = CashDestiny.Value.Description == "CAU" ? null : (DateTime?)incidence.StartDate;
-                    var refundOfMoney = new RefundOfMoney(incidence)
-                    {
-                        Quantity = Single.Parse(Quantity),
-                        CashDestiny = CashDestiny.Value,
-                        Status = CashDestiny?.Description == "CAU" ? RefundOfMoneyStatus.UNCOMMIT : RefundOfMoneyStatus.COMMIT,
-                        RefundDate = CashDestiny?.Description == "CAU" ? null : (DateTime?)incidence.StartDate
-                    };
-                    if (refundOfMoney.Save())
-                        ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateData();
+                    //incidence.Status = CashDestiny.Value.Description == "CAU" ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
+                    //incidence.Technician = SelectedTechnician;
+                    //incidence.Observations = Observations;
+                    //incidence.FinishDate = CashDestiny.Value.Description == "CAU" ? null : (DateTime?)incidence.StartDate;
+                    //var refundOfMoney = new RefundOfMoney(incidence)
+                    //{
+                    //    Quantity = Single.Parse(Quantity),
+                    //    CashDestiny = CashDestiny.Value,
+                    //    Status = CashDestiny?.Description == "CAU" ? RefundOfMoneyStatus.UNCOMMIT : RefundOfMoneyStatus.COMMIT,
+                    //    RefundDate = CashDestiny?.Description == "CAU" ? null : (DateTime?)incidence.StartDate
+                    //};
+                    //if (refundOfMoney.Save())
+                    //    ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateData();
                 }
             });
             ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();

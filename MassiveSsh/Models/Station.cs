@@ -9,7 +9,7 @@ namespace Acabus.Models
     /// Esta clase define la estructura de una estación perteneciente a una ruta troncal.
     /// </summary>
     [Entity(TableName = "Stations")]
-    public sealed class Station : Location
+    public sealed class Station : AssignableSection
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Devices'.
@@ -74,6 +74,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene o establece los dispositivos que están asiganados a la estación actual.
         /// </summary>
+        [Column(IsIgnored = true)]
         public ObservableCollection<Device> Devices {
             get {
                 if (_devices == null)

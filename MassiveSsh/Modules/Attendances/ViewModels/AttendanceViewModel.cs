@@ -123,7 +123,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                 if (incidence.Status != IncidenceStatus.OPEN) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                    .GetTechnicianAssigned(incidence.Device.Station, incidence.Device, incidence.StartDate);
+                    .GetTechnicianAssigned(incidence.Device, incidence.StartDate);
                 incidence.Update();
             }
             UpdateCounters();
@@ -144,7 +144,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                     != AttendanceService.GetTurn(DateTime.Now)) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                    .GetTechnicianAssigned(incidence.Device.Station, incidence.Device, incidence.StartDate);
+                    .GetTechnicianAssigned(incidence.Device, incidence.StartDate);
                 incidence.Update();
             }
             UpdateCounters();
@@ -158,8 +158,11 @@ namespace Acabus.Modules.Attendances.ViewModels
         /// <summary>
         /// Obtiene la asistencia para la asignación de la incidencia.
         /// </summary>
-        public Attendance GetTechnicianAssigned(Location location, Device device, DateTime startTime)
+        public Attendance GetTechnicianAssigned(Device device, DateTime startTime)
         {
+            AssignableSection location = (AssignableSection)device?.Station
+                ?? (device is DeviceBus ? (device as DeviceBus)?.Vehicle?.Route : null);
+
             /// Asignación cuando al menos hay un tecnico en turno.
             var attendances = (IEnumerable<Attendance>)Attendances
                 .Where(attendance => attendance.DateTimeDeparture is null
@@ -218,15 +221,15 @@ namespace Acabus.Modules.Attendances.ViewModels
                 if (location.GetType() != typeof(Vehicle) && !location.Name.Contains("RENA"))
                     return null;
 
-                if ((location as Vehicle).BusType == VehicleType.ARTICULATED
-                       || (location as Vehicle).BusType == VehicleType.STANDARD)
-                    attendances = attendances.Where(attendance
-                       => attendance.DateTimeDeparture is null
-                           && attendance.Section.Contains("PATIO"));
-                else if ((location as Vehicle).BusType == VehicleType.CONVENTIONAL)
-                    attendances = attendances.Where(attendance
-                       => attendance.DateTimeDeparture is null
-                           && attendance.Section.Contains("RENA"));
+                //if ((location as Vehicle).BusType == VehicleType.ARTICULATED
+                //       || (location as Vehicle).BusType == VehicleType.STANDARD)
+                //    attendances = attendances.Where(attendance
+                //       => attendance.DateTimeDeparture is null
+                //           && attendance.Section.Contains("PATIO"));
+                //else if ((location as Vehicle).BusType == VehicleType.CONVENTIONAL)
+                //    attendances = attendances.Where(attendance
+                //       => attendance.DateTimeDeparture is null
+                //           && attendance.Section.Contains("RENA"));
 
                 if (attendances.Count() == 1)
                     return attendances.First();

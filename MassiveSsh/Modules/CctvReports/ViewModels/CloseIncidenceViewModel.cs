@@ -25,7 +25,6 @@ namespace Acabus.Modules.CctvReports
         /// Obtiene o establece la fecha de solución de la incidencia a cerrar.
         /// </summary>
         public DateTime FinishDate {
-
             get => _finishDate;
             set {
                 _finishDate = value;
@@ -75,7 +74,6 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         private Incidence _selectedIncidence;
 
-
         /// <summary>
         /// Obtiene o establece el nombre de la persona que solucionó la incidencia.
         /// </summary>
@@ -98,12 +96,12 @@ namespace Acabus.Modules.CctvReports
         public ObservableCollection<String> Technicians => AcabusData.Technicians;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand CloseIncidenceCommand { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ICommand UpdateTableCommand => ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateDataCommand;
 
@@ -210,12 +208,12 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedCashDestiny'.
         /// </summary>
-        private CashDestiny? _selectedCashDestiny;
+        private CashDestiny _selectedCashDestiny;
 
         /// <summary>
         /// Obtiene o establece el destino del dinero a devolver.
         /// </summary>
-        public CashDestiny? SelectedCashDestiny {
+        public CashDestiny SelectedCashDestiny {
             get => _selectedCashDestiny;
             set {
                 _selectedCashDestiny = value;
@@ -235,9 +233,8 @@ namespace Acabus.Modules.CctvReports
             return false;
         });
 
-
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public CloseIncidenceViewModel()
         {
@@ -253,7 +250,6 @@ namespace Acabus.Modules.CctvReports
             }
 
             CloseIncidenceCommand = new CommandBase(CloseIncidenceCommandExecute, CloseIncidenceCommandCanExec);
-
         }
 
         private void CloseIncidenceCommandExecute(object parameter)
@@ -278,7 +274,7 @@ namespace Acabus.Modules.CctvReports
             {
                 var refund = new RefundOfMoney(SelectedIncidence)
                 {
-                    CashDestiny = SelectedCashDestiny.Value,
+                    CashDestiny = SelectedCashDestiny,
                     Quantity = Single.Parse(Quantity)
                 };
                 if (SelectedCashDestiny?.Description == "CAU")
@@ -321,22 +317,27 @@ namespace Acabus.Modules.CctvReports
                     if (String.IsNullOrEmpty(SelectedTechnician) || SelectedTechnician == "SISTEMA")
                         AddError("SelectedTechnician", "Falta seleccionar un técnico");
                     break;
+
                 case "FinishDate":
                     if (SelectedIncidence.StartDate.Date > FinishDate.Date)
                         AddError("FinishDate", "La fecha de finalización no puede ser menor que la de reporte");
                     break;
+
                 case "FinishTime":
                     if (SelectedIncidence.StartDate.Date == FinishDate.Date && SelectedIncidence.StartDate.TimeOfDay > FinishTime)
                         AddError("FinishTime", "La hora de finalización no puede ser menor a la de reporte");
                     break;
+
                 case "SelectedCashDestiny":
                     if (RefundOfMoney && String.IsNullOrEmpty(SelectedCashDestiny?.ToString()))
                         AddError("SelectedCashDestiny", "No ha seleccionado el destino del dinero.");
                     break;
+
                 case "Quantity":
                     if (RefundOfMoney && !Single.TryParse(Quantity, out Single result))
                         AddError("Quantity", "Ingrese una cantidad valida.");
                     break;
+
                 case "Folio":
                     if (SelectedIncidence.Status == IncidenceStatus.CLOSE)
                         AddError("Folio", "Folio cerrado anteriormente.");

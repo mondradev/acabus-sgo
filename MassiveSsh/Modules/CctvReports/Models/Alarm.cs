@@ -67,7 +67,6 @@ namespace Acabus.Modules.CctvReports.Models
         /// </summary>
         public UInt32 ID => _id;
 
-
         /// <summary>
         /// Campo que provee a la propiedad 'Priority'.
         /// </summary>
@@ -147,6 +146,5 @@ namespace Acabus.Modules.CctvReports.Models
 
             return false;
         }
-
     }
 }

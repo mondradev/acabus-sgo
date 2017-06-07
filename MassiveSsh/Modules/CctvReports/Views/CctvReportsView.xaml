@@ -11,50 +11,50 @@
     xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     x:Class="Acabus.Modules.CctvReports.CctvReportsView"
     Name="CctvReports"
-    mc:Ignorable="d" 
+    mc:Ignorable="d"
     MinWidth="600" MinHeight="480">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Converters:IncidenceStatusConverter x:Key="IncidenceStatusConverter"/>
-            <converters:PriorityToColorConverter x:Key="ConverterPriorityToColor"/>
+            <Converters:IncidenceStatusConverter x:Key="IncidenceStatusConverter" />
+            <converters:PriorityToColorConverter x:Key="ConverterPriorityToColor" />
             <CollectionViewSource x:Key="OpenedIncidencesCollection" Source="{Binding IncidencesOpened}">
-                <CollectionViewSource.SortDescriptions >
+                <CollectionViewSource.SortDescriptions>
                     <scm:SortDescription PropertyName="Priority" Direction="Descending" />
                 </CollectionViewSource.SortDescriptions>
             </CollectionViewSource>
         </ResourceDictionary>
     </UserControl.Resources>
     <UserControl.DataContext>
-        <local:CctvReportsViewModel/>
+        <local:CctvReportsViewModel />
     </UserControl.DataContext>
     <i:Interaction.Triggers>
         <i:EventTrigger>
-            <i:InvokeCommandAction Command="{Binding LoadedHandlerCommand}"/>
+            <i:InvokeCommandAction Command="{Binding LoadedHandlerCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="8"/>
-            <RowDefinition/>
+            <RowDefinition />
+            <RowDefinition Height="8" />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <Grid Margin="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
             </Grid.RowDefinitions>
-            <Grid Margin="0" >
+            <Grid Margin="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <materialDesign:PackIcon Kind="Magnify" Width="24" Height="24" VerticalAlignment="Center" Margin="8" />
                 <TextBox materialDesign:HintAssist.Hint="Buscar folio"  Margin="0,0,-0.4,-0.2" Grid.Column="1" Text="{Binding FolioToSearch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
-            <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource OpenedIncidencesCollection}}" IsReadOnly="True" 
+            <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource OpenedIncidencesCollection}}" IsReadOnly="True"
                 SelectedItem="{Binding SelectedIncidence}" SelectionMode="Single" CanUserResizeRows="False" Grid.Row="1">
                 <DataGrid.CommandBindings>
                     <CommandBinding Command="{x:Static ApplicationCommands.Copy}" Executed="CommandBindingExecuted" />
@@ -62,44 +62,44 @@
                 </DataGrid.CommandBindings>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
-                        <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}"/>
+                        <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}" />
                     </i:EventTrigger>
                     <i:EventTrigger EventName="MouseDown">
-                        <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}"/>
+                        <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}" />
                     </i:EventTrigger>
                     <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding ModifyIncidenceDialogCommand}"  CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:CctvReportsView}}}"/>
+                        <i:InvokeCommandAction Command="{Binding ModifyIncidenceDialogCommand}"  CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:CctvReportsView}}}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Folio}" Header="Folio"/>
-                    <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia"/>
-                    <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta"/>
-                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo"/>
-                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo"/>
-                    <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia"/>
-                    <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución"/>
-                    <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado"/>
-                    <DataGridTextColumn Binding="{Binding Status, Converter={StaticResource IncidenceStatusConverter}}" Header="Estado"/>
-                    <DataGridTextColumn Binding="{Binding Observations}" Header="Observaciones"/>
+                    <DataGridTextColumn Binding="{Binding Folio}" Header="Folio" />
+                    <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia" />
+                    <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta" />
+                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo" />
+                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo" />
+                    <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia" />
+                    <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución" />
+                    <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado" />
+                    <DataGridTextColumn Binding="{Binding Status, Converter={StaticResource IncidenceStatusConverter}}" Header="Estado" />
+                    <DataGridTextColumn Binding="{Binding Observations}" Header="Observaciones" />
                 </DataGrid.Columns>
                 <DataGrid.RowStyle>
                     <Style TargetType="{x:Type DataGridRow}">
-                        <Setter Property="Background" Value="{Binding Priority, Converter={StaticResource ConverterPriorityToColor}}"/>
+                        <Setter Property="Background" Value="{Binding Priority, Converter={StaticResource ConverterPriorityToColor}}" />
                     </Style>
                 </DataGrid.RowStyle>
             </DataGrid>
         </Grid>
-        <GridSplitter HorizontalAlignment="Stretch" Margin="0" Grid.Row="1" ResizeDirection="Rows"/>
+        <GridSplitter HorizontalAlignment="Stretch" Margin="0" Grid.Row="1" ResizeDirection="Rows" />
         <Grid Margin="0" Grid.Row="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="8"/>
-                <RowDefinition/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition />
             </Grid.RowDefinitions>
             <Grid Margin="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <materialDesign:PackIcon Kind="Magnify" Width="24" Height="24" VerticalAlignment="Center" Margin="8" />
@@ -112,24 +112,24 @@
                 </DataGrid.CommandBindings>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
-                        <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}"/>
+                        <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}" />
                     </i:EventTrigger>
                     <i:EventTrigger EventName="MouseDown">
-                        <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}"/>
+                        <i:InvokeCommandAction Command="{Binding CopyingRowClipboardHandlerCommand}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Folio}" Header="Folio"/>
-                    <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia"/>
-                    <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta"/>
-                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo"/>
-                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo"/>
-                    <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado"/>
-                    <DataGridTextColumn Binding="{Binding Technician}" Header="Técnico que soluciona"/>
-                    <DataGridTextColumn Binding="{Binding TotalTime}" Header="Tiempo de solución"/>
-                    <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia"/>
-                    <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución"/>
-                    <DataGridTextColumn Binding="{Binding Observations}" Header="Observaciones"/>
+                    <DataGridTextColumn Binding="{Binding Folio}" Header="Folio" />
+                    <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia" />
+                    <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta" />
+                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo" />
+                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo" />
+                    <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado" />
+                    <DataGridTextColumn Binding="{Binding Technician}" Header="Técnico que soluciona" />
+                    <DataGridTextColumn Binding="{Binding TotalTime}" Header="Tiempo de solución" />
+                    <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia" />
+                    <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución" />
+                    <DataGridTextColumn Binding="{Binding Observations}" Header="Observaciones" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
@@ -148,11 +148,11 @@
                     <Button.CommandParameter>
                         <local:ExportDataView />
                     </Button.CommandParameter>
-                    <materialDesign:PackIcon Kind="Export"  Width="24" Height="24"/>
+                    <materialDesign:PackIcon Kind="Export"  Width="24" Height="24" />
                 </Button>
                 <!-- Unidades en taller o sin energía -->
                 <Button ToolTip="Unidades en taller o sin energía" Command="{Binding OpenOffDutyVehiclesDialog}" BorderBrush="White" Background="White">
-                    <materialDesign:PackIcon Kind="Bus" Width="24" Height="24"/>
+                    <materialDesign:PackIcon Kind="Bus" Width="24" Height="24" />
                 </Button>
                 <!-- Reasignación de técnicos -->
                 <Button ToolTip="Reasignación de incidencias abiertas" Command="{Binding ReassignTechnician}" BorderBrush="White" Background="White">
@@ -164,11 +164,11 @@
                 </Button>
                 <!-- Devolución de dinero -->
                 <Button ToolTip="Devolución de dinero"  Command="{Binding RefundCashDialogCommand}" BorderBrush="White" Background="White">
-                    <materialDesign:PackIcon Kind="CashUsd" Width="24" Height="24"/>
+                    <materialDesign:PackIcon Kind="CashUsd" Width="24" Height="24" />
                 </Button>
                 <!-- Cerrar incidencias -->
                 <Button ToolTip="Cerrar incidencia"  Command="{Binding CloseIncidenceDialogCommand}" BorderBrush="White" Background="White">
-                    <materialDesign:PackIcon Kind="CloseBox" Width="24" Height="24"/>
+                    <materialDesign:PackIcon Kind="CloseBox" Width="24" Height="24" />
                 </Button>
             </StackPanel>
         </materialDesign:PopupBox>

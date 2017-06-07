@@ -175,7 +175,6 @@
       <DependentUpon>AttendanceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\CctvReports\AcabusData.cs" />
-    <Compile Include="Modules\CctvReports\Models\DbIncidenceStatusConverter.cs" />
     <Compile Include="Modules\CctvReports\Models\RefundOfMoney.cs" />
     <Compile Include="Modules\CctvReports\Models\ReportQuery.cs" />
     <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
@@ -194,7 +193,7 @@
     </Compile>
     <Compile Include="Modules\CctvReports\ViewModels\ExportDataViewModel.cs" />
     <Compile Include="Modules\CctvReports\Models\Alarm.cs" />
-    <Compile Include="Models\Location.cs" />
+    <Compile Include="Models\AssignableSection.cs" />
     <Compile Include="Models\Route.cs" />
     <Compile Include="Models\Staff.cs" />
     <Compile Include="Modules\CctvReports\Models\BusDisconnectedAlarm.cs" />

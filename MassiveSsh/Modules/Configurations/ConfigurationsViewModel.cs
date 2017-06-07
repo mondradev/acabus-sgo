@@ -86,7 +86,7 @@ namespace Acabus.Modules.Configurations
 
                             var idDevice = UInt16.Parse(deviceData[0].Substring(deviceData[0].Length - 2));
 
-                            Device deviceTemp = new Device(idDevice, type, stationTemp)
+                            Device deviceTemp = new Device(idDevice, type, stationTemp, "")
                             {
                                 IP = deviceData[1],
                                 CanReplicate = type != DeviceType.CDE,
@@ -142,7 +142,7 @@ namespace Acabus.Modules.Configurations
                 }
                 if (Routes.FindRoute((route)
                     => route.RouteNumber == routeTemp.RouteNumber
-                        && route.Type == routeTemp.Type) == null)
+                        && route.RouteType == routeTemp.RouteType) == null)
                     Routes.Add(routeTemp);
             }
 
@@ -171,7 +171,7 @@ namespace Acabus.Modules.Configurations
 
                     if (fkEconomicNumber != economicNumber) continue;
 
-                    var routeAsigned = Routes.FindRoute((route) => route.RouteNumber == routeNumber && route.Type == routeType);
+                    var routeAsigned = Routes.FindRoute((route) => route.RouteNumber == routeNumber && route.RouteType == routeType);
                     routeAsigned.AddVehicle(vehicleTemp);
                     vehicleTemp.Route = routeAsigned;
                     asigned = true;

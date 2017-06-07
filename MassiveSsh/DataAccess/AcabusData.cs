@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace Acabus.DataAccess
@@ -190,14 +191,132 @@ namespace Acabus.DataAccess
         {
             Session = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
             InitAcabusData();
+            foreach (var vehi in FindVehicles(vehicle => vehicle.BusType == VehicleType.ARTICULATED))
+            {
+                Session.Save(new DeviceBus(0, String.Format("PCA01{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "PC ABORDO",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+                Session.Save(new DeviceBus(0, String.Format("DSB01{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "DISPLAY BUS",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+                Session.Save(new DeviceBus(0, String.Format("DSB01{0:D3}02", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "DISPLAY BUS",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+            }
+            foreach (var vehi in FindVehicles(vehicle => vehicle.BusType != VehicleType.ARTICULATED))
+            {
+                Session.Save(new DeviceBus(0, String.Format("PCA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "PC ABORDO",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+                Session.Save(new DeviceBus(0, String.Format("CAM02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "CAMARA",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+                Session.Save(new DeviceBus(0, String.Format("CAM02{0:D3}02", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "CAMARA",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+                Session.Save(new DeviceBus(0, String.Format("TA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "TORNIQUETE ABORDO",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+                Session.Save(new DeviceBus(0, String.Format("MON02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "MONITOR",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
 
+                Session.Save(new DeviceBus(0, String.Format("NVRA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "NVR ABORDO",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+
+                Session.Save(new DeviceBus(0, String.Format("CONT02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "CONTADOR DE PASAJEROS",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+
+                Session.Save(new DeviceBus(0, String.Format("DSB02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
+                {
+                    Description = "DISPLAY BUS",
+                    CanReplicate = false,
+                    Enabled = true,
+                    HasDatabase = false,
+                    IP = "0.0.0.0",
+                    SshEnabled = false,
+                    Vehicle = vehi
+                });
+            }
         }
 
         public static DbSession Session { get; set; }
 
         private class SQLiteConfiguration : IDbConfiguration
         {
-            public string ConnectionString => "Data Source=Resources/acabus_data.dat;Version=3;Password=acabus*data*dat";
+            public string ConnectionString => "Data Source=Resources/acabus_data.dat;Password=acabus*data*dat";
 
             public string LastInsertFunctionName => "last_insert_rowid";
 
@@ -375,7 +494,7 @@ namespace Acabus.DataAccess
         /// Obtiene una lista de las rutas troncales.
         /// </summary>
         public static ObservableCollection<Route> Trunks
-            => (ObservableCollection<Route>)Util.Where(Routes, (route) => route.Type == RouteType.TRUNK);
+            => (ObservableCollection<Route>)Util.Where(Routes, (route) => route.RouteType == RouteType.TRUNK);
 
         /// <summary>
         /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las rutas troncales.
@@ -517,7 +636,7 @@ namespace Acabus.DataAccess
         public static Trunk FindTrunk(this IEnumerable<Route> trunks, Predicate<Trunk> predicate)
         {
             foreach (Trunk trunk in trunks)
-                if (trunk.Type == RouteType.TRUNK && predicate.Invoke(trunk))
+                if (trunk.RouteType == RouteType.TRUNK && predicate.Invoke(trunk))
                     return trunk;
             return null;
         }
@@ -673,6 +792,7 @@ namespace Acabus.DataAccess
             foreach (XmlNode routeXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Routes").SelectNodes("Route"))
             {
                 var route = ToRoute(routeXmlNode) as Route;
+                Session.Save(route);
                 Routes.Add(route);
                 LoadStations(route as Trunk, routeXmlNode.SelectSingleNode("Stations")?.SelectNodes("Station"));
                 LoadVehicles(route, routeXmlNode.SelectSingleNode("Vehicles")?.SelectNodes("Vehicle"));
@@ -725,9 +845,9 @@ namespace Acabus.DataAccess
             {
                 var device = new Device((UInt16)XmlUtils.GetAttributeInt(deviceXmlNode, "ID"),
                     (DeviceType)Enum.Parse(typeof(DeviceType), XmlUtils.GetAttribute(deviceXmlNode, "Type")),
-                    station)
+                    station, XmlUtils.GetAttribute(deviceXmlNode, "NumeSeri", (DeviceType)Enum.Parse(typeof(DeviceType), XmlUtils.GetAttribute(deviceXmlNode, "Type")) + station?.Trunk?.RouteNumber.ToString("D2") + station?.StationNumber.ToString("D2") + XmlUtils.GetAttributeInt(deviceXmlNode, "ID").ToString("D2")))
                 {
-                    IP = XmlUtils.GetAttribute(deviceXmlNode, "IP"),
+                    IP = XmlUtils.GetAttribute(deviceXmlNode, "IP", "0.0.0.0"),
                     Enabled = XmlUtils.GetAttributeBool(deviceXmlNode, "Enabled"),
                     HasDatabase = XmlUtils.GetAttributeBool(deviceXmlNode, "HasDataBase"),
                     SshEnabled = XmlUtils.GetAttributeBool(deviceXmlNode, "SshEnabled"),
@@ -923,6 +1043,7 @@ namespace Acabus.DataAccess
                 foreach (XmlNode deviceXmlNode in deviceNodes)
                 {
                     var device = ToDevice(deviceXmlNode, station) as Device;
+                    Session.Save(device);
                     station.AddDevice(device);
                 }
         }
@@ -949,6 +1070,7 @@ namespace Acabus.DataAccess
                 foreach (XmlNode stationXmlNode in stationNodes)
                 {
                     var station = ToStation(stationXmlNode, trunk) as Station;
+                    Session.Save(station);
                     trunk.AddStation(station);
                     LoadDevices(station, stationXmlNode.SelectSingleNode("Devices").SelectNodes("Device"));
                 }
@@ -982,6 +1104,7 @@ namespace Acabus.DataAccess
                 foreach (XmlNode vehicleXmlNode in vehicleNode)
                 {
                     var vehicle = ToVehicle(vehicleXmlNode, route) as Vehicle;
+                    Session.Save(vehicle);
                     route.AddVehicle(vehicle);
                 }
         }
@@ -1048,7 +1171,7 @@ namespace Acabus.DataAccess
                     XmlUtils.GetAttribute(vehicleXmlNode, "EconomicNumber"),
                     (VehicleType)Enum.Parse(typeof(VehicleType), XmlUtils.GetAttribute(vehicleXmlNode, "BusType")));
 
-                vehicle.IP = XmlUtils.GetAttribute(vehicleXmlNode, "IP");
+                vehicle.IP = XmlUtils.GetAttribute(vehicleXmlNode, "IP", "0.0.0.0");
                 vehicle.Enabled = XmlUtils.GetAttributeBool(vehicleXmlNode, "Enabled");
 
                 return vehicle;

@@ -10,61 +10,61 @@
              xmlns:dragablz="http://dragablz.net/winfx/xaml/dragablz"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
-        <converters:DateTimeConverter x:Key="DateTimeConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:DateTimeConverter x:Key="DateTimeConverter" />
         <converters:MultiCommandConverter x:Key="MultiCommandConverter" />
-        <converters1:CollapseBooleanConverter x:Key="CollapseBooleanConverter"/>
+        <converters1:CollapseBooleanConverter x:Key="CollapseBooleanConverter" />
     </UserControl.Resources>
     <UserControl.DataContext>
-        <local:CloseIncidenceViewModel/>
+        <local:CloseIncidenceViewModel />
     </UserControl.DataContext>
 
     <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="8"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="8" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid Margin="16,24,16,8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid Margin="0" MinWidth="300">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="8"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="8"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock TextWrapping="Wrap" Text="Cerrar incidencia" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height" Grid.Row="0" 
+                <TextBlock TextWrapping="Wrap" Text="Cerrar incidencia" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height" Grid.Row="0"
                                            HorizontalAlignment="Stretch" VerticalAlignment="Top" />
                 <StackPanel Orientation="Vertical" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2">
                     <TextBox Margin="0,0,0,8" materialDesign:HintAssist.Hint="Folio"
                                              Text="{Binding SelectedIncidence.Folio, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
                     <TextBox Margin="0,0,0,8" materialDesign:HintAssist.Hint="Descripción"
                                              Text="{Binding SelectedIncidence.Description, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
-                    <TextBox Margin="0,0,0,8" materialDesign:HintAssist.Hint="Equipo" 
+                    <TextBox Margin="0,0,0,8" materialDesign:HintAssist.Hint="Equipo"
                                              Text="{Binding SelectedIncidence.Device, Mode=OneWay}" IsReadOnly="True" Focusable="False" />
                 </StackPanel>
-                <ComboBox materialDesign:HintAssist.Hint="Técnico que resolvió" IsEditable="True" 
+                <ComboBox materialDesign:HintAssist.Hint="Técnico que resolvió" IsEditable="True"
                                           Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Technicians}" SelectedItem="{Binding SelectedTechnician , NotifyOnValidationError=True}" />
                 <DatePicker materialDesign:HintAssist.Hint="Fecha de solución" Grid.Row="6"
                                             HorizontalAlignment="Stretch" Margin="0,12,0,0" SelectedDate="{Binding FinishDate, NotifyOnValidationError=True}" />
-                <materialDesign:TimePicker  materialDesign:HintAssist.Hint="Hora de solución" 
-                                                            Grid.Row="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,12,0,0" 
+                <materialDesign:TimePicker  materialDesign:HintAssist.Hint="Hora de solución"
+                                                            Grid.Row="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,12,0,0"
                                                             SelectedTime="{Binding FinishTime, Converter={StaticResource DateTimeConverter}, NotifyOnValidationError=True}" />
                 <TextBox  materialDesign:HintAssist.Hint="Observaciones" TextWrapping="WrapWithOverflow"
-                                         VerticalScrollBarVisibility="Auto"  Grid.Row="10" HorizontalAlignment="Stretch" VerticalAlignment="Top" 
+                                         VerticalScrollBarVisibility="Auto"  Grid.Row="10" HorizontalAlignment="Stretch" VerticalAlignment="Top"
                                          AcceptsReturn="True" Text="{Binding Observations}" />
 
                 <Grid Margin="0" Grid.Row="12">
@@ -72,15 +72,15 @@
                         <ColumnDefinition />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <!--<TextBlock Text="Refacciones" Grid.Column="1" Margin="0,0,42,0" HorizontalAlignment="Right"/>
-                    <ToggleButton HorizontalAlignment="Right" Margin="0" IsChecked="{Binding UseParts}" Grid.Column="1"/>-->
+                    <!--<TextBlock Text="Refacciones" Grid.Column="1" Margin="0,0,42,0" HorizontalAlignment="Right" />
+                    <ToggleButton HorizontalAlignment="Right" Margin="0" IsChecked="{Binding UseParts}" Grid.Column="1" />-->
                     <TextBlock Text="Devolución de dinero" Margin="0,0,42,0" HorizontalAlignment="Right" />
                     <ToggleButton HorizontalAlignment="Right" Margin="0" IsChecked="{Binding RefundOfMoney}" IsEnabled="{Binding IsIncidenceFromKvr}" />
                 </Grid>
             </Grid>
             <Grid Margin="16,0,0,0" Grid.Column="2">
                 <Grid.Visibility>
-                    <MultiBinding Converter="{StaticResource CollapseBooleanConverter}" ConverterParameter="OR" >
+                    <MultiBinding Converter="{StaticResource CollapseBooleanConverter}" ConverterParameter="OR">
                         <Binding Path="RefundOfMoney" />
                         <Binding Path="UseParts" />
                     </MultiBinding>
@@ -88,45 +88,45 @@
                 <Grid.RowDefinitions>
                 </Grid.RowDefinitions>
                 <dragablz:TabablzControl SelectedIndex="{Binding SelectedTab}">
-                    <TabItem Header="Devolución de dinero" >
+                    <TabItem Header="Devolución de dinero">
                         <Grid Margin="16" MinWidth="250">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="16"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="16"/>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="16" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="16" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <StackPanel Margin="0" HorizontalAlignment="Right" Orientation="Horizontal">
-                                <TextBlock Text="Monedas" Margin="0 0 16 0"/>
+                                <TextBlock Text="Monedas" Margin="0 0 16 0" />
                                 <ToggleButton IsEnabled="{Binding RefundOfMoney}" Margin="0" IsChecked="{Binding IsMoney, Converter={StaticResource InverseBooleanConverter}}" />
-                                <TextBlock Text="Billetes" Margin="16 0 0 0"/>
+                                <TextBlock Text="Billetes" Margin="16 0 0 0" />
                             </StackPanel>
                             <Grid Margin="0" Grid.Row="2" HorizontalAlignment="Stretch">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
-                                <materialDesign:PackIcon Kind="CurrencyUsd" Width="24" Height="24" VerticalAlignment="Bottom" Margin="0 0 8 0"/>
-                                <TextBox IsEnabled="{Binding RefundOfMoney}" materialDesign:HintAssist.Hint="Cantidad" Margin="0" Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <materialDesign:PackIcon Kind="CurrencyUsd" Width="24" Height="24" VerticalAlignment="Bottom" Margin="0 0 8 0" />
+                                <TextBox IsEnabled="{Binding RefundOfMoney}" materialDesign:HintAssist.Hint="Cantidad" Margin="0" Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
-                            <ComboBox IsEnabled="{Binding RefundOfMoney}" materialDesign:HintAssist.Hint="Destino" Grid.Row="4" ItemsSource="{Binding Destinies}" SelectedItem="{Binding SelectedCashDestiny}"/>
+                            <ComboBox IsEnabled="{Binding RefundOfMoney}" materialDesign:HintAssist.Hint="Destino" Grid.Row="4" ItemsSource="{Binding Destinies}" SelectedItem="{Binding SelectedCashDestiny}" />
                         </Grid>
                     </TabItem>
-                    <!--<TabItem Header="Refacciones"/>-->
+                    <!--<TabItem Header="Refacciones" />-->
                 </dragablz:TabablzControl>
             </Grid>
         </Grid>
-        <StackPanel Margin="0" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" >
-            <Button Margin="8 8 8 8" ToolTip="Descartar" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" 
-                                        Style="{StaticResource MaterialDesignFlatButton}" >
+        <StackPanel Margin="0" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
+            <Button Margin="8 8 8 8" ToolTip="Descartar" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                        Style="{StaticResource MaterialDesignFlatButton}">
                 <materialDesign:PackIcon Kind="Delete" Width="24" Height="24" />
             </Button>
             <Button Margin="0 8 8 8" ToolTip="Cerrar incidencia" Style="{StaticResource MaterialDesignFlatButton}" CommandParameter="{Binding SelectedIncidence}">
                 <Button.Command>
                     <MultiBinding Converter="{StaticResource MultiCommandConverter}">
                         <Binding Path="CloseIncidenceCommand" />
-                        <Binding Path="UpdateTableCommand"/>
+                        <Binding Path="UpdateTableCommand" />
                     </MultiBinding>
                 </Button.Command>
                 <materialDesign:PackIcon Kind="CloseBoxOutline" Width="24" Height="24" />

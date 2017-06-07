@@ -249,8 +249,7 @@ namespace InnSyTech.Standard.Database
 
             foreach (DbField field in DbField.GetFields(typeOfInstance))
             {
-                if (field.IsPrimaryKey)
-                    if (field.GetValue(instance) is null || field.IsAutonumerical) continue;
+                if (field.IsPrimaryKey && field.IsAutonumerical) continue;
                 statement.AppendFormat("{0},", field.Name);
                 parameters.AppendFormat("@{0},", field.Name);
             }

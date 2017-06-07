@@ -1,9 +1,6 @@
-﻿using Acabus.DataAccess;
-using Acabus.Modules.CctvReports.Models;
+﻿using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils.Mvvm;
-using Acabus.Window;
 using System;
-using System.Linq;
 using System.Windows.Input;
 
 namespace Acabus.Modules.CctvReports

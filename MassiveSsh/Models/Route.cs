@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 namespace Acabus.Models
 {
     [Entity(TableName = "Routes")]
-    public class Route : Location
+    public class Route : AssignableSection
     {
         /// <summary>
         /// Campo que provee a la propiedad 'ID'.
@@ -17,7 +17,7 @@ namespace Acabus.Models
         /// <summary>
         /// Campo que provee a la propiedad 'Type'.
         /// </summary>
-        protected RouteType _type;
+        protected RouteType _routeType;
 
         /// <summary>
         /// Campo que provee a la propiedad 'RouteNumber'.
@@ -38,17 +38,17 @@ namespace Acabus.Models
         public Route(UInt16 id, UInt16 routeNumber, RouteType type = RouteType.ALIM)
         {
             _id = id;
-            _type = type;
+            _routeType = type;
             _routeNumber = routeNumber;
         }
 
         /// <summary>
         /// Obtiene el ID de la ruta.
         /// </summary>
-        [Column(IsPrimaryKey =true)]
+        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
         public UInt16 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged("ID");
             }
@@ -69,10 +69,10 @@ namespace Acabus.Models
         /// Obtiene el tipo de ruta.
         /// </summary>
         [Column(Converter = typeof(DbEnumConverter<RouteType>))]
-        public RouteType Type {
-            get => _type;
+        public RouteType RouteType {
+            get => _routeType;
             private set {
-                _type = value;
+                _routeType = value;
                 OnPropertyChanged("Type");
             }
         }
@@ -80,6 +80,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene una lista de los vehículos asignados a esa ruta.
         /// </summary>
+        [Column(IsIgnored = true)]
         public ObservableCollection<Vehicle> Vehicles {
             get {
                 if (_vehicles == null)
@@ -129,7 +130,7 @@ namespace Acabus.Models
         /// Obtiene el código de la ruta actual.
         /// </summary>
         /// <returns>Una cadena que representa una instancia.</returns>
-        public String GetCodeRoute() => String.Format("R{0}{1}", Enum.GetName(typeof(RouteType), Type)?[0], RouteNumber);
+        public String GetCodeRoute() => String.Format("R{0}{1}", Enum.GetName(typeof(RouteType), RouteType)?[0], RouteNumber);
 
         /// <summary>
         /// Obtiene el vehículo que coincide con el número económico especificado.
@@ -149,7 +150,7 @@ namespace Acabus.Models
         /// </summary>
         /// <returns>Una cadena que representa una instancia Route.</returns>
         public override String ToString() => String.Format("RUTA {0}{1} - {2}",
-                                                            Enum.GetName(typeof(RouteType), Type)?[0],
+                                                            Enum.GetName(typeof(RouteType), RouteType)?[0],
                                                             RouteNumber.ToString("D2"),
                                                             Name);
 

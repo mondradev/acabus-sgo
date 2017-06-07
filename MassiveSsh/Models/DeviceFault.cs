@@ -21,7 +21,7 @@ namespace Acabus.Models
         /// <summary>
         /// Campo que provee a la propiedad 'ID'.
         /// </summary>
-        private int _id;
+        private UInt64 _id;
 
         /// <summary>
         /// Obtiene o establece la descripción de la falla.
@@ -50,7 +50,7 @@ namespace Acabus.Models
         /// Obtiene o establece el identificador unico de la falla.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public int ID {
+        public UInt64 ID {
             get => _id;
             set {
                 _id = value;
@@ -58,6 +58,30 @@ namespace Acabus.Models
             }
         }
 
+        /// <summary>
+        /// Crea una instancia básica de <see cref="DeviceFault"/>
+        /// </summary>
+        public DeviceFault()
+        {
+        }
+
+        /// <summary>
+        /// Crea una instancia de <see cref="DeviceFault"/> definiendo el ID, descripción y el tipo de dispositivo.
+        /// </summary>
+        /// <param name="id">ID de la falla.</param>
+        /// <param name="description">Descripción de la falla.</param>
+        /// <param name="type">Tipo de dispositivo al que afecta.</param>
+        public DeviceFault(UInt64 id, String description, DeviceType type)
+        {
+            _id = id;
+            _description = description;
+            _deviceType = type;
+        }
+
+        /// <summary>
+        /// Representa en una cadena la falla actual.
+        /// </summary>
+        /// <returns>Una cadena que representa la instancia.</returns>
         public override string ToString() => Description;
     }
 }

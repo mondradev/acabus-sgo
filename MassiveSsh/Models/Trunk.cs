@@ -1,4 +1,5 @@
 ﻿using Acabus.Utils;
+using InnSyTech.Standard.Database;
 using System;
 using System.Collections.ObjectModel;
 
@@ -15,6 +16,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene una lista de las estaciones de asignadas a la ruta.
         /// </summary>
+        [Column(IsIgnored = true)]
         public ObservableCollection<Station> Stations {
             get {
                 if (_stations == null)

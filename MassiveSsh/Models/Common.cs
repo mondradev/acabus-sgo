@@ -79,13 +79,19 @@ namespace Acabus.Models
         /// </summary>
         DB,
         /// <summary>
-        /// Autobus
+        /// Display Bus
         /// </summary>
-        DEVICE_BUS,
+        DSPB,
         /// <summary>
         /// Display
         /// </summary>
         DSPL,
+        CONT,
+        NVRA,
+        TA,
+        CAM,
+        MON,
+        PCA,
         /// <summary>
         /// Sin tipo definido.
         /// </summary>
