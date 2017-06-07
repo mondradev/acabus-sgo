@@ -119,8 +119,7 @@ namespace Acabus.Modules.Attendances.Models
         public ICollection<Incidence> Incidences {
             get {
                 return ((ICollection<Incidence>)ViewModelService.GetViewModel<CctvReportsViewModel>().Incidences)
-                    .Where(incidence => incidence.AssignedAttendance == Technician
-                                       && DateTimeDeparture is null);
+                    .Where(incidence => incidence.AssignedAttendance == Technician);
             }
         }
 
