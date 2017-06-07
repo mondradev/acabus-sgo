@@ -2,7 +2,10 @@
 using Acabus.Modules.Attendances.Models;
 using Acabus.Modules.Attendances.Services;
 using Acabus.Utils.Mvvm;
+using InnSyTech.Standard.Database;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Acabus.Modules.CctvReports.Models
 {
@@ -30,17 +33,18 @@ namespace Acabus.Modules.CctvReports.Models
     /// <summary>
     ///
     /// </summary>
+    [Entity(TableName = "Incidences")]
     public class Incidence : NotifyPropertyChanged
     {
         /// <summary>
         /// Campo que provee a la propiedad 'AssignedAttendance'.
         /// </summary>
-        private String _assignedAttendance;
+        private Attendance _assignedAttendance;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Description'.
         /// </summary>
-        private String _description;
+        private DeviceFault _description;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Device'.
@@ -56,11 +60,6 @@ namespace Acabus.Modules.CctvReports.Models
         /// Campo que provee a la propiedad 'Folio'.
         /// </summary>
         private String _folio;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Location'.
-        /// </summary>
-        private Location _location;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Observations'.
@@ -102,9 +101,18 @@ namespace Acabus.Modules.CctvReports.Models
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public Incidence()
+        {
+            _status = IncidenceStatus.OPEN;
+        }
+
+        /// <summary>
         /// Obtiene o establece la asistencia correspondiente.
         /// </summary>
-        public String AssignedAttendance {
+        [Column(IsForeignKey = true, Name = "Fk_Attendance_ID")]
+        public Attendance AssignedAttendance {
             get => _assignedAttendance;
             set {
                 _assignedAttendance = value;
@@ -116,8 +124,9 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece la descripción de la incidencia.
         /// </summary>
-        public String Description {
-            get => _description?.ToUpper();
+        [Column(Name = "Fk_Fault_ID", IsForeignKey = true)]
+        public DeviceFault Description {
+            get => _description;
             set {
                 _description = value;
                 OnPropertyChanged("Description");
@@ -127,6 +136,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el equipo el cual presenta la incidencia.
         /// </summary>
+        [Column(IsForeignKey = true, Name = "Fk_Device_ID")]
         public Device Device {
             get => _device;
             set {
@@ -134,6 +144,8 @@ namespace Acabus.Modules.CctvReports.Models
                 OnPropertyChanged("Device");
             }
         }
+
+
 
         /// <summary>
         /// Obtiene o establece la fecha de finalización de la incidencia.
@@ -150,18 +162,14 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene el folio de la incidencia.
         /// </summary>
-        public String Folio => _folio;
-
-        /// <summary>
-        /// Obtiene o establece la ubicación de la inicidencia.
-        /// </summary>
-        public Location Location {
-            get => _location;
-            set {
-                _location = value;
-                OnPropertyChanged("Location");
+        public String Folio {
+            get => _folio;
+            private set {
+                _folio = value;
+                OnPropertyChanged("Folio");
             }
         }
+
 
         /// <summary>
         /// Obtiene o establece las observaciones de la incidencia.
@@ -177,6 +185,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece la prioridad de la incidencia.
         /// </summary>
+        [Column(Converter = typeof(DbPriorityConverter))]
         public Priority Priority {
             get => _priority;
             set {
@@ -200,6 +209,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el estado de la incidencia (Abierta|Cerrada).
         /// </summary>
+        [Column(Converter = typeof(DbIncidenceStatusConverter))]
         public IncidenceStatus Status {
             get => _status;
             set {
@@ -243,13 +253,13 @@ namespace Acabus.Modules.CctvReports.Models
         {
             return String.Format("*{0}* {1} {2} {3}",
                 Folio,
-                Location is Vehicle
+                Device.Vehicle is null
                     ? String.Format("{0} {1}",
-                        (Location as Vehicle),
+                        Device.Vehicle,
                         Device)
                     : Device.NumeSeri,
                 Description,
-                String.IsNullOrEmpty(AssignedAttendance)
+                AssignedAttendance is null
                 ? String.Empty
                 : String.Format("\n*Asignado:* {0}", AssignedAttendance));
         }

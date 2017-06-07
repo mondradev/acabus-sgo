@@ -7,15 +7,28 @@ using Acabus.Utils.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 
 namespace Acabus.Modules.CctvReports.Services
 {
     public static class CctvService
     {
-        public static Incidence CreateIncidence(this IList<Incidence> incidences, string description, Device device, DateTime startTime,
-            Priority priority, Location location, string whoReporting)
+        public static Boolean CommitRefund(this Incidence incidence, DateTime refundDateTime)
+        {
+            var refund = AcabusData.Session.GetObjects(typeof(RefundOfMoney))
+                .FirstOrDefault(refundOfMoney => (refundOfMoney as RefundOfMoney).Incidence.Folio == incidence.Folio) as RefundOfMoney;
+
+            refund.RefundDate = refundDateTime;
+            refund.Status = RefundOfMoneyStatus.COMMIT;
+            if (refund.Incidence.FinishDate is null)
+                refund.Incidence.FinishDate = refundDateTime;
+
+            return AcabusData.Session.Update(refund);
+        }
+
+        public static Incidence CreateIncidence(this IList<Incidence> incidences, DeviceFault description, Device device, DateTime startTime,
+                    Priority priority, Location location, string whoReporting)
         {
             lock (incidences)
             {
@@ -32,10 +45,10 @@ namespace Acabus.Modules.CctvReports.Services
                     Device = device,
                     StartDate = startTime,
                     Priority = priority,
-                    Location = location,
                     WhoReporting = whoReporting,
                     Status = IncidenceStatus.OPEN,
-                    AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?.GetTechnicianAssigned(location, device, startTime)
+                    AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
+                                .GetTechnicianAssigned(location, device, startTime)
                 };
 
                 incidences.Add(incidence);
@@ -43,33 +56,25 @@ namespace Acabus.Modules.CctvReports.Services
             }
         }
 
-        public static void LoadFromDataBase(this IList<Incidence> incidences)
+        public static Boolean Equals(Alarm alarm, Incidence incidence)
         {
-            var response = SQLiteAccess.ExecuteQuery("SELECT * FROM Incidences WHERE status<>1 UNION SELECT * FROM (SELECT * FROM Incidences WHERE status=1 AND DATE(StartDate) > DATE('now')-30 ORDER BY folio DESC)");
-            foreach (var incidenceData in response)
-            {
-                Device deviceData = AcabusData.FindDevice((device) => device.NumeSeri == incidenceData[3].ToString());
-                deviceData = deviceData is null ? AcabusData.FindDeviceInVehicle((device) => device.Description == incidenceData[3].ToString()) : deviceData;
+            if (alarm.Device.GetType() != incidence.Device.GetType()) return false;
+            if (alarm.Device == incidence.Device
+                && alarm.Description == incidence.Description.ToString())
+                if (incidence.Status != IncidenceStatus.CLOSE
+                    || alarm.DateTime == incidence.StartDate)
+                    return true;
 
-                Location locationData = deviceData is DeviceBus
-                    ? (Location)AcabusData.FindVehicle((vehicle) => vehicle.EconomicNumber == incidenceData[4].ToString())
-                    : AcabusData.FindStation((station) => station.Name == incidenceData[4].ToString());
+            return false;
+        }
 
-                incidences.Add(new Incidence(incidenceData[0].ToString())
-                {
-                    Description = incidenceData[1].ToString(),
-                    WhoReporting = incidenceData[2].ToString(),
-                    Device = deviceData,
-                    Location = locationData,
-                    StartDate = (DateTime)incidenceData[5],
-                    FinishDate = String.IsNullOrEmpty(incidenceData[6].ToString()) ? null : (DateTime?)incidenceData[6],
-                    Status = (IncidenceStatus)UInt16.Parse(incidenceData[7].ToString()),
-                    AssignedAttendance = incidenceData[8].ToString(),
-                    Technician = incidenceData[9].ToString(),
-                    Observations = incidenceData[10].ToString(),
-                    Priority = (Priority)incidenceData[11]
-                });
-            }
+        public static Boolean Equals(BusDisconnectedAlarm alarm, Incidence incidence)
+        {
+            if (incidence.Device.Station is null)
+                if (alarm.EconomicNumber == incidence.Device.Vehicle.EconomicNumber
+                    && incidence.Status != IncidenceStatus.CLOSE)
+                    return true;
+            return false;
         }
 
         public static void GetAlarms(this ObservableCollection<Alarm> alarms)
@@ -121,135 +126,19 @@ namespace Acabus.Modules.CctvReports.Services
             }
         }
 
-        public static Boolean Equals(Alarm alarm, Incidence incidence)
+        public static void LoadFromDataBase(this IList<Incidence> incidences)
         {
-            if (alarm.Device.GetType() != incidence.Device.GetType()) return false;
-            if (alarm.Device == incidence.Device
-                && alarm.Description == incidence.Description)
-                if (incidence.Status != IncidenceStatus.CLOSE
-                    || alarm.DateTime == incidence.StartDate)
-                    return true;
-
-            return false;
+            ICollection<object> incidencesFromDb = AcabusData.Session.GetObjects(typeof(Incidence));
+            foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).Status != IncidenceStatus.CLOSE))
+                incidences.Add(incidenceData as Incidence);
+            foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).StartDate > DateTime.Now.AddDays(-45)))
+                incidences.Add(incidenceData as Incidence);
         }
 
-        public static Boolean Equals(BusDisconnectedAlarm alarm, Incidence incidence)
-        {
-            if (incidence.Location is Vehicle)
-                if (alarm.EconomicNumber == ((Vehicle)incidence.Location).EconomicNumber
-                    && incidence.Status != IncidenceStatus.CLOSE)
-                    return true;
-            return false;
-        }
+        public static Boolean Save(this Incidence incidence) => AcabusData.Session.Save(incidence);
 
-        public static Boolean UpdatePriority(this Incidence incidence)
-        {
-            var query = String.Format("UPDATE Incidences SET Priority={0} WHERE Folio='{1}'",
-                (UInt16)incidence.Priority,
-                incidence.Folio
-                );
-            return SQLiteAccess.Execute(query) > 0;
-        }
+        public static Boolean Save(this RefundOfMoney refundOfMoney) => AcabusData.Session.Save(refundOfMoney);
 
-        public static Boolean Update(this Incidence incidence)
-        {
-            var query = String.Format("UPDATE Incidences SET WhoReporting='{0}', FinishDate='{1}', Status={2}, Technician='{3}', Observations='{4}', Priority={5}, AssignedTechnician='{6}' WHERE Folio='{7}' AND Status<>1",
-                incidence.WhoReporting,
-                incidence.FinishDate?.ToSqliteFormat(),
-                (UInt16)incidence.Status,
-                incidence.Technician,
-                incidence.Observations,
-                (UInt16)incidence.Priority,
-                incidence.AssignedAttendance,
-                incidence.Folio
-                );
-
-            Trace.WriteLine(query, "DEBUG");
-
-            return SQLiteAccess.Execute(query) > 0;
-        }
-
-        public static Boolean Save(this Incidence incidence)
-        {
-            var query = String.Format("SELECT COUNT(*) FROM Incidences WHERE Folio='{0}'", incidence.Folio);
-
-            var response = SQLiteAccess.ExecuteQuery(query);
-
-            if (response[0][0].ToString() != "0") return false;
-
-            query = String.Format("INSERT INTO Incidences VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},'{8}','{9}','{10}',{11})",
-               incidence.Folio,
-               incidence.Description,
-               incidence.WhoReporting,
-               incidence.Device is DeviceBus ? (incidence.Device as DeviceBus)?.Description : incidence.Device?.NumeSeri,
-               incidence.Location is Vehicle ? (incidence.Location as Vehicle).EconomicNumber : incidence.Location.Name,
-               incidence.StartDate.ToSqliteFormat(),
-               incidence.FinishDate?.ToSqliteFormat(),
-               (UInt16)incidence.Status,
-               incidence.AssignedAttendance,
-               incidence.Technician,
-               incidence.Observations,
-               (UInt16)incidence.Priority
-               );
-            return SQLiteAccess.Execute(query) > 0;
-        }
-
-        public static Boolean Save(this RefundOfMoney refundOfMoney)
-        {
-            var result = 0;
-            var incidence = refundOfMoney.Incidence;
-            var queryRefund = String.Format("INSERT INTO RefundOfMoney(Quantity, CashDestiny, Fk_Folio, Status, RefundDate, CashType) VALUES({0},'{1}','{2}', {3}, '{4}', '{5}')",
-                refundOfMoney.Quantity,
-                refundOfMoney.CashDestiny.Description,
-                refundOfMoney.Incidence.Folio,
-                (UInt16)refundOfMoney.Status,
-                refundOfMoney.RefundDate?.ToSqliteFormat(),
-                refundOfMoney.CashDestiny.Type
-                );
-            SQLiteAccess.BeginTransaction();
-            try
-            {
-                result += incidence.Update() ? 1 : 0;
-                result += SQLiteAccess.Execute(queryRefund);
-                SQLiteAccess.Commit();
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message, "ERROR");
-                SQLiteAccess.RollBack();
-                result = 0;
-            }
-            return result > 0;
-        }
-
-
-        public static Boolean CommitRefund(this Incidence incidence, DateTime refundDateTime)
-        {
-            bool hasError = false;
-            SQLiteAccess.BeginTransaction();
-            try
-            {
-                var refundID = SQLiteAccess.Select(String.Format("SELECT ID FROM RefundOfMoney WHERE Fk_Folio='{0}' AND Status=0", incidence.Folio));
-                if (String.IsNullOrEmpty(refundID.ToString())) return false;
-                if (incidence.FinishDate is null)
-                    incidence.FinishDate = refundDateTime;
-                if (!incidence.Update())
-                    throw new Exception("Error al actualizar la incidencia.");
-                if (SQLiteAccess.Execute(String.Format("UPDATE RefundOfMoney SET Status=1, RefundDate='{0}' WHERE ID={1}", refundDateTime.ToSqliteFormat(), refundID)) < 1)
-                    throw new Exception("Error al actualizar al devolución.");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message, "ERROR");
-                SQLiteAccess.RollBack();
-                hasError = true;
-            }
-            finally
-            {
-                if (!hasError) SQLiteAccess.Commit();
-            }
-            return false;
-        }
+        public static Boolean Update(this Incidence incidence) => AcabusData.Session.Update(incidence);
     }
 }

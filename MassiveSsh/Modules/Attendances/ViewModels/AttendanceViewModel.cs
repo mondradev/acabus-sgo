@@ -123,7 +123,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                 if (incidence.Status != IncidenceStatus.OPEN) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                    .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
+                    .GetTechnicianAssigned(incidence.Device.Station, incidence.Device, incidence.StartDate);
                 incidence.Update();
             }
             UpdateCounters();
@@ -140,11 +140,11 @@ namespace Acabus.Modules.Attendances.ViewModels
             foreach (Incidence incidence in openedIncidences)
             {
                 if (incidence.Status != IncidenceStatus.OPEN) continue;
-                if (AttendanceService.GetTurn(incidence.StartDate) 
+                if (AttendanceService.GetTurn(incidence.StartDate)
                     != AttendanceService.GetTurn(DateTime.Now)) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                    .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
+                    .GetTechnicianAssigned(incidence.Device.Station, incidence.Device, incidence.StartDate);
                 incidence.Update();
             }
             UpdateCounters();
@@ -158,7 +158,7 @@ namespace Acabus.Modules.Attendances.ViewModels
         /// <summary>
         /// Obtiene la asistencia para la asignación de la incidencia.
         /// </summary>
-        public String GetTechnicianAssigned(Location location, Device device, DateTime startTime)
+        public Attendance GetTechnicianAssigned(Location location, Device device, DateTime startTime)
         {
             /// Asignación cuando al menos hay un tecnico en turno.
             var attendances = (IEnumerable<Attendance>)Attendances
@@ -167,7 +167,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             var attendancesPrevious = attendances;
 
             if (attendances.Count() == 1)
-                return attendances.First()?.Technician;
+                return attendances.First();
             else if (attendances.Count() < 1)
                 return null;
             else
@@ -181,7 +181,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                        && attendance.Section == location.Section);
 
                 if (attendances.Count() == 1)
-                    return attendances.First()?.Technician;
+                    return attendances.First();
                 else if (attendances.Count() < 1)
                     attendances = attendancesPrevious;
                 else
@@ -192,7 +192,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                   => attendance.Turn == AttendanceService.GetTurn(startTime));
 
                 if (attendances.Count() == 1)
-                    return attendances.First()?.Technician;
+                    return attendances.First();
                 else if (attendances.Count() < 1)
                     attendances = attendancesPrevious;
                 else
@@ -207,7 +207,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                           => attendance.HasKvrKey || attendance.Section.Contains("ESTACI"));
 
                 if (attendances.Count() == 1)
-                    return attendances.First()?.Technician;
+                    return attendances.First();
                 else if (attendances.Count() < 1)
                     attendances = attendancesPrevious;
                 else
@@ -229,7 +229,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                            && attendance.Section.Contains("RENA"));
 
                 if (attendances.Count() == 1)
-                    return attendances.First()?.Technician;
+                    return attendances.First();
                 else if (attendances.Count() < 1)
                     attendances = attendancesPrevious;
                 else
@@ -244,7 +244,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                     return attendance2;
                 else
                     return attendance1;
-            })?.Technician;
+            });
         }
 
         public void UpdateCounters()

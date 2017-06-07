@@ -153,8 +153,8 @@
     <Compile Include="Converters\PriorityConverter.cs" />
     <Compile Include="Converters\TranslateEnumConverter.cs" />
     <Compile Include="DataAccess\Csv.cs" />
-    <Compile Include="DataAccess\SQLiteAccess.cs" />
     <Compile Include="Models\DeviceBus.cs" />
+    <Compile Include="Models\DeviceFault.cs" />
     <Compile Include="Modules\Attendances\AcabusData.cs" />
     <Compile Include="Modules\Attendances\Models\Attendance.cs" />
     <Compile Include="Modules\Attendances\Services\AttendanceService.cs" />
@@ -175,6 +175,7 @@
       <DependentUpon>AttendanceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\CctvReports\AcabusData.cs" />
+    <Compile Include="Modules\CctvReports\Models\DbIncidenceStatusConverter.cs" />
     <Compile Include="Modules\CctvReports\Models\RefundOfMoney.cs" />
     <Compile Include="Modules\CctvReports\Models\ReportQuery.cs" />
     <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
@@ -375,7 +376,12 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">
+      <Project>{f74fee3d-d536-44df-9e2c-53540ce78173}</Project>
+      <Name>InnSyTech.Standard</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.105.1\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.105.1\build\net451\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

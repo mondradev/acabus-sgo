@@ -1,5 +1,6 @@
 ﻿using InnSyTech.Debug;
 using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database.Utils;
 using System;
 
 namespace Acabus.Modules.CctvReports.Models

@@ -90,7 +90,7 @@ namespace Acabus.Modules.Configurations
                             {
                                 IP = deviceData[1],
                                 CanReplicate = type != DeviceType.CDE,
-                                HasDataBase = type != DeviceType.CDE,
+                                HasDatabase = type != DeviceType.CDE,
                                 Enabled = true,
                                 SshEnabled = true
                             };

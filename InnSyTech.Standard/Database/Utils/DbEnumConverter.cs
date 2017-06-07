@@ -6,7 +6,7 @@ namespace InnSyTech.Standard.Database.Utils
     /// Define un convertidor de datos para enumeraciones a enteros y así poder ingresarlos a la base de datos.
     /// </summary>
     /// <typeparam name="T">Tipo de la enumeración.</typeparam>
-    public abstract class DbEnumConverter<T> : IDbConverter
+    public class DbEnumConverter<T> : IDbConverter
     {
         /// <summary>
         /// Obtiene el valor de un campo de la base de datos convertido al tipo <see cref="T"/>.

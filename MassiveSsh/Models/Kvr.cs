@@ -26,7 +26,7 @@ namespace Acabus.Models
             Kvr kvrTemp = new Kvr(device.ID, device.Station)
             {
                 IP = device.IP,
-                HasDataBase = device.HasDataBase,
+                HasDatabase = device.HasDatabase,
                 SshEnabled = device.SshEnabled,
                 Enabled = device.Enabled,
                 CanReplicate = device.CanReplicate

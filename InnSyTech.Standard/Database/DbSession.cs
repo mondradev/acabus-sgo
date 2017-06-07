@@ -681,7 +681,7 @@ namespace InnSyTech.Standard.Database
                             else
                                 field.SetValue(data, ReadData(field.PropertyType, reader[field.Name], transaction, data));
                         }
-                        catch { }
+                        catch {                        }
                     }
                 }
 

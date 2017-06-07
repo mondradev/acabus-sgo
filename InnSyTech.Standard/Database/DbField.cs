@@ -159,11 +159,17 @@ namespace InnSyTech.Standard.Database
             try
             {
                 if (Converter is null)
-                    _propertyInfo.SetValue(instance, value);
+                    if (Nullable.GetUnderlyingType(PropertyType) is null)
+                        _propertyInfo.SetValue(instance, Convert.ChangeType(value, PropertyType));
+                    else
+                        _propertyInfo.SetValue(instance, Convert.ChangeType(value, Nullable.GetUnderlyingType(PropertyType)));
                 else
                     _propertyInfo.SetValue(instance, Converter.ConverterFromDb(value));
             }
-            catch { }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

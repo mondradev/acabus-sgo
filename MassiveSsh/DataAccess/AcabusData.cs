@@ -1,9 +1,11 @@
 ﻿using Acabus.Models;
 using Acabus.Utils;
 using Acabus.Utils.SecureShell;
+using InnSyTech.Standard.Database;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
@@ -186,7 +188,20 @@ namespace Acabus.DataAccess
         /// </summary>
         static AcabusData()
         {
+            Session = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
             InitAcabusData();
+
+        }
+
+        public static DbSession Session { get; set; }
+
+        private class SQLiteConfiguration : IDbConfiguration
+        {
+            public string ConnectionString => "Data Source=Resources/acabus_data.dat;Version=3;Password=acabus*data*dat";
+
+            public string LastInsertFunctionName => "last_insert_rowid";
+
+            public int TransactionPerConnection => 1;
         }
 
         /// <summary>
@@ -708,17 +723,16 @@ namespace Acabus.DataAccess
         {
             try
             {
-                var device = Device.CreateDevice(station,
-                    (UInt16)XmlUtils.GetAttributeInt(deviceXmlNode, "ID"),
+                var device = new Device((UInt16)XmlUtils.GetAttributeInt(deviceXmlNode, "ID"),
                     (DeviceType)Enum.Parse(typeof(DeviceType), XmlUtils.GetAttribute(deviceXmlNode, "Type")),
-                    XmlUtils.GetAttributeBool(deviceXmlNode, "CanReplicate"));
-
-                device.IP = XmlUtils.GetAttribute(deviceXmlNode, "IP");
-                device.Enabled = XmlUtils.GetAttributeBool(deviceXmlNode, "Enabled");
-                device.HasDataBase = XmlUtils.GetAttributeBool(deviceXmlNode, "HasDataBase");
-                device.SshEnabled = XmlUtils.GetAttributeBool(deviceXmlNode, "SshEnabled");
-                device.CanReplicate = XmlUtils.GetAttributeBool(deviceXmlNode, "CanReplicate");
-
+                    station)
+                {
+                    IP = XmlUtils.GetAttribute(deviceXmlNode, "IP"),
+                    Enabled = XmlUtils.GetAttributeBool(deviceXmlNode, "Enabled"),
+                    HasDatabase = XmlUtils.GetAttributeBool(deviceXmlNode, "HasDataBase"),
+                    SshEnabled = XmlUtils.GetAttributeBool(deviceXmlNode, "SshEnabled"),
+                    CanReplicate = XmlUtils.GetAttributeBool(deviceXmlNode, "CanReplicate")
+                };
                 if (device.Type == DeviceType.KVR)
                 {
                     var kvr = Kvr.FromDeviceToKvr(ref device);

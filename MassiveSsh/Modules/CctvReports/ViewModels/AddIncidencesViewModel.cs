@@ -20,7 +20,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Campo que provee a la propiedad 'Description'.
         /// </summary>
-        private String _description;
+        private DeviceFault _description;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Device'.
@@ -91,7 +91,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene o establece la descripción de la incidencia.
         /// </summary>
-        public String Description {
+        public DeviceFault Description {
             get => _description;
             set {
                 _description = value;
@@ -403,7 +403,7 @@ namespace Acabus.Modules.CctvReports
             Single.TryParse(Quantity, out float quantity);
             if (IsRefundOfMoney)
             {
-                Description = String.Format("{0}", _isMoney ? "MONEDAS DEVUELTAS" : "BILLETE DEVUELTO");
+                //Description = String.Format("{0}", _isMoney ? "MONEDAS DEVUELTAS" : "BILLETE DEVUELTO");
                 Observations = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}", _isMoney ? "MONEDAS" : "BILLETE", quantity, CashDestiny?.Description);
             }
         }
@@ -420,7 +420,7 @@ namespace Acabus.Modules.CctvReports
                     break;
 
                 case "Description":
-                    if (String.IsNullOrEmpty(Description))
+                    if (Description is null)
                         AddError("Description", "Falta ingresar la descripción de la incidencia.");
                     break;
 
@@ -469,12 +469,12 @@ namespace Acabus.Modules.CctvReports
             {
                 if (incidence.Status == IncidenceStatus.CLOSE) continue;
 
-                if (exists = (incidence.Description == Description
-                  && (incidence.Location is Vehicle && Location is Vehicle
-                        ? (incidence.Location as Vehicle).EconomicNumber == (Location as Vehicle).EconomicNumber
+                if (exists = (incidence.Description?.ID == Description?.ID
+                  && (incidence.Device.Station is null && Location is Vehicle
+                        ? incidence.Device.Vehicle.EconomicNumber == (Location as Vehicle).EconomicNumber
                         : incidence.Device.NumeSeri == Device.NumeSeri)
-                    && incidence.Location == Location))
-                    break;
+                    && (incidence.Device.Vehicle == Location || incidence.Device.Station == Location))
+                    ) break;
             }
             if (exists)
                 AddError("Description", "Ya existe una incidencia abierta igual para el equipo");
