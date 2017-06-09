@@ -161,7 +161,7 @@ namespace Acabus.Modules.Attendances.ViewModels
         public Attendance GetTechnicianAssigned(Device device, DateTime startTime)
         {
             AssignableSection location = (AssignableSection)device?.Station
-                ?? (device is DeviceBus ? (device as DeviceBus)?.Vehicle?.Route : null);
+                ?? device?.Vehicle?.Route ?? null;
 
             /// Asignación cuando al menos hay un tecnico en turno.
             var attendances = (IEnumerable<Attendance>)Attendances

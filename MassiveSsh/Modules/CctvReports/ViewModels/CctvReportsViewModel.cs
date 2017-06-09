@@ -11,6 +11,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Windows.Input;
 
@@ -24,141 +25,6 @@ namespace Acabus.Modules.CctvReports
         private ObservableCollection<Alarm> _alarms;
 
         /// <summary>
-        /// Obtiene una lista de las alarmas lanzadas por los equipos en vía.
-        /// </summary>
-        public ObservableCollection<Alarm> Alarms {
-            get {
-                if (_alarms == null)
-                    _alarms = new ObservableCollection<Alarm>();
-                return _alarms;
-            }
-        }
-
-        public ICommand ReassignTechnician { get; }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'BusDisconnectedAlarms'.
-        /// </summary>
-        private ObservableCollection<BusDisconnectedAlarm> _busDisconnectedAlarms;
-
-        /// <summary>
-        /// Obtiene una lista de las unidades sin conexión.
-        /// </summary>
-        public ObservableCollection<BusDisconnectedAlarm> BusDisconnectedAlarms {
-            get {
-                if (_busDisconnectedAlarms == null)
-                    _busDisconnectedAlarms = new ObservableCollection<BusDisconnectedAlarm>();
-                return _busDisconnectedAlarms;
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Incidences'.
-        /// </summary>
-        private ObservableCollection<Incidence> _incidences;
-
-        /// <summary>
-        /// Obtiene una lista de las incidencias actualmente abiertas.
-        /// </summary>
-        public ObservableCollection<Incidence> Incidences {
-            get {
-                if (_incidences == null)
-                    _incidences = new ObservableCollection<Incidence>();
-                return _incidences;
-            }
-        }
-
-        /// <summary>
-        /// Obtiene una lista de las incidencias abiertas.
-        /// </summary>
-        public ObservableCollection<Incidence> IncidencesOpened
-            => (ObservableCollection<Incidence>)Util.Where(Incidences, (incidence)
-                =>
-            {
-                Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
-                Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.ToUpper().Contains(FolioToSearch.ToUpper());
-
-                return isOpen && isMatch;
-            });
-
-        /// <summary>
-        /// Obtiene el comando que se ejecuta cuando el evento <c>SelectionChanged</c>
-        /// es deseandenado en el DataGrid.
-        /// </summary>
-        public ICommand CopyingRowClipboardHandlerCommand { get; }
-
-        /// <summary>
-        /// Obtiene un comando que se ejecuta cuando el evento <c>Loaded</c>
-        /// del UserControl se desencadena.
-        /// </summary>
-        public ICommand LoadedHandlerCommand { get; }
-
-        /// <summary>
-        /// Obtiene una lista de la incidencias generadas por alarmas.
-        /// </summary>
-        public ObservableCollection<Incidence> IncidencesClosed
-            => (ObservableCollection<Incidence>)Util.Where(Incidences, (incidence)
-                =>
-            {
-                Boolean isClosed = incidence.Status == IncidenceStatus.CLOSE;
-                Boolean isMatch = String.IsNullOrEmpty(ToSearchClosed)
-                            || incidence.Technician.ToUpper().Contains(ToSearchClosed.ToUpper())
-                            || incidence.Description.ToString().ToUpper().Contains(ToSearchClosed.ToUpper());
-
-                return isClosed && isMatch;
-            });
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'SelectedIncidence'.
-        /// </summary>
-        private Incidence _selectedIncidence;
-
-        /// <summary>
-        /// Obtiene o establece la incidencia actualmente seleccionada.
-        /// </summary>
-        public Incidence SelectedIncidence {
-            get => _selectedIncidence;
-            set {
-                _selectedIncidence = value;
-                OnPropertyChanged("SelectedIncidence");
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'FolioToSearch'.
-        /// </summary>
-        private String _folioToSearch;
-
-        /// <summary>
-        /// Obtiene o establece el folio a buscar en las incidencias abiertas.
-        /// </summary>
-        public String FolioToSearch {
-            get => _folioToSearch;
-            set {
-                _folioToSearch = value;
-                OnPropertyChanged("FolioToSearch");
-                OnPropertyChanged("IncidencesOpened");
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'ToSearchClosed'.
-        /// </summary>
-        private String _toSearchClosed;
-
-        /// <summary>
-        /// Obtiene o establece el criterio de busqueda la incidencia cerrada.
-        /// </summary>
-        public String ToSearchClosed {
-            get => _toSearchClosed;
-            set {
-                _toSearchClosed = value;
-                OnPropertyChanged("ToSearchClosed");
-                OnPropertyChanged("IncidencesClosed");
-            }
-        }
-
-        /// <summary>
         ///
         /// </summary>
         private Timer _alarmsMonitor;
@@ -169,54 +35,9 @@ namespace Acabus.Modules.CctvReports
         private Timer _busAlarmsMonitor;
 
         /// <summary>
-        ///
+        /// Campo que provee a la propiedad 'BusDisconnectedAlarms'.
         /// </summary>
-        private Timer _updatePriority;
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand UpdateDataCommand { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand CloseIncidenceDialogCommand { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand ModifyIncidenceDialogCommand { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand SaveIncidenceCommand { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand AddIncidenceCommand { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand RefundCashDialogCommand { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand OpenDialogExportCommand { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand OpenOffDutyVehiclesDialog { get; }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'NewWhoReporting'.
-        /// </summary>
-        private String _newWhoReporting;
+        private ObservableCollection<BusDisconnectedAlarm> _busDisconnectedAlarms;
 
         /// <summary>
         /// Indica si la actualización de los autobuses sin conexión esta ocurriendo.
@@ -224,15 +45,34 @@ namespace Acabus.Modules.CctvReports
         private bool _busUpdating;
 
         /// <summary>
-        /// Obtiene o establece el nuevo valor de quién reporta.
+        /// Campo que provee a la propiedad 'FolioToSearch'.
         /// </summary>
-        public String NewWhoReporting {
-            get => _newWhoReporting;
-            set {
-                _newWhoReporting = value;
-                OnPropertyChanged("NewWhoReporting");
-            }
-        }
+        private String _folioToSearch;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Incidences'.
+        /// </summary>
+        private ObservableCollection<Incidence> _incidences;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'NewWhoReporting'.
+        /// </summary>
+        private String _newWhoReporting;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedIncidence'.
+        /// </summary>
+        private Incidence _selectedIncidence;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'ToSearchClosed'.
+        /// </summary>
+        private String _toSearchClosed;
+
+        /// <summary>
+        ///
+        /// </summary>
+        private Timer _updatePriority;
 
         /// <summary>
         ///
@@ -342,10 +182,10 @@ namespace Acabus.Modules.CctvReports
                      }
                      if (item.Status == IncidenceStatus.UNCOMMIT || item.Priority == Priority.NONE) continue;
                      var time = DateTime.Now - item.StartDate;
-                     var type = item.Device?.Type;
-                     var maxLowPriority = type == DeviceType.DEVICE_BUS
+                     var type = item.Device.Vehicle != null;
+                     var maxLowPriority = type
                                 ? AcabusData.TimeMaxLowPriorityIncidenceBus : AcabusData.TimeMaxLowPriorityIncidence;
-                     var maxMediumPriority = type == DeviceType.DEVICE_BUS
+                     var maxMediumPriority = type
                                 ? AcabusData.TimeMaxMediumPriorityIncidenceBus : AcabusData.TimeMaxMediumPriorityIncidence;
 
                      if (time > maxMediumPriority)
@@ -358,11 +198,171 @@ namespace Acabus.Modules.CctvReports
              }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
         }
 
-        public void UpdateData()
+        ~CctvReportsViewModel()
         {
-            OnPropertyChanged("IncidencesOpened");
-            OnPropertyChanged("IncidencesClosed");
+            ViewModelService.UnRegister(this);
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand AddIncidenceCommand { get; }
+
+        /// <summary>
+        /// Obtiene una lista de las alarmas lanzadas por los equipos en vía.
+        /// </summary>
+        public ObservableCollection<Alarm> Alarms {
+            get {
+                if (_alarms == null)
+                    _alarms = new ObservableCollection<Alarm>();
+                return _alarms;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de las unidades sin conexión.
+        /// </summary>
+        public ObservableCollection<BusDisconnectedAlarm> BusDisconnectedAlarms {
+            get {
+                if (_busDisconnectedAlarms == null)
+                    _busDisconnectedAlarms = new ObservableCollection<BusDisconnectedAlarm>();
+                return _busDisconnectedAlarms;
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand CloseIncidenceDialogCommand { get; }
+
+        /// <summary>
+        /// Obtiene el comando que se ejecuta cuando el evento <c>SelectionChanged</c>
+        /// es deseandenado en el DataGrid.
+        /// </summary>
+        public ICommand CopyingRowClipboardHandlerCommand { get; }
+
+        /// <summary>
+        /// Obtiene o establece el folio a buscar en las incidencias abiertas.
+        /// </summary>
+        public String FolioToSearch {
+            get => _folioToSearch;
+            set {
+                _folioToSearch = value;
+                OnPropertyChanged("FolioToSearch");
+                OnPropertyChanged("IncidencesOpened");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de las incidencias actualmente abiertas.
+        /// </summary>
+        public ObservableCollection<Incidence> Incidences {
+            get {
+                if (_incidences == null)
+                    _incidences = new ObservableCollection<Incidence>();
+                return _incidences;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de la incidencias generadas por alarmas.
+        /// </summary>
+        public ObservableCollection<Incidence> IncidencesClosed
+            => (ObservableCollection<Incidence>)Util.Where(Incidences, (incidence)
+                =>
+            {
+                Boolean isClosed = incidence.Status == IncidenceStatus.CLOSE;
+                Boolean isMatch = String.IsNullOrEmpty(ToSearchClosed)
+                            || incidence.Technician.ToUpper().Contains(ToSearchClosed.ToUpper())
+                            || incidence.Description.ToString().ToUpper().Contains(ToSearchClosed.ToUpper());
+
+                return isClosed && isMatch;
+            });
+
+        /// <summary>
+        /// Obtiene una lista de las incidencias abiertas.
+        /// </summary>
+        public ObservableCollection<Incidence> IncidencesOpened
+            => (ObservableCollection<Incidence>)Util.Where(Incidences, (incidence)
+                =>
+            {
+                Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
+                Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.ToUpper().Contains(FolioToSearch.ToUpper());
+
+                return isOpen && isMatch;
+            });
+
+        /// <summary>
+        /// Obtiene un comando que se ejecuta cuando el evento <c>Loaded</c>
+        /// del UserControl se desencadena.
+        /// </summary>
+        public ICommand LoadedHandlerCommand { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand ModifyIncidenceDialogCommand { get; }
+
+        /// <summary>
+        /// Obtiene o establece el nuevo valor de quién reporta.
+        /// </summary>
+        public String NewWhoReporting {
+            get => _newWhoReporting;
+            set {
+                _newWhoReporting = value;
+                OnPropertyChanged("NewWhoReporting");
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand OpenDialogExportCommand { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand OpenOffDutyVehiclesDialog { get; }
+
+        public ICommand ReassignTechnician { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand RefundCashDialogCommand { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand SaveIncidenceCommand { get; }
+
+        /// <summary>
+        /// Obtiene o establece la incidencia actualmente seleccionada.
+        /// </summary>
+        public Incidence SelectedIncidence {
+            get => _selectedIncidence;
+            set {
+                _selectedIncidence = value;
+                OnPropertyChanged("SelectedIncidence");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el criterio de busqueda la incidencia cerrada.
+        /// </summary>
+        public String ToSearchClosed {
+            get => _toSearchClosed;
+            set {
+                _toSearchClosed = value;
+                OnPropertyChanged("ToSearchClosed");
+                OnPropertyChanged("IncidencesClosed");
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand UpdateDataCommand { get; }
 
         public void ReloadData()
         {
@@ -370,74 +370,36 @@ namespace Acabus.Modules.CctvReports
             Incidences.LoadFromDataBase();
         }
 
+        public void UpdateData()
+        {
+            OnPropertyChanged("IncidencesOpened");
+            OnPropertyChanged("IncidencesClosed");
+        }
+
         /// <summary>
         ///
         /// </summary>
-        private void InitBusAlarmsMonitor()
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AlarmsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (_busAlarmsMonitor != null) return;
-
-            _busAlarmsMonitor = new Timer(delegate
+            if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                if (_busUpdating) return;
-                _busUpdating = true;
-                Trace.WriteLine("Actualizando autobuses sin conexión", "DEBUG");
-                if (DateTime.Now.TimeOfDay > new TimeSpan(6, 0, 0))
+                foreach (Alarm alarm in e.NewItems)
                 {
-                    BusDisconnectedAlarms.GetBusDisconnectedAlarms();
-
-                    Incidence[] incidences;
-
-                    lock (Incidences)
-                    {
-                        incidences = new Incidence[Incidences.Count];
-                        Incidences.CopyTo(incidences, 0);
-                    }
-
-                    foreach (var incidence in incidences)
-                    {
-                        /// Verificación de las incidencias de SIN CONEXIÓN DE DATOS por confirmar
-                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description.Description == "SIN CONEXIÓN DE DATOS"
-                        && incidence.Device.Station is null)
-                            /// A pasado el tiempo para cerrar automáticamente ? 30 MIN
-                            if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
-                            {
-                                incidence.Status = IncidenceStatus.CLOSE;
-                                if (AcabusData.OffDutyVehicles.Where(vehicle
-                                    => vehicle.EconomicNumber == (incidence.Device as DeviceBus)?.Vehicle.EconomicNumber).Count > 0)
-                                    incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
-                                else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
-                                incidence.Update();
-                                UpdateData();
-                                continue;
-                            }
-
-                        /// Verificación de las incidencias ABIERTAS
-
-                        if (incidence.Status != IncidenceStatus.OPEN || incidence.Description.Description != "SIN CONEXIÓN DE DATOS"
-                        || !(incidence.Device.Station is null)) continue;
-
-                        bool exists = false;
-
-                        foreach (var bus in BusDisconnectedAlarms)
-                            if (CctvService.Equals(bus, incidence))
-                            {
-                                exists = true;
-                                break;
-                            }
-
-                        if (!exists)
-                        {
-                            incidence.Status = IncidenceStatus.UNCOMMIT;
-                            incidence.Priority = Priority.NONE;
-                            incidence.FinishDate = DateTime.Now;
-                            incidence.Technician = "SISTEMA";
-                            incidence.Update();
-                        }
-                    }
+                    Boolean exists = false;
+                    foreach (var incidence in Incidences)
+                        if (exists = CctvService.Equals(alarm, incidence)) break;
+                    if (!exists)
+                        Incidences.CreateIncidence(
+                           CctvService.CreateDeviceFault(alarm),
+                            alarm.Device,
+                            alarm.DateTime,
+                            alarm.Priority,
+                            "SISTEMA"
+                        );
                 }
-                _busUpdating = false;
-            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+            }
         }
 
         /// <summary>
@@ -456,8 +418,10 @@ namespace Acabus.Modules.CctvReports
                         if (exists = CctvService.Equals(alarm, incidence)) break;
                     if (!exists)
                         Incidences.CreateIncidence(
-                            new DeviceFault() { Description = "SIN CONEXIÓN DE DATOS" },
-                            AcabusData.FindDeviceInVehicle((deviceBus) => deviceBus.Description.Contains("PC ABORDO")),
+                            (DeviceFault)AcabusData.Session.GetObjects(typeof(DeviceFault))
+                                .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
+                                .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA")),
+                            AcabusData.FindDeviceBus(alarm.EconomicNumber, (deviceBus) => deviceBus.Type == DeviceType.PCA),
                             DateTime.Now,
                             alarm.Priority,
                             "SISTEMA"
@@ -480,41 +444,15 @@ namespace Acabus.Modules.CctvReports
                     if (item.Status == IncidenceStatus.OPEN)
                         AcabusControlCenterViewModel.AddNotify(String.Format("{0:dd/MM/yyyy HH:mm:ss} {1} - {2}",
                             item.StartDate,
-                            item.Device.Station is null
-                                ? String.Format("{0} {1}", item.Device.Station, item.Device)
-                                : item.Device.ToString(),
+                            item.Device?.Station is null
+                                ? String.Format("{0} {1}", item.Device?.Vehicle, item.Device)
+                                : item.Device?.ToString(),
                             item.Description));
                     item.Save();
                 }
             }
             OnPropertyChanged("IncidencesOpened");
             OnPropertyChanged("IncidencesClosed");
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AlarmsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (Alarm alarm in e.NewItems)
-                {
-                    Boolean exists = false;
-                    foreach (var incidence in Incidences)
-                        if (exists = CctvService.Equals(alarm, incidence)) break;
-                    if (!exists)
-                        Incidences.CreateIncidence(
-                           new DeviceFault() { Description = alarm.Description },
-                            alarm.Device,
-                            alarm.DateTime,
-                            alarm.Priority,
-                            "SISTEMA"
-                        );
-                }
-            }
         }
 
         /// <summary>
@@ -533,9 +471,80 @@ namespace Acabus.Modules.CctvReports
             InitBusAlarmsMonitor();
         }
 
-        ~CctvReportsViewModel()
+        /// <summary>
+        ///
+        /// </summary>
+        private void InitBusAlarmsMonitor()
         {
-            ViewModelService.UnRegister(this);
+            if (_busAlarmsMonitor != null) return;
+
+            _busAlarmsMonitor = new Timer(delegate
+            {
+                if (_busUpdating) return;
+                _busUpdating = true;
+
+                if (DateTime.Now.TimeOfDay > new TimeSpan(6, 0, 0))
+                {
+                    Trace.WriteLine("Actualizando autobuses sin conexión", "DEBUG");
+                    BusDisconnectedAlarms.GetBusDisconnectedAlarms();
+
+                    Incidence[] incidences;
+
+                    lock (Incidences)
+                    {
+                        incidences = new Incidence[Incidences.Count];
+                        Incidences.CopyTo(incidences, 0);
+                    }
+
+                    foreach (var incidence in incidences)
+                    {
+                        /// Verificación de las incidencias de SIN CONEXIÓN DE DATOS por confirmar
+                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description.Equals((DeviceFault)AcabusData.Session.GetObjects(typeof(DeviceFault))
+                               .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
+                                .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA")))
+                        && incidence.Device.Vehicle != null)
+                            /// A pasado el tiempo para cerrar automáticamente ? 30 MIN
+                            if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
+                            {
+                                incidence.Status = IncidenceStatus.CLOSE;
+                                if (AcabusData.OffDutyVehicles.Where(vehicle
+                                    => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count > 0)
+                                    incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
+                                else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
+                                incidence.Update();
+                                UpdateData();
+                                continue;
+                            }
+
+                        /// Verificación de las incidencias ABIERTAS
+
+                        if (incidence.Status != IncidenceStatus.OPEN
+                                || incidence.Description.Equals((DeviceFault)AcabusData.Session.GetObjects(typeof(DeviceFault))
+                                        .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
+                                        .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA")))
+                                    || incidence.Device?.Vehicle is null) continue;
+
+                        bool exists = false;
+
+                        foreach (var bus in BusDisconnectedAlarms)
+                            if (CctvService.Equals(bus, incidence))
+                            {
+                                exists = true;
+                                break;
+                            }
+
+                        if (!exists)
+                        {
+                            incidence.Status = IncidenceStatus.UNCOMMIT;
+                            incidence.Priority = Priority.NONE;
+                            incidence.FinishDate = DateTime.Now;
+                            incidence.Technician = "SISTEMA";
+                            incidence.Update();
+                        }
+                    }
+                }
+                _busUpdating = false;
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
         }
     }
 }

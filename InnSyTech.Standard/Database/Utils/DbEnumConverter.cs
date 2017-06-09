@@ -15,10 +15,10 @@ namespace InnSyTech.Standard.Database.Utils
         /// <returns>El valor del tipo <see cref="T"/></returns>
         public object ConverterFromDb(object data)
         {
-            if (data.GetType() != typeof(Int32))
-                throw new ArgumentException("El tipo de dato extraido de la base de datos debe ser 'System.Int32'.");
+            if (data.GetType() != typeof(Int16) && data.GetType() != typeof(Int32) && data.GetType() != typeof(Int64))
+                throw new ArgumentException("El tipo de dato extraido de la base de datos debe ser Enteros (Int16, Int32 o Int64).");
 
-            return (T)data;
+            return (T)Convert.ChangeType(data, typeof(Int32));
         }
 
         /// <summary>

@@ -153,8 +153,8 @@
     <Compile Include="Converters\PriorityConverter.cs" />
     <Compile Include="Converters\TranslateEnumConverter.cs" />
     <Compile Include="DataAccess\Csv.cs" />
-    <Compile Include="Models\DeviceBus.cs" />
     <Compile Include="Models\DeviceFault.cs" />
+    <Compile Include="Models\DeviceFaultCategory.cs" />
     <Compile Include="Modules\Attendances\AcabusData.cs" />
     <Compile Include="Modules\Attendances\Models\Attendance.cs" />
     <Compile Include="Modules\Attendances\Services\AttendanceService.cs" />

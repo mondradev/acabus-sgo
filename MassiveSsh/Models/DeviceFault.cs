@@ -8,20 +8,67 @@ namespace Acabus.Models
     [Entity(TableName = "Faults")]
     public sealed class DeviceFault : NotifyPropertyChanged
     {
+        /// Campo que provee a la propiedad 'Assignable'.
+        /// </summary>
+        private AreaAssignable _assignable;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Category'.
+        /// </summary>
+        private DeviceFaultCategory _category;
+
         /// <summary>
         /// Campo que provee a la propiedad 'Descripcion'.
         /// </summary>
         private String _description;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'DeviceType'.
-        /// </summary>
-        private DeviceType _deviceType;
-
-        /// <summary>
         /// Campo que provee a la propiedad 'ID'.
         /// </summary>
         private UInt64 _id;
+
+        /// <summary>
+        /// Crea una instancia básica de <see cref="DeviceFault"/>
+        /// </summary>
+        public DeviceFault()
+        {
+        }
+
+        /// <summary>
+        /// Crea una instancia de <see cref="DeviceFault"/> definiendo el ID, descripción y el tipo de dispositivo.
+        /// </summary>
+        /// <param name="id">ID de la falla.</param>
+        /// <param name="description">Descripción de la falla.</param>
+        /// <param name="type">Tipo de dispositivo al que afecta.</param>
+        public DeviceFault(UInt64 id, String description)
+        {
+            _id = id;
+            _description = description;
+        }
+
+        /// <summary>
+        /// Obtiene o establece el area a la que se puede asignar la falla.
+        /// </summary>
+        [Column(Converter = typeof(DbEnumConverter<AreaAssignable>))]
+        public AreaAssignable Assignable {
+            get => _assignable;
+            set {
+                _assignable = value;
+                OnPropertyChanged("Assignable");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la categoría de fallas.
+        /// </summary>
+        [Column(IsForeignKey = true, Name = "Fk_FaultCategories_ID")]
+        public DeviceFaultCategory Category {
+            get => _category;
+            set {
+                _category = value;
+                OnPropertyChanged("Category");
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece la descripción de la falla.
@@ -31,18 +78,6 @@ namespace Acabus.Models
             set {
                 _description = value;
                 OnPropertyChanged("Description");
-            }
-        }
-
-        /// <summary>
-        /// Obtiene o establece el tipo de equipo que falla.
-        /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<DeviceType>))]
-        public DeviceType DeviceType {
-            get => _deviceType;
-            set {
-                _deviceType = value;
-                OnPropertyChanged("DeviceType");
             }
         }
 
@@ -59,29 +94,11 @@ namespace Acabus.Models
         }
 
         /// <summary>
-        /// Crea una instancia básica de <see cref="DeviceFault"/>
-        /// </summary>
-        public DeviceFault()
-        {
-        }
-
-        /// <summary>
-        /// Crea una instancia de <see cref="DeviceFault"/> definiendo el ID, descripción y el tipo de dispositivo.
-        /// </summary>
-        /// <param name="id">ID de la falla.</param>
-        /// <param name="description">Descripción de la falla.</param>
-        /// <param name="type">Tipo de dispositivo al que afecta.</param>
-        public DeviceFault(UInt64 id, String description, DeviceType type)
-        {
-            _id = id;
-            _description = description;
-            _deviceType = type;
-        }
-
-        /// <summary>
         /// Representa en una cadena la falla actual.
         /// </summary>
         /// <returns>Una cadena que representa la instancia.</returns>
-        public override string ToString() => Description;
+        public override string ToString() => String.Format("{0}, {1}", Category?.Description, Description);
+
+        /// <summary>
     }
 }

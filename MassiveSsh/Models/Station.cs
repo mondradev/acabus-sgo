@@ -72,6 +72,14 @@ namespace Acabus.Models
         }
 
         /// <summary>
+        /// Crea una instancia básica de <see cref="Station"/>.
+        /// </summary>
+        public Station()
+        {
+            State = StateValue.DISCONNECTED;
+        }
+
+        /// <summary>
         /// Obtiene o establece los dispositivos que están asiganados a la estación actual.
         /// </summary>
         [Column(IsIgnored = true)]
@@ -170,7 +178,13 @@ namespace Acabus.Models
         /// </summary>
         [XmlAnnotation(Ignore = true)]
         [Column(IsForeignKey = true, Name = "Fk_Route_ID")]
-        public Trunk Trunk => _trunk;
+        public Trunk Trunk {
+            get => _trunk;
+            set {
+                _trunk = value;
+                OnPropertyChanged("Trunk");
+            }
+        }
 
         /// <summary>
         /// Crea una instancia de estación especificando su ID y  la ruta a la que pertenece.

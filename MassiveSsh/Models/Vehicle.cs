@@ -49,6 +49,16 @@ namespace Acabus.Models
         private VehicleType _type;
 
         /// <summary>
+        /// Crea una instancia básica de <see cref="Vehicle"/>.
+        /// </summary>
+        public Vehicle()
+        {
+
+            _status = VehicleStatus.UNKNOWN;
+            BusType = VehicleType.NONE;
+        }
+
+        /// <summary>
         /// Crea una instancia nueva de 'Vehicle' indicando el número económico.
         /// </summary>
         /// <param name="economicNumber">Número Económico de la unidad.</param>

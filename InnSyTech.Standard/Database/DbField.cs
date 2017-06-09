@@ -129,7 +129,14 @@ namespace InnSyTech.Standard.Database
         /// <returns>El campo con llave primaria.</returns>
         public static DbField GetPrimaryKey(Type typeOfInstance)
         {
-            return GetFields(typeOfInstance).First(field => field.IsPrimaryKey);
+            try
+            {
+                return GetFields(typeOfInstance).First(field => field.IsPrimaryKey);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"La estructura de la instancia {typeOfInstance.FullName} no contiene llave primaria.", ex);
+            }
         }
 
         /// <summary>

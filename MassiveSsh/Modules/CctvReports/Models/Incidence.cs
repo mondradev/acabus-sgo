@@ -116,7 +116,8 @@ namespace Acabus.Modules.CctvReports.Models
             set {
                 _assignedAttendance = value;
                 OnPropertyChanged("AssignedAttendance");
-                AttendanceService.CountIncidences(value);
+                if (value != null)
+                    AttendanceService.CountIncidences(value);
             }
         }
 
@@ -159,6 +160,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene el folio de la incidencia.
         /// </summary>
+        [Column(IsPrimaryKey = true)]
         public String Folio {
             get => _folio;
             private set {
@@ -250,18 +252,18 @@ namespace Acabus.Modules.CctvReports.Models
         {
             return String.Format("*{0}* {1} {2} {3} {4}",
                 Folio,
-                Device is DeviceBus
+                Device?.Vehicle != null
                     ? String.Format("{0} {1}",
-                        (Device as DeviceBus)?.Vehicle,
+                        Device?.Vehicle,
                         Device)
-                    : Device.NumeSeri,
+                    : Device?.NumeSeri,
                 Description,
                 AssignedAttendance is null
                 ? String.Empty
                 : String.Format("\n*Asignado:* {0}", AssignedAttendance),
-                String.IsNullOrEmpty(Observations.Trim())
+                String.IsNullOrEmpty(Observations?.Trim())
                 ? String.Empty
-                : Observations.Trim().ToUpper());
+                : Observations?.Trim().ToUpper());
         }
 
         /// <summary>

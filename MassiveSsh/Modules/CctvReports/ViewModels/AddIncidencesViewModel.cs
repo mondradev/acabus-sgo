@@ -18,16 +18,6 @@ namespace Acabus.Modules.CctvReports
     public sealed class AddIncidencesViewModel : ViewModelBase
     {
         /// <summary>
-        /// Campo que provee a la propiedad 'Description'.
-        /// </summary>
-        private DeviceFault _description;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Device'.
-        /// </summary>
-        private Device _device;
-
-        /// <summary>
         /// Campo que provee a la propiedad 'Incidences'.
         /// </summary>
         private ObservableCollection<Incidence> _incidences;
@@ -38,19 +28,29 @@ namespace Acabus.Modules.CctvReports
         private Boolean _isBusIncidences;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Location'.
+        /// Campo que provee a la propiedad 'SelectedDescription'.
         /// </summary>
-        private AssignableSection _location;
+        private DeviceFault _selectedDescription;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Priority'.
+        /// Campo que provee a la propiedad 'SelectedDevice'.
         /// </summary>
-        private Priority _priority;
+        private Device _selectedDevice;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'SelectedRoute'.
+        /// Campo que provee a la propiedad 'SelectedLocation'.
         /// </summary>
-        private Route _selectedRoute;
+        private AssignableSection _selectedLocation;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedPriority'.
+        /// </summary>
+        private Priority _selectedPriority;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedVehicle'.
+        /// </summary>
+        private Vehicle _selectedVehicle;
 
         /// <summary>
         /// Campo que provee a la propiedad 'StartTime'.
@@ -89,26 +89,16 @@ namespace Acabus.Modules.CctvReports
         public ICommand CloseCommand { get; }
 
         /// <summary>
-        /// Obtiene o establece la descripción de la incidencia.
+        /// Obtiene una lista de todas las fallas disponibles.
         /// </summary>
-        public DeviceFault Description {
-            get => _description;
-            set {
-                _description = value;
-                OnPropertyChanged("Description");
-            }
-        }
+        public IEnumerable<DeviceFault> DeviceFaults {
+            get {
+                if (SelectedDevice is null)
+                    return AcabusData.Session.GetObjects(typeof(DeviceFault)).Cast<DeviceFault>();
 
-        /// <summary>
-        /// Obtiene o establece el equipo que presenta la incidencia.
-        /// </summary>
-        public Device Device {
-            get => _device;
-            set {
-                _device = value;
-                OnPropertyChanged("Device");
-                if (!IsBusIncidences && Device != null && Device.Station != Location)
-                    Location = Device.Station;
+                return AcabusData.Session.GetObjects(typeof(DeviceFault))
+                    .Where(fault => (fault as DeviceFault).Category.DeviceType == SelectedDevice.Type)
+                    .Cast<DeviceFault>();
             }
         }
 
@@ -118,14 +108,26 @@ namespace Acabus.Modules.CctvReports
         public IEnumerable<Device> Devices {
             get {
                 if (IsRefundOfMoney)
-                    return Location is null
-                        ? AcabusData.FindDevices(device => device is Kvr)
-                        : (Location as Station).Devices.Where(device => device is Kvr);
-                if (!IsBusIncidences)
-                    return Location is null || (!(Location is Vehicle) && !(Location is Station))
-                        ? AcabusData.FindDevices((device) => true) : (Location as Station).Devices;
+                    return SelectedLocation is null
+                        ? AcabusData.Session.GetObjects(typeof(Device))
+                                    .Where(device => (device as Device).Type == DeviceType.KVR).Cast<Device>()
+                        : AcabusData.Session.GetObjects(typeof(Device))
+                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID)
+                                    .Where(device => (device as Device).Type == DeviceType.KVR)
+                                    .Cast<Device>();
+                if (IsBusIncidences)
+                    return SelectedVehicle is null
+                        ? null
+                        : AcabusData.Session.GetObjects(typeof(Device))
+                                    .Where(device => (device as Device).Vehicle?.EconomicNumber == SelectedVehicle?.EconomicNumber)
+                                    .Cast<Device>();
                 else
-                    return AcabusData.DevicesBus;
+                    return SelectedLocation is null
+                        ? AcabusData.Session.GetObjects(typeof(Device))
+                                    .Where(device => (device as Device).Vehicle is null).Cast<Device>()
+                        : AcabusData.Session.GetObjects(typeof(Device))
+                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID)
+                                    .Cast<Device>();
             }
         }
 
@@ -137,7 +139,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene el nombre del cuadro de texto para ubicación.
         /// </summary>
-        public String HeaderTextRouteOrStation => IsBusIncidences ? "Vehículo" : "Estación";
+        public String HeaderTextRouteOrStation => IsBusIncidences ? "Ruta" : "Estación";
 
         /// <summary>
         /// Obtiene o establece la lista de incidencias.
@@ -167,33 +169,14 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
-        /// Obtiene o establece la ubicación de la incidencia.
-        /// </summary>
-        public AssignableSection Location {
-            get => _location;
-            set {
-                _location = value;
-                OnPropertyChanged("Location");
-                OnPropertyChanged("Devices");
-                //if (value is Vehicle)
-                //{
-                //    SelectedRoute = (value as Vehicle).Route;
-                //    OnPropertyChanged("SelectedRoute");
-                //}
-            }
-        }
-
-        /// <summary>
         /// Obtiene una lista de todas las ubicaciones disponibles.
         /// </summary>
         public IEnumerable<AssignableSection> Locations {
             get {
-                //if (!IsBusIncidences)
-                    return AcabusData.FindStations((station) => true);
-                //if (SelectedRoute is null)
-                //    return AcabusData.FindVehicles(vehi => true);
-                //else
-                //    return SelectedRoute.Vehicles;
+                if (IsBusIncidences)
+                    return AcabusData.Session.GetObjects(typeof(Route)).Cast<AssignableSection>();
+
+                return AcabusData.Session.GetObjects(typeof(Station)).Cast<AssignableSection>();
             }
         }
 
@@ -203,30 +186,63 @@ namespace Acabus.Modules.CctvReports
         public IEnumerable<Priority> Priorities => Enum.GetValues(typeof(Priority)).Cast<Priority>();
 
         /// <summary>
-        /// Obtiene o establece la prioridad de la incidencia.
+        /// Obtiene o establece la descripción de la incidencia.
         /// </summary>
-        public Priority Priority {
-            get => _priority;
+        public DeviceFault SelectedDescription {
+            get => _selectedDescription;
             set {
-                _priority = value;
-                OnPropertyChanged("Priority");
+                _selectedDescription = value;
+                OnPropertyChanged("SelectedDescription");
             }
         }
 
         /// <summary>
-        /// Obtiene una lista las rutas disponibles.
+        /// Obtiene o establece el equipo que presenta la incidencia.
         /// </summary>
-        public IEnumerable<Route> Routes => AcabusData.Routes;
+        public Device SelectedDevice {
+            get => _selectedDevice;
+            set {
+                _selectedDevice = value;
+                OnPropertyChanged("SelectedDevice");
+                OnPropertyChanged("DeviceFaults");
+                if (!IsBusIncidences && SelectedDevice != null && SelectedDevice.Station != SelectedLocation)
+                    SelectedLocation = SelectedDevice.Station;
+            }
+        }
 
         /// <summary>
-        /// Obtiene o establece la ruta seleccionada.
+        /// Obtiene o establece la ubicación de la incidencia.
         /// </summary>
-        public Route SelectedRoute {
-            get => _selectedRoute;
+        public AssignableSection SelectedLocation {
+            get => _selectedLocation;
             set {
-                _selectedRoute = value;
-                OnPropertyChanged("SelectedRoute");
-                OnPropertyChanged("Locations");
+                _selectedLocation = value;
+                OnPropertyChanged("SelectedLocation");
+                OnPropertyChanged("Devices");
+                OnPropertyChanged("Vehicles");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la prioridad de la incidencia.
+        /// </summary>
+        public Priority SelectedPriority {
+            get => _selectedPriority;
+            set {
+                _selectedPriority = value;
+                OnPropertyChanged("SelectedPriority");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el autobus seleccionado.
+        /// </summary>
+        public Vehicle SelectedVehicle {
+            get => _selectedVehicle;
+            set {
+                _selectedVehicle = value;
+                OnPropertyChanged("SelectedVehicle");
+                OnPropertyChanged("Devices");
             }
         }
 
@@ -238,6 +254,22 @@ namespace Acabus.Modules.CctvReports
             set {
                 _startTime = value;
                 OnPropertyChanged("StartTime");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el listado de los autobuses.
+        /// </summary>
+        public IEnumerable<Vehicle> Vehicles {
+            get {
+                if (!IsBusIncidences)
+                    return null;
+                if (SelectedLocation is null)
+                    return AcabusData.Session.GetObjects(typeof(Vehicle)).Cast<Vehicle>();
+                else
+                    return AcabusData.Session.GetObjects(typeof(Vehicle))
+                        .Where(vehicle => (vehicle as Vehicle).Route?.ID == (SelectedLocation as Route)?.ID)
+                        .Cast<Vehicle>();
             }
         }
 
@@ -403,8 +435,19 @@ namespace Acabus.Modules.CctvReports
             Single.TryParse(Quantity, out float quantity);
             if (IsRefundOfMoney)
             {
-                //Description = String.Format("{0}", _isMoney ? "MONEDAS DEVUELTAS" : "BILLETE DEVUELTO");
-                Observations = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}", _isMoney ? "MONEDAS" : "BILLETE", quantity, CashDestiny?.Description);
+                var faults = AcabusData.Session.GetObjects(typeof(DeviceFault))
+                     .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.KVR);
+
+                SelectedDescription = IsMoney
+                     ? faults.Where(fault => (fault as DeviceFault).Description
+                     .Equals("MONEDAS ENCONTRADAS EN TOLVA, NOTIFICAR EL TOTAL E INTRODUCIR A LA ALCANCIA"))
+                     .FirstOrDefault() as DeviceFault
+                     : faults.Where(fault => (fault as DeviceFault).Description
+                     .Equals("BILLETE ATASCADO, NOTIFICAR EL TOTAL Y CANALIZAR EL DINERO A CAU"))
+                     .FirstOrDefault() as DeviceFault;
+
+                Observations = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}", IsMoney ? "MONEDAS" : "BILLETE",
+                    quantity, CashDestiny?.Description);
             }
         }
 
@@ -419,26 +462,31 @@ namespace Acabus.Modules.CctvReports
                         AddError("WhoReporting", "Falta ingresar quién reporta");
                     break;
 
-                case "Description":
-                    if (Description is null)
-                        AddError("Description", "Falta ingresar la descripción de la incidencia.");
+                case "SelectedDescription":
+                    if (SelectedDescription is null)
+                        AddError("SelectedDescription", "Falta ingresar la descripción de la incidencia.");
                     break;
 
-                case "Location":
-                    if (String.IsNullOrEmpty(Location?.ToString()))
-                        AddError("Location", String.Format("Falta seleccionar {0}.", IsBusIncidences ? "el autobus" : "la estación"));
+                case "SelectedLocation":
+                    if (String.IsNullOrEmpty(SelectedLocation?.ToString()))
+                        AddError("SelectedLocation", String.Format("Falta seleccionar {0}.", IsBusIncidences ? "la ruta" : "la estación"));
                     break;
 
-                case "Device":
-                    if (String.IsNullOrEmpty(Device?.ToString()))
-                        AddError("Device", "Falta seleccionar el equipo.");
-                    if (IsRefundOfMoney && !(Device is Kvr))
-                        AddError("Device", "El equipo debe ser un KVR");
+                case "SelectedVehicle":
+                    if (IsBusIncidences && String.IsNullOrEmpty(SelectedVehicle?.ToString()))
+                        AddError("SelectedVehicle", "Falta seleccionar la unidad.");
                     break;
 
-                case "Priority":
-                    if (IsNewIncidences && Priority == Priority.NONE)
-                        AddError("Priority", "Debe asignar una prioridad a la incidencia.");
+                case "SelectedDevice":
+                    if (String.IsNullOrEmpty(SelectedDevice?.ToString()))
+                        AddError("SelectedDevice", "Falta seleccionar el equipo.");
+                    if (IsRefundOfMoney && !(SelectedDevice is Kvr))
+                        AddError("SelectedDevice", "El equipo debe ser un KVR");
+                    break;
+
+                case "SelectedPriority":
+                    if (IsNewIncidences && SelectedPriority == Priority.NONE)
+                        AddError("SelectedPriority", "Debe asignar una prioridad a la incidencia.");
                     break;
 
                 case "CashDestiny":
@@ -469,15 +517,11 @@ namespace Acabus.Modules.CctvReports
             {
                 if (incidence.Status == IncidenceStatus.CLOSE) continue;
 
-                //if (exists = (incidence.Description?.ID == Description?.ID
-                //  && (incidence.Device.Station is null && Location is Vehicle
-                //        ? incidence.Device.Vehicle.EconomicNumber == (Location as Vehicle).EconomicNumber
-                //        : incidence.Device.NumeSeri == Device.NumeSeri)
-                //    && (incidence.Device.Vehicle == Location || incidence.Device.Station == Location))
-                //    ) break;
+                if (exists = (incidence.Description?.ID == SelectedDescription?.ID
+                    && incidence.Device == SelectedDevice)) break;
             }
             if (exists)
-                AddError("Description", "Ya existe una incidencia abierta igual para el equipo");
+                AddError("SelectedDescription", "Ya existe una incidencia abierta igual para el equipo");
 
             return !exists;
         }
@@ -489,28 +533,28 @@ namespace Acabus.Modules.CctvReports
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var incidence = CctvService.CreateIncidence(incidences,
-                    Description,
-                    Device,
+                    SelectedDescription,
+                    SelectedDevice,
                     DateTime.Now.Date.AddTicks(StartTime.Ticks),
-                    IsRefundOfMoney ? Priority.NONE : Priority,                    
+                    IsRefundOfMoney ? Priority.NONE : SelectedPriority,
                     WhoReporting
                 );
 
                 if (IsRefundOfMoney)
                 {
-                    //incidence.Status = CashDestiny.Value.Description == "CAU" ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
-                    //incidence.Technician = SelectedTechnician;
-                    //incidence.Observations = Observations;
-                    //incidence.FinishDate = CashDestiny.Value.Description == "CAU" ? null : (DateTime?)incidence.StartDate;
-                    //var refundOfMoney = new RefundOfMoney(incidence)
-                    //{
-                    //    Quantity = Single.Parse(Quantity),
-                    //    CashDestiny = CashDestiny.Value,
-                    //    Status = CashDestiny?.Description == "CAU" ? RefundOfMoneyStatus.UNCOMMIT : RefundOfMoneyStatus.COMMIT,
-                    //    RefundDate = CashDestiny?.Description == "CAU" ? null : (DateTime?)incidence.StartDate
-                    //};
-                    //if (refundOfMoney.Save())
-                    //    ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateData();
+                    incidence.Status = CashDestiny.Description == "CAU" ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
+                    incidence.Technician = SelectedTechnician;
+                    incidence.Observations = Observations;
+                    incidence.FinishDate = CashDestiny.Description == "CAU" ? null : (DateTime?)incidence.StartDate;
+                    var refundOfMoney = new RefundOfMoney(incidence)
+                    {
+                        Quantity = Single.Parse(Quantity),
+                        CashDestiny = CashDestiny,
+                        Status = CashDestiny?.Description == "CAU" ? RefundOfMoneyStatus.UNCOMMIT : RefundOfMoneyStatus.COMMIT,
+                        RefundDate = CashDestiny?.Description == "CAU" ? null : (DateTime?)incidence.StartDate
+                    };
+                    if (refundOfMoney.Save())
+                        ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateData();
                 }
             });
             ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
@@ -520,10 +564,14 @@ namespace Acabus.Modules.CctvReports
         private Boolean Validate()
         {
             ValidateProperty("WhoReporting");
-            ValidateProperty("Description");
-            ValidateProperty("Location");
-            ValidateProperty("Device");
-            ValidateProperty("Priority");
+            ValidateProperty("SelectedDescription");
+            ValidateProperty("SelectedLocation");
+            ValidateProperty("SelectedDevice");
+            ValidateProperty("SelectedPriority");
+
+            if (IsBusIncidences)
+                ValidateProperty("SelectedVehicle");
+
             if (IsRefundOfMoney)
             {
                 ValidateProperty("CashDestiny");

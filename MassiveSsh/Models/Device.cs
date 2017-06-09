@@ -23,6 +23,11 @@ namespace Acabus.Models
         private String _databaseName;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'Description'.
+        /// </summary>
+        private String _description;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'Enabled'.
         /// </summary>
         private Boolean _enabled;
@@ -107,6 +112,10 @@ namespace Acabus.Models
         /// </summary>
         private DeviceType _type;
 
+        /// <summary>
+        /// Campo que provee a la propiedad 'Vehicle'.
+        /// </summary>
+        private Vehicle _vehicle;
 
         /// <summary>
         /// Crea una instancia nueva de un equipo.
@@ -152,6 +161,16 @@ namespace Acabus.Models
             }
         }
 
+        /// Obtiene o establece la descripción del equipo a bordo.
+        /// </summary>
+        public String Description {
+            get => _description?.ToUpper();
+            set {
+                _description = value;
+                OnPropertyChanged("Description");
+            }
+        }
+
         /// <summary>
         /// Obtiene o establece si el equipo está activo.
         /// </summary>
@@ -184,7 +203,7 @@ namespace Acabus.Models
                 _id = value;
                 OnPropertyChanged("ID");
             }
-        }
+        }   /// <summary>
 
         /// <summary>
         /// Obtiene o establece la dirección IP del equipo
@@ -224,6 +243,12 @@ namespace Acabus.Models
                 OnPropertyChanged("TimeWithoutReplicate");
             }
         }
+
+        /// <summary>
+        /// Obtiene la ubicación del dispositivo actual.
+        /// </summary>
+        [Column(IsIgnored = true)]
+        public Object Location => (Object)Station ?? Vehicle;
 
         /// <summary>
         /// Obtiene o establece la memoria (RAM) libre del equipo.
@@ -337,6 +362,7 @@ namespace Acabus.Models
             protected set {
                 _station = value;
                 OnPropertyChanged("Station");
+                OnPropertyChanged("Location");
             }
         }
 
@@ -372,6 +398,18 @@ namespace Acabus.Models
             }
         }
 
+        /// <summary>
+        /// Obtiene o establece el vehículo donde se encuentra el dispositivo.
+        /// </summary>
+        [Column(IsForeignKey = true, Name = "Fk_Vehicle_No_Econ")]
+        public Vehicle Vehicle {
+            get => _vehicle;
+            set {
+                _vehicle = value;
+                OnPropertyChanged("Vehicle");
+                OnPropertyChanged("Location");
+            }
+        }
 
         /// <summary>
         /// Operador lógico de desigualdad, determina si dos instancias <see cref="Device"/> son diferentes.
@@ -427,7 +465,6 @@ namespace Acabus.Models
         /// Una cadena que representa a este equipo.
         /// </summary>
         /// <returns>Un número de serie que identifica al equipo.</returns>
-        public override String ToString() => NumeSeri;
-
+        public override String ToString() => Description;
     }
 }

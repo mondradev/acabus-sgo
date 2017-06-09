@@ -28,14 +28,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Margin="0" MinWidth="300" MaxWidth="400">
-            <Grid.Resources>
-                <CollectionViewSource Source="{x:Static da:AcabusData.CommonFaults}" x:Key="CommonFaultsCollection">
-                    <CollectionViewSource.SortDescriptions>
-                        <scm:SortDescription Direction="Ascending" />
-                    </CollectionViewSource.SortDescriptions>
-                </CollectionViewSource>
-            </Grid.Resources>
+        <Grid Margin="0" Width="500">
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -63,23 +57,23 @@
                 <ComboBox materialDesign:HintAssist.Hint="Quién Reporta" Margin="0"
                                   VerticalAlignment="Top" Grid.Row="2" SelectedItem="{Binding WhoReporting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding Business}" IsEditable="True" />
                 <ComboBox materialDesign:HintAssist.Hint="Descripción de la incidencia"
-                                  Margin="0" Grid.Row="4" Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding Mode=OneWay, Source={StaticResource CommonFaultsCollection}}" VerticalAlignment="Top" IsSynchronizedWithCurrentItem="False" IsEditable="True" IsEnabled="{Binding IsNewIncidences}" />
+                                  Margin="0" Grid.Row="4" SelectedItem="{Binding SelectedDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding DeviceFaults, Mode=OneWay}" VerticalAlignment="Top" IsEnabled="{Binding IsNewIncidences}" />
                 <Grid Margin="0" Grid.Row="6">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <Grid Margin="0 0 16 0" Visibility="{Binding IsBusIncidences, Converter={StaticResource CollapseBooleanConverter}}">
-                        <ComboBox materialDesign:HintAssist.Hint="Ruta"  Margin="0"  MinWidth="200"
-                        VerticalAlignment="Top" ItemsSource="{Binding Routes}" SelectedItem="{Binding SelectedRoute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEditable="True" />
+                    <ComboBox  materialDesign:HintAssist.Hint="{Binding HeaderTextRouteOrStation}"  Margin="0"  MinWidth="200"
+                        VerticalAlignment="Top" ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation, ValidatesOnDataErrors=True}" IsEditable="True" />
+                    <Grid Grid.Column="1" Margin="16 0 0 0" Visibility="{Binding IsBusIncidences, Converter={StaticResource CollapseBooleanConverter}}">
+                        <ComboBox materialDesign:HintAssist.Hint="Vehículo"  Width="200"
+                            Margin="0" VerticalAlignment="Top" ItemsSource="{Binding Vehicles}" SelectedItem="{Binding SelectedVehicle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEditable="True" />
                     </Grid>
-                    <ComboBox materialDesign:HintAssist.Hint="{Binding HeaderTextRouteOrStation}"  Grid.Column="1"
-                            Margin="0" VerticalAlignment="Top" ItemsSource="{Binding Locations}" SelectedItem="{Binding Location, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEditable="True" />
                 </Grid>
                 <ComboBox materialDesign:HintAssist.Hint="{Binding HeaderTextDeviceOrVehicle}"
-                                  VerticalAlignment="Top" Grid.Row="8" ItemsSource="{Binding Devices}" SelectedItem="{Binding Device, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                  VerticalAlignment="Top" Grid.Row="8" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                 <ComboBox materialDesign:HintAssist.Hint="Prioridad" VerticalAlignment="Top"
-                                  Grid.Row="12" Margin="0" SelectedItem="{Binding Priority, Converter={StaticResource PriorityConverter}}"
+                                  Grid.Row="12" Margin="0" SelectedItem="{Binding SelectedPriority, Converter={StaticResource PriorityConverter}}"
                                   ItemsSource="{Binding Priorities, Converter={StaticResource PriorityConverter}}"
                                   Visibility="{Binding IsNewIncidences, Converter={StaticResource CollapseBooleanConverter}}" />
                 <materialDesign:TimePicker Grid.Row="10" materialDesign:HintAssist.Hint="Hora de la incidencia"  Style="{StaticResource MaterialDesignFloatingHintTimePicker}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedTime="{Binding StartTime, Converter={StaticResource DateTimeConverter}}" />

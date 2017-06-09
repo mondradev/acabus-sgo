@@ -27,8 +27,73 @@ namespace Acabus.Modules.CctvReports.Services
             return AcabusData.Session.Update(refund);
         }
 
+        public static DeviceFault CreateDeviceFault(Alarm alarm)
+        {
+            if (alarm is null) return null;
+
+            var deviceType = alarm?.Device?.Type;
+            var description = alarm?.Description;
+
+            var faults = AcabusData.Session.GetObjects(typeof(DeviceFault)).Where(fault => (fault as DeviceFault).Category?.DeviceType == deviceType);
+
+            switch (description)
+            {
+                case "FALLA EN TARJETA IO":
+                case "FALLA TARJETA IO":
+                case "COMUNICACIÓN CON VALIDADOR TARJETA ADR":
+                case "NO SE PUDO ESTABLECER COMUNICACIÓN CON LA TARJETA ES (ADR)":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "PROBLEMAS DE FUNCIONALIDAD");
+                case "FALLA SAM AV RECARGA":
+                case "FALLA LECTOR RECARGA":
+                case "FALLA EN LECTOR RECARGA":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "SIN LECTURA DE TARJETAS");
+
+                case "ALCANCIA LLENA":
+                case "ALCANCÍA LLENA":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "MONEDAS ATASCADAS, NOTIFICAR EL TOTAL E INTRODUCIRLO A LA ALCANCÍA");
+
+                case "FALLA EN IMPRESORA":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "NO IMPRIMIÓ TICKET E IMPRIMIR TICKET DE PRUEBA");
+
+                case "FALLA EN VALIDADOR DE BILLETES":
+                case "FALLA BILLETERO":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "NO ACEPTA BILLETES");
+
+                case "FUERA DE SERVICIO":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "FUERA DE SERVICIO");
+
+                case "FALLA SAM AV2 VENTA":
+                case "FALLA LECTOR VENTA":
+                case "FALLA EN EXPENDEDOR":
+                case "FALLA EN EL DISPENSADOR":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "TARJETA ATASCADA CANALIZARLO CON CALL CENTER");
+
+                case "BILLETERA LLENA":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "BILLETE ATASCADO, NOTIFICAR EL TOTAL Y CANALIZAR EL DINERO A CAU");
+
+                case "FALLA ENERGIA":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "EQUIPO DE RECAUDO APAGADO");
+
+                case "FALLA EN VALIDADOR DE MONEDAS":
+                case "FALLA MONEDERO":
+                    return (DeviceFault)faults.FirstOrDefault(fault
+                        => (fault as DeviceFault).Description == "NO ACEPTA MONEDAS");
+
+                default: return null;
+            }
+        }
+
         public static Incidence CreateIncidence(this IList<Incidence> incidences, DeviceFault description, Device device, DateTime startTime,
-                    Priority priority, string whoReporting)
+                            Priority priority, string whoReporting)
         {
             lock (incidences)
             {
@@ -59,7 +124,7 @@ namespace Acabus.Modules.CctvReports.Services
         public static Boolean Equals(Alarm alarm, Incidence incidence)
         {
             if (!alarm.Device.Equals(incidence?.Device)) return false;
-            if (alarm.Description == incidence.Description.ToString())
+            if (CreateDeviceFault(alarm).Equals(incidence.Description))
                 if (incidence.Status != IncidenceStatus.CLOSE
                     || alarm.DateTime == incidence.StartDate)
                     return true;
@@ -69,8 +134,8 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Equals(BusDisconnectedAlarm alarm, Incidence incidence)
         {
-            if (incidence.Device is DeviceBus)
-                if (alarm.EconomicNumber == (incidence.Device as DeviceBus)?.Vehicle.EconomicNumber
+            if (incidence.Device?.Vehicle != null)
+                if (alarm.EconomicNumber == incidence.Device?.Vehicle?.EconomicNumber
                     && incidence.Status != IncidenceStatus.CLOSE)
                     return true;
             return false;
@@ -130,7 +195,8 @@ namespace Acabus.Modules.CctvReports.Services
             ICollection<object> incidencesFromDb = AcabusData.Session.GetObjects(typeof(Incidence));
             foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).Status != IncidenceStatus.CLOSE))
                 incidences.Add(incidenceData as Incidence);
-            foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).StartDate > DateTime.Now.AddDays(-45)))
+            foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).StartDate > DateTime.Now.AddDays(-45)
+                                                                                && (incidence as Incidence).Status == IncidenceStatus.CLOSE))
                 incidences.Add(incidenceData as Incidence);
         }
 

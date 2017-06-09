@@ -14,6 +14,21 @@ namespace Acabus.Models
         private ObservableCollection<Station> _stations;
 
         /// <summary>
+        /// Crea una instancia de ruta troncal.
+        /// </summary>
+        /// <param name="id">Identificador de la ruta troncal.</param>
+        /// <param name="routeNumber">El número de la ruta troncal.</param>
+        public Trunk(UInt16 id, UInt16 routeNumber) : base(id, routeNumber, RouteType.TRUNK) { }
+
+        /// <summary>
+        /// Crea una instancia básica de <see cref="Trunk"/>.
+        /// </summary>
+        public Trunk()
+        {
+            _routeType = RouteType.TRUNK;
+        }
+
+        /// <summary>
         /// Obtiene una lista de las estaciones de asignadas a la ruta.
         /// </summary>
         [Column(IsIgnored = true)]
@@ -26,11 +41,11 @@ namespace Acabus.Models
         }
 
         /// <summary>
-        /// Crea una instancia de ruta troncal.
+        /// Crea una instancia de 'Trunk' proporcionando su ID.
         /// </summary>
-        /// <param name="id">Identificador de la ruta troncal.</param>
-        /// <param name="routeNumber">El número de la ruta troncal.</param>
-        public Trunk(UInt16 id, UInt16 routeNumber) : base(id, routeNumber, RouteType.TRUNK) { }
+        /// <param name="id">ID de la ruta troncal.</param>
+        /// <returns>Una instancia de ruta troncal.</returns>
+        public static Trunk CreateTrunk(UInt16 id, UInt16 routeNumber) => new Trunk(id, routeNumber);
 
         /// <summary>
         /// Añade una estación a la ruta.
@@ -39,6 +54,18 @@ namespace Acabus.Models
         public void AddStation(Station station)
         {
             Stations.Add(station);
+        }
+
+        /// <summary>
+        /// Obtiene el número de dispositivos en la ruta troncal
+        /// </summary>
+        /// <returns>Número de dispositivos</returns>
+        public int CountDevices()
+        {
+            int count = 0;
+            foreach (var item in Stations)
+                count += item.DeviceCount();
+            return count;
         }
 
         /// <summary>
@@ -59,25 +86,5 @@ namespace Acabus.Models
         /// </summary>
         /// <returns>El número de estaciones asignadas a la ruta actual.</returns>
         public UInt16 StationCount() => (UInt16)(Stations.Count);
-
-        /// <summary>
-        /// Obtiene el número de dispositivos en la ruta troncal
-        /// </summary>
-        /// <returns>Número de dispositivos</returns>
-        public int CountDevices()
-        {
-            int count = 0;
-            foreach (var item in Stations)
-                count += item.DeviceCount();
-            return count;
-        }
-
-        /// <summary>
-        /// Crea una instancia de 'Trunk' proporcionando su ID.
-        /// </summary>
-        /// <param name="id">ID de la ruta troncal.</param>
-        /// <returns>Una instancia de ruta troncal.</returns>
-        public static Trunk CreateTrunk(UInt16 id, UInt16 routeNumber) => new Trunk(id, routeNumber);
-
     }
 }

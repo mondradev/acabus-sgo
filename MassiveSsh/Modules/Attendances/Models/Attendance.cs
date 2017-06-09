@@ -58,11 +58,30 @@ namespace Acabus.Modules.Attendances.Models
         /// </summary>
         private WorkShift _turn;
 
+        /// <summary>
+        /// Define los turnos posibles.
+        /// </summary>
         public enum WorkShift
         {
+            /// <summary>
+            /// Matutino
+            /// </summary>
             MONING_SHIFT,
+
+            /// <summary>
+            /// Vespertino
+            /// </summary>
             AFTERNOON_SHIFT,
-            NIGHT_SHIFT
+
+            /// <summary>
+            /// Nocturno
+            /// </summary>
+            NIGHT_SHIFT,
+
+            /// <summary>
+            /// Vespertino
+            /// </summary>
+            OPERATION_SHIT
         }
 
         /// <summary>
@@ -145,7 +164,7 @@ namespace Acabus.Modules.Attendances.Models
         [Column(IsIgnored = true)]
         public ICollection<Incidence> Incidences {
             get => ViewModelService.GetViewModel<CctvReportsViewModel>()?.Incidences?
-                    .Where(incidence => incidence.AssignedAttendance.Technician == Technician
+                    .Where(incidence => incidence.AssignedAttendance?.Technician == Technician
                                        && DateTimeDeparture is null);
         }
 
@@ -208,8 +227,9 @@ namespace Acabus.Modules.Attendances.Models
             OnPropertyChanged("CountOpenedIncidences");
             OnPropertyChanged("CountClosedIncidences");
         }
+
+        public override string ToString() => Technician;
     }
-    
 
     public sealed class TurnsConverter : TranslateEnumConverter<Attendance.WorkShift>
     {
@@ -217,7 +237,8 @@ namespace Acabus.Modules.Attendances.Models
         {
             {Attendance.WorkShift.MONING_SHIFT, "MATUTINO" },
             {Attendance.WorkShift.AFTERNOON_SHIFT, "VESPERTINO" },
-            {Attendance.WorkShift.NIGHT_SHIFT, "NOCTURNO" }
+            {Attendance.WorkShift.NIGHT_SHIFT, "NOCTURNO" },
+            {Attendance.WorkShift.OPERATION_SHIT, "OPERACIÓN" }
         })
         {
         }

@@ -8,7 +8,6 @@ using System.Collections.ObjectModel;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace Acabus.DataAccess
@@ -58,11 +57,6 @@ namespace Acabus.DataAccess
         /// Campo que provee a la propiedad 'Companies'.
         /// </summary>
         private static ObservableCollection<String> _companies;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'DevicesBus'.
-        /// </summary>
-        private static ICollection<DeviceBus> _devicesBus;
 
         /// <summary>
         /// Campo que provee a la propiedad 'DevicesQuery'.
@@ -191,136 +185,221 @@ namespace Acabus.DataAccess
         {
             Session = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
             InitAcabusData();
-            foreach (var vehi in FindVehicles(vehicle => vehicle.BusType == VehicleType.ARTICULATED))
-            {
-                Session.Save(new DeviceBus(0, String.Format("PCA01{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "PC ABORDO",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
-                Session.Save(new DeviceBus(0, String.Format("DSB01{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "DISPLAY BUS",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
-                Session.Save(new DeviceBus(0, String.Format("DSB01{0:D3}02", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "DISPLAY BUS",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
-            }
-            foreach (var vehi in FindVehicles(vehicle => vehicle.BusType != VehicleType.ARTICULATED))
-            {
-                Session.Save(new DeviceBus(0, String.Format("PCA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "PC ABORDO",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
-                Session.Save(new DeviceBus(0, String.Format("CAM02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "CAMARA",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
-                Session.Save(new DeviceBus(0, String.Format("CAM02{0:D3}02", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "CAMARA",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
-                Session.Save(new DeviceBus(0, String.Format("TA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "TORNIQUETE ABORDO",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
-                Session.Save(new DeviceBus(0, String.Format("MON02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "MONITOR",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
+            //foreach (var vehi in FindVehicles(vehicle => vehicle.BusType == VehicleType.ARTICULATED))
+            //{
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.PCA, String.Format("PCA01{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "PC ABORDO",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.DSPB, String.Format("DSPB01{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "DISPLAY BUS",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.DSPB, String.Format("DSPB01{0:D3}02", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "DISPLAY BUS",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.MON, String.Format("MON01{0:D3}02", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "MONITOR",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //}
+            //foreach (var vehi in FindVehicles(vehicle => vehicle.BusType == VehicleType.STANDARD))
+            //{
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.PCA, String.Format("PCA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "PC ABORDO",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.CAM, String.Format("CAM02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "CAMARA",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.CAM, String.Format("CAM02{0:D3}02", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "CAMARA",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.TA, String.Format("TA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "TORNIQUETE ABORDO",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.MON, String.Format("MON02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "MONITOR",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
 
-                Session.Save(new DeviceBus(0, String.Format("NVRA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "NVR ABORDO",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.NVRA, String.Format("NVRA02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "NVR ABORDO",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
 
-                Session.Save(new DeviceBus(0, String.Format("CONT02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "CONTADOR DE PASAJEROS",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.CONT, String.Format("CONT02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "CONTADOR DE PASAJEROS",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
 
-                Session.Save(new DeviceBus(0, String.Format("DSB02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]*").Value))
-                {
-                    Description = "DISPLAY BUS",
-                    CanReplicate = false,
-                    Enabled = true,
-                    HasDatabase = false,
-                    IP = "0.0.0.0",
-                    SshEnabled = false,
-                    Vehicle = vehi
-                });
-            }
-        }
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.DSPB, String.Format("DSPB02{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "DISPLAY BUS",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //}
+            //foreach (var vehi in FindVehicles(vehicle => vehicle.BusType == VehicleType.CONVENTIONAL))
+            //{
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.PCA, String.Format("PCA03{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "PC ABORDO",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.CAM, String.Format("CAM03{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "CAMARA",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.CAM, String.Format("CAM03{0:D3}02", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "CAMARA",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.TA, String.Format("TA03{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "TORNIQUETE ABORDO",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.MON, String.Format("MON03{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "MONITOR",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
 
-        public static DbSession Session { get; set; }
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.NVRA, String.Format("NVRA03{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "NVR ABORDO",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
 
-        private class SQLiteConfiguration : IDbConfiguration
-        {
-            public string ConnectionString => "Data Source=Resources/acabus_data.dat;Password=acabus*data*dat";
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.CONT, String.Format("CONT03{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "CONTADOR DE PASAJEROS",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
 
-            public string LastInsertFunctionName => "last_insert_rowid";
-
-            public int TransactionPerConnection => 1;
+            //    Session.Save(new DeviceBus(default(UInt16), DeviceType.DSPB, String.Format("DSPB03{0:D3}01", Regex.Match(vehi.EconomicNumber, "[0-9]{3}").Value))
+            //    {
+            //        Description = "DISPLAY BUS",
+            //        CanReplicate = false,
+            //        Enabled = true,
+            //        HasDatabase = false,
+            //        IP = "0.0.0.0",
+            //        SshEnabled = false,
+            //        Vehicle = vehi
+            //    });
+            //}
         }
 
         /// <summary>
@@ -357,17 +436,6 @@ namespace Acabus.DataAccess
                 if (_companies == null)
                     _companies = new ObservableCollection<String>();
                 return _companies;
-            }
-        }
-
-        /// <summary>
-        /// Obtiene una lista de los dispositivos de un autobus.
-        /// </summary>
-        public static ICollection<DeviceBus> DevicesBus {
-            get {
-                if (_devicesBus == null)
-                    _devicesBus = new ObservableCollection<DeviceBus>();
-                return _devicesBus;
             }
         }
 
@@ -438,6 +506,8 @@ namespace Acabus.DataAccess
         /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las rutas.
         /// </summary>
         public static String RoutesQuery => _routesQuery;
+
+        public static DbSession Session { get; set; }
 
         /// <summary>
         /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las estaciones.
@@ -530,7 +600,7 @@ namespace Acabus.DataAccess
 
             SshPostgreSQL psql = SshPostgreSQL.CreateConnection(
                 PGPathPlus,
-                CC.FindDevice((device) => device.Type == DeviceType.DB).IP,
+                "172.17.0.121",
                 PGPort,
                 credentialDBServer.Username,
                 credentialDBServer.Password,
@@ -554,19 +624,6 @@ namespace Acabus.DataAccess
                     foreach (var device in station.Devices)
                         if (predicate.Invoke(device))
                             return device;
-            return null;
-        }
-
-        /// <summary>
-        /// Obtiene un dispositivo de autobus que cumple con la condiciones establecidas por el predicado.
-        /// </summary>
-        /// <param name="predicate">Predicado que evaluará a los dispositivos.</param>
-        /// <returns>Un dispositivo que cumple el predicado.</returns>
-        public static DeviceBus FindDeviceInVehicle(Predicate<DeviceBus> predicate)
-        {
-            foreach (var device in AcabusData.DevicesBus)
-                if (predicate.Invoke(device))
-                    return device;
             return null;
         }
 
@@ -715,15 +772,6 @@ namespace Acabus.DataAccess
         }
 
         /// <summary>
-        /// Carga todos los dispositivos montados un autobus.
-        /// </summary>
-        public static void LoadDevicesBus()
-        {
-            DevicesBus.Clear();
-            FillList(ref _devicesBus, ToDeviceBus, "DevicesBus", "DeviceBus");
-        }
-
-        /// <summary>
         /// Carga la lista de unidades fuera de servicio.
         /// </summary>
         public static void LoadOffDutyVehiclesSettings()
@@ -793,7 +841,7 @@ namespace Acabus.DataAccess
             {
                 var route = ToRoute(routeXmlNode) as Route;
                 Session.Save(route);
-                Routes.Add(route);
+                //Routes.Add(route);
                 LoadStations(route as Trunk, routeXmlNode.SelectSingleNode("Stations")?.SelectNodes("Station"));
                 LoadVehicles(route, routeXmlNode.SelectSingleNode("Vehicles")?.SelectNodes("Vehicle"));
             }
@@ -843,7 +891,7 @@ namespace Acabus.DataAccess
         {
             try
             {
-                var device = new Device((UInt16)XmlUtils.GetAttributeInt(deviceXmlNode, "ID"),
+                var device = new Device(default(UInt16),
                     (DeviceType)Enum.Parse(typeof(DeviceType), XmlUtils.GetAttribute(deviceXmlNode, "Type")),
                     station, XmlUtils.GetAttribute(deviceXmlNode, "NumeSeri", (DeviceType)Enum.Parse(typeof(DeviceType), XmlUtils.GetAttribute(deviceXmlNode, "Type")) + station?.Trunk?.RouteNumber.ToString("D2") + station?.StationNumber.ToString("D2") + XmlUtils.GetAttributeInt(deviceXmlNode, "ID").ToString("D2")))
                 {
@@ -995,7 +1043,6 @@ namespace Acabus.DataAccess
                 _xmlConfig.Load(CONFIG_FILENAME);
 
                 LoadSettings();
-                LoadDevicesBus();
                 LoadTrunkSettings();
                 LoadTechniciansSettings();
                 LoadOffDutyVehiclesSettings();
@@ -1043,7 +1090,7 @@ namespace Acabus.DataAccess
                 foreach (XmlNode deviceXmlNode in deviceNodes)
                 {
                     var device = ToDevice(deviceXmlNode, station) as Device;
-                    Session.Save(device);
+                    // Session.Save(device);
                     station.AddDevice(device);
                 }
         }
@@ -1070,7 +1117,7 @@ namespace Acabus.DataAccess
                 foreach (XmlNode stationXmlNode in stationNodes)
                 {
                     var station = ToStation(stationXmlNode, trunk) as Station;
-                    Session.Save(station);
+                    //Session.Save(station);
                     trunk.AddStation(station);
                     LoadDevices(station, stationXmlNode.SelectSingleNode("Devices").SelectNodes("Device"));
                 }
@@ -1089,7 +1136,7 @@ namespace Acabus.DataAccess
         {
             ReadRoutesData();
             ReadCCData();
-            ReadLinksData();
+            // ReadLinksData();
         }
 
         /// <summary>
@@ -1104,7 +1151,7 @@ namespace Acabus.DataAccess
                 foreach (XmlNode vehicleXmlNode in vehicleNode)
                 {
                     var vehicle = ToVehicle(vehicleXmlNode, route) as Vehicle;
-                    Session.Save(vehicle);
+                    //Session.Save(vehicle);
                     route.AddVehicle(vehicle);
                 }
         }
@@ -1148,14 +1195,6 @@ namespace Acabus.DataAccess
             return new Credential(username, password, type, isRoot);
         }
 
-        private static DeviceBus ToDeviceBus(XmlNode arg)
-        {
-            return new DeviceBus()
-            {
-                Description = XmlUtils.GetAttribute(arg, "Description")
-            };
-        }
-
         /// <summary>
         /// Convierte un nodo XML con una estructura correspondiente a un
         /// vehículo que pertenece a una ruta.
@@ -1178,6 +1217,15 @@ namespace Acabus.DataAccess
             }
             catch { }
             return null;
+        }
+
+        private class SQLiteConfiguration : IDbConfiguration
+        {
+            public string ConnectionString => "Data Source=Resources/acabus_data.dat;Password=acabus*data*dat";
+
+            public string LastInsertFunctionName => "last_insert_rowid";
+
+            public int TransactionPerConnection => 1;
         }
 
         #region BasicOperations

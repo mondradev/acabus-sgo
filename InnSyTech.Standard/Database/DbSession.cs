@@ -249,7 +249,14 @@ namespace InnSyTech.Standard.Database
 
             foreach (DbField field in DbField.GetFields(typeOfInstance))
             {
-                if (field.IsPrimaryKey && field.IsAutonumerical) continue;
+                object defaultValue = field.PropertyType.IsValueType
+                                                        ? Activator.CreateInstance(field.PropertyType)
+                                                        : null;
+                object propertyValue = field.GetValue(instance);
+
+                if (field.IsPrimaryKey && field.IsAutonumerical
+                    && propertyValue.Equals(defaultValue))
+                    continue;
                 statement.AppendFormat("{0},", field.Name);
                 parameters.AppendFormat("@{0},", field.Name);
             }
@@ -280,6 +287,9 @@ namespace InnSyTech.Standard.Database
         {
             DbCommand command = null;
 
+            if (instance?.GetType() is null)
+                return null;
+
             try
             {
                 if (ExistsInstance(instance, transaction))
@@ -292,19 +302,21 @@ namespace InnSyTech.Standard.Database
                     foreach (var item in DbField.GetFields(instance.GetType()).Where(field => field.IsForeignKey))
                         CreateParameter(command, item.Name, SaveInstance(item.GetValue(instance), transaction, instance));
                 CreateParameters(command, instance);
+                Trace.WriteLine($"Ejecutando SQL: {command.CommandText}", "DEBUG");
 
                 int rows = command.ExecuteNonQuery();
                 if (!DbField.GetPrimaryKey(instance.GetType()).IsAutonumerical)
                     return DbField.GetPrimaryKey(instance.GetType()).GetValue(instance);
                 command.Parameters.Clear();
                 command.CommandText = String.Format("SELECT {0}()", Configuration.LastInsertFunctionName);
+                Trace.WriteLine($"Ejecutando SQL: {command.CommandText}", "DEBUG");
 
                 DbField.GetPrimaryKey(instance.GetType()).SetValue(instance, command.ExecuteScalar());
                 return DbField.GetPrimaryKey(instance.GetType()).GetValue(instance);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error al guardar la instancia: {instance.GetType()}", ex);
+                throw new Exception($"Error al guardar la instancia: {instance.GetType()}, Mensaje: {ex.Message}", ex);
             }
             finally
             {
@@ -405,6 +417,9 @@ namespace InnSyTech.Standard.Database
         {
             DbCommand command = null;
 
+            if (instance?.GetType() is null)
+                return null;
+
             try
             {
                 command = _connection.CreateCommand();
@@ -423,7 +438,7 @@ namespace InnSyTech.Standard.Database
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error al actualizar los valores de la instancia {instance.GetType()}", ex);
+                throw new Exception($"Error al actualizar los valores de la instancia {instance.GetType()}, Mensaje: {ex.Message}", ex);
             }
             finally
             {
@@ -655,32 +670,28 @@ namespace InnSyTech.Standard.Database
                     data = Activator.CreateInstance(typeOfInstance);
                     foreach (DbField field in fields)
                     {
-                        try
-                        {
-                            if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
+                        if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
+                            continue;
+
+                        if (reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(DateTime)
+                            || reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(TimeSpan))
+                            if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
                                 continue;
 
-                            if (reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(DateTime)
-                                || reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(TimeSpan))
-                                if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
-                                    continue;
-
-                            Object fieldValue = reader[field.Name];
-                            //if (field.PropertyType is IEnumerable)
-                            //    ReadList(field.PropertyType.GetGenericArguments()?[0],
-                            //        (ICollection<object>)field.GetValue(data),
-                            //        transaction,
-                            //        data);
-                            //else
-                            if (!field.IsForeignKey)
-                                field.SetValue(data, reader[field.Name]);
-                            else if (childInstance != null && field.PropertyType == childInstance.GetType()
-                                && fieldValue.Equals(DbField.GetPrimaryKey(childInstance.GetType()).GetValue(childInstance)))
-                                field.SetValue(data, childInstance);
-                            else
-                                field.SetValue(data, ReadData(field.PropertyType, reader[field.Name], transaction, data));
-                        }
-                        catch {                        }
+                        Object fieldValue = reader[field.Name];
+                        //if (field.PropertyType is IEnumerable)
+                        //    ReadList(field.PropertyType.GetGenericArguments()?[0],
+                        //        (ICollection<object>)field.GetValue(data),
+                        //        transaction,
+                        //        data);
+                        //else
+                        if (!field.IsForeignKey)
+                            field.SetValue(data, fieldValue);
+                        else if (childInstance != null && field.PropertyType == childInstance.GetType()
+                            && fieldValue.Equals(DbField.GetPrimaryKey(childInstance.GetType()).GetValue(childInstance)))
+                            field.SetValue(data, childInstance);
+                        else
+                            field.SetValue(data, ReadData(field.PropertyType, fieldValue, transaction, data));
                     }
                 }
 

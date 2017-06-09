@@ -75,13 +75,13 @@
                     <DataGridTextColumn Binding="{Binding Folio}" Header="Folio" />
                     <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia" />
                     <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta" />
-                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo" />
-                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo" />
+                    <DataGridTextColumn Binding="{Binding Device.Location}" Header="Estación/Vehículo" />
+                    <DataGridTextColumn Binding="{Binding Device.Description}" Header="Equipo" />
                     <DataGridTextColumn Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Incidencia" />
-                    <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución" />
                     <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado" />
-                    <DataGridTextColumn Binding="{Binding Status, Converter={StaticResource IncidenceStatusConverter}}" Header="Estado" />
                     <DataGridTextColumn Binding="{Binding Observations}" Header="Observaciones" />
+                    <DataGridTextColumn Binding="{Binding Status, Converter={StaticResource IncidenceStatusConverter}}" Header="Estado" />
+                    <DataGridTextColumn Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" Header="Fecha/Hora Solución" />
                 </DataGrid.Columns>
                 <DataGrid.RowStyle>
                     <Style TargetType="{x:Type DataGridRow}">
@@ -122,8 +122,8 @@
                     <DataGridTextColumn Binding="{Binding Folio}" Header="Folio" />
                     <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia" />
                     <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta" />
-                    <DataGridTextColumn Binding="{Binding Location}" Header="Estación/Vehículo" />
-                    <DataGridTextColumn Binding="{Binding Device}" Header="Equipo" />
+                    <DataGridTextColumn Binding="{Binding Device.Location}" Header="Estación/Vehículo" />
+                    <DataGridTextColumn Binding="{Binding Device.Description}" Header="Equipo" />
                     <DataGridTextColumn Binding="{Binding AssignedAttendance}" Header="Técnico asignado" />
                     <DataGridTextColumn Binding="{Binding Technician}" Header="Técnico que soluciona" />
                     <DataGridTextColumn Binding="{Binding TotalTime}" Header="Tiempo de solución" />

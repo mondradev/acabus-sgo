@@ -1,4 +1,5 @@
-﻿using Acabus.Modules.CctvReports.Models;
+﻿using Acabus.Models;
+using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,17 @@ namespace Acabus.DataAccess
                     _reportQueries = new List<ReportQuery>();
                 return _reportQueries;
             }
+        }
+        /// <summary>
+        /// Busca un dispositivo en todos los autobuses.
+        /// </summary>
+        public static Device FindDeviceBus(String economicNumber, Predicate<Device> predicate)
+        {
+            foreach (var item in FindVehicles(vehicle => vehicle.EconomicNumber == economicNumber))
+                foreach (var device in item.Devices)
+                    if (predicate.Invoke(device))
+                        return device;
+            return null;
         }
 
         public static void LoadCCTVModule()

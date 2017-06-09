@@ -30,6 +30,14 @@ namespace Acabus.Models
         private ObservableCollection<Vehicle> _vehicles;
 
         /// <summary>
+        /// Crea una instancia básica de <see cref="Route"/>.
+        /// </summary>
+        public Route()
+        {
+
+        }
+
+        /// <summary>
         /// Crea una nueva instancia de ruta especificando su identificador.
         /// </summary>
         /// <param name="id">Identificador de la ruta.</param>
@@ -59,8 +67,8 @@ namespace Acabus.Models
         /// </summary>
         public UInt16 RouteNumber {
             get => _routeNumber;
-            private set {
-                _routeNumber = RouteNumber;
+            protected set {
+                _routeNumber = value;
                 OnPropertyChanged("RouteNumber");
             }
         }
@@ -71,7 +79,7 @@ namespace Acabus.Models
         [Column(Converter = typeof(DbEnumConverter<RouteType>))]
         public RouteType RouteType {
             get => _routeType;
-            private set {
+            protected set {
                 _routeType = value;
                 OnPropertyChanged("Type");
             }
