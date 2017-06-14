@@ -6,10 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:Converters="clr-namespace:Acabus.Converters"
              xmlns:Models="clr-namespace:Acabus.Modules.Attendances.Models"
-             xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels"
-             mc:Ignorable="d" TextElement.FontWeight="Medium"
-             TextElement.FontSize="14"
-             FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto">
+             xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels">
     <UserControl.Resources>
         <Converters:DateTimeConverter x:Key="DateTimeConverter"/>
         <Models:TurnsConverter x:Key="TurnsConverter"/>

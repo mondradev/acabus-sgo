@@ -22,10 +22,6 @@ namespace Acabus.Models
         /// </summary>
         private String _databaseName;
 
-        /// <summary>
-        /// Campo que provee a la propiedad 'Description'.
-        /// </summary>
-        private String _description;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Enabled'.
@@ -40,7 +36,7 @@ namespace Acabus.Models
         /// <summary>
         /// Campo que provee a la propiedad 'ID'.
         /// </summary>
-        private UInt16 _id;
+        private UInt64 _id;
 
         /// <summary>
         /// Campo que provee a la propiedad 'IP'
@@ -122,7 +118,7 @@ namespace Acabus.Models
         /// </summary>
         /// <param name="station">Estación a la que pertence
         /// el equipo.</param>
-        public Device(UInt16 id, DeviceType type, Station station, String numeSeri)
+        public Device(UInt64 id, DeviceType type, Station station, String numeSeri)
         {
             _id = id;
             _type = type;
@@ -161,16 +157,6 @@ namespace Acabus.Models
             }
         }
 
-        /// Obtiene o establece la descripción del equipo a bordo.
-        /// </summary>
-        public String Description {
-            get => _description?.ToUpper();
-            set {
-                _description = value;
-                OnPropertyChanged("Description");
-            }
-        }
-
         /// <summary>
         /// Obtiene o establece si el equipo está activo.
         /// </summary>
@@ -197,7 +183,7 @@ namespace Acabus.Models
         /// Obtiene el identificador del equipo.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt16 ID {
+        public UInt64 ID {
             get => _id;
             protected set {
                 _id = value;
@@ -359,7 +345,7 @@ namespace Acabus.Models
         [XmlAnnotation(Ignore = true)]
         public Station Station {
             get => _station;
-            protected set {
+            set {
                 _station = value;
                 OnPropertyChanged("Station");
                 OnPropertyChanged("Location");
@@ -401,7 +387,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene o establece el vehículo donde se encuentra el dispositivo.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Vehicle_No_Econ")]
+        [Column(IsForeignKey = true, Name = "Fk_Vehicle_ID")]
         public Vehicle Vehicle {
             get => _vehicle;
             set {
@@ -465,6 +451,6 @@ namespace Acabus.Models
         /// Una cadena que representa a este equipo.
         /// </summary>
         /// <returns>Un número de serie que identifica al equipo.</returns>
-        public override String ToString() => Description;
+        public override String ToString() => String.IsNullOrEmpty(NumeSeri) ? Type.Translate() : NumeSeri;
     }
 }

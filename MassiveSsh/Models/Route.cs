@@ -25,6 +25,11 @@ namespace Acabus.Models
         private UInt16 _routeNumber;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'Stations'.
+        /// </summary>
+        private ObservableCollection<Station> _stations;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'Vehicles'.
         /// </summary>
         private ObservableCollection<Vehicle> _vehicles;
@@ -34,7 +39,6 @@ namespace Acabus.Models
         /// </summary>
         public Route()
         {
-
         }
 
         /// <summary>
@@ -86,6 +90,18 @@ namespace Acabus.Models
         }
 
         /// <summary>
+        /// Obtiene una lista de las estaciones de asignadas a la ruta.
+        /// </summary>
+        [Column(IsIgnored = true)]
+        public ObservableCollection<Station> Stations {
+            get {
+                if (_stations == null)
+                    _stations = new ObservableCollection<Station>();
+                return _stations;
+            }
+        } /// <summary>
+
+        /// <summary>
         /// Obtiene una lista de los vehículos asignados a esa ruta.
         /// </summary>
         [Column(IsIgnored = true)]
@@ -98,6 +114,29 @@ namespace Acabus.Models
         }
 
         /// <summary>
+        /// Compara dos instancias de <see cref="Route"/> y determina si son diferentes
+        /// </summary>
+        public static bool operator !=(Route routeA, Route routeB) => !(routeA == routeB);
+
+        /// <summary>
+        /// Compara dos instancias de <see cref="Route"/> y determina si son iguales.
+        /// </summary>
+        public static bool operator ==(Route routeA, Route routeB)
+            => !(routeA is null)
+            && !(routeB is null)
+            && routeA.ID == routeB.ID
+            && routeA.RouteNumber == routeB.RouteNumber
+            && routeA.RouteType == routeB.RouteType;
+
+        /// Añade una estación a la ruta.
+        /// </summary>
+        /// <param name="station">Estación por agregar.</param>
+        public void AddStation(Station station)
+        {
+            Stations.Add(station);
+        }
+
+        /// <summary>
         /// Añade un vehículo a la ruta.
         /// </summary>
         /// <param name="vehicle">Vehículo a agregar.</param>
@@ -105,6 +144,31 @@ namespace Acabus.Models
         {
             if (!Vehicles.Contains(vehicle))
                 Vehicles.Add(vehicle);
+        }
+
+        /// <summary>
+        /// Obtiene el número de dispositivos en la ruta troncal
+        /// </summary>
+        /// <returns>Número de dispositivos</returns>
+        public int CountDevices()
+        {
+            int count = 0;
+            foreach (var item in Stations)
+                count += item.DeviceCount();
+            return count;
+        }
+
+        /// <summary>
+        /// Compara si la instancia es igual a la actual.
+        /// </summary>
+        /// <param name="obj">Una instancia a comparar.</param>
+        /// <returns>Un valor verdadero si ambas instancias son iguales.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (obj.GetType() != GetType()) return false;
+
+            return this == (Route)obj;
         }
 
         /// <summary>
@@ -141,6 +205,25 @@ namespace Acabus.Models
         public String GetCodeRoute() => String.Format("R{0}{1}", Enum.GetName(typeof(RouteType), RouteType)?[0], RouteNumber);
 
         /// <summary>
+        /// Obtiene un código hash de la instancia.
+        /// </summary>
+        /// <returns>Código hash de la instancia actual.</returns>
+        public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
+        /// Obtiene la estación con el ID especificado.
+        /// </summary>
+        /// <param name="idStation">ID de la estación a buscar.</param>
+        /// <returns>Una estación que coincida con el número de estación.</returns>
+        public Station GetStation(UInt16 idStation)
+        {
+            foreach (var item in Stations)
+                if (item.ID == idStation)
+                    return item;
+            return null;
+        }
+
+        /// <summary>
         /// Obtiene el vehículo que coincide con el número económico especificado.
         /// </summary>
         /// <param name="economicNumber">Número económico del vehículo a buscar</param>
@@ -152,6 +235,12 @@ namespace Acabus.Models
                     return item;
             return null;
         }
+
+        /// <summary>
+        /// Obtiene el número de estaciones en la ruta.
+        /// </summary>
+        /// <returns>El número de estaciones asignadas a la ruta actual.</returns>
+        public UInt16 StationCount() => (UInt16)(Stations.Count);
 
         /// <summary>
         /// Representa en una cadena la instancia actual.

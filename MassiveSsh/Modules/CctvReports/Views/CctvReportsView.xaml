@@ -14,18 +14,18 @@
     mc:Ignorable="d"
     MinWidth="600" MinHeight="480">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-            <Converters:IncidenceStatusConverter x:Key="IncidenceStatusConverter" />
-            <converters:PriorityToColorConverter x:Key="ConverterPriorityToColor" />
-            <CollectionViewSource x:Key="OpenedIncidencesCollection" Source="{Binding IncidencesOpened}">
-                <CollectionViewSource.SortDescriptions>
-                    <scm:SortDescription PropertyName="Priority" Direction="Descending" />
-                </CollectionViewSource.SortDescriptions>
-            </CollectionViewSource>
-        </ResourceDictionary>
+        <Converters:IncidenceStatusConverter x:Key="IncidenceStatusConverter" />
+        <converters:PriorityToColorConverter x:Key="ConverterPriorityToColor" />
+        <CollectionViewSource x:Key="OpenedIncidencesCollection" Source="{Binding IncidencesOpened}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="StartDate" Direction="Descending" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <CollectionViewSource x:Key="ClosedIncidencesCollection" Source="{Binding IncidencesClosed}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="FinishDate" Direction="Descending" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
     </UserControl.Resources>
     <UserControl.DataContext>
         <local:CctvReportsViewModel />
@@ -52,7 +52,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <materialDesign:PackIcon Kind="Magnify" Width="24" Height="24" VerticalAlignment="Center" Margin="8" />
-                <TextBox materialDesign:HintAssist.Hint="Buscar folio"  Margin="0,0,-0.4,-0.2" Grid.Column="1" Text="{Binding FolioToSearch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox materialDesign:HintAssist.Hint="Buscar folio"  Margin="0,0,16,0" Grid.Column="1" Text="{Binding FolioToSearch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
             <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource OpenedIncidencesCollection}}" IsReadOnly="True"
                 SelectedItem="{Binding SelectedIncidence}" SelectionMode="Single" CanUserResizeRows="False" Grid.Row="1">
@@ -103,9 +103,9 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <materialDesign:PackIcon Kind="Magnify" Width="24" Height="24" VerticalAlignment="Center" Margin="8" />
-                <TextBox materialDesign:HintAssist.Hint="Buscar técnico o descripción"  Margin="0" Grid.Column="1" Text="{Binding ToSearchClosed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox materialDesign:HintAssist.Hint="Buscar técnico o descripción"  Margin="0,0,16,0" Grid.Column="1" Text="{Binding ToSearchClosed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
-            <DataGrid  Grid.Row="2"  Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding IncidencesClosed}" IsReadOnly="True" SelectionMode="Single" CanUserResizeRows="False">
+            <DataGrid  Grid.Row="2"  Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource ClosedIncidencesCollection}}" IsReadOnly="True" SelectionMode="Single" CanUserResizeRows="False">
                 <DataGrid.CommandBindings>
                     <CommandBinding Command="{x:Static ApplicationCommands.Copy}" Executed="CommandBindingExecuted" />
                     <CommandBinding Command="{x:Static ApplicationCommands.Cut}" Executed="CommandBindingExecuted" />

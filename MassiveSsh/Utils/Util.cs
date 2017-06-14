@@ -73,14 +73,14 @@ namespace Acabus.Utils
             return builder.ToString();
         }
 
-        public static ICollection<T> Where<T>(this ICollection<T> collection, Predicate<T> predicate)
-        {
-            ICollection<T> listTemp = (IList<T>)Activator.CreateInstance(collection.GetType());
-            foreach (var item in collection)
-                if (predicate.Invoke(item))
-                    listTemp.Add(item);
-            return listTemp;
-        }
+        //public static ICollection<T> Where<T>(this ICollection<T> collection, Predicate<T> predicate)
+        //{
+        //    ICollection<T> listTemp = (IList<T>)Activator.CreateInstance(collection.GetType());
+        //    foreach (var item in collection)
+        //        if (predicate.Invoke(item))
+        //            listTemp.Add(item);
+        //    return listTemp;
+        //}
 
         /// <summary>
         /// 

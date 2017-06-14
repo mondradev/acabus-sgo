@@ -164,7 +164,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                 ?? device?.Vehicle?.Route ?? null;
 
             /// Asignación cuando al menos hay un tecnico en turno.
-            var attendances = (IEnumerable<Attendance>)Attendances
+            var attendances = Attendances
                 .Where(attendance => attendance.DateTimeDeparture is null
                 && AttendanceService.GetTurn(DateTime.Now) == attendance.Turn);
             var attendancesPrevious = attendances;
@@ -202,12 +202,12 @@ namespace Acabus.Modules.Attendances.ViewModels
                     attendancesPrevious = attendances;
 
                 /// Asignación por llave.
-                if (location is Vehicle)
+                if (location is Route)
                     attendances = attendances.Where(attendance
-                          => attendance.HasNemaKey || attendance.Section.Contains("AUTOBUS"));
+                          => attendance.HasNemaKey || attendance.Section.Contains("AUTOBUSES"));
                 else
                     attendances = attendances.Where(attendance
-                          => attendance.HasKvrKey || attendance.Section.Contains("ESTACI"));
+                          => attendance.HasKvrKey || attendance.Section.Contains("ESTACIONES"));
 
                 if (attendances.Count() == 1)
                     return attendances.First();
@@ -218,18 +218,18 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
             else
             {
-                if (location.GetType() != typeof(Vehicle) && !location.Name.Contains("RENA"))
+                if (location.GetType() != typeof(Vehicle) && !location.Name.Contains("TERMINAL DE TRANSFERENCIA"))
                     return null;
 
-                //if ((location as Vehicle).BusType == VehicleType.ARTICULATED
-                //       || (location as Vehicle).BusType == VehicleType.STANDARD)
-                //    attendances = attendances.Where(attendance
-                //       => attendance.DateTimeDeparture is null
-                //           && attendance.Section.Contains("PATIO"));
-                //else if ((location as Vehicle).BusType == VehicleType.CONVENTIONAL)
-                //    attendances = attendances.Where(attendance
-                //       => attendance.DateTimeDeparture is null
-                //           && attendance.Section.Contains("RENA"));
+                if (device?.Vehicle?.BusType == VehicleType.ARTICULATED
+                       || device?.Vehicle?.BusType == VehicleType.STANDARD)
+                    attendances = attendances.Where(attendance
+                       => attendance.DateTimeDeparture is null
+                           && attendance.Section.Contains("PATIO"));
+                else if (device?.Vehicle?.BusType == VehicleType.CONVENTIONAL)
+                    attendances = attendances.Where(attendance
+                       => attendance.DateTimeDeparture is null
+                           && attendance.Section.Contains("TERMINAL DE TRANSFERENCIA"));
 
                 if (attendances.Count() == 1)
                     return attendances.First();

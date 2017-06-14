@@ -8,16 +8,11 @@
     xmlns:Models="clr-namespace:Acabus.Modules.Attendances.Models"
     xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels"
     x:Class="Acabus.Modules.Attendances.Views.AttendanceView"
-             x:Name="Attendance"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="900">
+    x:Name="Attendance"
+    mc:Ignorable="d" 
+    d:DesignHeight="300" d:DesignWidth="900">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-            <Models:TurnsConverter x:Key="TurnsConverter"/>
-        </ResourceDictionary>
+        <Models:TurnsConverter x:Key="TurnsConverter"/>
     </UserControl.Resources>
     <UserControl.DataContext>
         <ViewModels:AttendanceViewModel/>

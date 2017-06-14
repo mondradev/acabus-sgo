@@ -149,10 +149,12 @@
     <Compile Include="Converters\DateTimeConverter.cs" />
     <Compile Include="Converters\EnumToColorConverter.cs" />
     <Compile Include="Converters\IsNullConverter.cs" />
+    <Compile Include="Converters\MultiExpanderConverter.cs" />
     <Compile Include="Converters\NotIsNullConverter.cs" />
     <Compile Include="Converters\PriorityConverter.cs" />
     <Compile Include="Converters\TranslateEnumConverter.cs" />
     <Compile Include="DataAccess\Csv.cs" />
+    <Compile Include="Models\CommonTranslators.cs" />
     <Compile Include="Models\DeviceFault.cs" />
     <Compile Include="Models\DeviceFaultCategory.cs" />
     <Compile Include="Modules\Attendances\AcabusData.cs" />
@@ -202,11 +204,22 @@
       <DependentUpon>ModifyIncidenceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\CctvReports\Services\CctvServices.cs" />
-    <Compile Include="Modules\Configurations\ConfigurationsView.xaml.cs">
-      <DependentUpon>ConfigurationsView.xaml</DependentUpon>
+    <Compile Include="Modules\Configurations\AcabusData.cs" />
+    <Compile Include="Modules\Configurations\Configuration.xaml.cs">
+      <DependentUpon>Configuration.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Configurations\ConfigurationsViewModel.cs" />
+    <Compile Include="Modules\Configurations\IConfigurable.cs" />
+    <Compile Include="Modules\Configurations\ViewModels\ConfigurationViewModel.cs" />
+    <Compile Include="Modules\Configurations\Views\ConfigurationView.xaml.cs">
+      <DependentUpon>ConfigurationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Core\Config\CoreConfig.cs" />
+    <Compile Include="Modules\Core\Config\ViewModels\CoreConfigViewModel.cs" />
+    <Compile Include="Modules\Core\Config\Views\CoreConfigView.xaml.cs">
+      <DependentUpon>CoreConfigView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\OffDutyVehicles\AcabusData.cs" />
+    <Compile Include="Utils\EnumTranslate.cs" />
     <Compile Include="Utils\Mvvm\NotifyPropertyChanged.cs" />
     <Compile Include="Utils\Mvvm\ViewModelBase.cs" />
     <Compile Include="Utils\Mvvm\ViewModelService.cs" />
@@ -217,7 +230,6 @@
     <Compile Include="Models\Kvr.cs" />
     <Compile Include="Models\Link.cs" />
     <Compile Include="Models\Station.cs" />
-    <Compile Include="Models\Trunk.cs" />
     <Compile Include="Models\Vehicle.cs" />
     <Compile Include="Modules\CctvReports\Views\CctvReportsView.xaml.cs">
       <DependentUpon>CctvReportsView.xaml</DependentUpon>
@@ -296,7 +308,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\Configurations\ConfigurationsView.xaml">
+    <Page Include="Modules\Configurations\Configuration.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Configurations\Views\ConfigurationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Core\Config\Views\CoreConfigView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -381,6 +401,7 @@
       <Name>InnSyTech.Standard</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.105.1\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.105.1\build\net451\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

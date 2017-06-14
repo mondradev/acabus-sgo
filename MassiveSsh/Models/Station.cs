@@ -42,6 +42,11 @@ namespace Acabus.Models
         private UInt16 _pingMin;
 
         /// <summary>
+        /// Campo que provee la ruta a la propiedad 'Trunk'.
+        /// </summary>
+        private Route _route;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'State'.
         /// </summary>
         private StateValue _state;
@@ -52,20 +57,15 @@ namespace Acabus.Models
         private UInt16 _stationNumber;
 
         /// <summary>
-        /// Campo que provee la ruta a la propiedad 'Trunk'.
-        /// </summary>
-        private Trunk _trunk;
-
-        /// <summary>
         /// Crea una instancia de una estación indicando la ruta troncal
         /// a la que pertence.
         /// </summary>
         /// <param name="trunk">Ruta troncal a la que pertenece la estación.</param>
         /// <param name="id">Identificador único de la estación.</param>
         /// <param name="stationNumber">Número de la estación.</param>
-        public Station(Trunk trunk, UInt16 id, UInt16 stationNumber)
+        public Station(Route trunk, UInt16 id, UInt16 stationNumber)
         {
-            _trunk = trunk;
+            _route = trunk;
             _id = id;
             _stationNumber = stationNumber;
             State = StateValue.DISCONNECTED;
@@ -150,6 +150,19 @@ namespace Acabus.Models
         }
 
         /// <summary>
+        /// Obtiene la ruta troncal a la que pertence la estación.
+        /// </summary>
+        [XmlAnnotation(Ignore = true)]
+        [Column(IsForeignKey = true, Name = "Fk_Route_ID")]
+        public Route Route {
+            get => _route;
+            set {
+                _route = value;
+                OnPropertyChanged("Route");
+            }
+        }
+
+        /// <summary>
         /// Obtiene o establece el estado de la comunicación con la estación.
         /// </summary>
         [Column(IsIgnored = true)]
@@ -174,26 +187,28 @@ namespace Acabus.Models
         }
 
         /// <summary>
-        /// Obtiene la ruta troncal a la que pertence la estación.
-        /// </summary>
-        [XmlAnnotation(Ignore = true)]
-        [Column(IsForeignKey = true, Name = "Fk_Route_ID")]
-        public Trunk Trunk {
-            get => _trunk;
-            set {
-                _trunk = value;
-                OnPropertyChanged("Trunk");
-            }
-        }
-
-        /// <summary>
         /// Crea una instancia de estación especificando su ID y  la ruta a la que pertenece.
         /// </summary>
         /// <param name="trunk">Ruta troncal a la que pertenece.</param>
         /// <param name="id">ID de la estación.</param>
         /// <param name="stationNumber">Número de la estación.</param>
         /// <returns>Una instancia de estación.</returns>
-        public static Station CreateStation(Trunk trunk, UInt16 id, UInt16 stationNumber) => new Station(trunk, id, stationNumber);
+        public static Station CreateStation(Route trunk, UInt16 id, UInt16 stationNumber) => new Station(trunk, id, stationNumber);
+
+        /// <summary>
+        /// Compara dos instancias de <see cref="Station"/> y determina si son diferentes.
+        /// </summary>
+        public static bool operator !=(Station stationA, Station stationB)
+            => !(stationA == stationB);
+
+        /// <summary>
+        /// Compara dos instancias de <see cref="Station"/> y determina si son iguales.
+        /// </summary>
+        public static bool operator ==(Station stationA, Station stationB)
+            => !(stationA is null)
+                && !(stationB is null)
+                && stationA.ID == stationB.ID
+                && stationA.StationNumber == stationB.StationNumber;
 
         /// <summary>
         /// Añade un dispositivo a la estación.
@@ -219,6 +234,19 @@ namespace Acabus.Models
         /// </summary>
         /// <returns>El número total de dispositivos.</returns>
         public UInt16 DeviceCount() => (UInt16)(Devices.Count);
+
+        /// <summary>
+        /// Compara la instancia actual con una instancia cualquiera y determina si son iguales.
+        /// </summary>
+        /// <param name="obj">Instancia a comparar.</param>
+        /// <returns>Un valor <see cref="true"/> si las instancias son iguales.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (obj.GetType() != GetType()) return false;
+
+            return this == (Station)obj;
+        }
 
         /// <summary>
         /// Obtiene el primer dispositivo de la estación que cumpla con el predicado.
@@ -247,9 +275,16 @@ namespace Acabus.Models
         }
 
         /// <summary>
+        /// Obtiene una código hash de la instancia actual.
+        /// </summary>
+        /// <returns>Un código hash de la instancia.</returns>
+        public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
         /// Obtiene el ID de la estación en vía.
         /// </summary>
         /// <returns>ID de la estación en vía.</returns>
-        public String GetViaID() => String.Format("{0:00}{1:00}", Trunk?.RouteNumber, StationNumber);
+        public String GetViaID() => String.Format("{0:00}{1:00}", Route?.RouteNumber, StationNumber);
+
     }
 }

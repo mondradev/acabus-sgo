@@ -1,12 +1,12 @@
 ﻿using Acabus.Converters;
 using Acabus.Modules.CctvReports;
 using Acabus.Modules.CctvReports.Models;
-using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Acabus.Modules.Attendances.Models
 {
@@ -89,7 +89,7 @@ namespace Acabus.Modules.Attendances.Models
         /// </summary>
         [Column(IsIgnored = true)]
         public int CountClosedIncidences {
-            get => Incidences is null ? 0 : Incidences.Where(incidence => incidence.Status == IncidenceStatus.CLOSE).Count;
+            get => Incidences is null ? 0 : Incidences.Where(incidence => incidence.Status == IncidenceStatus.CLOSE).Count();
             private set { }
         }
 
@@ -98,7 +98,7 @@ namespace Acabus.Modules.Attendances.Models
         /// </summary>
         [Column(Name = "OpenedIncidences")]
         public int CountOpenedIncidences {
-            get => Incidences is null ? 0 : Incidences.Where(incidence => incidence.Status != IncidenceStatus.CLOSE).Count;
+            get => Incidences is null ? 0 : Incidences.Where(incidence => incidence.Status != IncidenceStatus.CLOSE).Count();
             private set { }
         }
 
@@ -162,10 +162,11 @@ namespace Acabus.Modules.Attendances.Models
         /// Obtiene una lista de las incidencias asignadas.
         /// </summary>
         [Column(IsIgnored = true)]
-        public ICollection<Incidence> Incidences {
+        public IEnumerable<Incidence> Incidences {
             get => ViewModelService.GetViewModel<CctvReportsViewModel>()?.Incidences?
                     .Where(incidence => incidence.AssignedAttendance?.Technician == Technician
-                                       && DateTimeDeparture is null);
+                                       && DateTimeDeparture is null)
+                .Cast<Incidence>();
         }
 
         /// <summary>
@@ -180,7 +181,7 @@ namespace Acabus.Modules.Attendances.Models
         }
 
         [Column(IsIgnored = true)]
-        public ICollection<Incidence> OpenedIncidences
+        public IEnumerable<Incidence> OpenedIncidences
                     => Incidences?.Where(incidence => incidence.Status != IncidenceStatus.CLOSE);
 
         /// <summary>

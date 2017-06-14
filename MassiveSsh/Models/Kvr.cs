@@ -30,7 +30,7 @@ namespace Acabus.Models
         /// </summary>
         /// <param name="id">Identificador del kiosko.</param>
         /// <param name="station">Estación a la que pertenece.</param>
-        public Kvr(ushort id, Station station, String numeSeri) : base(id, DeviceType.KVR, station, numeSeri) { }
+        public Kvr(UInt64 id, Station station, String numeSeri) : base(id, DeviceType.KVR, station, numeSeri) { }
 
         /// <summary>
         /// Crea una instancia básica de KVR.

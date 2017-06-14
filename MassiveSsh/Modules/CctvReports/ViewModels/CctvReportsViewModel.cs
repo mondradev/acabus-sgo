@@ -268,7 +268,7 @@ namespace Acabus.Modules.CctvReports
         /// Obtiene una lista de la incidencias generadas por alarmas.
         /// </summary>
         public ObservableCollection<Incidence> IncidencesClosed
-            => (ObservableCollection<Incidence>)Util.Where(Incidences, (incidence)
+            => new ObservableCollection<Incidence>(Incidences.Where((incidence)
                 =>
             {
                 Boolean isClosed = incidence.Status == IncidenceStatus.CLOSE;
@@ -277,20 +277,20 @@ namespace Acabus.Modules.CctvReports
                             || incidence.Description.ToString().ToUpper().Contains(ToSearchClosed.ToUpper());
 
                 return isClosed && isMatch;
-            });
+            }));
 
         /// <summary>
         /// Obtiene una lista de las incidencias abiertas.
         /// </summary>
         public ObservableCollection<Incidence> IncidencesOpened
-            => (ObservableCollection<Incidence>)Util.Where(Incidences, (incidence)
+            => new ObservableCollection<Incidence>(Incidences.Where((incidence)
                 =>
             {
                 Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
                 Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.ToUpper().Contains(FolioToSearch.ToUpper());
 
                 return isOpen && isMatch;
-            });
+            }));
 
         /// <summary>
         /// Obtiene un comando que se ejecuta cuando el evento <c>Loaded</c>
@@ -508,7 +508,7 @@ namespace Acabus.Modules.CctvReports
                             {
                                 incidence.Status = IncidenceStatus.CLOSE;
                                 if (AcabusData.OffDutyVehicles.Where(vehicle
-                                    => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count > 0)
+                                    => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count() > 0)
                                     incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
                                 else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
                                 incidence.Update();

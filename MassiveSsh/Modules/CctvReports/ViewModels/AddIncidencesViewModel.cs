@@ -3,7 +3,6 @@ using Acabus.Models;
 using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
-using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using MaterialDesignThemes.Wpf;
 using System;
@@ -324,14 +323,17 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene una lista con los destino de dinero.
         /// </summary>
-        public IEnumerable<CashDestiny> CashDestinies => AcabusData.CashDestiny.Where(cashDestiny =>
-        {
-            if (IsMoney && cashDestiny.Type == CashType.MONEY)
-                return true;
-            if (!IsMoney && cashDestiny.Type == CashType.BILL)
-                return true;
-            return false;
-        });
+        public IEnumerable<CashDestiny> CashDestinies
+            => AcabusData.Session.GetObjects(typeof(CashDestiny))
+            .Where(cashDestiny =>
+            {
+                if (IsMoney && (cashDestiny as CashDestiny).CashType == CashType.MONEY)
+                    return true;
+                if (!IsMoney && (cashDestiny as CashDestiny).CashType == CashType.BILL)
+                    return true;
+                return false;
+            })
+            .Cast<CashDestiny>();
 
         /// <summary>
         /// Obtiene o establece el destino del dinero.

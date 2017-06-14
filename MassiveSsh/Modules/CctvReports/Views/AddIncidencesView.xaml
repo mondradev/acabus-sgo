@@ -5,10 +5,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converters="clr-namespace:Acabus.Converters"
-             xmlns:da="clr-namespace:Acabus.DataAccess"
              xmlns:local="clr-namespace:Acabus.Modules.CctvReports"
              xmlns:converters1="clr-namespace:Acabus.Modules.CctvReports.Converters"
-             xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d">
     <UserControl.Resources>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />

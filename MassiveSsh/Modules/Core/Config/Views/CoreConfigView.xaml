@@ -1,0 +1,133 @@
+﻿<UserControl
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:dragablz="http://dragablz.net/winfx/xaml/dragablz"
+    xmlns:materialDesignMahApps="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Models="clr-namespace:Acabus.Models"
+    xmlns:ViewModels="clr-namespace:Acabus.Modules.Core.Config.ViewModels"
+    x:Class="Acabus.Modules.Core.Config.Views.CoreConfigView"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="279.2">
+    <UserControl.DataContext>
+        <ViewModels:CoreConfigViewModel />
+    </UserControl.DataContext>
+    <Grid>
+        <dragablz:TabablzControl>
+            <dragablz:TabablzControl.Background>
+                <ImageBrush/>
+            </dragablz:TabablzControl.Background>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="EQUIPOS" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
+                </TabItem.Header>
+                <Grid>
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Devices}" IsReadOnly="True">
+                        <DataGrid.Resources>
+                            <Models:DeviceTypeConverter x:Key="DeviceTypeConverter" />
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding ID}" ClipboardContentBinding="{x:Null}" Header="ID Equipo" />
+                            <DataGridTextColumn Binding="{Binding NumeSeri, TargetNullValue='(SIN ASIGNAR)'}" ClipboardContentBinding="{x:Null}" Header="Número de serie" />
+                            <DataGridTextColumn Binding="{Binding IP}" ClipboardContentBinding="{x:Null}" Header="IP" />
+                            <DataGridTextColumn Binding="{Binding Type, Converter={StaticResource DeviceTypeConverter}}" ClipboardContentBinding="{x:Null}" Header="Tipo" />
+                            <DataGridTextColumn Binding="{Binding Station, TargetNullValue='(SIN ASIGNAR)'}" ClipboardContentBinding="{x:Null}" Header="Estación" />
+                            <DataGridTextColumn Binding="{Binding Vehicle, TargetNullValue='(SIN ASIGNAR)'}" ClipboardContentBinding="{x:Null}" Header="Vehículo" />
+                            <DataGridTextColumn Binding="{Binding Enabled}" ClipboardContentBinding="{x:Null}" Header="Activo?" />
+                            <DataGridTextColumn Binding="{Binding CanReplicate}" ClipboardContentBinding="{x:Null}" Header="Replica?" />
+                            <DataGridTextColumn Binding="{Binding HasDatabase}" ClipboardContentBinding="{x:Null}" Header="Base de datos?" />
+                            <DataGridTextColumn Binding="{Binding SshEnabled}" ClipboardContentBinding="{x:Null}" Header="Consola Segura?" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="ESTACIONES" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
+                </TabItem.Header>
+                <Grid>
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Stations}" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding ID}" ClipboardContentBinding="{x:Null}" Header="ID Estación" />
+                            <DataGridTextColumn Binding="{Binding StationNumber}" ClipboardContentBinding="{x:Null}" Header="Número de estación" />
+                            <DataGridTextColumn Binding="{Binding Name}" ClipboardContentBinding="{x:Null}" Header="Nombre" />
+                            <DataGridTextColumn Binding="{Binding Route}" ClipboardContentBinding="{x:Null}" Header="Ruta" />
+                            <DataGridTextColumn Binding="{Binding IsConnected}" ClipboardContentBinding="{x:Null}" Header="Conectada?" />
+                            <DataGridTextColumn Binding="{Binding PingMin}" ClipboardContentBinding="{x:Null}" Header="Latencia Mínima" />
+                            <DataGridTextColumn Binding="{Binding PingMax}" ClipboardContentBinding="{x:Null}" Header="Latencia Máxima" />
+                            <DataGridTextColumn Binding="{Binding Devices.Count}" ClipboardContentBinding="{x:Null}" Header="Número de equipos" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="VEHÍCULOS" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
+                </TabItem.Header>
+                <Grid>
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Vehicles}" IsReadOnly="True">
+                        <DataGrid.Resources>
+                            <Models:VehicleTypeConverter x:Key="VehicleTypeConverter" />
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding ID}" ClipboardContentBinding="{x:Null}" Header="ID Vehículo" />
+                            <DataGridTextColumn Binding="{Binding EconomicNumber}" ClipboardContentBinding="{x:Null}" Header="Número Económico" />
+                            <DataGridTextColumn Binding="{Binding BusType, Converter={StaticResource VehicleTypeConverter}}" ClipboardContentBinding="{x:Null}" Header="Tipo" />
+                            <DataGridTextColumn Binding="{Binding Route}" ClipboardContentBinding="{x:Null}" Header="Ruta" />
+                            <DataGridTextColumn Binding="{Binding Devices.Count}" ClipboardContentBinding="{x:Null}" Header="Número de equipos" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="RUTAS" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
+                </TabItem.Header>
+                <Grid>
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Routes}" IsReadOnly="True">
+                        <DataGrid.Resources>
+                            <Models:RouteTypeConverter x:Key="RouteTypeConverter" />
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding ID}" ClipboardContentBinding="{x:Null}" Header="ID" />
+                            <DataGridTextColumn Binding="{Binding RouteNumber}" ClipboardContentBinding="{x:Null}" Header="Número de ruta" />
+                            <DataGridTextColumn Binding="{Binding Name}" ClipboardContentBinding="{x:Null}" Header="Nombre" />
+                            <DataGridTextColumn Binding="{Binding RouteType, Converter={StaticResource RouteTypeConverter}}" ClipboardContentBinding="{x:Null}" Header="Tipo" />
+                            <DataGridTextColumn Binding="{Binding Vehicles.Count}" ClipboardContentBinding="{x:Null}" Header="Número de vehículos" />
+                            <DataGridTextColumn Binding="{Binding Stations.Count}" ClipboardContentBinding="{x:Null}" Header="Número de estaciones" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </dragablz:TabablzControl>
+
+        <materialDesignMahApps:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
+            PlacementMode="TopAndAlignCentres"
+            Margin="0,0,16,16"
+            ToolTip="Añadir equipo" Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" PopupMode="MouseOver" Grid.RowSpan="4">
+            <materialDesignMahApps:PopupBox.ToggleCheckedContent>
+                <materialDesignMahApps:PackIcon Kind="GlassStange" Width="24" Height="24" />
+            </materialDesignMahApps:PopupBox.ToggleCheckedContent>
+            <StackPanel>
+                <Button ToolTip="Descargar catálogos"  BorderBrush="White" Background="White" Command="{Binding DownloadDataCommand}">
+                    <materialDesignMahApps:PackIcon Kind="Download" Width="24" Height="24" />
+                </Button>
+                <Button ToolTip="Reasignar vehículos"  Command="{Binding BusReassingCommand}" BorderBrush="White" Background="White">
+                    <materialDesignMahApps:PackIcon Kind="MapMarkerRadius" Width="24" Height="24" />
+                </Button>
+                <Button ToolTip="Actualizar listas (local)"  Command="{Binding RefreshCommand}" BorderBrush="White" Background="White">
+                    <materialDesignMahApps:PackIcon Kind="Refresh" Width="24" Height="24" />
+                </Button>
+                <Button ToolTip="Añadir Ruta"  BorderBrush="White" Background="White">
+                    <materialDesignMahApps:PackIcon Kind="GoogleMaps" Width="24" Height="24" />
+                </Button>
+                <Button ToolTip="Añadir Vehículo"  BorderBrush="White" Background="White">
+                    <materialDesignMahApps:PackIcon Kind="Bus" Width="24" Height="24" />
+                </Button>
+                <Button ToolTip="Añadir Estación"  BorderBrush="White" Background="White">
+                    <materialDesignMahApps:PackIcon Kind="HomeModern" Width="24" Height="24" />
+                </Button>
+            </StackPanel>
+        </materialDesignMahApps:PopupBox>
+    </Grid>
+</UserControl>

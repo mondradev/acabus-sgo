@@ -15,6 +15,9 @@ namespace Acabus.Modules.CctvReports.Models
         COMMIT
     }
 
+    /// <summary>
+    /// Define la estructura de una devolución de dinero.
+    /// </summary>
     [Entity(TableName = "RefundOfMoney")]
     public sealed class RefundOfMoney : NotifyPropertyChanged
     {
@@ -64,24 +67,12 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el destino del dinero.
         /// </summary>
-        [Column(Converter = typeof(CashDestinyConverter))]
+        [Column(IsForeignKey = true, Name = "Fk_CashDestiny_ID")]
         public CashDestiny CashDestiny {
-            get => _cashDestiny ?? new CashDestiny();
+            get => _cashDestiny;
             set {
                 _cashDestiny = value;
                 OnPropertyChanged("CashDestiny");
-            }
-        }
-
-        /// <summary>
-        /// Obtiene o establece el tipo de dinero que se manipula en la devolución.
-        /// </summary>
-        public CashType CashType {
-            get => CashDestiny.Type;
-            set {
-                CashDestiny.Type = value;
-                OnPropertyChanged("CashDestiny");
-                OnPropertyChanged("CashType");
             }
         }
 

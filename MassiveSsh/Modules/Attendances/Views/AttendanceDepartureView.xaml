@@ -7,11 +7,8 @@
     xmlns:Converters="clr-namespace:Acabus.Converters"
     xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels"
     xmlns:Models="clr-namespace:Acabus.Modules.Attendances.Models"
-    x:Class="Acabus.Modules.Attendances.Views.AttendanceDepartureView"
-             TextElement.FontWeight="Medium"
-             TextElement.FontSize="14"
-             FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
-             mc:Ignorable="d">
+    x:Class="Acabus.Modules.Attendances.Views.AttendanceDepartureView"             
+    mc:Ignorable="d">
     <UserControl.Resources>
         <Models:TurnsConverter x:Key="TurnsConverter"/>
         <Converters:DateTimeConverter x:Key="DateTimeConverter"/>

@@ -11,6 +11,6 @@
              FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"    
              d:DesignHeight="150" d:DesignWidth="350">
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-        <StackPanel x:Name="_content"/>
+        <StackPanel x:Name="_content" x:FieldModifier="private"/>
     </ScrollViewer>
 </UserControl>

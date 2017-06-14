@@ -1,7 +1,6 @@
 ﻿using Acabus.DataAccess;
 using Acabus.Modules.Attendances.Models;
 using Acabus.Modules.Attendances.Services;
-using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
@@ -55,7 +54,8 @@ namespace Acabus.Modules.Attendances.ViewModels
         /// <summary>
         /// Obtiene una lista de asistencia.
         /// </summary>
-        public ObservableCollection<Attendance> Attendances => ViewModelService.GetViewModel<AttendanceViewModel>().Attendances;
+        public ObservableCollection<Attendance> Attendances
+            => ViewModelService.GetViewModel<AttendanceViewModel>().Attendances;
 
         /// <summary>
         /// Obtiene o establece si el técnico tiene asiganda una llave de Kvr.
@@ -92,7 +92,17 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
         }
 
-        public IEnumerable<String> Sections => AcabusData.Sections;
+        public IEnumerable<String> Sections =>
+            AcabusData.Sections
+            .Where(section =>
+            {
+                if (section.Contains("SUPERVICIÓN"))
+                    return true;
+                if (Turn == Attendance.WorkShift.NIGHT_SHIFT)
+                    return section.Contains("PATIO") || section.Contains("TERMINAL");
+                else
+                    return !section.Contains("PATIO") && !section.Contains("TERMINAL");
+            });
 
         /// <summary>
         /// Obtiene o establece el nombre del técnico a entrar.
@@ -105,7 +115,8 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
         }
 
-        public IEnumerable<String> Technicians => AcabusData.Technicians.OrderBy(technician => technician);
+        public IEnumerable<String> Technicians
+            => AcabusData.Technicians.OrderBy(technician => technician);
 
         /// <summary>
         /// Obtiene o establece la hora de entrada del técnico.
@@ -126,6 +137,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             set {
                 _turn = value;
                 OnPropertyChanged("Turn");
+                OnPropertyChanged("Sections");
                 OnPropertyChanged("TimeEntry");
             }
         }
@@ -163,7 +175,6 @@ namespace Acabus.Modules.Attendances.ViewModels
             {
                 Attendances.Add(attendance);
                 ViewModelService.GetViewModel<AttendanceViewModel>()?.AssignTechnicianIncoming();
-
             }
             else
                 AcabusControlCenterViewModel.ShowDialog("No se registro la asistencia, intentelo de nuevo");

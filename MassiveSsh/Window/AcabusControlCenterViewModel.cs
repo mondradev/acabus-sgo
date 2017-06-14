@@ -89,6 +89,14 @@ namespace Acabus.Window
         }
 
         /// <summary>
+        /// Muestra una vista en la aplicación como si se tratase de un modulo.
+        /// </summary>
+        public static void ShowContent(UserControl view)
+        {
+            Instance?._view.ShowContent(view);
+        }
+
+        /// <summary>
         /// Carga todos los modulos leidos del archivo de configuración de la aplicación.
         /// </summary>
         private static void LoadModule()

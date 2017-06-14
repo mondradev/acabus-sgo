@@ -3,13 +3,13 @@ using Acabus.Models;
 using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
-using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Acabus.Modules.CctvReports
@@ -224,14 +224,16 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene una lista de destinos posibles para devolución de dinero.
         /// </summary>
-        public ICollection<CashDestiny> Destinies => AcabusData.CashDestiny.Where(cashDestiny =>
-        {
-            if (IsMoney && cashDestiny.Type == CashType.MONEY)
-                return true;
-            if (!IsMoney && cashDestiny.Type == CashType.BILL)
-                return true;
-            return false;
-        });
+        public IEnumerable<CashDestiny> Destinies => AcabusData.Session.GetObjects(typeof(CashDestiny))
+            .Where(cashDestiny =>
+            {
+                if (IsMoney && (cashDestiny as CashDestiny).CashType == CashType.MONEY)
+                    return true;
+                if (!IsMoney && (cashDestiny as CashDestiny).CashType == CashType.BILL)
+                    return true;
+                return false;
+            })
+            .Cast<CashDestiny>();
 
         /// <summary>
         ///

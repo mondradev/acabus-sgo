@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Opera.Acabus.Kernel
+namespace Opera.Acabus.Core
 {
     public class Class1
     {

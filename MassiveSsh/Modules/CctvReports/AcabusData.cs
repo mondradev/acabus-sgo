@@ -34,6 +34,7 @@ namespace Acabus.DataAccess
                 return _reportQueries;
             }
         }
+
         /// <summary>
         /// Busca un dispositivo en todos los autobuses.
         /// </summary>
@@ -61,7 +62,7 @@ namespace Acabus.DataAccess
             return new CashDestiny()
             {
                 Description = description,
-                Type = (CashType)Enum.Parse(typeof(CashType), type)
+                CashType = (CashType)Enum.Parse(typeof(CashType), type)
             };
         }
 

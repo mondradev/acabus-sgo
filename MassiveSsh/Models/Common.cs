@@ -56,6 +56,11 @@ namespace Acabus.Models
     public enum DeviceType
     {
         /// <summary>
+        /// Sin tipo definido.
+        /// </summary>
+        NONE,
+
+        /// <summary>
         /// Kiosko de venta y recarga.
         /// </summary>
         KVR,
@@ -153,12 +158,7 @@ namespace Acabus.Models
         /// <summary>
         /// PC Abordo.
         /// </summary>
-        PCA,
-
-        /// <summary>
-        /// Sin tipo definido.
-        /// </summary>
-        NONE
+        PCA
     }
 
     /// <summary>

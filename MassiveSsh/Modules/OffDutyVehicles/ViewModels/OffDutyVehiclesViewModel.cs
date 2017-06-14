@@ -117,7 +117,7 @@ namespace Acabus.Modules.OffDutyVehicles
         {
             AddVehicleCommand = new CommandBase(delegate
             {
-                if (String.IsNullOrEmpty(EconomicNumber)) return;
+                if (string.IsNullOrEmpty(EconomicNumber)) return;
 
                 var economicNumbers = EconomicNumber.Split(new String[] { "\n", "\r\n" },
                                                                 StringSplitOptions.RemoveEmptyEntries);
@@ -127,7 +127,7 @@ namespace Acabus.Modules.OffDutyVehicles
                     var matches = Regex.Match(economicNumber.ToUpper(), "A[ACP]{1}-[0-9]{3}").Groups;
                     if (matches.Count < 1) continue;
                     foreach (var match in matches)
-                        if (!String.IsNullOrEmpty(match.ToString()))
+                        if (!string.IsNullOrEmpty(match.ToString()))
                         {
                             Boolean exists = false;
                             foreach (Vehicle vehi in Vehicles)
@@ -137,11 +137,15 @@ namespace Acabus.Modules.OffDutyVehicles
                                     break;
                                 }
                             if (!exists)
-                                Vehicles.Add(new Vehicle(match.ToString(), SelectedStatus));
+                            {
+                                Vehicle vehicle = AcabusData.Session.GetObject(typeof(Vehicle), match.ToString()) as Vehicle;
+                                vehicle.Status = SelectedStatus;
+                                Vehicles.Add(vehicle);
+                            }
                         }
                 }
 
-                EconomicNumber = String.Empty;
+                EconomicNumber = string.Empty;
             });
 
             ClearVehicleCommand = new CommandBase((param) => Vehicles?.Clear());

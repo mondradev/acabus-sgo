@@ -44,6 +44,7 @@ namespace Acabus.Modules.CctvReports.Services
                 case "NO SE PUDO ESTABLECER COMUNICACIÓN CON LA TARJETA ES (ADR)":
                     return (DeviceFault)faults.FirstOrDefault(fault
                         => (fault as DeviceFault).Description == "PROBLEMAS DE FUNCIONALIDAD");
+
                 case "FALLA SAM AV RECARGA":
                 case "FALLA LECTOR RECARGA":
                 case "FALLA EN LECTOR RECARGA":
@@ -123,7 +124,7 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Equals(Alarm alarm, Incidence incidence)
         {
-            if (!alarm.Device.Equals(incidence?.Device)) return false;
+            if (alarm.Device != null && !alarm.Device.Equals(incidence?.Device)) return false;
             if (CreateDeviceFault(alarm).Equals(incidence.Description))
                 if (incidence.Status != IncidenceStatus.CLOSE
                     || alarm.DateTime == incidence.StartDate)
@@ -200,10 +201,13 @@ namespace Acabus.Modules.CctvReports.Services
                 incidences.Add(incidenceData as Incidence);
         }
 
-        public static Boolean Save(this Incidence incidence) => AcabusData.Session.Save(incidence);
+        public static Boolean Save(this Incidence incidence)
+            => AcabusData.Session.Save(incidence);
 
-        public static Boolean Save(this RefundOfMoney refundOfMoney) => AcabusData.Session.Save(refundOfMoney);
+        public static Boolean Save(this RefundOfMoney refundOfMoney)
+            => AcabusData.Session.Save(refundOfMoney);
 
-        public static Boolean Update(this Incidence incidence) => AcabusData.Session.Update(incidence);
+        public static Boolean Update(this Incidence incidence)
+            => AcabusData.Session.Update(incidence);
     }
 }
