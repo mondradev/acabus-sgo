@@ -17,6 +17,11 @@ namespace InnSyTech.Standard.Database
         private IDbConverter _converter;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'ForeignKeyName'
+        /// </summary>
+        private String _foreignKeyName;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'IsAutonumerical'.
         /// </summary>
         private Boolean _isAutonumerical;
@@ -63,6 +68,11 @@ namespace InnSyTech.Standard.Database
         /// Obtiene el convertidor de datos para el campo en la base de datos.
         /// </summary>
         public IDbConverter Converter => _converter;
+
+        /// <summary>
+        /// Obtiene el nombre de la llave forenea de una relación de uno a varios.
+        /// </summary>
+        public String ForeignKeyName => _foreignKeyName;
 
         /// <summary>
         /// Obtiene si el campo es autonumerico.
@@ -113,7 +123,8 @@ namespace InnSyTech.Standard.Database
                             yield return new DbField(name, property, columnAttribute.IsPrimaryKey, columnAttribute.Converter)
                             {
                                 _isForeignKey = columnAttribute.IsForeignKey,
-                                _isAutonumerical = columnAttribute.IsAutonumerical
+                                _isAutonumerical = columnAttribute.IsAutonumerical,
+                                _foreignKeyName = columnAttribute.ForeignKeyName
                             };
                         }
                 }
