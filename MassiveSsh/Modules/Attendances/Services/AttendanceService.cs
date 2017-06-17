@@ -26,7 +26,7 @@ namespace Acabus.Modules.Attendances.Services
 
         public static void LoadFromDataBase(this ICollection<Attendance> attendances)
         {
-            foreach (var attendancesData in AcabusData.Session.GetObjects(typeof(Attendance))
+            foreach (var attendancesData in AcabusData.Session.GetObjects<Attendance>(typeof(Attendance))
                 .Where(attendance => (attendance as Attendance).DateTimeDeparture is null))
                 attendances.Add(attendancesData as Attendance);
         }

@@ -1,10 +1,9 @@
-﻿using Acabus.Models;
-using Acabus.Modules.Configurations;
+﻿using Acabus.Modules.Configurations;
 using Acabus.Modules.Core.Config.ViewModels;
 using Acabus.Modules.Core.Config.Views;
+using Acabus.Modules.Core.DataAccess;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
-using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,10 +23,10 @@ namespace Acabus.Modules.Core.Config
         public CoreConfig()
         {
             _previewData = new List<Tuple<string, Func<Object>>>() {
-                new Tuple<string, Func<Object>>("Equipos", () => DataAccess.AcabusData.Session.GetObjects(typeof(Device)).Count()),
-                new Tuple<string, Func<Object>>("Estaciones", () => DataAccess.AcabusData.Session.GetObjects(typeof(Station)).Count()),
-                new Tuple<string, Func<Object>>("Vehículos", () => DataAccess.AcabusData.Session.GetObjects(typeof(Vehicle)).Count()),
-                new Tuple<string, Func<Object>>("Rutas", () => DataAccess.AcabusData.Session.GetObjects(typeof(Route)).Count())
+                new Tuple<string, Func<Object>>("Equipos", () => AcabusData.AllDevices.Count()),
+                new Tuple<string, Func<Object>>("Estaciones", () => AcabusData.AllStations.Count()),
+                new Tuple<string, Func<Object>>("Vehículos", () => AcabusData.AllVehicles.Count()),
+                new Tuple<string, Func<Object>>("Rutas", () => AcabusData.AllRoutes.Count())
             };
 
             _commands = new List<Tuple<string, ICommand>>()

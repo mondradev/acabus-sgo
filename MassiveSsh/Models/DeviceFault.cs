@@ -97,7 +97,7 @@ namespace Acabus.Models
         /// Representa en una cadena la falla actual.
         /// </summary>
         /// <returns>Una cadena que representa la instancia.</returns>
-        public override string ToString() => String.Format("{0}, {1}", Category?.Description, Description);
+        public override string ToString() => Description;
 
         /// <summary>
     }

@@ -18,7 +18,7 @@
         <ViewModels:AttendanceViewModel/>
     </UserControl.DataContext>
     <Grid>
-        <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Attendances}" IsReadOnly="True" SelectedItem="{Binding SelectedAttendance}" >
+        <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Attendances}" IsReadOnly="True" SelectedItem="{Binding SelectedAttendance}" Margin="0,8,0,0" >
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
                     <i:InvokeCommandAction Command="{Binding RegisterDepartureCommand}"/>

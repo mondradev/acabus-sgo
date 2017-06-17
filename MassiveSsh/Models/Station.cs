@@ -82,7 +82,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene o establece los dispositivos que están asiganados a la estación actual.
         /// </summary>
-        [Column(IsIgnored = true)]
+        [Column(ForeignKeyName = "Fk_Station_ID")]
         public ObservableCollection<Device> Devices {
             get {
                 if (_devices == null)
@@ -205,10 +205,12 @@ namespace Acabus.Models
         /// Compara dos instancias de <see cref="Station"/> y determina si son iguales.
         /// </summary>
         public static bool operator ==(Station stationA, Station stationB)
-            => !(stationA is null)
+            => (stationA is null && stationB is null)
+                || (
+                !(stationA is null)
                 && !(stationB is null)
                 && stationA.ID == stationB.ID
-                && stationA.StationNumber == stationB.StationNumber;
+                && stationA.StationNumber == stationB.StationNumber);
 
         /// <summary>
         /// Añade un dispositivo a la estación.

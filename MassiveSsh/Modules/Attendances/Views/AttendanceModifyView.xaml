@@ -27,7 +27,7 @@
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Modificar asignación" FontSize="24" FontWeight="Normal" />
+            <TextBlock Text="Modificar asignación" FontSize="20" FontWeight="Normal" />
             <TextBox materialDesign:HintAssist.Hint="Nombre del técnico" Grid.Row="2" Text="{Binding Attendance.Technician}"/>
             <ComboBox materialDesign:HintAssist.Hint="Asignación" Grid.Row="4" ItemsSource="{Binding Sections}" SelectedItem="{Binding Section}" />
             <CheckBox Content="Llaves de KVR" Grid.Row="6" IsChecked="{Binding HasKvrKey}"  />

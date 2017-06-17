@@ -12,7 +12,7 @@ namespace Acabus.Models
         /// <summary>
         /// Campo que provee a la propiedad 'ID'.
         /// </summary>
-        protected UInt16 _id;
+        protected UInt64 _id;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Type'.
@@ -58,7 +58,7 @@ namespace Acabus.Models
         /// Obtiene el ID de la ruta.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt16 ID {
+        public UInt64 ID {
             get => _id;
             protected set {
                 _id = value;
@@ -92,7 +92,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene una lista de las estaciones de asignadas a la ruta.
         /// </summary>
-        [Column(IsIgnored = true)]
+        [Column(ForeignKeyName = "Fk_Route_ID")]
         public ObservableCollection<Station> Stations {
             get {
                 if (_stations == null)
@@ -104,7 +104,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene una lista de los vehículos asignados a esa ruta.
         /// </summary>
-        [Column(IsIgnored = true)]
+        [Column(ForeignKeyName = "Fk_Route_ID")]
         public ObservableCollection<Vehicle> Vehicles {
             get {
                 if (_vehicles == null)

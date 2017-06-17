@@ -254,10 +254,10 @@ namespace Acabus.Modules.CctvReports.Models
                 Folio,
                 Device?.Vehicle != null
                     ? String.Format("{0} {1}",
-                        Device?.Vehicle,
+                        Device?.Vehicle.Description,
                         Device)
                     : Device?.NumeSeri,
-                Description,
+                String.Format("*{0}*, {1}", Description.Category?.Description, Description),
                 AssignedAttendance is null
                 ? String.Empty
                 : String.Format("\n*Asignado:* {0}", AssignedAttendance),

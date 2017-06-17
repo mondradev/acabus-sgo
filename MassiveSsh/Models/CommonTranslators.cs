@@ -54,7 +54,8 @@ namespace Acabus.Models
                 { DeviceType.TA, "TORNIQUETE ABORDO" },
                 { DeviceType.MRV, "GRABADOR DE VIDEO MÓVIL" },
                 { DeviceType.PCA, "PC ABORDO" },
-                { DeviceType.CAM, "MONITOR" },
+                { DeviceType.CAM, "CAMARA" },
+                { DeviceType.MON, "MONITOR" },
                 { DeviceType.CONT, "CONTADOR DE PASAJEROS" },
                 { DeviceType.DSPB, "DISPLAY BUS" },
                 { DeviceType.CDE, "CONCENTRADOR DE ESTACIÓN" },
@@ -67,6 +68,9 @@ namespace Acabus.Models
                 { DeviceType.TS, "TORNIQUETE SIMPLE E/S" },
                 { DeviceType.TSI, "TORNIQUETE SIMPLE E/S" },
                 { DeviceType.TOR, "TORNIQUETE E/S" },
+                { DeviceType.APP, "SERVIDOR DE APLICACIÓN" },
+                { DeviceType.DB, "SERVIDOR BASE DE DATOS" },
+                { DeviceType.PDE, "SERVIDOR PATIO DE ENCIERRO" },
                 { DeviceType.NONE, "NINGUNO" }
             })
             {

@@ -26,7 +26,7 @@
                 <RowDefinition Height="8" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock TextWrapping="Wrap" Text="Modificar incidencia" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height"
+            <TextBlock TextWrapping="Wrap" Text="Modificar Incidencia" FontSize="20"
                                                Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
             <StackPanel Orientation="Vertical" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2">
                 <TextBox Margin="0,0,0,8"  materialDesign:HintAssist.Hint="Folio"

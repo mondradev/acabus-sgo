@@ -1,14 +1,15 @@
-﻿using Acabus.Models;
+﻿using Acabus.DataAccess;
+using Acabus.Models;
+using Acabus.Modules.Core.Config.Views;
+using Acabus.Utils;
 using Acabus.Utils.Mvvm;
+using Acabus.Window;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System;
-using Acabus.DataAccess;
 using System.Linq;
-using System.Windows.Input;
-using Acabus.Window;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Acabus.Modules.Core.Config.ViewModels
 {
@@ -20,15 +21,9 @@ namespace Acabus.Modules.Core.Config.ViewModels
         private ICollection<Device> _devices;
 
         /// <summary>
-        /// Obtiene una lista de todos los dispositivos.
+        /// Campo que provee a la propiedad 'Routes'.
         /// </summary>
-        public ICollection<Device> Devices {
-            get {
-                if (_devices == null)
-                    _devices = new ObservableCollection<Device>();
-                return _devices;
-            }
-        }
+        private ICollection<Route> _routes;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Stations'.
@@ -36,36 +31,12 @@ namespace Acabus.Modules.Core.Config.ViewModels
         private ICollection<Station> _stations;
 
         /// <summary>
-        /// Obtiene una lista de todas las estaciones.
-        /// </summary>
-        public ICollection<Station> Stations {
-            get {
-                if (_stations == null)
-                    _stations = new ObservableCollection<Station>();
-                return _stations;
-            }
-        }
-
-        /// <summary>
         /// Campo que provee a la propiedad 'Vehicles'.
         /// </summary>
         private ICollection<Vehicle> _vehicles;
 
         /// <summary>
-        /// Obtiene una lista de todos los autobuses.
-        /// </summary>
-        public ICollection<Vehicle> Vehicles {
-            get {
-                if (_vehicles == null)
-                    _vehicles = new ObservableCollection<Vehicle>();
-                return _vehicles;
-            }
-        }
-
-        public ICommand DownloadDataCommand { get; }
-
-        /// <summary>
-        ///  
+        ///
         /// </summary>
         public CoreConfigViewModel()
         {
@@ -76,19 +47,33 @@ namespace Acabus.Modules.Core.Config.ViewModels
                     AcabusControlCenterViewModel.AddNotify("DESCARGANDO RUTAS...");
                     if (DownloadRoutes())
                     {
+                        DataAccess.AcabusData.ReloadData();
                         AcabusControlCenterViewModel.AddNotify("RUTAS DESCARGAS CORRECTAMENTE, DESCAGANDO VEHÍCULOS...");
                         if (DownloadVehicles())
+                        {
                             AcabusControlCenterViewModel.AddNotify("VEHÍCULOS DESCARGADOS Y REASIGNADOS A SUS RUTAS CORRECTAMENTE.");
+                            DataAccess.AcabusData.ReloadData();
+                        }
+                        else
+                            AcabusControlCenterViewModel.AddNotify("ERROR: FALLA AL DESCARGAR LOS VEHÍCULOS");
                         AcabusControlCenterViewModel.AddNotify("DESCARGANDO ESTACIONES...");
                         if (DownloadStations())
                         {
+                            DataAccess.AcabusData.ReloadData();
                             AcabusControlCenterViewModel.AddNotify("ESTACIONES DESCARGADAS CORRECTAMENTE, DESCARGANDO EQUIPOS ASIGNADOS...");
                             if (DownloadDevices())
+                            {
                                 AcabusControlCenterViewModel.AddNotify("EQUIPOS DESCARGADOS CORRECTAMENTE.");
-
+                                DataAccess.AcabusData.ReloadData();
+                            }
+                            else
+                                AcabusControlCenterViewModel.AddNotify("ERROR: FALLA AL DESCARGAR LOS EQUIPOS");
                         }
+                        else
+                            AcabusControlCenterViewModel.AddNotify("ERROR: FALLA AL DESCARGAR LAS ESTACIONES");
                     }
-
+                    else
+                        AcabusControlCenterViewModel.AddNotify("ERROR: FALLA AL DESCARGAR LAS RUTAS");
                 });
             });
 
@@ -103,18 +88,79 @@ namespace Acabus.Modules.Core.Config.ViewModels
 
             BusReassingCommand = new CommandBase(parameter =>
             {
-                Task.Run(() =>
+                switch (parameter.ToString())
                 {
-                    AcabusControlCenterViewModel.AddNotify("DESCAGANDO VEHÍCULOS Y REASIGNANDO...");
-                    if (DownloadVehicles())
-                        AcabusControlCenterViewModel.AddNotify("VEHÍCULOS DESCARGADOS Y REASIGNADOS.");
-                });
-              });
+                    case "0":
+                        Task.Run(() =>
+                        {
+                            AcabusControlCenterViewModel.AddNotify("DESCAGANDO VEHÍCULOS Y REASIGNANDO...");
+                            if (DownloadVehicles())
+                                AcabusControlCenterViewModel.AddNotify("VEHÍCULOS DESCARGADOS Y REASIGNADOS.");
+                        });
+                        break;
+                    case "1":
+                        AcabusControlCenterViewModel.ShowDialog(new ManualReassignRouteView(), RefreshCommand.Execute);
+                        break;
+                }
+
+            });
+
+            AddDeviceCommand = new CommandBase(parameter => AcabusControlCenterViewModel.ShowDialog(new AddDeviceView(), RefreshCommand.Execute));
 
             Task.Run(() => RefreshData());
         }
 
+        public ICommand AddDeviceCommand { get; }
+
         public ICommand BusReassingCommand { get; }
+
+        /// <summary>
+        /// Obtiene una lista de todos los dispositivos.
+        /// </summary>
+        public ICollection<Device> Devices {
+            get {
+                if (_devices == null)
+                    _devices = new ObservableCollection<Device>();
+                return _devices;
+            }
+        }
+
+        public ICommand DownloadDataCommand { get; }
+
+        public ICommand RefreshCommand { get; }
+
+        /// <summary>
+        /// Obtiene una lista de todas las rutas.
+        /// </summary>
+        public ICollection<Route> Routes {
+            get {
+                if (_routes == null)
+                    _routes = new ObservableCollection<Route>();
+                return _routes;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de todas las estaciones.
+        /// </summary>
+        public ICollection<Station> Stations {
+            get {
+                if (_stations == null)
+                    _stations = new ObservableCollection<Station>();
+                return _stations;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de todos los autobuses.
+        /// </summary>
+        public ICollection<Vehicle> Vehicles {
+            get {
+                if (_vehicles == null)
+                    _vehicles = new ObservableCollection<Vehicle>();
+                return _vehicles;
+            }
+        }
 
         private bool DownloadDevices()
         {
@@ -125,7 +171,6 @@ namespace Acabus.Modules.Core.Config.ViewModels
                 foreach (var row in resultSet)
                 {
                     if (!headerRead) { headerRead = true; continue; }
-
 
                     var id = UInt64.Parse(row[0].Trim());
                     var serialNumber = row[1].Trim();
@@ -166,87 +211,6 @@ namespace Acabus.Modules.Core.Config.ViewModels
             catch { return false; }
         }
 
-
-        private bool DownloadStations()
-        {
-            try
-            {
-                var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.StationsQuery);
-                var headerRead = false;
-                foreach (var row in resultSet)
-                {
-                    if (!headerRead) { headerRead = true; continue; }
-
-                    var id = UInt16.Parse(row[0].Trim());
-                    var name = row[1].Trim();
-                    var isConnected = UInt16.Parse(row[2].Trim()) == 1 ? true : false;
-                    var minPing = UInt16.Parse(row[3].Trim());
-                    var maxPing = UInt16.Parse(row[4].Trim());
-                    var stationNumber = UInt16.Parse(row[5].Trim());
-                    var routeAsigned = Routes.FindRoute(route => route.ID == UInt16.Parse(row[6].Trim()));
-
-                    Station station = new Station(routeAsigned, id, stationNumber)
-                    {
-                        IsConnected = isConnected,
-                        Name = name,
-                        PingMin = minPing,
-                        PingMax = maxPing
-                    };
-
-                    if (Stations.Contains(station))
-                    {
-                        var stationReassign = Stations.FirstOrDefault(stationTemp => stationTemp.ID == station.ID);
-                        stationReassign.Route = station.Route;
-                        AcabusData.Session.Update(stationReassign);
-                        continue;
-                    }
-                    App.Current.Dispatcher.Invoke(() => Stations.Add(station));
-                    AcabusData.Session.Save(station);
-                }
-                return true;
-            }
-            catch { return false; }
-        }
-
-
-        private bool DownloadVehicles()
-        {
-            try
-            {
-                var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.VehiclesQuery);
-                var headerRead = false;
-                foreach (var row in resultSet)
-                {
-                    if (!headerRead) { headerRead = true; continue; }
-
-                    var id = UInt16.Parse(row[0].Trim());
-                    var type = (VehicleType)UInt16.Parse(row[1].Trim());
-                    var economicNumber = row[2].Trim();
-                    var enabled = UInt16.Parse(row[3].Trim()) == 1 ? true : false;
-                    var ipAddress = row[4].Trim();
-                    var routeAsigned = Routes.FindRoute(route => route.ID == UInt16.Parse(row[5].Trim()));
-
-                    Vehicle vehicle = new Vehicle(id, economicNumber, type)
-                    {
-                        Enabled = enabled,
-                        Route = routeAsigned
-                    };
-
-                    if (Vehicles.Contains(vehicle))
-                    {
-                        var vehicleReassign = Vehicles.FirstOrDefault(vehicleTemp => vehicleTemp.ID == vehicle.ID);
-                        vehicleReassign.Route = vehicle.Route;
-                        AcabusData.Session.Update(vehicleReassign);
-                        continue;
-                    }
-                    App.Current.Dispatcher.Invoke(() => Vehicles.Add(vehicle));
-                    AcabusData.Session.Save(vehicle);
-                }
-                return true;
-            }
-            catch { return false; }
-        }
-
         private bool DownloadRoutes()
         {
             try
@@ -275,41 +239,110 @@ namespace Acabus.Modules.Core.Config.ViewModels
             catch { return false; }
         }
 
+        private bool DownloadStations()
+        {
+            try
+            {
+                var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.StationsQuery);
+                var headerRead = false;
+                foreach (var row in resultSet)
+                {
+                    if (!headerRead) { headerRead = true; continue; }
+
+                    var id = UInt16.Parse(row[0].Trim());
+                    var name = row[1].Trim();
+                    var isConnected = UInt16.Parse(row[2].Trim()) == 1 ? true : false;
+                    var minPing = UInt16.Parse(row[3].Trim());
+                    var maxPing = UInt16.Parse(row[4].Trim());
+                    var stationNumber = UInt16.Parse(row[5].Trim());
+                    var routeAsigned = DataAccess.AcabusData.AllRoutes.FirstOrDefault(route => route.ID == UInt16.Parse(row[6].Trim()));
+
+                    Station station = new Station(routeAsigned, id, stationNumber)
+                    {
+                        IsConnected = isConnected,
+                        Name = name,
+                        PingMin = minPing,
+                        PingMax = maxPing
+                    };
+
+                    if (Stations.Contains(station))
+                    {
+                        var stationReassign = Stations.FirstOrDefault(stationTemp => stationTemp.ID == station.ID);
+                        stationReassign.Route = station.Route;
+                        AcabusData.Session.Update(stationReassign);
+                        continue;
+                    }
+                    App.Current.Dispatcher.Invoke(() => Stations.Add(station));
+                    AcabusData.Session.Save(station);
+                }
+                return true;
+            }
+            catch { return false; }
+        }
+
+        private bool DownloadVehicles()
+        {
+            try
+            {
+                var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.VehiclesQuery);
+                var headerRead = false;
+                foreach (var row in resultSet)
+                {
+                    if (!headerRead) { headerRead = true; continue; }
+
+                    var id = UInt16.Parse(row[0].Trim());
+                    var type = (VehicleType)UInt16.Parse(row[1].Trim());
+                    var economicNumber = row[2].Trim();
+                    var enabled = UInt16.Parse(row[3].Trim()) == 1 ? true : false;
+                    var ipAddress = row[4].Trim();
+                    var routeAsigned = DataAccess.AcabusData.AllRoutes.FirstOrDefault(route => route.ID == UInt16.Parse(row[5].Trim()));
+
+                    Vehicle vehicle = new Vehicle(id, economicNumber, type)
+                    {
+                        Enabled = enabled,
+                        Route = routeAsigned
+                    };
+
+                    if (Vehicles.Contains(vehicle))
+                    {
+                        var vehicleReassign = Vehicles.FirstOrDefault(vehicleTemp => vehicleTemp.ID == vehicle.ID);
+                        vehicleReassign.Route = vehicle.Route;
+                        AcabusData.Session.Update(vehicleReassign);
+                        continue;
+                    }
+                    App.Current.Dispatcher.Invoke(() => Vehicles.Add(vehicle));
+                    AcabusData.Session.Save(vehicle);
+                }
+                return true;
+            }
+            catch { return false; }
+        }
+
         private void RefreshData()
         {
             App.Current.Dispatcher.Invoke(() => Devices.Clear());
-            foreach (var device in AcabusData.Session.GetObjects(typeof(Device)).Cast<Device>())
-                App.Current.Dispatcher.Invoke(() => Devices.Add(device));
-
+            App.Current.Dispatcher.Invoke(() => Vehicles.Clear());
             App.Current.Dispatcher.Invoke(() => Stations.Clear());
-            foreach (var station in AcabusData.Session.GetObjects(typeof(Station)).Cast<Station>())
+            App.Current.Dispatcher.Invoke(() => Routes.Clear());
+
+            DataAccess.AcabusData.ReloadData();
+
+            IEnumerable<Route> routes = DataAccess.AcabusData.AllRoutes;
+
+            foreach (var route in routes)
+                App.Current.Dispatcher.Invoke(() => Routes.Add(route));
+
+            foreach (var station in routes.Select(route => route.Stations).Combine())
                 App.Current.Dispatcher.Invoke(() => Stations.Add(station));
 
-            App.Current.Dispatcher.Invoke(() => Vehicles.Clear());
-            foreach (var vehicle in AcabusData.Session.GetObjects(typeof(Vehicle)).Cast<Vehicle>())
+            foreach (var vehicle in routes.Select(route => route.Vehicles).Combine())
                 App.Current.Dispatcher.Invoke(() => Vehicles.Add(vehicle));
 
-            App.Current.Dispatcher.Invoke(() => Routes.Clear());
-            foreach (var route in AcabusData.Session.GetObjects(typeof(Route)).Cast<Route>())
-                App.Current.Dispatcher.Invoke(() => Routes.Add(route));
+            foreach (var device in Util.Combine(new[] {
+                Stations.Select(station => station.Devices).Combine(),
+                Vehicles.Select(vehicle => vehicle.Devices).Combine()
+            }))
+                App.Current.Dispatcher.Invoke(() => Devices.Add(device));
         }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Routes'.
-        /// </summary>
-        private ICollection<Route> _routes;
-
-        /// <summary>
-        /// Obtiene una lista de todas las rutas.
-        /// </summary>
-        public ICollection<Route> Routes {
-            get {
-                if (_routes == null)
-                    _routes = new ObservableCollection<Route>();
-                return _routes;
-            }
-        }
-
-        public ICommand RefreshCommand { get; }
     }
 }

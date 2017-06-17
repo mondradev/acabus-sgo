@@ -410,10 +410,7 @@ namespace Acabus.Models
         /// si el NumeSeri es diferente en ambas instancias <see cref="Device"/>.
         /// </returns>
         public static bool operator !=(Device device, Device otherDevice)
-        {
-            if (otherDevice?.NumeSeri == device?.NumeSeri) return false;
-            return true;
-        }
+            => !(device == otherDevice);
 
         /// <summary>
         /// Operador lógico de igualdad, determina si dos instancias <see cref="Device"/> son iguales.
@@ -423,7 +420,10 @@ namespace Acabus.Models
         /// <returns>Un valor <code>true</code> si el NumeSeri es igual en ambas instancias <see cref="Device"/>.</returns>
         public static bool operator ==(Device device, Device otherDevice)
         {
-            if (otherDevice?.NumeSeri == device?.NumeSeri) return true;
+            if (device is null && otherDevice is null) return true;
+
+            if (!(device is null) && !(otherDevice is null))
+                return device.ID == otherDevice.ID && device.NumeSeri == otherDevice.NumeSeri;
 
             return false;
         }
@@ -435,8 +435,8 @@ namespace Acabus.Models
         /// <returns>Un valor <see cref="true"/> si las instancias son iguales.</returns>
         public override bool Equals(object obj)
         {
-            if (GetType() != obj.GetType())
-                return false;
+            if (obj is null) return false;
+            if (GetType() != obj.GetType()) return false;
 
             return this == (Device)obj;
         }

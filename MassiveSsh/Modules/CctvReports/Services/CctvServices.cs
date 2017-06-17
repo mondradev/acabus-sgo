@@ -16,7 +16,7 @@ namespace Acabus.Modules.CctvReports.Services
     {
         public static Boolean CommitRefund(this Incidence incidence, DateTime refundDateTime)
         {
-            var refund = AcabusData.Session.GetObjects(typeof(RefundOfMoney))
+            var refund = AcabusData.Session.GetObjects<RefundOfMoney>(typeof(RefundOfMoney))
                 .FirstOrDefault(refundOfMoney => (refundOfMoney as RefundOfMoney).Incidence.Folio == incidence.Folio) as RefundOfMoney;
 
             refund.RefundDate = refundDateTime;
@@ -34,7 +34,7 @@ namespace Acabus.Modules.CctvReports.Services
             var deviceType = alarm?.Device?.Type;
             var description = alarm?.Description;
 
-            var faults = AcabusData.Session.GetObjects(typeof(DeviceFault)).Where(fault => (fault as DeviceFault).Category?.DeviceType == deviceType);
+            var faults =Core.DataAccess.AcabusData.AllFaults.Where(fault => (fault as DeviceFault).Category?.DeviceType == deviceType);
 
             switch (description)
             {
@@ -125,7 +125,8 @@ namespace Acabus.Modules.CctvReports.Services
         public static Boolean Equals(Alarm alarm, Incidence incidence)
         {
             if (alarm.Device != null && !alarm.Device.Equals(incidence?.Device)) return false;
-            if (CreateDeviceFault(alarm).Equals(incidence.Description))
+            DeviceFault deviceFault = CreateDeviceFault(alarm);
+            if (deviceFault != null && deviceFault.Equals(incidence.Description))
                 if (incidence.Status != IncidenceStatus.CLOSE
                     || alarm.DateTime == incidence.StartDate)
                     return true;
@@ -193,7 +194,7 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void LoadFromDataBase(this IList<Incidence> incidences)
         {
-            ICollection<object> incidencesFromDb = AcabusData.Session.GetObjects(typeof(Incidence));
+            ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>(typeof(Incidence));
             foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).Status != IncidenceStatus.CLOSE))
                 incidences.Add(incidenceData as Incidence);
             foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).StartDate > DateTime.Now.AddDays(-45)

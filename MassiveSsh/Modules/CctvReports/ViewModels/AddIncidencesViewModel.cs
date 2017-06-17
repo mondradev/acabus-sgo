@@ -67,7 +67,7 @@ namespace Acabus.Modules.CctvReports
         public AddIncidencesViewModel()
         {
             AddCommand = new CommandBase(AddCommandExecute, AddCommandCanExec);
-            CloseCommand = new CommandBase(parameter => DialogHost.CloseDialogCommand.Execute(parameter, null));
+            CloseCommand = DialogHost.CloseDialogCommand;
 
             _startTime = DateTime.Now.TimeOfDay;
         }
@@ -93,11 +93,10 @@ namespace Acabus.Modules.CctvReports
         public IEnumerable<DeviceFault> DeviceFaults {
             get {
                 if (SelectedDevice is null)
-                    return AcabusData.Session.GetObjects(typeof(DeviceFault)).Cast<DeviceFault>();
+                    return null;
 
-                return AcabusData.Session.GetObjects(typeof(DeviceFault))
-                    .Where(fault => (fault as DeviceFault).Category.DeviceType == SelectedDevice.Type)
-                    .Cast<DeviceFault>();
+                return Core.DataAccess.AcabusData.AllFaults
+                    .Where(fault => (fault as DeviceFault).Category.DeviceType == SelectedDevice.Type);
             }
         }
 
@@ -108,25 +107,22 @@ namespace Acabus.Modules.CctvReports
             get {
                 if (IsRefundOfMoney)
                     return SelectedLocation is null
-                        ? AcabusData.Session.GetObjects(typeof(Device))
-                                    .Where(device => (device as Device).Type == DeviceType.KVR).Cast<Device>()
-                        : AcabusData.Session.GetObjects(typeof(Device))
-                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID)
+                        ? Core.DataAccess.AcabusData.AllDevices
                                     .Where(device => (device as Device).Type == DeviceType.KVR)
-                                    .Cast<Device>();
+                        : Core.DataAccess.AcabusData.AllDevices
+                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID)
+                                    .Where(device => (device as Device).Type == DeviceType.KVR);
                 if (IsBusIncidences)
                     return SelectedVehicle is null
                         ? null
-                        : AcabusData.Session.GetObjects(typeof(Device))
-                                    .Where(device => (device as Device).Vehicle?.EconomicNumber == SelectedVehicle?.EconomicNumber)
-                                    .Cast<Device>();
+                        : Core.DataAccess.AcabusData.AllDevices
+                                    .Where(device => (device as Device).Vehicle?.EconomicNumber == SelectedVehicle?.EconomicNumber);
                 else
                     return SelectedLocation is null
-                        ? AcabusData.Session.GetObjects(typeof(Device))
-                                    .Where(device => (device as Device).Vehicle is null).Cast<Device>()
-                        : AcabusData.Session.GetObjects(typeof(Device))
-                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID)
-                                    .Cast<Device>();
+                        ? Core.DataAccess.AcabusData.AllDevices
+                                    .Where(device => (device as Device).Vehicle is null)
+                        : Core.DataAccess.AcabusData.AllDevices
+                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID);
             }
         }
 
@@ -173,9 +169,9 @@ namespace Acabus.Modules.CctvReports
         public IEnumerable<AssignableSection> Locations {
             get {
                 if (IsBusIncidences)
-                    return AcabusData.Session.GetObjects(typeof(Route)).Cast<AssignableSection>();
+                    return Core.DataAccess.AcabusData.AllRoutes.Cast<AssignableSection>();
 
-                return AcabusData.Session.GetObjects(typeof(Station)).Cast<AssignableSection>();
+                return Core.DataAccess.AcabusData.AllStations.Cast<AssignableSection>();
             }
         }
 
@@ -204,8 +200,11 @@ namespace Acabus.Modules.CctvReports
                 _selectedDevice = value;
                 OnPropertyChanged("SelectedDevice");
                 OnPropertyChanged("DeviceFaults");
-                if (!IsBusIncidences && SelectedDevice != null && SelectedDevice.Station != SelectedLocation)
-                    SelectedLocation = SelectedDevice.Station;
+                if (!IsBusIncidences && SelectedDevice != null && SelectedDevice.Station.Equals(SelectedLocation))
+                {
+                    _selectedLocation = SelectedDevice.Station;
+                    OnPropertyChanged(nameof(SelectedLocation));
+                }
             }
         }
 
@@ -242,6 +241,8 @@ namespace Acabus.Modules.CctvReports
                 _selectedVehicle = value;
                 OnPropertyChanged("SelectedVehicle");
                 OnPropertyChanged("Devices");
+                if (value != null)
+                    SelectedLocation = value.Route;
             }
         }
 
@@ -264,11 +265,10 @@ namespace Acabus.Modules.CctvReports
                 if (!IsBusIncidences)
                     return null;
                 if (SelectedLocation is null)
-                    return AcabusData.Session.GetObjects(typeof(Vehicle)).Cast<Vehicle>();
+                    return Core.DataAccess.AcabusData.AllVehicles;
                 else
-                    return AcabusData.Session.GetObjects(typeof(Vehicle))
-                        .Where(vehicle => (vehicle as Vehicle).Route?.ID == (SelectedLocation as Route)?.ID)
-                        .Cast<Vehicle>();
+                    return Core.DataAccess.AcabusData.AllVehicles
+                        .Where(vehicle => (vehicle as Vehicle).Route?.ID == (SelectedLocation as Route)?.ID);
             }
         }
 
@@ -324,7 +324,7 @@ namespace Acabus.Modules.CctvReports
         /// Obtiene una lista con los destino de dinero.
         /// </summary>
         public IEnumerable<CashDestiny> CashDestinies
-            => AcabusData.Session.GetObjects(typeof(CashDestiny))
+            => Core.DataAccess.AcabusData.AllCashDestinies
             .Where(cashDestiny =>
             {
                 if (IsMoney && (cashDestiny as CashDestiny).CashType == CashType.MONEY)
@@ -332,8 +332,7 @@ namespace Acabus.Modules.CctvReports
                 if (!IsMoney && (cashDestiny as CashDestiny).CashType == CashType.BILL)
                     return true;
                 return false;
-            })
-            .Cast<CashDestiny>();
+            });
 
         /// <summary>
         /// Obtiene o establece el destino del dinero.
@@ -437,12 +436,12 @@ namespace Acabus.Modules.CctvReports
             Single.TryParse(Quantity, out float quantity);
             if (IsRefundOfMoney)
             {
-                var faults = AcabusData.Session.GetObjects(typeof(DeviceFault))
+                var faults = Core.DataAccess.AcabusData.AllFaults
                      .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.KVR);
 
                 SelectedDescription = IsMoney
                      ? faults.Where(fault => (fault as DeviceFault).Description
-                     .Equals("MONEDAS ENCONTRADAS EN TOLVA, NOTIFICAR EL TOTAL E INTRODUCIR A LA ALCANCIA"))
+                     .Equals("MONEDAS ENCONTRADAS EN TOLVA, NOTIFICAR EL TOTAL E INTRODUCIR A LA ALCANCÍA"))
                      .FirstOrDefault() as DeviceFault
                      : faults.Where(fault => (fault as DeviceFault).Description
                      .Equals("BILLETE ATASCADO, NOTIFICAR EL TOTAL Y CANALIZAR EL DINERO A CAU"))
@@ -482,7 +481,7 @@ namespace Acabus.Modules.CctvReports
                 case "SelectedDevice":
                     if (String.IsNullOrEmpty(SelectedDevice?.ToString()))
                         AddError("SelectedDevice", "Falta seleccionar el equipo.");
-                    if (IsRefundOfMoney && !(SelectedDevice is Kvr))
+                    if (IsRefundOfMoney && !(SelectedDevice?.Type == DeviceType.KVR))
                         AddError("SelectedDevice", "El equipo debe ser un KVR");
                     break;
 

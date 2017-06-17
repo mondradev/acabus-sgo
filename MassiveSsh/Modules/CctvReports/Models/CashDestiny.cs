@@ -68,6 +68,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el identificador unico del destino de dinero.
         /// </summary>
+        [Column(IsPrimaryKey = true)]
         public Int64 ID {
             get => _id;
             set {

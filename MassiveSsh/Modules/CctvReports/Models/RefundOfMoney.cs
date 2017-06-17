@@ -54,7 +54,8 @@ namespace Acabus.Modules.CctvReports.Models
         /// </param>
         public RefundOfMoney(Incidence incidence)
         {
-            if (!(incidence.Device is Kvr)) throw new ArgumentException("La incidencia debe pertenecer a un Kvr.");
+            if (incidence.Device?.Type != DeviceType.KVR)
+                throw new ArgumentException("La incidencia debe pertenecer a un Kvr.");
 
             _incidence = incidence;
         }

@@ -33,7 +33,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Margin="16,24,16,0" TextWrapping="Wrap" Text="{Binding TitleSection}" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height" />
+            <TextBlock Margin="16,24,16,0" TextWrapping="Wrap" Text="{Binding TitleSection}" FontSize="20" />
             <Grid Margin="16" Grid.Row="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

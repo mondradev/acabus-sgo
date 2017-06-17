@@ -32,7 +32,7 @@ namespace Acabus.Models
         /// Campo que provee a la propiedad 'ID'.
         /// </summary>
         private Int64 _id;
-        
+
         /// <summary>
         /// Campo que provee a la propiedad 'Route'.
         /// </summary>
@@ -84,9 +84,15 @@ namespace Acabus.Models
         }
 
         /// <summary>
-        /// Obtiene una lista de los dispositivos dentro de la unidad.
+        /// Obtiene la descripción del vehículo ([Ruta] [Número Económico]).
         /// </summary>
         [Column(IsIgnored = true)]
+        public String Description => String.Format("{0} {1}", Route?.GetCodeRoute(), EconomicNumber);
+
+        /// <summary>
+        /// Obtiene una lista de los dispositivos dentro de la unidad.
+        /// </summary>
+        [Column(ForeignKeyName = "Fk_Vehicle_ID")]
         public ObservableCollection<Device> Devices {
             get {
                 if (_devices == null)
@@ -128,7 +134,7 @@ namespace Acabus.Models
                 OnPropertyChanged("ID");
             }
         }
-       
+
         /// <summary>
         /// Obtiene o establece la ruta asignada de la unidad.
         /// </summary>
@@ -165,11 +171,12 @@ namespace Acabus.Models
         /// Compara dos instancias de <see cref="Vehicle"/> y determina si son iguales.
         /// </summary>
         public static bool operator ==(Vehicle vehicleA, Vehicle vehicleB)
-            => !(vehicleA is null)
+            => (vehicleA is null && vehicleB is null)
+                || (!(vehicleA is null)
                 && !(vehicleB is null)
                 && vehicleA.ID == vehicleB.ID
                 && vehicleA.EconomicNumber == vehicleB.EconomicNumber
-                && vehicleA.BusType == vehicleB.BusType;
+                && vehicleA.BusType == vehicleB.BusType);
 
         /// <summary>
         /// Compara la instancia actual con la especificada y determina si son iguales.
@@ -183,6 +190,12 @@ namespace Acabus.Models
 
             return this == (Vehicle)obj;
         }
+
+        /// <summary>
+        /// Obtiene el código hash de la instancia actual.
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode() => base.GetHashCode();
 
         /// <summary>
         /// Obtiene la representación de una unidad a través de una cadena.

@@ -281,29 +281,22 @@ namespace Acabus.Models
     /// </summary>
     public static class StateValueExtension
     {
+
         /// <summary>
         /// Obtiene un estado evaluando ambos estados de conexión devolviendo el de menor valor.
         /// </summary>
-        /// <param name="state1">Estado 1.</param>
-        /// <param name="state2">Estado 2.</param>
+        /// <param name="state">Un estado a evaluar.</param>
+        /// <param name="anotherState">Otro estado a evaluar.</param>
         /// <returns>El estado de menor valor.</returns>
-        public static StateValue AndConnectionState(StateValue state1, StateValue state2)
+        public static StateValue And(this StateValue state, StateValue anotherState)
         {
-            if (state1 == state2)
-                return state1;
-            if (state1 < state2)
-                return state1;
-            return state2;
+            if (state == anotherState)
+                return state;
+            if (state < anotherState)
+                return state;
+            return anotherState;
         }
 
-        /// <summary>
-        /// Obtiene un estado evaluando ambos estados de conexión devolviendo el menor valor.
-        /// </summary>
-        /// <param name="thisState">Este estado.</param>
-        /// <param name="otherState">Otro estado.</param>
-        /// <returns>El estado de menor valor.</returns>
-        public static StateValue AndConnectionStete(this StateValue thisState, StateValue otherState) =>
-            AndConnectionState(thisState, otherState);
 
         /// <summary>
         /// Obtiene el estado de conexión determinado por la latencia mínima y máxima aceptable.

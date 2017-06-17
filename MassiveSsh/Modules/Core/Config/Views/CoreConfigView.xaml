@@ -14,9 +14,6 @@
     </UserControl.DataContext>
     <Grid>
         <dragablz:TabablzControl>
-            <dragablz:TabablzControl.Background>
-                <ImageBrush/>
-            </dragablz:TabablzControl.Background>
             <TabItem>
                 <TabItem.Header>
                     <TextBlock Text="EQUIPOS" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
@@ -103,7 +100,7 @@
 
         <materialDesignMahApps:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
             PlacementMode="TopAndAlignCentres"
-            Margin="0,0,16,16"
+            Margin="0,0,16,16" ToggleCheckedContentCommand="{Binding AddDeviceCommand}" 
             ToolTip="Añadir equipo" Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" PopupMode="MouseOver" Grid.RowSpan="4">
             <materialDesignMahApps:PopupBox.ToggleCheckedContent>
                 <materialDesignMahApps:PackIcon Kind="GlassStange" Width="24" Height="24" />
@@ -112,21 +109,24 @@
                 <Button ToolTip="Descargar catálogos"  BorderBrush="White" Background="White" Command="{Binding DownloadDataCommand}">
                     <materialDesignMahApps:PackIcon Kind="Download" Width="24" Height="24" />
                 </Button>
-                <Button ToolTip="Reasignar vehículos"  Command="{Binding BusReassingCommand}" BorderBrush="White" Background="White">
+                <Button ToolTip="Reasignar vehículos (Automática)"  Command="{Binding BusReassingCommand}" CommandParameter="0" BorderBrush="White" Background="White">
                     <materialDesignMahApps:PackIcon Kind="MapMarkerRadius" Width="24" Height="24" />
+                </Button>
+                <Button ToolTip="Reasignar vehículos (Manual)"  Command="{Binding BusReassingCommand}" CommandParameter="1" BorderBrush="White" Background="White">
+                    <materialDesignMahApps:PackIcon Kind="MapMarkerMultiple" Width="24" Height="24" />
                 </Button>
                 <Button ToolTip="Actualizar listas (local)"  Command="{Binding RefreshCommand}" BorderBrush="White" Background="White">
                     <materialDesignMahApps:PackIcon Kind="Refresh" Width="24" Height="24" />
                 </Button>
-                <Button ToolTip="Añadir Ruta"  BorderBrush="White" Background="White">
+                <!--<Button ToolTip="Añadir Ruta"  BorderBrush="White" Background="White">
                     <materialDesignMahApps:PackIcon Kind="GoogleMaps" Width="24" Height="24" />
-                </Button>
-                <Button ToolTip="Añadir Vehículo"  BorderBrush="White" Background="White">
+                </Button>-->
+                <!--<Button ToolTip="Añadir Vehículo"  BorderBrush="White" Background="White">
                     <materialDesignMahApps:PackIcon Kind="Bus" Width="24" Height="24" />
-                </Button>
-                <Button ToolTip="Añadir Estación"  BorderBrush="White" Background="White">
+                </Button>-->
+                <!--<Button ToolTip="Añadir Estación" BorderBrush="White" Background="White">
                     <materialDesignMahApps:PackIcon Kind="HomeModern" Width="24" Height="24" />
-                </Button>
+                </Button>-->
             </StackPanel>
         </materialDesignMahApps:PopupBox>
     </Grid>

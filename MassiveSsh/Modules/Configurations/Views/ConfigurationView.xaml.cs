@@ -13,7 +13,7 @@ namespace Acabus.Modules.Configurations.Views
         static ConfigurationView()
         {
             AcabusData.LoadConfigModules();
-            AcabusControlCenterViewModel.AddModule(new ConfigurationView(), new PackIcon() { Kind = PackIconKind.Settings }, "Configuración");
+            AcabusControlCenterViewModel.AddModule(new ConfigurationView(), new PackIcon() { Kind = PackIconKind.Settings }, "Configuración", true);
         }
 
         public ConfigurationView()

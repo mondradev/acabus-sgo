@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Acabus.Window
 {
@@ -36,23 +37,32 @@ namespace Acabus.Window
         /// <param name="command">Comando para hacer su llamada.</param>
         /// <param name="buttonContent">Contenido del botón.</param>
         /// <param name="tooltip">Tip de la herramienta.</param>
-        public void AddToolButton(String name, ICommand command, FrameworkElement buttonContent, String tooltip)
+        /// <param name="isSecundary">Es un modulo secundario.</param>
+        public void AddToolButton(String name, ICommand command, FrameworkElement buttonContent, String tooltip, Boolean isSecundary)
         {
-            foreach (var item in _mainToolBar.Items)
+            foreach (var item in _mainToolBar.Children)
                 if (item is Button)
                     if (((Button)item).Name == name)
                         throw new ArgumentException($"Ya existe un botón con el mismo nombre '{name}'");
 
-            buttonContent.Width = 24;
             buttonContent.Height = 24;
+            buttonContent.Width = 24;
+            buttonContent.Margin = new Thickness(0);
 
-            _mainToolBar.Items.Add(new Button()
+            Button newButton = new Button()
             {
                 Content = buttonContent,
                 Command = command,
                 Name = name,
-                ToolTip = tooltip
-            });
+                ToolTip = tooltip,
+                Style = TryFindResource("MaterialDesignToolButton") as Style,
+                Margin = new Thickness(16),
+                Padding = new Thickness(0),
+                Foreground = TryFindResource("IdealForegroundColorBrush") as Brush
+            };
+            if (isSecundary)
+                DockPanel.SetDock(newButton, Dock.Right);
+            _mainToolBar.Children.Add(newButton);
         }
 
         /// <summary>
@@ -61,7 +71,8 @@ namespace Acabus.Window
         /// <param name="content">Modulo a visualizar.</param>
         public void ShowContent(UserControl content)
         {
-            _content.Content = content;
+            _content.Children.Clear();
+            _content.Children.Add(content);
         }
 
         /// <summary>

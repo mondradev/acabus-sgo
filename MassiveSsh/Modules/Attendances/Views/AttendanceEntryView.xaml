@@ -33,7 +33,7 @@
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Asistencia (Entrada)" FontSize="24" FontWeight="Normal" />
+            <TextBlock Text="Asistencia (Entrada)" FontSize="20" FontWeight="Normal" />
             <ComboBox materialDesign:HintAssist.Hint="Nombre del técnico" Grid.Row="2" ItemsSource="{Binding Technicians}" SelectedItem="{Binding Technician}"/>
             <ComboBox materialDesign:HintAssist.Hint="Turno" Grid.Row="4" SelectedItem="{Binding Turn, Converter={StaticResource TurnsConverter}}" ItemsSource="{Binding Turns, Converter={StaticResource TurnsConverter}}"/>
             <materialDesign:TimePicker materialDesign:HintAssist.Hint="Hora de entrada" Grid.Row="6" SelectedTime="{Binding TimeEntry, Converter={StaticResource DateTimeConverter}}"/>

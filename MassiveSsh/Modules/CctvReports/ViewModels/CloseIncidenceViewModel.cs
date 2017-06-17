@@ -224,7 +224,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene una lista de destinos posibles para devolución de dinero.
         /// </summary>
-        public IEnumerable<CashDestiny> Destinies => AcabusData.Session.GetObjects(typeof(CashDestiny))
+        public IEnumerable<CashDestiny> Destinies => Core.DataAccess.AcabusData.AllCashDestinies
             .Where(cashDestiny =>
             {
                 if (IsMoney && (cashDestiny as CashDestiny).CashType == CashType.MONEY)
@@ -232,8 +232,7 @@ namespace Acabus.Modules.CctvReports
                 if (!IsMoney && (cashDestiny as CashDestiny).CashType == CashType.BILL)
                     return true;
                 return false;
-            })
-            .Cast<CashDestiny>();
+            });
 
         /// <summary>
         ///

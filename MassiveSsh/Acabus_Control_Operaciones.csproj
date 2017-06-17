@@ -214,10 +214,19 @@
       <DependentUpon>ConfigurationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Core\Config\CoreConfig.cs" />
+    <Compile Include="Modules\Core\Config\ViewModels\AddDeviceViewModel.cs" />
     <Compile Include="Modules\Core\Config\ViewModels\CoreConfigViewModel.cs" />
+    <Compile Include="Modules\Core\Config\ViewModels\ManualReassignRouteViewModel.cs" />
+    <Compile Include="Modules\Core\Config\Views\AddDeviceView.xaml.cs">
+      <DependentUpon>AddDeviceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\Core\Config\Views\CoreConfigView.xaml.cs">
       <DependentUpon>CoreConfigView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\Core\Config\Views\ManualReassignRouteView.xaml.cs">
+      <DependentUpon>ManualReassignRouteView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Core\DataAccess\AcabusData.cs" />
     <Compile Include="Modules\OffDutyVehicles\AcabusData.cs" />
     <Compile Include="Utils\EnumTranslate.cs" />
     <Compile Include="Utils\Mvvm\NotifyPropertyChanged.cs" />
@@ -316,7 +325,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Modules\Core\Config\Views\AddDeviceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Modules\Core\Config\Views\CoreConfigView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Core\Config\Views\ManualReassignRouteView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

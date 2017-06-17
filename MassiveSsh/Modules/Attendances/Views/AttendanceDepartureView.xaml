@@ -36,7 +36,7 @@
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Asistencia (Salida)" FontSize="24" FontWeight="Normal" />
+                <TextBlock Text="Asistencia (Salida)" FontSize="20" FontWeight="Normal" />
                 <TextBox Focusable="False" materialDesign:HintAssist.Hint="Nombre del técnico" Grid.Row="2" IsReadOnly="True" Text="{Binding Attendance.Technician}"/>
                 <TextBox Focusable="False"  materialDesign:HintAssist.Hint="Turno" Grid.Row="4" IsReadOnly="True" Text="{Binding Attendance.Turn, Converter={StaticResource TurnsConverter}}"/>
                 <materialDesign:TimePicker materialDesign:HintAssist.Hint="Hora de salida" Grid.Row="8" SelectedTime="{Binding TimeDeparture, Converter={StaticResource DateTimeConverter}}"/>

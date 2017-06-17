@@ -1,6 +1,7 @@
 ﻿using Acabus.Models;
 using Acabus.Utils.Mvvm;
 using System;
+using System.Linq;
 
 namespace Acabus.Modules.CctvReports.Models
 {
@@ -104,7 +105,7 @@ namespace Acabus.Modules.CctvReports.Models
             {
                 Description = description,
                 DateTime = dateTime,
-                Device = DataAccess.AcabusData.FindDevice((device)
+                Device = Core.DataAccess.AcabusData.AllDevices.FirstOrDefault((device)
                             => device.NumeSeri.Equals(numeSeri)),
                 Priority = priority
             };

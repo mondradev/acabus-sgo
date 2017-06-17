@@ -418,10 +418,12 @@ namespace Acabus.Modules.CctvReports
                         if (exists = CctvService.Equals(alarm, incidence)) break;
                     if (!exists)
                         Incidences.CreateIncidence(
-                            (DeviceFault)AcabusData.Session.GetObjects(typeof(DeviceFault))
+                            Core.DataAccess.AcabusData.AllFaults
                                 .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
                                 .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA")),
-                            AcabusData.FindDeviceBus(alarm.EconomicNumber, (deviceBus) => deviceBus.Type == DeviceType.PCA),
+                            Core.DataAccess.AcabusData.AllDevices
+                                .FirstOrDefault(deviceBus => deviceBus.Vehicle != null
+                                    && deviceBus.Vehicle.EconomicNumber == alarm.EconomicNumber),
                             DateTime.Now,
                             alarm.Priority,
                             "SISTEMA"
@@ -499,7 +501,8 @@ namespace Acabus.Modules.CctvReports
                     foreach (var incidence in incidences)
                     {
                         /// Verificación de las incidencias de SIN CONEXIÓN DE DATOS por confirmar
-                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description.Equals((DeviceFault)AcabusData.Session.GetObjects(typeof(DeviceFault))
+                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description.Equals(
+                            Core.DataAccess.AcabusData.AllFaults
                                .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
                                 .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA")))
                         && incidence.Device.Vehicle != null)
@@ -519,9 +522,10 @@ namespace Acabus.Modules.CctvReports
                         /// Verificación de las incidencias ABIERTAS
 
                         if (incidence.Status != IncidenceStatus.OPEN
-                                || incidence.Description.Equals((DeviceFault)AcabusData.Session.GetObjects(typeof(DeviceFault))
+                                || (incidence.Description != null && incidence.Description.Equals(
+                                    Core.DataAccess.AcabusData.AllFaults
                                         .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
-                                        .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA")))
+                                        .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA"))))
                                     || incidence.Device?.Vehicle is null) continue;
 
                         bool exists = false;
