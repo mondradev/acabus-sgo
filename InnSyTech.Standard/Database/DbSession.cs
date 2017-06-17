@@ -250,6 +250,9 @@ namespace InnSyTech.Standard.Database
 
             foreach (DbField field in DbField.GetFields(typeOfInstance))
             {
+                if (!String.IsNullOrEmpty(field.ForeignKeyName))
+                    continue;
+
                 object defaultValue = field.PropertyType.IsValueType
                                                         ? Activator.CreateInstance(field.PropertyType)
                                                         : null;
@@ -391,6 +394,8 @@ namespace InnSyTech.Standard.Database
 
             foreach (DbField field in DbField.GetFields(typeOfInstance))
             {
+                if (!String.IsNullOrEmpty(field.ForeignKeyName))
+                    continue;
                 if (field.IsPrimaryKey) continue;
                 parameters.AppendFormat("{0}=@{0},", field.Name);
             }

@@ -20,9 +20,9 @@ namespace InnSyTech.Debug
 
         public static bool Delete<T>(T instance) => _session.Delete(instance);
 
-        public static T GetObject<T>(Object idkey) => (T)_session.GetObject(typeof(T), idkey);
+        public static T GetObject<T>(Object idkey) => (T)_session.GetObject<T>(typeof(T), idkey);
 
-        public static IEnumerable<T> GetObjects<T>() => _session.GetObjects(typeof(T)).Select(item => (T)item);
+        public static IEnumerable<T> GetObjects<T>() => _session.GetObjects<T>(typeof(T)).Select(item => (T)item);
 
         public static bool Save<T>(T instance) => _session.Save(instance);
 
