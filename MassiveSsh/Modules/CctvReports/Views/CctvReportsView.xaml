@@ -32,14 +32,14 @@
     </UserControl.DataContext>
     <i:Interaction.Triggers>
         <i:EventTrigger>
-            <i:InvokeCommandAction Command="{Binding LoadedHandlerCommand}" />
+            <i:InvokeCommandAction Command="{Binding LoadCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="8" />
-            <RowDefinition />
+            <RowDefinition Height="140" />
         </Grid.RowDefinitions>
         <Grid Margin="0">
             <Grid.RowDefinitions>
@@ -55,7 +55,7 @@
                 <TextBox materialDesign:HintAssist.Hint="Buscar folio"  Margin="0,0,16,0" Grid.Column="1" Text="{Binding FolioToSearch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
             <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource OpenedIncidencesCollection}}" IsReadOnly="True"
-                SelectedItem="{Binding SelectedIncidence}" SelectionMode="Single" CanUserResizeRows="False" Grid.Row="1">
+                SelectedItem="{Binding SelectedIncidence}" SelectionMode="Single" CanUserResizeRows="False" Grid.Row="1" FrozenColumnCount="1">
                 <DataGrid.CommandBindings>
                     <CommandBinding Command="{x:Static ApplicationCommands.Copy}" Executed="CommandBindingExecuted" />
                     <CommandBinding Command="{x:Static ApplicationCommands.Cut}" Executed="CommandBindingExecuted" />
@@ -105,7 +105,7 @@
                 <materialDesign:PackIcon Kind="Magnify" Width="24" Height="24" VerticalAlignment="Center" Margin="8" />
                 <TextBox materialDesign:HintAssist.Hint="Buscar técnico o descripción"  Margin="0,0,16,0" Grid.Column="1" Text="{Binding ToSearchClosed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
-            <DataGrid  Grid.Row="2"  Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource ClosedIncidencesCollection}}" IsReadOnly="True" SelectionMode="Single" CanUserResizeRows="False">
+            <DataGrid  Grid.Row="2"  Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource ClosedIncidencesCollection}}" IsReadOnly="True" SelectionMode="Single" CanUserResizeRows="False" FrozenColumnCount="1">
                 <DataGrid.CommandBindings>
                     <CommandBinding Command="{x:Static ApplicationCommands.Copy}" Executed="CommandBindingExecuted" />
                     <CommandBinding Command="{x:Static ApplicationCommands.Cut}" Executed="CommandBindingExecuted" />
@@ -149,6 +149,10 @@
                         <local:ExportDataView />
                     </Button.CommandParameter>
                     <materialDesign:PackIcon Kind="Export"  Width="24" Height="24" />
+                </Button>
+                <!--Busqueda personalizada en el historial de incidencias-->
+                <Button ToolTip="Buscar en historial" Command="{Binding SearchToHistoryCommand}" BorderBrush="White" Background="White">
+                    <materialDesign:PackIcon Kind="Magnify" Width="24 " Height="24" />
                 </Button>
                 <!-- Unidades en taller o sin energía -->
                 <Button ToolTip="Unidades en taller o sin energía" Command="{Binding OpenOffDutyVehiclesDialog}" BorderBrush="White" Background="White">

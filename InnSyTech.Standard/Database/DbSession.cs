@@ -559,8 +559,9 @@ namespace InnSyTech.Standard.Database
         /// <param name="typeOfInstance">Tipo de la instancia.</param>
         /// <param name="idKey">Valor de la llave primaria de la instancia.</param>
         /// <returns>Una instancia del tipo especificada.</returns>
-        public TResult GetObject<TResult>(Type typeOfInstance, Object idKey)
+        public TResult GetObject<TResult>(Object idKey)
         {
+            Type typeOfInstance = typeof(TResult);
             DbTransaction transaction = null;
             ValidateConnection();
             lock (_transactions)
@@ -604,8 +605,9 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="typeOfInstance">Tipo a devolver de la base de datos.</param>
         /// <returns>Una colección de instancias del tipo especificado.</returns>
-        public ICollection<TResult> GetObjects<TResult>(Type typeOfInstance)
+        public ICollection<TResult> GetObjects<TResult>()
         {
+            Type typeOfInstance = typeof(TResult);
             ICollection<TResult> objects = new List<TResult>();
             DbTransaction transaction = null;
             ValidateConnection();

@@ -138,7 +138,7 @@ namespace Acabus.Modules.OffDutyVehicles
                                 }
                             if (!exists)
                             {
-                                Vehicle vehicle = AcabusData.Session.GetObject<Vehicle>(typeof(Vehicle), match.ToString()) as Vehicle;
+                                Vehicle vehicle = AcabusData.Session.GetObject<Vehicle>(match.ToString()) as Vehicle;
                                 vehicle.Status = SelectedStatus;
                                 Vehicles.Add(vehicle);
                             }

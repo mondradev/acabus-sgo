@@ -27,6 +27,11 @@ namespace Acabus.Modules.CctvReports.Models
         private CashDestiny _cashDestiny;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'ID'.
+        /// </summary>
+        private UInt64 _id;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'Incidence'.
         /// </summary>
         private Incidence _incidence;
@@ -74,6 +79,18 @@ namespace Acabus.Modules.CctvReports.Models
             set {
                 _cashDestiny = value;
                 OnPropertyChanged("CashDestiny");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el identificador de la devolución.
+        /// </summary>
+        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
+        public UInt64 ID {
+            get => _id;
+            set {
+                _id = value;
+                OnPropertyChanged(nameof(ID));
             }
         }
 

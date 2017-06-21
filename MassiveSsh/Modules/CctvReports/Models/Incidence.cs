@@ -83,7 +83,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Campo que provee a la propiedad 'Technician'.
         /// </summary>
-        private String _technician;
+        private Technician _technician;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Bussines'.
@@ -219,7 +219,8 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el técnico que resolvió la incidencia.
         /// </summary>
-        public String Technician {
+        [Column(IsForeignKey = true, Name = "Fk_Technicia_ID")]
+        public Technician Technician {
             get => _technician;
             set {
                 _technician = value;
@@ -257,7 +258,7 @@ namespace Acabus.Modules.CctvReports.Models
                         Device?.Vehicle.Description,
                         Device)
                     : Device?.NumeSeri,
-                String.Format("*{0}*, {1}", Description.Category?.Description, Description),
+                String.Format("*{0}*, {1}", Description?.Category?.Description, Description),
                 AssignedAttendance is null
                 ? String.Empty
                 : String.Format("\n*Asignado:* {0}", AssignedAttendance),

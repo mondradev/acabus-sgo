@@ -4,6 +4,7 @@ using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils.Mvvm;
+using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
@@ -157,6 +158,7 @@ namespace Acabus.Modules.CctvReports
                 OnPropertyChanged("IsBusIncidences");
                 OnPropertyChanged("Locations");
                 OnPropertyChanged("Devices");
+                OnPropertyChanged("Vehicles");
                 OnPropertyChanged("HeaderTextDeviceOrVehicle");
                 OnPropertyChanged("HeaderTextRouteOrStation");
                 ClearErrors();
@@ -242,7 +244,10 @@ namespace Acabus.Modules.CctvReports
                 OnPropertyChanged("SelectedVehicle");
                 OnPropertyChanged("Devices");
                 if (value != null)
-                    SelectedLocation = value.Route;
+                {
+                    _selectedLocation = value.Route;
+                    OnPropertyChanged("SelectedLocation");
+                }
             }
         }
 
@@ -313,7 +318,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedTechnician'.
         /// </summary>
-        private String _selectedTechnician;
+        private Technician _selectedTechnician;
 
         /// <summary>
         /// Campo que provee a la propiedad 'TitleSection'.
@@ -410,7 +415,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene o establece el nombre de la persona que solucionó la incidencia.
         /// </summary>
-        public String SelectedTechnician {
+        public Technician SelectedTechnician {
             get => _selectedTechnician;
             set {
                 _selectedTechnician = value;
@@ -421,7 +426,8 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene una lista de los técnicos seleccionables.
         /// </summary>
-        public ObservableCollection<String> Technicians => AcabusData.Technicians;
+        public IEnumerable<Technician> Technicians => Core.DataAccess.AcabusData.AllTechnicians
+            .Where(technicia => technicia.Name != "SISTEMA");
 
         /// <summary>
         /// Obtiene el titulo del cuadro de dialogo
@@ -501,7 +507,7 @@ namespace Acabus.Modules.CctvReports
                     break;
 
                 case "SelectedTechnician":
-                    if (IsRefundOfMoney && String.IsNullOrEmpty(SelectedTechnician))
+                    if (IsRefundOfMoney && SelectedTechnician is null)
                         AddError("SelectedTechnician", "Falta agregar el técnico que hará la devolución.");
                     break;
             }
@@ -557,6 +563,14 @@ namespace Acabus.Modules.CctvReports
                     if (refundOfMoney.Save())
                         ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateData();
                 }
+
+                try
+                {
+                    Clipboard.Clear();
+                    Clipboard.SetDataObject(incidence.ToReportString().ToUpper());
+                    AcabusControlCenterViewModel.ShowDialog("Incidencia agregada y copiada al portapapeles.");
+                }
+                catch { }
             });
             ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
             CloseCommand.Execute(parameter);

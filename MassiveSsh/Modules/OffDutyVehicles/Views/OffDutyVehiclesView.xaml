@@ -50,7 +50,7 @@
             <Button ToolTip="Agregar nueva" Command="{Binding AddVehicleCommand}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,8,8" Style="{StaticResource MaterialDesignFlatButton}">
                 <materialDesign:PackIcon Kind="Plus" Width="24" Height="24"/>
             </Button>
-            <Button CommandParameter="LISTO" ToolTip="Listo" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,8,8" Style="{StaticResource MaterialDesignFlatButton}">
+            <Button CommandParameter="LISTO" ToolTip="Listo" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,8,8" Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True">
                 <Button.Command>
                     <MultiBinding Converter="{StaticResource ConverterMultiCommand}">
                         <Binding Source="{x:Static materialDesign:DialogHost.CloseDialogCommand}"/>

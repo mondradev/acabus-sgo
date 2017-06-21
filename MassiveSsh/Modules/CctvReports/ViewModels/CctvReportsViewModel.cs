@@ -3,6 +3,7 @@ using Acabus.Models;
 using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
+using Acabus.Modules.CctvReports.Views;
 using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
@@ -81,6 +82,11 @@ namespace Acabus.Modules.CctvReports
         {
             ViewModelService.Register(this);
 
+            SearchToHistoryCommand = new CommandBase(parameter =>
+            {
+                AcabusControlCenterViewModel.ShowDialog(new IncidencesHistoryView());
+            });
+
             ReassignTechnician = new CommandBase(parameter =>
             {
                 if (IncidencesOpened.Count == 0) return;
@@ -154,7 +160,6 @@ namespace Acabus.Modules.CctvReports
 
             OpenDialogExportCommand = new CommandBase(async (parameter) => await DialogHost.Show(parameter));
 
-            LoadedHandlerCommand = new CommandBase((parameter) => InitAlarmsMonitor());
             OpenOffDutyVehiclesDialog = new CommandBase((parameter) =>
            {
                var dialogContent = new OffDutyVehicles.OffDutyVehiclesView();
@@ -273,11 +278,11 @@ namespace Acabus.Modules.CctvReports
             {
                 Boolean isClosed = incidence.Status == IncidenceStatus.CLOSE;
                 Boolean isMatch = String.IsNullOrEmpty(ToSearchClosed)
-                            || incidence.Technician.ToUpper().Contains(ToSearchClosed.ToUpper())
+                            || (incidence.Technician != null && incidence.Technician.Name.ToUpper().Contains(ToSearchClosed.ToUpper()))
                             || incidence.Description.ToString().ToUpper().Contains(ToSearchClosed.ToUpper());
 
                 return isClosed && isMatch;
-            }));
+            }).OrderByDescending(incidence => incidence.FinishDate));
 
         /// <summary>
         /// Obtiene una lista de las incidencias abiertas.
@@ -292,11 +297,6 @@ namespace Acabus.Modules.CctvReports
                 return isOpen && isMatch;
             }));
 
-        /// <summary>
-        /// Obtiene un comando que se ejecuta cuando el evento <c>Loaded</c>
-        /// del UserControl se desencadena.
-        /// </summary>
-        public ICommand LoadedHandlerCommand { get; }
 
         /// <summary>
         ///
@@ -363,6 +363,10 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         public ICommand UpdateDataCommand { get; }
+
+        public ICommand SearchToHistoryCommand { get; }
+
+        protected override void OnLoad(object arg) => InitAlarmsMonitor();
 
         public void ReloadData()
         {
@@ -542,7 +546,8 @@ namespace Acabus.Modules.CctvReports
                             incidence.Status = IncidenceStatus.UNCOMMIT;
                             incidence.Priority = Priority.NONE;
                             incidence.FinishDate = DateTime.Now;
-                            incidence.Technician = "SISTEMA";
+                            incidence.Technician = Core.DataAccess.AcabusData.AllTechnicians
+                                                    .FirstOrDefault(technician => technician.Name == "SISTEMA");
                             incidence.Update();
                         }
                     }

@@ -23,6 +23,9 @@ namespace Acabus.Utils
         /// <returns></returns>
         public static Boolean Between(this DateTime toComparer, DateTime? value1, DateTime? value2)
         {
+            if (value1 is null && value2 is null)
+                return false;
+
             if (value1 is null)
                 return toComparer <= value2;
 

@@ -79,13 +79,25 @@ namespace Acabus.Modules.Core.DataAccess
         public static void ReloadData() => LoadFromDatabase();
 
         /// <summary>
+        /// Campo que provee a la propiedad 'AllTechnicians'.
+        /// </summary>
+        private static IEnumerable<Technician> _allTechnicians;
+
+        /// <summary>
+        /// Obtiene la lista de todos los técnicos registrados.
+        /// </summary>
+        public static IEnumerable<Technician> AllTechnicians => _allTechnicians;
+
+        /// <summary>
         /// Realiza una consulta a la base de datos de la aplicación y obtiene los catálogos.
         /// </summary>
         private static void LoadFromDatabase()
         {
-            _allRoutes = Acabus.DataAccess.AcabusData.Session.GetObjects<Route>(typeof(Route));
-            _allFaults = Acabus.DataAccess.AcabusData.Session.GetObjects<DeviceFault>(typeof(DeviceFault));
-            _allCashDestinies = Acabus.DataAccess.AcabusData.Session.GetObjects<CashDestiny>(typeof(CashDestiny));
+            _allRoutes = Acabus.DataAccess.AcabusData.Session.GetObjects<Route>();
+            _allFaults = Acabus.DataAccess.AcabusData.Session.GetObjects<DeviceFault>();
+            _allCashDestinies = Acabus.DataAccess.AcabusData.Session.GetObjects<CashDestiny>();
+            _allTechnicians = Acabus.DataAccess.AcabusData.Session.GetObjects<Technician>()
+                                .OrderBy(technician => technician.Name);
 
             _cc = AllStations.FirstOrDefault(station =>
                 station.Devices.FirstOrDefault(device =>

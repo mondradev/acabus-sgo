@@ -1,4 +1,5 @@
 ﻿using Acabus.Converters;
+using Acabus.Models;
 using Acabus.Modules.CctvReports;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils.Mvvm;
@@ -51,7 +52,7 @@ namespace Acabus.Modules.Attendances.Models
         /// <summary>
         /// Campo que provee a la propiedad 'Technician'.
         /// </summary>
-        private String _technician;
+        private Technician _technician;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Turn'.
@@ -149,7 +150,7 @@ namespace Acabus.Modules.Attendances.Models
         /// <summary>
         /// Obtiene o establece el idenficador unico de la instancia.
         /// </summary>
-        [Column(IsPrimaryKey = true)]
+        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
         public UInt64 ID {
             get => _id;
             set {
@@ -198,7 +199,8 @@ namespace Acabus.Modules.Attendances.Models
         /// <summary>
         /// Obtiene o establece el técnico de la asistencia.
         /// </summary>
-        public String Technician {
+        [Column(IsForeignKey = true, Name = "Fk_technician_ID")]
+        public Technician Technician {
             get => _technician;
             set {
                 _technician = value;
@@ -229,7 +231,7 @@ namespace Acabus.Modules.Attendances.Models
             OnPropertyChanged("CountClosedIncidences");
         }
 
-        public override string ToString() => Technician;
+        public override string ToString() => Technician.Name;
     }
 
     public sealed class TurnsConverter : TranslateEnumConverter<Attendance.WorkShift>

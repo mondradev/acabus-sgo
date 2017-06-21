@@ -35,7 +35,7 @@
         </Grid>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
             <Button ToolTip="Descartar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0 0 8 0"
-                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsCancel="True">
                 <materialDesign:PackIcon Kind="Delete" Width="24" Height="24"/>
             </Button>
             <Button ToolTip="Modificar asignación" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding ModifyCommand}">

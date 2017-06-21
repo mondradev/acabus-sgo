@@ -99,6 +99,17 @@ namespace Acabus.Models
         /// <returns>Una cadena que representa la instancia.</returns>
         public override string ToString() => Description;
 
-        /// <summary>
+        public override int GetHashCode() => base.GetHashCode();
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null)
+                return false;
+
+            if (obj.GetType() != GetType())
+                return false;
+
+            return Description == ((DeviceFault)obj).Description && Assignable == ((DeviceFault)obj).Assignable;
+        }
     }
 }

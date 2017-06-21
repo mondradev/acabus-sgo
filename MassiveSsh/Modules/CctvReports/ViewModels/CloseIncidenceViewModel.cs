@@ -67,7 +67,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedTechnician'.
         /// </summary>
-        private String _selectedTechnician;
+        private Technician _selectedTechnician;
 
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedIncidence'
@@ -77,7 +77,7 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene o establece el nombre de la persona que solucionó la incidencia.
         /// </summary>
-        public String SelectedTechnician {
+        public Technician SelectedTechnician {
             get => _selectedTechnician;
             set {
                 _selectedTechnician = value;
@@ -93,7 +93,8 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene una lista de los técnicos seleccionables.
         /// </summary>
-        public ObservableCollection<String> Technicians => AcabusData.Technicians;
+        public IEnumerable<Technician> Technicians => Core.DataAccess.AcabusData.AllTechnicians
+            .Where(technicia => technicia.Name != "SISTEMA");
 
         /// <summary>
         ///
@@ -299,7 +300,7 @@ namespace Acabus.Modules.CctvReports
                 ViewModelService.GetViewModel<CctvReportsViewModel>().ReloadData();
             }
             else
-                DialogHost.CloseDialogCommand.Execute(parameter, null);
+                AcabusControlCenterViewModel.ShowDialog($"Incidencia '{SelectedIncidence.Folio}' cerrada correctamente");
             ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
         }
 
@@ -315,7 +316,7 @@ namespace Acabus.Modules.CctvReports
             switch (propertyName)
             {
                 case "SelectedTechnician":
-                    if (String.IsNullOrEmpty(SelectedTechnician) || SelectedTechnician == "SISTEMA")
+                    if (SelectedTechnician is null || SelectedTechnician?.Name == "SISTEMA")
                         AddError("SelectedTechnician", "Falta seleccionar un técnico");
                     break;
 

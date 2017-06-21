@@ -16,7 +16,7 @@ namespace Acabus.Modules.CctvReports.Services
     {
         public static Boolean CommitRefund(this Incidence incidence, DateTime refundDateTime)
         {
-            var refund = AcabusData.Session.GetObjects<RefundOfMoney>(typeof(RefundOfMoney))
+            var refund = AcabusData.Session.GetObjects<RefundOfMoney>()
                 .FirstOrDefault(refundOfMoney => (refundOfMoney as RefundOfMoney).Incidence.Folio == incidence.Folio) as RefundOfMoney;
 
             refund.RefundDate = refundDateTime;
@@ -114,7 +114,7 @@ namespace Acabus.Modules.CctvReports.Services
                     WhoReporting = whoReporting,
                     Status = IncidenceStatus.OPEN,
                     AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                                .GetTechnicianAssigned(device, startTime)
+                                .GetTechnicianAssigned(device, startTime, description)
                 };
 
                 incidences.Add(incidence);
@@ -127,8 +127,7 @@ namespace Acabus.Modules.CctvReports.Services
             if (alarm.Device != null && !alarm.Device.Equals(incidence?.Device)) return false;
             DeviceFault deviceFault = CreateDeviceFault(alarm);
             if (deviceFault != null && deviceFault.Equals(incidence.Description))
-                if (incidence.Status != IncidenceStatus.CLOSE
-                    || alarm.DateTime == incidence.StartDate)
+                if (alarm.DateTime == incidence.StartDate)
                     return true;
 
             return false;
@@ -149,7 +148,7 @@ namespace Acabus.Modules.CctvReports.Services
                || DateTime.Now.TimeOfDay < TimeSpan.FromHours(6)) return;
 
             alarms.Clear();
-            var response = AcabusData.ExecuteQueryInServerDB(String.Format(AcabusData.TrunkAlertQuery, DateTime.Now.AddMinutes(-10)));
+            var response = AcabusData.ExecuteQueryInServerDB(String.Format(AcabusData.TrunkAlertQuery, DateTime.Now.AddMinutes(-30)));
             if (response == null || response.Length < 2) return;
             for (UInt16 i = 1; i < response.Length; i++)
             {
@@ -194,7 +193,7 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void LoadFromDataBase(this IList<Incidence> incidences)
         {
-            ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>(typeof(Incidence));
+            ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>();
             foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).Status != IncidenceStatus.CLOSE))
                 incidences.Add(incidenceData as Incidence);
             foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).StartDate > DateTime.Now.AddDays(-45)

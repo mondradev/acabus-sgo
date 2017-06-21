@@ -179,6 +179,7 @@
     <Compile Include="Modules\CctvReports\AcabusData.cs" />
     <Compile Include="Modules\CctvReports\Models\RefundOfMoney.cs" />
     <Compile Include="Modules\CctvReports\Models\ReportQuery.cs" />
+    <Compile Include="Modules\CctvReports\ViewModels\IncidencesHistoryViewModel.cs" />
     <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
       <DependentUpon>AddIncidencesView.xaml</DependentUpon>
     </Compile>
@@ -197,9 +198,12 @@
     <Compile Include="Modules\CctvReports\Models\Alarm.cs" />
     <Compile Include="Models\AssignableSection.cs" />
     <Compile Include="Models\Route.cs" />
-    <Compile Include="Models\Staff.cs" />
+    <Compile Include="Models\Technician.cs" />
     <Compile Include="Modules\CctvReports\Models\BusDisconnectedAlarm.cs" />
     <Compile Include="Modules\CctvReports\Models\Incidence.cs" />
+    <Compile Include="Modules\CctvReports\Views\IncidencesHistoryView.xaml.cs">
+      <DependentUpon>IncidencesHistoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\CctvReports\Views\ModifyIncidenceView.xaml.cs">
       <DependentUpon>ModifyIncidenceView.xaml</DependentUpon>
     </Compile>
@@ -310,6 +314,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\CctvReports\Views\ExportDataView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\CctvReports\Views\IncidencesHistoryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

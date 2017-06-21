@@ -126,7 +126,7 @@ namespace Acabus.Models
         /// <summary>
         /// Obtiene o establece el identificador del autobus.
         /// </summary>
-        [Column(IsPrimaryKey = true)]
+        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
         public Int64 ID {
             get => _id;
             private set {
