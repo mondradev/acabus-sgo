@@ -32,10 +32,10 @@
             <DatePicker materialDesign:HintAssist.Hint="Fecha final" Grid.Row="6" HorizontalAlignment="Stretch" Margin="0,12,0,0" DisplayDate="{Binding FinishDateTime}" SelectedDate="{Binding FinishDateTime}" />
         </Grid>
         <StackPanel Margin="8" Grid.Row="2" HorizontalAlignment="Right" Orientation="Horizontal">
-            <Button ToolTip="Descartar" Height="Auto" Margin="0,0,8,0" VerticalAlignment="Top" HorizontalAlignment="Left" d:LayoutOverrides="TopPosition, BottomPosition" Style="{StaticResource MaterialDesignFlatButton}" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsCancel="True">
+            <Button ToolTip="Descartar" Height="Auto" Margin="0,0,8,0" VerticalAlignment="Top" HorizontalAlignment="Left" d:LayoutOverrides="TopPosition, BottomPosition" Style="{StaticResource MaterialDesignFlatButton}" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsCancel="True" MinHeight="36">
                 <materialDesign:PackIcon Kind="Delete" Width="24" Height="24" />
             </Button>
-            <Button ToolTip="Exportar" Height="Auto" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Left" d:LayoutOverrides="TopPosition, BottomPosition" Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding GenerateExportCommand}">
+            <Button ToolTip="Exportar" Height="Auto" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Left" d:LayoutOverrides="TopPosition, BottomPosition" Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding GenerateExportCommand}" MinHeight="36">
                 <materialDesign:PackIcon Kind="Export" Width="24" Height="24" />
             </Button>
         </StackPanel>

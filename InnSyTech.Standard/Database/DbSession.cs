@@ -13,9 +13,15 @@ namespace InnSyTech.Standard.Database
 {
     public sealed class DbSession
     {
+        private static Dictionary<Type, IList> _cache;
         private DbConnection _connection;
 
         private List<DbTransaction> _transactions;
+
+        static DbSession()
+        {
+            _cache = new Dictionary<Type, IList>();
+        }
 
         internal DbSession(DbConnection connection)
         {
@@ -193,7 +199,7 @@ namespace InnSyTech.Standard.Database
         /// <typeparam name="T">Tipo de la instancia a trasladar a una base de datos.</typeparam>
         /// <param name="instance">Instancia que deseamos escribir en la base de datos.</param>
         /// <returns>Un valor <see cref="true"/> si la instancia se guardó correctamente.</returns>
-        public bool Save<T>(T instance)
+        public bool Save<T>(ref T instance)
         {
             DbTransaction transaction = null;
             ValidateConnection();
@@ -338,7 +344,7 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="instance">Instancia a actualizar.</param>
         /// <returns>Un valor <see cref="true"/> si la instancia fue actualizada correctamente.</returns>
-        public bool Update<T>(T instance)
+        public bool Update<T>(ref T instance)
         {
             DbTransaction transaction = null;
             DbCommand command = null;
@@ -437,7 +443,10 @@ namespace InnSyTech.Standard.Database
                         CreateParameter(command, item.Name, UpdateInstance(item.GetValue(instance), transaction, instance));
                 CreateParameters(command, instance);
 
-                if (command.ExecuteNonQuery() == 0)
+                Trace.WriteLine($"Ejecutando SQL: {command.CommandText}", "DEBUG");
+
+                int rows = command.ExecuteNonQuery();
+                if (rows == 0)
                     return SaveInstance(instance, transaction, childInstance);
 
                 return DbField.GetPrimaryKey(instance.GetType()).GetValue(instance);
@@ -561,6 +570,22 @@ namespace InnSyTech.Standard.Database
         /// <returns>Una instancia del tipo especificada.</returns>
         public TResult GetObject<TResult>(Object idKey)
         {
+            if (_cache.ContainsKey(typeof(TResult)))
+            {
+                var instance = default(TResult);
+                var primaryKey = DbField.GetPrimaryKey(typeof(TResult));
+                Boolean exists = false;
+                foreach (var item in _cache[typeof(TResult)])
+
+                    if (exists = primaryKey.GetValue(item).Equals(idKey))
+                    {
+                        instance = (TResult)item;
+                        break;
+                    }
+                if (exists)
+                    _cache[typeof(TResult)].Remove(instance);
+            }
+
             Type typeOfInstance = typeof(TResult);
             DbTransaction transaction = null;
             ValidateConnection();
@@ -607,6 +632,8 @@ namespace InnSyTech.Standard.Database
         /// <returns>Una colección de instancias del tipo especificado.</returns>
         public ICollection<TResult> GetObjects<TResult>()
         {
+            if (_cache.ContainsKey(typeof(TResult))) _cache[typeof(TResult)].Clear();
+
             Type typeOfInstance = typeof(TResult);
             ICollection<TResult> objects = new List<TResult>();
             DbTransaction transaction = null;
@@ -692,6 +719,23 @@ namespace InnSyTech.Standard.Database
                 {
                     data = (TResult)Activator.CreateInstance(typeOfInstance);
                     primaryKeyField.SetValue(data, reader[primaryKeyField.Name]);
+
+                    if (_cache.ContainsKey(data.GetType()))
+                    {
+                        Boolean exists = false;
+                        foreach (var item in _cache[data.GetType()])
+                            if (exists = primaryKeyField.GetValue(data).Equals(primaryKeyField.GetValue(item)))
+                            {
+                                data = (TResult)item;
+                                break;
+                            }
+
+                        if (!exists) _cache[data.GetType()].Add(data);
+                        else continue;
+                    }
+                    else
+                        _cache.Add(data.GetType(), new List<Object>() { data });
+
                     foreach (DbField field in fields)
                     {
                         if (field.IsPrimaryKey) continue;
@@ -776,6 +820,25 @@ namespace InnSyTech.Standard.Database
 
                     DbField primaryKeyField = DbField.GetPrimaryKey(typeOfInstance);
                     primaryKeyField.SetValue(data, reader[primaryKeyField.Name]);
+
+                    if (_cache.ContainsKey(data.GetType()))
+                    {
+                        Boolean exists = false;
+                        foreach (var item in _cache[data.GetType()])
+                            if (exists = primaryKeyField.GetValue(data).Equals(primaryKeyField.GetValue(item)))
+                            {
+                                data = (T)item;
+                                break;
+                            }
+                        if (!exists) _cache[data.GetType()].Add(data);
+                        else
+                        {
+                            objects.Add(data);
+                            continue;
+                        };
+                    }
+                    else
+                        _cache.Add(data.GetType(), new List<Object>() { data });
 
                     foreach (DbField field in fields)
                     {

@@ -64,7 +64,7 @@ namespace Acabus.Modules.Core.Config.ViewModels
                             if (DownloadDevices())
                             {
                                 AcabusControlCenterViewModel.AddNotify("EQUIPOS DESCARGADOS CORRECTAMENTE.");
-                                DataAccess.AcabusData.ReloadData();
+                                RefreshData();
                             }
                             else
                                 AcabusControlCenterViewModel.AddNotify("ERROR: FALLA AL DESCARGAR LOS EQUIPOS");
@@ -200,11 +200,11 @@ namespace Acabus.Modules.Core.Config.ViewModels
                         var deviceReassign = Devices.FirstOrDefault(deviceTemp => device.ID == deviceTemp.ID);
                         deviceReassign.Station = station;
                         deviceReassign.Vehicle = vehicle;
-                        AcabusData.Session.Update(device);
+                        AcabusData.Session.Update(ref device);
                         continue;
                     }
                     App.Current.Dispatcher.Invoke(() => Devices.Add(device));
-                    AcabusData.Session.Save(device);
+                    AcabusData.Session.Save(ref device);
                 }
                 return true;
             }
@@ -232,7 +232,7 @@ namespace Acabus.Modules.Core.Config.ViewModels
                     if (Routes.Contains(route)) continue;
 
                     App.Current.Dispatcher.Invoke(() => Routes.Add(route));
-                    AcabusData.Session.Save(route);
+                    AcabusData.Session.Save(ref route);
                 }
                 return true;
             }
@@ -269,11 +269,11 @@ namespace Acabus.Modules.Core.Config.ViewModels
                     {
                         var stationReassign = Stations.FirstOrDefault(stationTemp => stationTemp.ID == station.ID);
                         stationReassign.Route = station.Route;
-                        AcabusData.Session.Update(stationReassign);
+                        AcabusData.Session.Update(ref stationReassign);
                         continue;
                     }
                     App.Current.Dispatcher.Invoke(() => Stations.Add(station));
-                    AcabusData.Session.Save(station);
+                    AcabusData.Session.Save(ref station);
                 }
                 return true;
             }
@@ -307,11 +307,11 @@ namespace Acabus.Modules.Core.Config.ViewModels
                     {
                         var vehicleReassign = Vehicles.FirstOrDefault(vehicleTemp => vehicleTemp.ID == vehicle.ID);
                         vehicleReassign.Route = vehicle.Route;
-                        AcabusData.Session.Update(vehicleReassign);
+                        AcabusData.Session.Update(ref vehicleReassign);
                         continue;
                     }
                     App.Current.Dispatcher.Invoke(() => Vehicles.Add(vehicle));
-                    AcabusData.Session.Save(vehicle);
+                    AcabusData.Session.Save(ref vehicle);
                 }
                 return true;
             }

@@ -10,7 +10,7 @@ namespace InnSyTech.Debug
         static void Main(string[] args)
         {
 
-            var r = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration()).GetObjects<Incidence>(typeof(Incidence));
+            var r = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration()).GetObjects<Incidence>();
 
         }
     }

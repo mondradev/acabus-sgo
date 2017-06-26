@@ -97,10 +97,11 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece la incidencia a la que corresponde la devolución.
         /// </summary>
+        [Column(IsForeignKey = true, Name = "Fk_Folio")]
         public Incidence Incidence {
             get => _incidence;
             set {
-                if (value.Device is Kvr)
+                if (value.Device.Type == DeviceType.KVR)
                 {
                     _incidence = value;
                     OnPropertyChanged("Incidence");

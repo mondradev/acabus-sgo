@@ -56,10 +56,10 @@
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
                 <Button ToolTip="Descartar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0 0 8 0"
-                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsCancel="True">
+                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsCancel="True" MinHeight="36">
                     <materialDesign:PackIcon Kind="Delete" Width="24" Height="24"/>
                 </Button>
-                <Button ToolTip="Asistencia de Salida" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterDepartureCommand}">
+                <Button ToolTip="Asistencia de Salida" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterDepartureCommand}" MinHeight="36">
                     <materialDesign:PackIcon Kind="Walk" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
                         <materialDesign:PackIcon.RenderTransform>
                             <TransformGroup>

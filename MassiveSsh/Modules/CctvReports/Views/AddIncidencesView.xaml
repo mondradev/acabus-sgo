@@ -110,11 +110,11 @@
         </Grid>
         <StackPanel Margin="0,2,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.ColumnSpan="2" d:LayoutOverrides="Height">
             <Button Command="{Binding CloseCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left"
-                                HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True">
+                                HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True" MinHeight="36">
                 <materialDesign:PackIcon  Kind="Delete" Width="24" Height="24" />
             </Button>
             <Button ToolTip="Agregar" Height="Auto" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,8,8,8" Style="{StaticResource MaterialDesignFlatButton}"
-                          Command="{Binding AddCommand}">
+                          Command="{Binding AddCommand}" MinHeight="36">
                 <materialDesign:PackIcon  Kind="Check" Width="24" Height="24" />
             </Button>
         </StackPanel>

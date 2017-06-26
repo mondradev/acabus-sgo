@@ -1,7 +1,10 @@
-﻿using Acabus.Utils.Mvvm;
+﻿using Acabus.Converters;
+using Acabus.Utils.Mvvm;
 using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using System;
+using System.Collections.Generic;
+using System.Windows.Data;
 
 namespace Acabus.Modules.CctvReports.Models
 {
@@ -19,6 +22,18 @@ namespace Acabus.Modules.CctvReports.Models
         /// Billetes.
         /// </summary>
         BILL
+    }
+
+    [ValueConversion(typeof(CashType), typeof(String))]
+    public sealed class CashTypeTraslatorConverter : TranslateEnumConverter<CashType>
+    {
+        public CashTypeTraslatorConverter() : base(new Dictionary<CashType, string>()
+        {
+            { CashType.BILL , "BILLETE" },
+            { CashType.MONEY, "MONEDAS" }
+        })
+        {
+        }
     }
 
     /// <summary>

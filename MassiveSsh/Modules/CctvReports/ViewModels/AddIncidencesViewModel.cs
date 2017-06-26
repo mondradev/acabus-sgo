@@ -202,7 +202,7 @@ namespace Acabus.Modules.CctvReports
                 _selectedDevice = value;
                 OnPropertyChanged("SelectedDevice");
                 OnPropertyChanged("DeviceFaults");
-                if (!IsBusIncidences && SelectedDevice != null && SelectedDevice.Station.Equals(SelectedLocation))
+                if (!IsBusIncidences && SelectedDevice != null && !SelectedDevice.Station.Equals(SelectedLocation))
                 {
                     _selectedLocation = SelectedDevice.Station;
                     OnPropertyChanged(nameof(SelectedLocation));
@@ -471,7 +471,10 @@ namespace Acabus.Modules.CctvReports
 
                 case "SelectedDescription":
                     if (SelectedDescription is null)
-                        AddError("SelectedDescription", "Falta ingresar la descripción de la incidencia.");
+                        if (SelectedDevice is null)
+                            AddError("SelectedDescription", "Seleccione primero el equipo que presenta la incidencia.");
+                        else
+                            AddError("SelectedDescription", "Falta ingresar la descripción de la incidencia.");
                     break;
 
                 case "SelectedLocation":

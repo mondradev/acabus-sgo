@@ -7,9 +7,11 @@
     xmlns:Converters="clr-namespace:Acabus.Modules.CctvReports.Converters"
     xmlns:ViewModels="clr-namespace:Acabus.Modules.CctvReports.ViewModels"
     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:Models="clr-namespace:Acabus.Modules.CctvReports.Models"
     mc:Ignorable="d" 
     x:Class="Acabus.Modules.CctvReports.Views.IncidencesHistoryView">
     <UserControl.Resources>
+        <Models:CashTypeTraslatorConverter x:Key="CashTypeTraslatorConverter"/>
         <Converters:CollapseBooleanConverter x:Key="CollapseBooleanConverter"/>
         <Converters:IncidenceStatusConverter x:Key="IncidenceStatusConverter"/>
     </UserControl.Resources>
@@ -21,13 +23,17 @@
             <i:InvokeCommandAction Command="{Binding LoadCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <Grid MinWidth="800" MinHeight="600" MaxWidth="800" MaxHeight="600">
+    <Grid MinWidth="800" MinHeight="600" MaxWidth="1200" MaxHeight="800">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid Margin="0" Grid.Row="1">
-            <DataGrid Margin="0,0,0,58" AutoGenerateColumns="False" ItemsSource="{Binding Result}" IsReadOnly="True" FrozenColumnCount="1" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Result}" IsReadOnly="True" FrozenColumnCount="1" >
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Folio" Binding="{Binding Folio}"/>
                     <DataGridTextColumn Header="Descripción" Binding="{Binding Description}"/>
@@ -35,15 +41,17 @@
                     <DataGridTextColumn Header="Equipo" Binding="{Binding Device}"/>
                     <DataGridTextColumn Header="Técnico asignado" Binding="{Binding AssignedAttendance}"/>
                     <DataGridTextColumn Header="Reporta" Binding="{Binding WhoReporting}"/>
-                    <DataGridTextColumn Header="Fecha/hora de inicio" Binding="{Binding StartDate}"/>
+                    <DataGridTextColumn Header="Fecha/hora de inicio" Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm tt\}}"/>
                     <DataGridTextColumn Header="Estado" Binding="{Binding Status, Converter={StaticResource IncidenceStatusConverter}}"/>
                     <DataGridTextColumn Header="Técnico que soluciona" Binding="{Binding Technician}"/>
-                    <DataGridTextColumn Header="Fecha/hora de solución" Binding="{Binding FinishDate}"/>
+                    <DataGridTextColumn Header="Fecha/hora de solución" Binding="{Binding FinishDate, StringFormat=\{0:dd MMM yyyy hh:mm tt\}}"/>
                     <DataGridTextColumn Header="Tiempo en solucionar" Binding="{Binding TotalTime}"/>
                     <DataGridTextColumn Header="Observaciones" Binding="{Binding Observations}"/>
+                    <DataGridTextColumn Binding="{Binding RefundOfMoney.Quantity, StringFormat=\{0:C\}}" Header="Cantidad"/>
+                    <DataGridTextColumn Binding="{Binding RefundOfMoney.CashType, Converter={StaticResource CashTypeTraslatorConverter}}" Header="Tipo de dinero"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="CERRAR" Margin="8" VerticalAlignment="Bottom" IsCancel="True" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Right" Height="36" DockPanel.Dock="Bottom"/>
+            <Button Grid.Row="1" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="CERRAR" Margin="8" VerticalAlignment="Bottom" IsCancel="True" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Right" MinHeight="36"/>
         </Grid>
         <Expander Header="Filtros de búsqueda" Padding="0" IsExpanded="{Binding IsExpanded}">
             <Grid Margin="16" IsEnabled="{Binding IsEnabled}">
@@ -63,23 +71,13 @@
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="160"/>
                     <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="160"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <TextBox TextWrapping="Wrap" materialDesign:HintAssist.Hint="Folio" Text="{Binding Folio, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <ComboBox VerticalAlignment="Stretch" Grid.Column="4" Grid.ColumnSpan="3" Margin="0" materialDesign:HintAssist.Hint="Descripción" Grid.Row="4" ItemsSource="{Binding AllFaults}" SelectedItem="{Binding SelectedDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <DatePicker Margin="0" VerticalAlignment="Stretch" Grid.Row="2" Grid.Column="2" materialDesign:HintAssist.Hint="Fecha de inicial" SelectedDate="{Binding FinishDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <StackPanel Grid.Column="6" Margin="0" materialDesign:HintAssist.Hint="Fecha final">
-                    <TextBlock Text="{Binding HeadingDate}" Margin="0,0,0,2" />
-                    <ToggleButton Content="" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                </StackPanel>
-                <StackPanel Grid.Column="6" Margin="0" Grid.Row="2">
-                    <TextBlock Text="{Binding HeadingIncidenceType}" Margin="0,0,0,2" />
-                    <ToggleButton Content="" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsBusIncidences, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                </StackPanel>
-                <DatePicker Margin="0" VerticalAlignment="Stretch" Grid.Row="2" materialDesign:HintAssist.Hint="Fecha final" SelectedDate="{Binding StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <ComboBox Margin="0" VerticalAlignment="Stretch" Grid.Row="6" materialDesign:HintAssist.Hint="Estado" SelectedItem="{Binding SelectedStatus, Converter={StaticResource IncidenceStatusConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllStatus, Converter={StaticResource IncidenceStatusConverter}}"/>
-                <ComboBox Margin="0" VerticalAlignment="Stretch" Grid.Row="4" materialDesign:HintAssist.Hint="Técnico (solución)" Grid.ColumnSpan="3" SelectedItem="{Binding SelectedTechnician, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllTechnician}"/>
-                <Grid Grid.ColumnSpan="3" Grid.Column="2">
+                <TextBox TextWrapping="Wrap" materialDesign:HintAssist.Hint="Folio" Text="{Binding Folio, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2" Margin="0,0,15,0"/>
+                <Grid Grid.ColumnSpan="4" Grid.Column="2" Margin="2,0,12,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -87,10 +85,30 @@
                     <ComboBox Margin="0" VerticalAlignment="Stretch" materialDesign:HintAssist.Hint="Ubicación" ItemsSource="{Binding AllLocations}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <ComboBox Margin="16,0,0,0" VerticalAlignment="Stretch" materialDesign:HintAssist.Hint="Vehículo" Width="160" Grid.Column="1" SelectedItem="{Binding SelectedVehicle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllVehicles}" Visibility="{Binding IsBusIncidences, Converter={StaticResource CollapseBooleanConverter}}"/>
                 </Grid>
-                <ComboBox Margin="0" VerticalAlignment="Stretch" Grid.Row="2" materialDesign:HintAssist.Hint="Equipo" Grid.Column="4" SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllDevices}"/>
-                <ComboBox Margin="0" VerticalAlignment="Stretch" Grid.Row="6" Grid.Column="2" materialDesign:HintAssist.Hint="Reporta?" SelectedItem="{Binding SelectedWhoReporting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllCompanies}"/>
-                <Button Content="LIMPIAR" Style="{StaticResource MaterialDesignRaisedAccentButton}" HorizontalAlignment="Right" Margin="0,0,88,0" VerticalAlignment="Bottom" Height="36" Grid.Column="6" Grid.Row="6" Command="{Binding ClearCommand}"/>
-                <Button Content="BUSCAR" Style="{StaticResource MaterialDesignRaisedButton}" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Bottom" Height="36" IsDefault="True" Grid.Column="6" Grid.Row="5" Width="85" Grid.RowSpan="2" Command="{Binding SearchCommand}"/>
+                <StackPanel Grid.Column="6" Margin="0" Grid.ColumnSpan="2">
+                    <TextBlock Text="{Binding HeadingDate}" Margin="0,0,0,2" />
+                    <ToggleButton Content="" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="8" Margin="0">
+                    <TextBlock Margin="0" Text="Devolución dinero" />
+                    <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding HasRefundOfMoney, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <DatePicker Margin="0,0,15,0" VerticalAlignment="Stretch" Grid.Row="2" materialDesign:HintAssist.Hint="Fecha inicial" SelectedDate="{Binding StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2"/>
+                <DatePicker Margin="2,0,14,0" VerticalAlignment="Stretch" Grid.Row="2" Grid.Column="2" materialDesign:HintAssist.Hint="Fecha final" SelectedDate="{Binding FinishDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2"/>
+                <ComboBox Margin="3,0,12,0" VerticalAlignment="Stretch" Grid.Row="2" materialDesign:HintAssist.Hint="Equipo" Grid.Column="4" SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllDevices}" Grid.ColumnSpan="2"/>
+                <StackPanel Grid.Column="6" Margin="0" Grid.Row="2">
+                    <TextBlock Text="{Binding HeadingIncidenceType}" Margin="0,0,0,2" />
+                    <ToggleButton Content="" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsBusIncidences, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <ComboBox Margin="0,0,14,0" VerticalAlignment="Stretch" Grid.Row="4" materialDesign:HintAssist.Hint="Técnico (solución)" Grid.ColumnSpan="4" SelectedItem="{Binding SelectedTechnician, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllTechnician}"/>
+                <ComboBox VerticalAlignment="Stretch" Grid.Column="4" Grid.ColumnSpan="5" Margin="3,0,8,0" materialDesign:HintAssist.Hint="Descripción" Grid.Row="4" ItemsSource="{Binding AllFaults}" SelectedItem="{Binding SelectedDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <ComboBox Margin="0,0,15,0" VerticalAlignment="Stretch" Grid.Row="6" materialDesign:HintAssist.Hint="Estado" SelectedItem="{Binding SelectedStatus, Converter={StaticResource IncidenceStatusConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllStatus, Converter={StaticResource IncidenceStatusConverter}}" Grid.ColumnSpan="2"/>
+                <ComboBox Margin="2,0,14,0" VerticalAlignment="Stretch" Grid.Row="6" Grid.Column="2" materialDesign:HintAssist.Hint="Reporta?" SelectedItem="{Binding SelectedWhoReporting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllCompanies}" Grid.ColumnSpan="2"/>
+                <StackPanel Grid.Column="9" Margin="0" FlowDirection="RightToLeft" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Row="8">
+                    <Button Content="BUSCAR" Style="{StaticResource MaterialDesignRaisedButton}" Margin="0" VerticalAlignment="Bottom" Height="Auto" IsDefault="True" Command="{Binding SearchCommand}" MinHeight="36"/>
+                    <Button Content="LIMPIAR" Style="{StaticResource MaterialDesignRaisedAccentButton}" VerticalAlignment="Bottom" Height="Auto" Command="{Binding ClearCommand}" Margin="8,0,0,0" MinHeight="36"/>
+                </StackPanel>
+
             </Grid>
         </Expander>
     </Grid>

@@ -92,6 +92,7 @@ namespace Acabus.Modules.Attendances.ViewModels
         public ICommand ModifyAttendanceCommand { get; }
 
         public ICommand OpenedIncidenceToClipboardCommand { get; }
+
         public ICommand RegisterDepartureCommand { get; }
 
         public ICommand RegisterEntryCommand { get; }
@@ -160,7 +161,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
 
             /// Asignación cuando al menos hay un tecnico en turno.
-            attendances = Attendances
+            attendances = attendances
                 .Where(attendance => attendance.DateTimeDeparture is null
                 && AttendanceService.GetTurn(DateTime.Now) == attendance.Turn);
 
@@ -187,7 +188,7 @@ namespace Acabus.Modules.Attendances.ViewModels
 
                 /// Asignación por turno.
                 attendances = attendances.Where(attendance
-                  => attendance.Turn == AttendanceService.GetTurn(startTime));
+                  => attendance.Turn == AttendanceService.GetTurn(startTime) || startTime.Date < DateTime.Now.Date);
 
                 if (attendances.Count() == 1)
                     return attendances.First();

@@ -58,11 +58,11 @@
         </Grid>
         <StackPanel Margin="0,2,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.ColumnSpan="2" d:LayoutOverrides="Height">
             <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left"
-                                HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}">
+                                HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}" MinHeight="36">
                 <materialDesign:PackIcon  Kind="Delete" Width="24" Height="24" />
             </Button>
             <Button ToolTip="Agregar" Height="Auto" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,8,8,8" Style="{StaticResource MaterialDesignFlatButton}"
-                          Command="{Binding AddDeviceCommand}">
+                          Command="{Binding AddDeviceCommand}" MinHeight="36">
                 <materialDesign:PackIcon  Kind="Check" Width="24" Height="24" />
             </Button>
         </StackPanel>

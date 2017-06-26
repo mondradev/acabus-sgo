@@ -34,9 +34,26 @@ namespace Acabus.Modules.CctvReports.ViewModels
         private String _Folio;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'HasRefundOfMoney'.
+        /// </summary>
+        private Boolean _hasRefundOfMoney;
+
+        private ICollection<Incidence> _incidences;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'IsBusIncidences'.
         /// </summary>
         private Boolean _isBusIncidence;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'IsEnabled'.
+        /// </summary>
+        private Boolean _isEnabled;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Expanded'.
+        /// </summary>
+        private Boolean _isExpanded;
 
         /// <summary>
         /// Campo que provee a la propiedad 'IsStartDate'.
@@ -64,6 +81,11 @@ namespace Acabus.Modules.CctvReports.ViewModels
         private Technician _selectedTechnician;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'SelectedVehicle'.
+        /// </summary>
+        private Vehicle _selectedVehicle;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'SelectedWhoReporting'.
         /// </summary>
         private String _selectedWhoReporting;
@@ -72,6 +94,48 @@ namespace Acabus.Modules.CctvReports.ViewModels
         /// Campo que provee a la propiedad 'StartDate'.
         /// </summary>
         private DateTime? _startDate;
+
+        public IncidencesHistoryViewModel()
+        {
+            _result = null;
+            _isEnabled = false;
+            _isExpanded = false;
+            _hasRefundOfMoney = false;
+
+            SearchCommand = new CommandBase(SeachIncidences);
+            ClearCommand = new CommandBase(ClearFields);
+        }
+
+        public IEnumerable<String> AllCompanies => DataAccess.AcabusData.Companies;
+
+        public IEnumerable<Device> AllDevices => SelectedLocation is null && !IsBusIncidences
+                    ? Core.DataAccess.AcabusData.AllDevices.Where(device => device.Station != null)
+                    : SelectedLocation is Station
+                        ? (SelectedLocation as Station).Devices
+                        : SelectedVehicle is null
+                            ? null
+                            : SelectedVehicle.Devices;
+
+        public IEnumerable<DeviceFault> AllFaults => SelectedDevice is null
+                    ? Core.DataAccess.AcabusData.AllFaults
+                        .GroupBy(fault => fault.Description)
+                        .Select(group => group.FirstOrDefault())
+                    : Core.DataAccess.AcabusData.AllFaults
+                        .Where(fault => fault.Category.DeviceType == SelectedDevice.Type);
+
+        public IEnumerable<AssignableSection> AllLocations => IsBusIncidences
+                    ? Core.DataAccess.AcabusData.AllRoutes.Cast<AssignableSection>()
+                    : Core.DataAccess.AcabusData.AllStations.Cast<AssignableSection>();
+
+        public IEnumerable<IncidenceStatus> AllStatus => Enum.GetValues(typeof(IncidenceStatus)).Cast<IncidenceStatus>();
+
+        public IEnumerable<Technician> AllTechnician => Core.DataAccess.AcabusData.AllTechnicians;
+
+        public IEnumerable<Vehicle> AllVehicles => SelectedLocation is Route
+                    ? (SelectedLocation as Route).Vehicles
+                    : Core.DataAccess.AcabusData.AllVehicles;
+
+        public CommandBase ClearCommand { get; }
 
         /// <summary>
         /// Obtiene o establece la fecha final de la búsqueda.
@@ -95,6 +159,17 @@ namespace Acabus.Modules.CctvReports.ViewModels
             }
         }
 
+        /// <summary>
+        /// Obtiene o establece si las incidencias tienen devolución de dinero.
+        /// </summary>
+        public Boolean HasRefundOfMoney {
+            get => _hasRefundOfMoney;
+            set {
+                _hasRefundOfMoney = value;
+                OnPropertyChanged(nameof(HasRefundOfMoney));
+            }
+        }
+
         public String HeadingDate => IsStartDate ? "Por fecha de inicio de incidencia" : "Por fecha de solución de incidencia";
 
         public String HeadingIncidenceType => IsBusIncidences ? "Incidencia de autobus" : "Incidencia de estación";
@@ -109,6 +184,28 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 OnPropertyChanged(nameof(IsBusIncidences));
                 OnPropertyChanged(nameof(AllLocations));
                 OnPropertyChanged(nameof(HeadingIncidenceType));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece si las opciones estan activas.
+        /// </summary>
+        public Boolean IsEnabled {
+            get => _isEnabled;
+            set {
+                _isEnabled = value;
+                OnPropertyChanged(nameof(IsEnabled));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece si las opciones de busqueda estan visibles o no.
+        /// </summary>
+        public Boolean IsExpanded {
+            get => _isExpanded;
+            set {
+                _isExpanded = value;
+                OnPropertyChanged(nameof(IsExpanded));
             }
         }
 
@@ -128,6 +225,8 @@ namespace Acabus.Modules.CctvReports.ViewModels
         /// Obtiene la lista de incidencias que resultan de la búsqueda.
         /// </summary>
         public IEnumerable<Incidence> Result => _result;
+
+        public ICommand SearchCommand { get; }
 
         /// <summary>
         /// Obtiene o establece la descripción de la falla para la búsqueda.
@@ -188,6 +287,18 @@ namespace Acabus.Modules.CctvReports.ViewModels
         }
 
         /// <summary>
+        /// Obtiene o establece el vehículo seleccionado para la búsqueda.
+        /// </summary>
+        public Vehicle SelectedVehicle {
+            get => _selectedVehicle;
+            set {
+                _selectedVehicle = value;
+                OnPropertyChanged(nameof(SelectedVehicle));
+                OnPropertyChanged(nameof(AllDevices));
+            }
+        }
+
+        /// <summary>
         /// Obtiene o establece quien reporta.
         /// </summary>
         public String SelectedWhoReporting {
@@ -209,111 +320,6 @@ namespace Acabus.Modules.CctvReports.ViewModels
             }
         }
 
-        /// <summary>
-        /// Campo que provee a la propiedad 'SelectedVehicle'.
-        /// </summary>
-        private Vehicle _selectedVehicle;
-        private ICollection<Incidence> _incidences;
-
-        /// <summary>
-        /// Obtiene o establece el vehículo seleccionado para la búsqueda.
-        /// </summary>
-        public Vehicle SelectedVehicle {
-            get => _selectedVehicle;
-            set {
-                _selectedVehicle = value;
-                OnPropertyChanged(nameof(SelectedVehicle));
-                OnPropertyChanged(nameof(AllDevices));
-            }
-        }
-
-        public IEnumerable<AssignableSection> AllLocations => IsBusIncidences
-            ? Core.DataAccess.AcabusData.AllRoutes.Cast<AssignableSection>()
-            : Core.DataAccess.AcabusData.AllStations.Cast<AssignableSection>();
-
-        public IEnumerable<Device> AllDevices => SelectedLocation is null && !IsBusIncidences
-            ? Core.DataAccess.AcabusData.AllDevices
-            : SelectedLocation is Station
-                ? (SelectedLocation as Station).Devices
-                : SelectedVehicle is null
-                    ? null
-                    : SelectedVehicle.Devices;
-
-        public IEnumerable<DeviceFault> AllFaults => SelectedDevice is null
-            ? Core.DataAccess.AcabusData.AllFaults
-            : Core.DataAccess.AcabusData.AllFaults
-                .Where(fault => fault.Category.DeviceType == SelectedDevice.Type);
-
-        public IEnumerable<Vehicle> AllVehicles => SelectedLocation is Route
-            ? (SelectedLocation as Route).Vehicles
-            : Core.DataAccess.AcabusData.AllVehicles;
-
-        public IEnumerable<String> AllCompanies => DataAccess.AcabusData.Companies;
-
-        public IEnumerable<Technician> AllTechnician => Core.DataAccess.AcabusData.AllTechnicians;
-
-        public IEnumerable<IncidenceStatus> AllStatus => Enum.GetValues(typeof(IncidenceStatus)).Cast<IncidenceStatus>();
-
-        public ICommand SearchCommand { get; }
-
-        public CommandBase ClearCommand { get;}
-
-        public IncidencesHistoryViewModel()
-        {
-            _result = null;
-            _isEnabled = false;
-            _isExpanded = false;
-
-            SearchCommand = new CommandBase(SeachIncidences);
-            ClearCommand = new CommandBase(ClearFields);
-        }
-
-        private void ClearFields(object obj)
-        {
-            Folio = String.Empty;
-            SelectedDescription = null;
-            SelectedDevice = null;
-            SelectedLocation = null;
-            SelectedStatus = null;
-            SelectedTechnician = null;
-            SelectedVehicle = null;
-            SelectedWhoReporting = string.Empty;
-            StartDate = null;
-            FinishDate = null;
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Expanded'.
-        /// </summary>
-        private Boolean _isExpanded;
-
-        /// <summary>
-        /// Obtiene o establece si las opciones de busqueda estan visibles o no.
-        /// </summary>
-        public Boolean IsExpanded {
-            get => _isExpanded;
-            set {
-                _isExpanded = value;
-                OnPropertyChanged(nameof(IsExpanded));
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'IsEnabled'.
-        /// </summary>
-        private Boolean _isEnabled;
-
-        /// <summary>
-        /// Obtiene o establece si las opciones estan activas.
-        /// </summary>
-        public Boolean IsEnabled {
-            get => _isEnabled;
-            set {
-                _isEnabled = value;
-                OnPropertyChanged(nameof(IsEnabled));
-            }
-        }
-
         protected override void OnLoad(object arg)
         {
             Task.Run(() =>
@@ -322,7 +328,20 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 Application.Current.Dispatcher.Invoke(() => IsEnabled = true);
                 Application.Current.Dispatcher.Invoke(() => IsExpanded = true);
             });
+        }
 
+        private void ClearFields(object obj)
+        {
+            Folio = null;
+            SelectedDescription = null;
+            SelectedDevice = null;
+            SelectedLocation = null;
+            SelectedStatus = null;
+            SelectedTechnician = null;
+            SelectedVehicle = null;
+            SelectedWhoReporting = null;
+            StartDate = null;
+            FinishDate = null;
         }
 
         private void SeachIncidences(object obj)
@@ -341,9 +360,9 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 _result = _result.Where(incidence => incidence.Device?.Vehicle == SelectedVehicle);
 
             if (IsStartDate && (StartDate != null || FinishDate != null))
-                _result = _result.Where(incidence => incidence.StartDate.Between(StartDate, StartDate));
+                _result = _result.Where(incidence => incidence.StartDate.Between(StartDate, FinishDate));
             else if (!IsStartDate && (StartDate != null || FinishDate != null))
-                _result = _result.Where(incidence => incidence.FinishDate != null && incidence.FinishDate.Value.Between(StartDate, StartDate));
+                _result = _result.Where(incidence => incidence.FinishDate != null && incidence.FinishDate.Value.Between(StartDate, FinishDate));
 
             if (SelectedDevice != null)
                 _result = _result.Where(incidence => incidence.Device == SelectedDevice);
@@ -353,13 +372,16 @@ namespace Acabus.Modules.CctvReports.ViewModels
 
             if (SelectedDescription != null)
                 _result = _result.Where(incidence => incidence.Description != null
-                    && incidence.Description.Equals(SelectedDescription));
+                    && incidence.Description.Description == SelectedDescription.Description);
 
             if (SelectedStatus != null)
                 _result = _result.Where(incidence => incidence.Status == SelectedStatus);
 
-            if (SelectedWhoReporting != null)
+            if (!String.IsNullOrEmpty(SelectedWhoReporting))
                 _result = _result.Where(incidence => incidence.WhoReporting == SelectedWhoReporting);
+
+            if (HasRefundOfMoney)
+                _result = _result.Where(incidence => incidence.HasRefundOfMoney());
 
             OnPropertyChanged(nameof(Result));
             IsExpanded = false;

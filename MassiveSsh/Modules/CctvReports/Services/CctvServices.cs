@@ -24,7 +24,7 @@ namespace Acabus.Modules.CctvReports.Services
             if (refund.Incidence.FinishDate is null)
                 refund.Incidence.FinishDate = refundDateTime;
 
-            return AcabusData.Session.Update(refund);
+            return AcabusData.Session.Update(ref refund);
         }
 
         public static DeviceFault CreateDeviceFault(Alarm alarm)
@@ -34,7 +34,7 @@ namespace Acabus.Modules.CctvReports.Services
             var deviceType = alarm?.Device?.Type;
             var description = alarm?.Description;
 
-            var faults =Core.DataAccess.AcabusData.AllFaults.Where(fault => (fault as DeviceFault).Category?.DeviceType == deviceType);
+            var faults = Core.DataAccess.AcabusData.AllFaults.Where(fault => (fault as DeviceFault).Category?.DeviceType == deviceType);
 
             switch (description)
             {
@@ -43,7 +43,7 @@ namespace Acabus.Modules.CctvReports.Services
                 case "COMUNICACIÓN CON VALIDADOR TARJETA ADR":
                 case "NO SE PUDO ESTABLECER COMUNICACIÓN CON LA TARJETA ES (ADR)":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "PROBLEMAS DE FUNCIONALIDAD");
+                        => (fault as DeviceFault).Description.Contains("FUERA DE SERVICIO"));
 
                 case "FALLA SAM AV RECARGA":
                 case "FALLA LECTOR RECARGA":
@@ -67,7 +67,7 @@ namespace Acabus.Modules.CctvReports.Services
 
                 case "FUERA DE SERVICIO":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "FUERA DE SERVICIO");
+                        => (fault as DeviceFault).Description.Contains("FUERA DE SERVICIO"));
 
                 case "FALLA SAM AV2 VENTA":
                 case "FALLA LECTOR VENTA":
@@ -82,7 +82,7 @@ namespace Acabus.Modules.CctvReports.Services
 
                 case "FALLA ENERGIA":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "EQUIPO DE RECAUDO APAGADO");
+                        => (fault as DeviceFault).Description.Contains("APAGADO"));
 
                 case "FALLA EN VALIDADOR DE MONEDAS":
                 case "FALLA MONEDERO":
@@ -171,8 +171,8 @@ namespace Acabus.Modules.CctvReports.Services
                 || DateTime.Now.TimeOfDay < TimeSpan.FromHours(6)) return;
 
             busAlarms.Clear();
-            Vehicle[] vehicles = new Vehicle[AcabusData.OffDutyVehicles.Count];
-            AcabusData.OffDutyVehicles.CopyTo(vehicles, 0);
+            Vehicle[] vehicles = new Vehicle[Core.DataAccess.AcabusData.OffDutyVehicles.Count];
+            Core.DataAccess.AcabusData.OffDutyVehicles.CopyTo(vehicles, 0);
 
             var response = AcabusData.ExecuteQueryInServerDB(String.Format(AcabusData.BusDisconnectedQuery, vehicles.Length < 1 ? "''" : Util.ToString(vehicles, "'{0}'", (vehi) => vehi.EconomicNumber)));
 
@@ -202,12 +202,12 @@ namespace Acabus.Modules.CctvReports.Services
         }
 
         public static Boolean Save(this Incidence incidence)
-            => AcabusData.Session.Save(incidence);
+            => AcabusData.Session.Save(ref incidence);
 
         public static Boolean Save(this RefundOfMoney refundOfMoney)
-            => AcabusData.Session.Save(refundOfMoney);
+            => AcabusData.Session.Save(ref refundOfMoney);
 
         public static Boolean Update(this Incidence incidence)
-            => AcabusData.Session.Update(incidence);
+            => AcabusData.Session.Update(ref incidence);
     }
 }

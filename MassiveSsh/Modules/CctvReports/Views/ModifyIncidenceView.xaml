@@ -44,11 +44,11 @@
         </Grid>
         <StackPanel Margin="0" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
             <Button Margin="8 8 8 8" ToolTip="Descartar" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                            Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True">
+                                            Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True" MinWidth="36" Height="Auto">
                 <materialDesign:PackIcon Kind="Delete" Width="24" Height="24" />
             </Button>
             <Button Margin="0 8 8 8" ToolTip="Modificar incidencia" Style="{StaticResource MaterialDesignFlatButton}"
-                                            CommandParameter="{Binding SelectedIncidence}">
+                                            CommandParameter="{Binding SelectedIncidence}" MinWidth="36" Height="Auto">
                 <Button.Command>
                     <MultiBinding Converter="{StaticResource MultiCommandConverter}">
                         <Binding Path="SaveIncidenceCommand" />

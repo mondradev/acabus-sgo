@@ -109,7 +109,8 @@ namespace Acabus.Modules.Configurations
                     Padding = new Thickness(8, 0, 8, 0),
                     Margin = new Thickness(0, 0, 8, 0),
                     Command = item.Item2,
-                    Content = item.Item1
+                    Content = item.Item1,
+                    MinHeight = 36
                 };
                 buttonsContainer.Children.Add(command);
             }

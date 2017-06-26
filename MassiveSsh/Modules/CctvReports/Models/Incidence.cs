@@ -158,6 +158,29 @@ namespace Acabus.Modules.CctvReports.Models
         }
 
         /// <summary>
+        /// Campo que provee a la propiedad 'RefundOfMoney'.
+        /// </summary>
+        private RefundOfMoney _refundOfMoney;
+
+        /// <summary>
+        /// Obtiene o establece la devolución de dinero
+        /// </summary>
+        [Column(ForeignKeyName = "Fk_Incidence_ID")]
+        public RefundOfMoney RefundOfMoney {
+            get => _refundOfMoney;
+            set {
+                _refundOfMoney = value;
+                OnPropertyChanged(nameof(RefundOfMoney));
+            }
+        }
+
+        /// <summary>
+        /// Indica si la incidencia tiene una devolución de dinero.
+        /// </summary>
+        /// <returns></returns>
+        public Boolean HasRefundOfMoney() => RefundOfMoney != null;
+
+        /// <summary>
         /// Obtiene el folio de la incidencia.
         /// </summary>
         [Column(IsPrimaryKey = true)]

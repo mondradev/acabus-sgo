@@ -1,14 +1,11 @@
-﻿using Acabus.DataAccess;
-using Acabus.Models;
+﻿using Acabus.Models;
 using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
-using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 
@@ -22,130 +19,9 @@ namespace Acabus.Modules.CctvReports
         private DateTime _finishDate;
 
         /// <summary>
-        /// Obtiene o establece la fecha de solución de la incidencia a cerrar.
-        /// </summary>
-        public DateTime FinishDate {
-            get => _finishDate;
-            set {
-                _finishDate = value;
-                OnPropertyChanged("FinishDate");
-            }
-        }
-
-        /// <summary>
         /// Campo que provee a la propiedad 'EndTime'.
         /// </summary>
         private TimeSpan _finishTime;
-
-        /// <summary>
-        /// Obtiene o establece la hora de solución de la incidencia a cerrar.
-        /// </summary>
-        public TimeSpan FinishTime {
-            get => _finishTime;
-            set {
-                _finishTime = value;
-                OnPropertyChanged("FinishTime");
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Observations'.
-        /// </summary>
-        private String _observationes;
-
-        /// <summary>
-        /// Obtiene o establece las observaciones con respecto a la incidencia a cerrar.
-        /// </summary>
-        public String Observations {
-            get => _observationes;
-            set {
-                _observationes = value;
-                OnPropertyChanged("Observations");
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'SelectedTechnician'.
-        /// </summary>
-        private Technician _selectedTechnician;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'SelectedIncidence'
-        /// </summary>
-        private Incidence _selectedIncidence;
-
-        /// <summary>
-        /// Obtiene o establece el nombre de la persona que solucionó la incidencia.
-        /// </summary>
-        public Technician SelectedTechnician {
-            get => _selectedTechnician;
-            set {
-                _selectedTechnician = value;
-                OnPropertyChanged("SelectedTechnician");
-            }
-        }
-
-        /// <summary>
-        /// Obtiene la incidencia actualmente seleccionada en la tabla principal.
-        /// </summary>
-        public Incidence SelectedIncidence => _selectedIncidence;
-
-        /// <summary>
-        /// Obtiene una lista de los técnicos seleccionables.
-        /// </summary>
-        public IEnumerable<Technician> Technicians => Core.DataAccess.AcabusData.AllTechnicians
-            .Where(technicia => technicia.Name != "SISTEMA");
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand CloseIncidenceCommand { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ICommand UpdateTableCommand => ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateDataCommand;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'UseParts'.
-        /// </summary>
-        private Boolean _useParts;
-
-        /// <summary>
-        /// Obtiene o establece si la incidencia se resolvió usando refacciones.
-        /// </summary>
-        public Boolean UseParts {
-            get => _useParts;
-            set {
-                _useParts = value;
-                OnPropertyChanged("UseParts");
-                if (_useParts) SelectedTab = 1;
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'RefundOfMoney'.
-        /// </summary>
-        private Boolean _returnCash;
-
-        /// <summary>
-        /// Obtiene o establece si la incidencia devuelve dinero.
-        /// </summary>
-        public Boolean RefundOfMoney {
-            get => _returnCash;
-            set {
-                _returnCash = value;
-                OnPropertyChanged("RefundOfMoney");
-                if (_returnCash) SelectedTab = 0;
-                if (!_returnCash) ClearReturnCashData();
-            }
-        }
-
-        private void ClearReturnCashData()
-        {
-            SelectedCashDestiny = null;
-            Quantity = String.Empty;
-        }
 
         /// <summary>
         /// Campo que provee a la propiedad 'IsIncidenceFromKvr'.
@@ -153,25 +29,14 @@ namespace Acabus.Modules.CctvReports
         private Boolean _isIncidenceFromKvr;
 
         /// <summary>
-        /// Obtiene si la incidencia es de KVR.
+        /// Campo que provee a la propiedad 'IsMoney'.
         /// </summary>
-        public Boolean IsIncidenceFromKvr => _isIncidenceFromKvr;
+        private Boolean _isMoney;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'SelectedTab'.
+        /// Campo que provee a la propiedad 'Observations'.
         /// </summary>
-        private int _selectedTab;
-
-        /// <summary>
-        /// Obtiene o establece el index de la pestaña seleccionada.
-        /// </summary>
-        public int SelectedTab {
-            get => _selectedTab;
-            set {
-                _selectedTab = value;
-                OnPropertyChanged("SelectedTab");
-            }
-        }
+        private String _observationes;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Quantity'.
@@ -179,32 +44,9 @@ namespace Acabus.Modules.CctvReports
         private String _quantity;
 
         /// <summary>
-        /// Obtiene o establece la cantidad del dinero por trasladar de los kvrs.
+        /// Campo que provee a la propiedad 'RefundOfMoney'.
         /// </summary>
-        public String Quantity {
-            get => _quantity;
-            set {
-                _quantity = value;
-                OnPropertyChanged("Quantity");
-            }
-        }
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'IsMoney'.
-        /// </summary>
-        private Boolean _isMoney;
-
-        /// <summary>
-        /// Obtiene o establece si la devolución de dinero son monedas.
-        /// </summary>
-        public Boolean IsMoney {
-            get => _isMoney;
-            set {
-                _isMoney = value;
-                OnPropertyChanged("IsMoney");
-                OnPropertyChanged("Destinies");
-            }
-        }
+        private Boolean _returnCash;
 
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedCashDestiny'.
@@ -212,15 +54,48 @@ namespace Acabus.Modules.CctvReports
         private CashDestiny _selectedCashDestiny;
 
         /// <summary>
-        /// Obtiene o establece el destino del dinero a devolver.
+        /// Campo que provee a la propiedad 'SelectedIncidence'
         /// </summary>
-        public CashDestiny SelectedCashDestiny {
-            get => _selectedCashDestiny;
-            set {
-                _selectedCashDestiny = value;
-                OnPropertyChanged("SelectedCashDestiny");
+        private Incidence _selectedIncidence;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedTab'.
+        /// </summary>
+        private int _selectedTab;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'SelectedTechnician'.
+        /// </summary>
+        private Technician _selectedTechnician;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'UseParts'.
+        /// </summary>
+        private Boolean _useParts;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public CloseIncidenceViewModel()
+        {
+            _finishDate = DateTime.Now;
+            _finishTime = DateTime.Now.TimeOfDay;
+            _selectedIncidence = ViewModelService.GetViewModel<CctvReportsViewModel>().SelectedIncidence;
+            _isIncidenceFromKvr = _selectedIncidence.Device.Type == DeviceType.KVR;
+            _observationes = _selectedIncidence.Observations;
+            if (_selectedIncidence.Status == IncidenceStatus.UNCOMMIT)
+            {
+                _selectedTechnician = _selectedIncidence.Technician;
+                _isIncidenceFromKvr = false;
             }
+
+            CloseIncidenceCommand = new CommandBase(CloseIncidenceCommandExecute, CloseIncidenceCommandCanExec);
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ICommand CloseIncidenceCommand { get; }
 
         /// <summary>
         /// Obtiene una lista de destinos posibles para devolución de dinero.
@@ -236,79 +111,138 @@ namespace Acabus.Modules.CctvReports
             });
 
         /// <summary>
+        /// Obtiene o establece la fecha de solución de la incidencia a cerrar.
+        /// </summary>
+        public DateTime FinishDate {
+            get => _finishDate;
+            set {
+                _finishDate = value;
+                OnPropertyChanged("FinishDate");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la hora de solución de la incidencia a cerrar.
+        /// </summary>
+        public TimeSpan FinishTime {
+            get => _finishTime;
+            set {
+                _finishTime = value;
+                OnPropertyChanged("FinishTime");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene si la incidencia es de KVR.
+        /// </summary>
+        public Boolean IsIncidenceFromKvr => _isIncidenceFromKvr;
+
+        /// <summary>
+        /// Obtiene o establece si la devolución de dinero son monedas.
+        /// </summary>
+        public Boolean IsMoney {
+            get => _isMoney;
+            set {
+                _isMoney = value;
+                OnPropertyChanged("IsMoney");
+                OnPropertyChanged("Destinies");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece las observaciones con respecto a la incidencia a cerrar.
+        /// </summary>
+        public String Observations {
+            get => _observationes;
+            set {
+                _observationes = value;
+                OnPropertyChanged("Observations");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la cantidad del dinero por trasladar de los kvrs.
+        /// </summary>
+        public String Quantity {
+            get => _quantity;
+            set {
+                _quantity = value;
+                OnPropertyChanged("Quantity");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece si la incidencia devuelve dinero.
+        /// </summary>
+        public Boolean RefundOfMoney {
+            get => _returnCash;
+            set {
+                _returnCash = value;
+                OnPropertyChanged("RefundOfMoney");
+                if (_returnCash) SelectedTab = 0;
+                if (!_returnCash) ClearReturnCashData();
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el destino del dinero a devolver.
+        /// </summary>
+        public CashDestiny SelectedCashDestiny {
+            get => _selectedCashDestiny;
+            set {
+                _selectedCashDestiny = value;
+                OnPropertyChanged("SelectedCashDestiny");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene la incidencia actualmente seleccionada en la tabla principal.
+        /// </summary>
+        public Incidence SelectedIncidence => _selectedIncidence;
+
+        /// <summary>
+        /// Obtiene o establece el index de la pestaña seleccionada.
+        /// </summary>
+        public int SelectedTab {
+            get => _selectedTab;
+            set {
+                _selectedTab = value;
+                OnPropertyChanged("SelectedTab");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el nombre de la persona que solucionó la incidencia.
+        /// </summary>
+        public Technician SelectedTechnician {
+            get => _selectedTechnician;
+            set {
+                _selectedTechnician = value;
+                OnPropertyChanged("SelectedTechnician");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de los técnicos seleccionables.
+        /// </summary>
+        public IEnumerable<Technician> Technicians => Core.DataAccess.AcabusData.AllTechnicians
+            .Where(technicia => technicia.Name != "SISTEMA");
+
+        /// <summary>
         ///
         /// </summary>
-        public CloseIncidenceViewModel()
-        {
-            _finishDate = DateTime.Now;
-            _finishTime = DateTime.Now.TimeOfDay;
-            _selectedIncidence = ViewModelService.GetViewModel<CctvReportsViewModel>().SelectedIncidence;
-            _isIncidenceFromKvr = _selectedIncidence.Device is Kvr;
-            _observationes = _selectedIncidence.Observations;
-            if (_selectedIncidence.Status == IncidenceStatus.UNCOMMIT)
-            {
-                _selectedTechnician = _selectedIncidence.Technician;
-                _isIncidenceFromKvr = false;
+        public ICommand UpdateTableCommand => ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateDataCommand;
+
+        /// <summary>
+        /// Obtiene o establece si la incidencia se resolvió usando refacciones.
+        /// </summary>
+        public Boolean UseParts {
+            get => _useParts;
+            set {
+                _useParts = value;
+                OnPropertyChanged("UseParts");
+                if (_useParts) SelectedTab = 1;
             }
-
-            CloseIncidenceCommand = new CommandBase(CloseIncidenceCommandExecute, CloseIncidenceCommandCanExec);
-        }
-
-        private void CloseIncidenceCommandExecute(object parameter)
-        {
-            var previousStatus = SelectedIncidence.Status;
-            SelectedIncidence.Technician = SelectedTechnician;
-            SelectedIncidence.Observations = Observations;
-            if (SelectedIncidence.Status != IncidenceStatus.UNCOMMIT)
-                SelectedIncidence.FinishDate = FinishDate.AddTicks(FinishTime.Ticks);
-            else if (SelectedIncidence.Device is Kvr)
-                if (!SelectedIncidence.CommitRefund(FinishDate.AddTicks(FinishTime.Ticks)))
-                {
-                    AcabusControlCenterViewModel.ShowDialog("No se confirmó la incidencia con devolución");
-                    ViewModelService.GetViewModel<CctvReportsViewModel>().ReloadData();
-                    return;
-                }
-            SelectedIncidence.Status = IncidenceStatus.CLOSE;
-
-            bool isDone = false;
-
-            if (RefundOfMoney)
-            {
-                var refund = new RefundOfMoney(SelectedIncidence)
-                {
-                    CashDestiny = SelectedCashDestiny,
-                    Quantity = Single.Parse(Quantity)
-                };
-                if (SelectedCashDestiny?.Description == "CAU")
-                {
-                    SelectedIncidence.Status = IncidenceStatus.UNCOMMIT;
-                    SelectedIncidence.Priority = Priority.NONE;
-                }
-                if (String.IsNullOrEmpty(SelectedIncidence.Observations))
-                    SelectedIncidence.Observations = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}",
-                        IsMoney ? "MONEDAS" : "BILLETE",
-                        Single.Parse(Quantity),
-                        SelectedCashDestiny?.Description);
-                isDone = refund.Save();
-            }
-            else
-                isDone = SelectedIncidence.Update();
-
-            if (!isDone)
-            {
-                AcabusControlCenterViewModel.ShowDialog("No se cerró la incidencia");
-                ViewModelService.GetViewModel<CctvReportsViewModel>().ReloadData();
-            }
-            else
-                AcabusControlCenterViewModel.ShowDialog($"Incidencia '{SelectedIncidence.Folio}' cerrada correctamente");
-            ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
-        }
-
-        private bool CloseIncidenceCommandCanExec(object parameter)
-        {
-            if (!Validate()) return false;
-
-            return true;
         }
 
         protected override void OnValidation(string propertyName)
@@ -345,6 +279,71 @@ namespace Acabus.Modules.CctvReports
                         AddError("Folio", "Folio cerrado anteriormente.");
                     break;
             }
+        }
+
+        private void ClearReturnCashData()
+        {
+            SelectedCashDestiny = null;
+            Quantity = String.Empty;
+        }
+
+        private bool CloseIncidenceCommandCanExec(object parameter)
+        {
+            if (!Validate()) return false;
+
+            return true;
+        }
+
+        private void CloseIncidenceCommandExecute(object parameter)
+        {
+            var previousStatus = SelectedIncidence.Status;
+            SelectedIncidence.Technician = SelectedTechnician;
+            SelectedIncidence.Observations = Observations;
+            if (SelectedIncidence.Status != IncidenceStatus.UNCOMMIT)
+                SelectedIncidence.FinishDate = FinishDate.AddTicks(FinishTime.Ticks);
+            else if (SelectedIncidence.Device is Kvr)
+                if (!SelectedIncidence.CommitRefund(FinishDate.AddTicks(FinishTime.Ticks)))
+                {
+                    AcabusControlCenterViewModel.ShowDialog("No se confirmó la incidencia con devolución");
+                    ViewModelService.GetViewModel<CctvReportsViewModel>().ReloadData();
+                    return;
+                }
+            SelectedIncidence.Status = IncidenceStatus.CLOSE;
+
+            bool isDone = false;
+
+            if (RefundOfMoney)
+            {
+                var refund = new RefundOfMoney(SelectedIncidence)
+                {
+                    CashDestiny = SelectedCashDestiny,
+                    Quantity = Single.Parse(Quantity)
+                };
+                if (SelectedCashDestiny?.Description == "CAU")
+                {
+                    SelectedIncidence.Status = IncidenceStatus.UNCOMMIT;
+                    SelectedIncidence.Priority = Priority.NONE;
+                }
+                else
+                    refund.RefundDate = SelectedIncidence.FinishDate;
+
+                if (String.IsNullOrEmpty(SelectedIncidence.Observations))
+                    SelectedIncidence.Observations = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}",
+                        IsMoney ? "MONEDAS" : "BILLETE",
+                        Single.Parse(Quantity),
+                        SelectedCashDestiny?.Description);
+                isDone = refund.Save();
+            }
+                isDone = SelectedIncidence.Update();
+
+            if (!isDone)
+            {
+                AcabusControlCenterViewModel.ShowDialog("No se cerró la incidencia");
+                ViewModelService.GetViewModel<CctvReportsViewModel>().ReloadData();
+            }
+            else
+                AcabusControlCenterViewModel.ShowDialog($"Incidencia '{SelectedIncidence.Folio}' cerrada correctamente");
+            ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
         }
 
         private bool Validate()

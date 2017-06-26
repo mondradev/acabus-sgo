@@ -138,7 +138,8 @@ namespace Acabus.Modules.OffDutyVehicles
                                 }
                             if (!exists)
                             {
-                                Vehicle vehicle = AcabusData.Session.GetObject<Vehicle>(match.ToString()) as Vehicle;
+                                Vehicle vehicle = Core.DataAccess.AcabusData.AllVehicles.FirstOrDefault(vehi => vehi.EconomicNumber == match.ToString());
+                                if (vehicle is null) continue;
                                 vehicle.Status = SelectedStatus;
                                 Vehicles.Add(vehicle);
                             }
@@ -152,18 +153,13 @@ namespace Acabus.Modules.OffDutyVehicles
 
             SaveVehicleCommand = new CommandBase((param) =>
             {
-                AcabusData.OffDutyVehicles.Clear();
+                Core.DataAccess.AcabusData.OffDutyVehicles.Clear();
                 foreach (Vehicle vehicle in Vehicles)
-                    AcabusData.OffDutyVehicles.Add(vehicle);
-                AcabusData.SaveOffDutyVehiclesList();
+                    Core.DataAccess.AcabusData.OffDutyVehicles.Add(vehicle);
+                Core.DataAccess.AcabusData.SaveOffDutyVehiclesList();
             });
 
-            ReloadVehicleCommand = new CommandBase((param) =>
-            {
-                Vehicles.Clear();
-                foreach (Vehicle vehicle in AcabusData.OffDutyVehicles)
-                    Vehicles.Add(vehicle);
-            });
+            ReloadVehicleCommand = new CommandBase((param) => LoadData());
 
             RemoveVehicleCommand = new CommandBase((param) =>
             {
@@ -171,10 +167,14 @@ namespace Acabus.Modules.OffDutyVehicles
                 SelectedVehicle = null;
             });
 
-            Vehicles.Clear();
-            foreach (Vehicle vehicle in AcabusData.OffDutyVehicles)
-                Vehicles.Add(vehicle);
+            LoadData();
         }
 
+        private void LoadData()
+        {
+            Vehicles.Clear();
+            foreach (Vehicle vehicle in Core.DataAccess.AcabusData.OffDutyVehicles)
+                Vehicles.Add(vehicle);
+        }
     }
 }

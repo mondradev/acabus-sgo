@@ -176,31 +176,32 @@ namespace Acabus.Modules.CctvReports
 
             Incidences.LoadFromDataBase();
 
-            _updatePriority = new Timer((target) =>
-             {
-                 foreach (var item in IncidencesOpened)
-                 {
-                     if (item.Status == IncidenceStatus.UNCOMMIT && item.Priority != Priority.NONE)
-                     {
-                         item.Priority = Priority.NONE;
-                         item.Update();
-                     }
-                     if (item.Status == IncidenceStatus.UNCOMMIT || item.Priority == Priority.NONE) continue;
-                     var time = DateTime.Now - item.StartDate;
-                     var type = item.Device.Vehicle != null;
-                     var maxLowPriority = type
-                                ? AcabusData.TimeMaxLowPriorityIncidenceBus : AcabusData.TimeMaxLowPriorityIncidence;
-                     var maxMediumPriority = type
-                                ? AcabusData.TimeMaxMediumPriorityIncidenceBus : AcabusData.TimeMaxMediumPriorityIncidence;
+            //_updatePriority = new Timer((target) =>
+            // {
+            //     foreach (var item in IncidencesOpened)
+            //     {
+            //         if (item.Status == IncidenceStatus.UNCOMMIT && item.Priority != Priority.NONE)
+            //         {
+            //             item.Priority = Priority.NONE;
+            //             item.Update();
+            //         }
+            //         if (item.Status == IncidenceStatus.UNCOMMIT || item.Priority == Priority.NONE) continue;
+            //         var time = DateTime.Now - item.StartDate;
+            //         var type = item.Device.Vehicle != null;
+            //         var maxLowPriority = type
+            //                    ? AcabusData.TimeMaxLowPriorityIncidenceBus : AcabusData.TimeMaxLowPriorityIncidence;
+            //         var maxMediumPriority = type
+            //                    ? AcabusData.TimeMaxMediumPriorityIncidenceBus : AcabusData.TimeMaxMediumPriorityIncidence;
 
-                     if (time > maxMediumPriority)
-                         item.Priority = Priority.HIGH;
-                     else if (time > maxLowPriority && item.Priority < Priority.HIGH)
-                         item.Priority = Priority.MEDIUM;
+            //         if (time > maxMediumPriority)
+            //             item.Priority = Priority.HIGH;
+            //         else if (time > maxLowPriority && item.Priority < Priority.HIGH)
+            //             item.Priority = Priority.MEDIUM;
 
-                     item.Update();
-                 }
-             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
+            //         if (item.Status == IncidenceStatus.OPEN)
+            //             item.Update();
+            //     }
+            // }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
         }
 
         ~CctvReportsViewModel()

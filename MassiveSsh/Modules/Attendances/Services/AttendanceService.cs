@@ -35,12 +35,12 @@ namespace Acabus.Modules.Attendances.Services
         /// Persiste los datos de una nueva instancia <see cref="Attendance"/> en una base de datos.
         /// </summary>
         public static bool Save(this Attendance attendance)
-            => AcabusData.Session.Save(attendance);
+            => AcabusData.Session.Save(ref attendance);
 
         /// <summary>
         /// Persiste los datos de una instancia <see cref="Attendance"/> que han cambiado sus propiedades.
         /// </summary>
         public static Boolean Update(this Attendance attendance)
-            => AcabusData.Session.Update(attendance);
+            => AcabusData.Session.Update(ref attendance);
     }
 }
