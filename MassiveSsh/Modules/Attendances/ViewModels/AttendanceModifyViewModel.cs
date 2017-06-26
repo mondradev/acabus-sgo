@@ -8,6 +8,7 @@ using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Acabus.Modules.Attendances.ViewModels
@@ -44,31 +45,6 @@ namespace Acabus.Modules.Attendances.ViewModels
             ModifyCommand = new CommandBase(ModifyExecute);
         }
 
-        private void ModifyExecute(object obj)
-        {
-            Attendance.Section = Section;
-            Attendance.HasKvrKey = HasKvrKey;
-            Attendance.HasNemaKey = HasNemaKey;
-
-            if (Attendance.Update())
-            {
-                IEnumerable<Incidence> openedIncidences
-                    = ViewModelService.GetViewModel<CctvReports.CctvReportsViewModel>()?.IncidencesOpened;
-
-                foreach (Incidence incidence in openedIncidences)
-                {
-                    incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                        .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
-                    incidence.Update();
-                }
-
-                ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
-            }
-            else
-                AcabusControlCenterViewModel.ShowDialog("Error al actualizar la asignación.");
-            DialogHost.CloseDialogCommand.Execute(obj, null);
-        }
-
         /// <summary>
         /// Obtiene o establece la asistencia a modificar.
         /// </summary>
@@ -102,6 +78,8 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
         }
 
+        public ICommand ModifyCommand { get; private set; }
+
         /// <summary>
         /// Obtiene o establece el tramo asignado.
         /// </summary>
@@ -113,8 +91,41 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
         }
 
-        public IEnumerable<String> Sections => AcabusData.Sections;
+        public IEnumerable<String> Sections =>
+           AcabusData.Sections
+           .Where(section =>
+           {
+               if (section.Contains("SUPERVICIÓN"))
+                   return true;
+               if (Attendance.Turn == Attendance.WorkShift.NIGHT_SHIFT)
+                   return section.Contains("PATIO") || section.Contains("TERMINAL");
+               else
+                   return !section.Contains("PATIO") && !section.Contains("TERMINAL");
+           });
 
-        public ICommand ModifyCommand { get; private set; }
+        private void ModifyExecute(object obj)
+        {
+            Attendance.Section = Section;
+            Attendance.HasKvrKey = HasKvrKey;
+            Attendance.HasNemaKey = HasNemaKey;
+
+            if (Attendance.Update())
+            {
+                IEnumerable<Incidence> openedIncidences
+                    = ViewModelService.GetViewModel<CctvReports.CctvReportsViewModel>()?.IncidencesOpened;
+
+                foreach (Incidence incidence in openedIncidences)
+                {
+                    incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
+                        .GetTechnicianAssigned(incidence.Device, incidence.StartDate, incidence.Description);
+                    incidence.Update();
+                }
+
+                ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
+            }
+            else
+                AcabusControlCenterViewModel.ShowDialog("Error al actualizar la asignación.");
+            DialogHost.CloseDialogCommand.Execute(obj, null);
+        }
     }
 }

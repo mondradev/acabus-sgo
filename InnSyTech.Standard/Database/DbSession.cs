@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
@@ -12,9 +13,15 @@ namespace InnSyTech.Standard.Database
 {
     public sealed class DbSession
     {
+        private static Dictionary<Type, IList> _cache;
         private DbConnection _connection;
 
         private List<DbTransaction> _transactions;
+
+        static DbSession()
+        {
+            _cache = new Dictionary<Type, IList>();
+        }
 
         internal DbSession(DbConnection connection)
         {
@@ -192,7 +199,7 @@ namespace InnSyTech.Standard.Database
         /// <typeparam name="T">Tipo de la instancia a trasladar a una base de datos.</typeparam>
         /// <param name="instance">Instancia que deseamos escribir en la base de datos.</param>
         /// <returns>Un valor <see cref="true"/> si la instancia se guardó correctamente.</returns>
-        public bool Save<T>(T instance)
+        public bool Save<T>(ref T instance)
         {
             DbTransaction transaction = null;
             ValidateConnection();
@@ -249,8 +256,17 @@ namespace InnSyTech.Standard.Database
 
             foreach (DbField field in DbField.GetFields(typeOfInstance))
             {
-                if (field.IsPrimaryKey)
-                    if (field.GetValue(instance) is null || field.IsAutonumerical) continue;
+                if (!String.IsNullOrEmpty(field.ForeignKeyName))
+                    continue;
+
+                object defaultValue = field.PropertyType.IsValueType
+                                                        ? Activator.CreateInstance(field.PropertyType)
+                                                        : null;
+                object propertyValue = field.GetValue(instance);
+
+                if (field.IsPrimaryKey && field.IsAutonumerical
+                    && propertyValue.Equals(defaultValue))
+                    continue;
                 statement.AppendFormat("{0},", field.Name);
                 parameters.AppendFormat("@{0},", field.Name);
             }
@@ -281,6 +297,9 @@ namespace InnSyTech.Standard.Database
         {
             DbCommand command = null;
 
+            if (instance?.GetType() is null)
+                return null;
+
             try
             {
                 if (ExistsInstance(instance, transaction))
@@ -293,19 +312,21 @@ namespace InnSyTech.Standard.Database
                     foreach (var item in DbField.GetFields(instance.GetType()).Where(field => field.IsForeignKey))
                         CreateParameter(command, item.Name, SaveInstance(item.GetValue(instance), transaction, instance));
                 CreateParameters(command, instance);
+                Trace.WriteLine($"Ejecutando SQL: {command.CommandText}", "DEBUG");
 
                 int rows = command.ExecuteNonQuery();
                 if (!DbField.GetPrimaryKey(instance.GetType()).IsAutonumerical)
                     return DbField.GetPrimaryKey(instance.GetType()).GetValue(instance);
                 command.Parameters.Clear();
                 command.CommandText = String.Format("SELECT {0}()", Configuration.LastInsertFunctionName);
+                Trace.WriteLine($"Ejecutando SQL: {command.CommandText}", "DEBUG");
 
                 DbField.GetPrimaryKey(instance.GetType()).SetValue(instance, command.ExecuteScalar());
                 return DbField.GetPrimaryKey(instance.GetType()).GetValue(instance);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error al guardar la instancia: {instance.GetType()}", ex);
+                throw new Exception($"Error al guardar la instancia: {instance.GetType()}, Mensaje: {ex.Message}", ex);
             }
             finally
             {
@@ -323,7 +344,7 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="instance">Instancia a actualizar.</param>
         /// <returns>Un valor <see cref="true"/> si la instancia fue actualizada correctamente.</returns>
-        public bool Update(object instance)
+        public bool Update<T>(ref T instance)
         {
             DbTransaction transaction = null;
             DbCommand command = null;
@@ -379,6 +400,8 @@ namespace InnSyTech.Standard.Database
 
             foreach (DbField field in DbField.GetFields(typeOfInstance))
             {
+                if (!String.IsNullOrEmpty(field.ForeignKeyName))
+                    continue;
                 if (field.IsPrimaryKey) continue;
                 parameters.AppendFormat("{0}=@{0},", field.Name);
             }
@@ -406,6 +429,9 @@ namespace InnSyTech.Standard.Database
         {
             DbCommand command = null;
 
+            if (instance?.GetType() is null)
+                return null;
+
             try
             {
                 command = _connection.CreateCommand();
@@ -417,14 +443,17 @@ namespace InnSyTech.Standard.Database
                         CreateParameter(command, item.Name, UpdateInstance(item.GetValue(instance), transaction, instance));
                 CreateParameters(command, instance);
 
-                if (command.ExecuteNonQuery() == 0)
+                Trace.WriteLine($"Ejecutando SQL: {command.CommandText}", "DEBUG");
+
+                int rows = command.ExecuteNonQuery();
+                if (rows == 0)
                     return SaveInstance(instance, transaction, childInstance);
 
                 return DbField.GetPrimaryKey(instance.GetType()).GetValue(instance);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error al actualizar los valores de la instancia {instance.GetType()}", ex);
+                throw new Exception($"Error al actualizar los valores de la instancia {instance.GetType()}, Mensaje: {ex.Message}", ex);
             }
             finally
             {
@@ -442,7 +471,7 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="instance">Instancia a borrar.</param>
         /// <returns>Un valor verdadero si se borró la instancia correctamente.</returns>
-        public bool Delete(object instance)
+        public bool Delete<T>(T instance)
         {
             DbTransaction transaction = null;
             DbCommand command = null;
@@ -539,8 +568,25 @@ namespace InnSyTech.Standard.Database
         /// <param name="typeOfInstance">Tipo de la instancia.</param>
         /// <param name="idKey">Valor de la llave primaria de la instancia.</param>
         /// <returns>Una instancia del tipo especificada.</returns>
-        public object GetObject(Type typeOfInstance, Object idKey)
+        public TResult GetObject<TResult>(Object idKey)
         {
+            if (_cache.ContainsKey(typeof(TResult)))
+            {
+                var instance = default(TResult);
+                var primaryKey = DbField.GetPrimaryKey(typeof(TResult));
+                Boolean exists = false;
+                foreach (var item in _cache[typeof(TResult)])
+
+                    if (exists = primaryKey.GetValue(item).Equals(idKey))
+                    {
+                        instance = (TResult)item;
+                        break;
+                    }
+                if (exists)
+                    _cache[typeof(TResult)].Remove(instance);
+            }
+
+            Type typeOfInstance = typeof(TResult);
             DbTransaction transaction = null;
             ValidateConnection();
             lock (_transactions)
@@ -548,7 +594,7 @@ namespace InnSyTech.Standard.Database
                 try
                 {
                     transaction = BeginTransaction();
-                    Object data = ReadData(typeOfInstance, idKey, transaction, null);
+                    TResult data = ReadData<TResult>(typeOfInstance, idKey, transaction);
                     transaction.Commit();
 
                     return data;
@@ -561,7 +607,7 @@ namespace InnSyTech.Standard.Database
                     if (transaction != null)
                         transaction.Rollback();
 
-                    return null;
+                    return default(TResult);
                 }
                 finally
                 {
@@ -584,9 +630,12 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="typeOfInstance">Tipo a devolver de la base de datos.</param>
         /// <returns>Una colección de instancias del tipo especificado.</returns>
-        public ICollection<object> GetObjects(Type typeOfInstance)
+        public ICollection<TResult> GetObjects<TResult>()
         {
-            ICollection<object> objects = new List<object>();
+            if (_cache.ContainsKey(typeof(TResult))) _cache[typeof(TResult)].Clear();
+
+            Type typeOfInstance = typeof(TResult);
+            ICollection<TResult> objects = new List<TResult>();
             DbTransaction transaction = null;
             ValidateConnection();
             lock (_transactions)
@@ -595,7 +644,7 @@ namespace InnSyTech.Standard.Database
                 {
                     transaction = BeginTransaction();
 
-                    ReadList(typeOfInstance, objects, transaction);
+                    ReadList<TResult>(typeOfInstance, objects as IList, transaction);
 
                     transaction.Commit();
 
@@ -627,36 +676,73 @@ namespace InnSyTech.Standard.Database
             }
         }
 
+        private bool HasChildren(DbField field, out Type typeChildren)
+        {
+            if (!String.IsNullOrEmpty(field.ForeignKeyName)
+                && (field.PropertyType as TypeInfo).ImplementedInterfaces.Contains(typeof(ICollection)))
+            {
+                typeChildren = field.PropertyType.GetGenericArguments().FirstOrDefault();
+                return true;
+            }
+            typeChildren = null;
+            return false;
+        }
+
         /// <summary>
         /// Lee la información de una instancia que contenga la llave primaria especificada por el parametro.
         /// </summary>
         /// <param name="typeOfInstance">Tipo de la instancia a obtener.</param>
         /// <param name="idKey">Valor de la llave primaria de la instancia.</param>
         /// <param name="transaction">Instancia <see cref="DbTransaction"/> que administra la transacción actual.</param>
-        /// <param name="childInstance">Instancia dependiente.</param>
+        /// <param name="dependenceInstance">Instancia dependiente.</param>
         /// <returns>Una instancia del tipo especificado.</returns>
-        private Object ReadData(Type typeOfInstance, object idKey, DbTransaction transaction, Object childInstance = null)
+        private TResult ReadData<TResult>(Type typeOfInstance, object idKey, DbTransaction transaction, Object dependenceInstance = null)
         {
             DbCommand command = _connection.CreateCommand();
+            DbField primaryKeyField = DbField.GetPrimaryKey(typeOfInstance);
             command.Transaction = transaction;
 
-            command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@{1}", GetTableName(typeOfInstance),
-                DbField.GetPrimaryKey(typeOfInstance).Name);
-            CreateParameter(command, DbField.GetPrimaryKey(typeOfInstance).Name, idKey);
+            command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@{1}",
+                                                    GetTableName(typeOfInstance),
+                                                    primaryKeyField.Name);
+
+            CreateParameter(command, primaryKeyField.Name, idKey);
 
             IEnumerable<DbField> fields = DbField.GetFields(typeOfInstance);
             DbDataReader reader = null;
-            Object data = null;
+            TResult data = default(TResult);
             try
             {
                 reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
-                    data = Activator.CreateInstance(typeOfInstance);
+                    data = (TResult)Activator.CreateInstance(typeOfInstance);
+                    primaryKeyField.SetValue(data, reader[primaryKeyField.Name]);
+
+                    if (_cache.ContainsKey(data.GetType()))
+                    {
+                        Boolean exists = false;
+                        foreach (var item in _cache[data.GetType()])
+                            if (exists = primaryKeyField.GetValue(data).Equals(primaryKeyField.GetValue(item)))
+                            {
+                                data = (TResult)item;
+                                break;
+                            }
+
+                        if (!exists) _cache[data.GetType()].Add(data);
+                        else continue;
+                    }
+                    else
+                        _cache.Add(data.GetType(), new List<Object>() { data });
+
                     foreach (DbField field in fields)
                     {
-                        try
+                        if (field.IsPrimaryKey) continue;
+
+                        if (HasChildren(field, out Type typeChildren))
+                            ReadList<Object>(typeChildren, (field.GetValue(data) as IList), transaction, data, field.ForeignKeyName);
+                        else
                         {
                             if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
                                 continue;
@@ -666,26 +752,28 @@ namespace InnSyTech.Standard.Database
                                 if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
                                     continue;
 
-                            Object fieldValue = reader[field.Name];
-                            //if (field.PropertyType is IEnumerable)
-                            //    ReadList(field.PropertyType.GetGenericArguments()?[0],
-                            //        (ICollection<object>)field.GetValue(data),
-                            //        transaction,
-                            //        data);
-                            //else
+                            Object dbFieldValue = reader[field.Name];
+
                             if (!field.IsForeignKey)
-                                field.SetValue(data, reader[field.Name]);
-                            else if (childInstance != null && field.PropertyType == childInstance.GetType()
-                                && fieldValue.Equals(DbField.GetPrimaryKey(childInstance.GetType()).GetValue(childInstance)))
-                                field.SetValue(data, childInstance);
+                                field.SetValue(data, dbFieldValue);
+                            else if (dependenceInstance != null && field.PropertyType == dependenceInstance.GetType())
+                            {
+                                DbField dependencePrimaryKeyField = DbField.GetPrimaryKey(dependenceInstance.GetType());
+                                var valueFromDb = Convert.ChangeType(dbFieldValue, dependencePrimaryKeyField.PropertyType);
+                                var key = dependencePrimaryKeyField.GetValue(dependenceInstance);
+
+                                if (valueFromDb.Equals(key))
+                                    field.SetValue(data, dependenceInstance);
+                                else
+                                    field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
+                            }
                             else
-                                field.SetValue(data, ReadData(field.PropertyType, reader[field.Name], transaction, data));
+                                field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
                         }
-                        catch { }
                     }
                 }
 
-                return data;
+                return (TResult)data;
             }
             finally
             {
@@ -703,44 +791,88 @@ namespace InnSyTech.Standard.Database
         /// <param name="typeOfInstance"></param>
         /// <param name="objects"></param>
         /// <param name="transaction"></param>
-        /// <param name="parentInstance"></param>
-        private void ReadList(Type typeOfInstance, ICollection<object> objects, DbTransaction transaction, Object parentInstance = null)
+        /// <param name="dependenceInstance"></param>
+        private void ReadList<T>(Type typeOfInstance, IList objects, DbTransaction transaction, Object dependenceInstance = null, String foreignKeyName = "")
         {
+            DbField dependencePrimaryKeyField = dependenceInstance is null ? null : DbField.GetPrimaryKey(dependenceInstance.GetType());
             DbCommand command = _connection.CreateCommand();
-            command.Transaction = transaction;
 
-            command.CommandText = String.Format("SELECT * FROM {0}", GetTableName(typeOfInstance));
+            command.Transaction = transaction;
+            if (dependenceInstance is null)
+                command.CommandText = String.Format("SELECT * FROM {0}", GetTableName(typeOfInstance));
+            else
+            {
+                command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@ForeignKey", GetTableName(typeOfInstance), foreignKeyName);
+                CreateParameter(command, "ForeignKey", dependencePrimaryKeyField.GetValue(dependenceInstance));
+            }
 
             DbDataReader reader = null;
             try
             {
                 reader = command.ExecuteReader();
 
-                Object data = null;
+                T data = default(T);
                 IEnumerable<DbField> fields = DbField.GetFields(typeOfInstance);
 
                 while (reader.Read())
                 {
-                    data = Activator.CreateInstance(typeOfInstance);
+                    data = (T)Activator.CreateInstance(typeOfInstance);
+
+                    DbField primaryKeyField = DbField.GetPrimaryKey(typeOfInstance);
+                    primaryKeyField.SetValue(data, reader[primaryKeyField.Name]);
+
+                    if (_cache.ContainsKey(data.GetType()))
+                    {
+                        Boolean exists = false;
+                        foreach (var item in _cache[data.GetType()])
+                            if (exists = primaryKeyField.GetValue(data).Equals(primaryKeyField.GetValue(item)))
+                            {
+                                data = (T)item;
+                                break;
+                            }
+                        if (!exists) _cache[data.GetType()].Add(data);
+                        else
+                        {
+                            objects.Add(data);
+                            continue;
+                        };
+                    }
+                    else
+                        _cache.Add(data.GetType(), new List<Object>() { data });
+
                     foreach (DbField field in fields)
                     {
-                        if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
-                            continue;
+                        if (field.IsPrimaryKey) continue;
 
-                        if (reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(DateTime)
-                            || reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(TimeSpan))
-                            if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
+                        if (HasChildren(field, out Type typeChildren))
+                            ReadList<Object>(typeChildren, (field.GetValue(data) as IList), transaction, data, field.ForeignKeyName);
+                        else
+                        {
+                            if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
                                 continue;
 
-                        Object fieldValue = reader[field.Name];
+                            if (reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(DateTime)
+                                || reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(TimeSpan))
+                                if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
+                                    continue;
 
-                        if (!field.IsForeignKey)
-                            field.SetValue(data, reader[field.Name]);
-                        else if (parentInstance != null && field.PropertyType == parentInstance.GetType()
-                            && fieldValue.Equals(DbField.GetPrimaryKey(parentInstance.GetType()).GetValue(parentInstance)))
-                            field.SetValue(data, parentInstance);
-                        else
-                            field.SetValue(data, ReadData(field.PropertyType, reader[field.Name], transaction, data));
+                            Object dbFieldValue = reader[field.Name];
+
+                            if (!field.IsForeignKey)
+                                field.SetValue(data, dbFieldValue);
+                            else if (dependenceInstance != null && field.PropertyType == dependenceInstance.GetType())
+                            {
+                                var valueFromDb = Convert.ChangeType(dbFieldValue, dependencePrimaryKeyField.PropertyType);
+                                var key = dependencePrimaryKeyField.GetValue(dependenceInstance);
+
+                                if (valueFromDb.Equals(key))
+                                    field.SetValue(data, dependenceInstance);
+                                else
+                                    field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
+                            }
+                            else
+                                field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
+                        }
                     }
 
                     objects.Add(data);

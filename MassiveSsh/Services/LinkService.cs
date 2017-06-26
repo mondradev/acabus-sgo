@@ -12,7 +12,7 @@ namespace Acabus.Services
             link.Ping = pingA > pingB ? pingA : pingB;
 
             link.State = StateValueExtension.GetConnectionState(pingA, link.StationA.PingMin, link.StationB.PingMax)
-                .AndConnectionStete(StateValueExtension.GetConnectionState(pingB, link.StationB.PingMin, link.StationB.PingMax));
+                .And(StateValueExtension.GetConnectionState(pingB, link.StationB.PingMin, link.StationB.PingMax));
 
             if (pingA < 0 || pingB < 0)
             {

@@ -79,13 +79,22 @@ namespace Acabus.Window
         /// <param name="module">Instancia del modulo.</param>
         /// <param name="icon">Icono a visualizar en el botón.</param>
         /// <param name="tooltip">Tip de la herramienta.</param>
-        public static void AddModule(UserControl module, FrameworkElement icon, String tooltip)
+        /// <param name="isSecundary">Si el modulo es una función secundaria.</param>
+        public static void AddModule(UserControl module, FrameworkElement icon, String tooltip, Boolean isSecundary = false)
         {
             var moduleTemp = module;
             Instance?._view.AddToolButton(module.Name, new CommandBase((parameter) =>
             {
                 Instance?._view.ShowContent(module);
-            }), icon, tooltip);
+            }), icon, tooltip, isSecundary);
+        }
+
+        /// <summary>
+        /// Muestra una vista en la aplicación como si se tratase de un modulo.
+        /// </summary>
+        public static void ShowContent(UserControl view)
+        {
+            Instance?._view.ShowContent(view);
         }
 
         /// <summary>
@@ -128,7 +137,7 @@ namespace Acabus.Window
         public async static void ShowDialog(String message)
         {
             DialogHost.CloseDialogCommand.Execute(null, null);
-            System.Threading.Thread.Sleep(500);
+            System.Threading.Thread.Sleep(1000);
             await DialogHost.Show(new DialogTemplateView() { Message = message });
         }
 

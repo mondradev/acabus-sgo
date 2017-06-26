@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Acabus.Utils;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -13,15 +14,23 @@ namespace Acabus.Converters
     public abstract class TranslateEnumConverter<T> : IValueConverter
     {
         /// <summary>
-        /// Diccionario que contiene todas las palabras traducidas de la enumeración.
+        /// 
         /// </summary>
-        private Dictionary<T, String> _keys;
+        private EnumTranslator<T> _translator;
 
         /// <summary>
         /// Crea una instancia nueva del traductor.
         /// </summary>
         /// <param name="keys">Valores posibles para la traducción.</param>
-        public TranslateEnumConverter(Dictionary<T, String> keys) { _keys = keys; }
+        public TranslateEnumConverter(Dictionary<T, String> keys) { _translator = new EnumTranslator<T>(keys); }
+
+        /// <summary>
+        /// Crea una instancia a partir de un traductor <see cref="EnumTranslator{T}"/>
+        /// </summary>
+        public TranslateEnumConverter(EnumTranslator<T> translator)
+        {
+            _translator = translator;
+        }
 
         /// <summary>
         /// Convierte una instancia o una enumeración del tipo <see cref="T"/>
@@ -35,23 +44,11 @@ namespace Acabus.Converters
         public virtual object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is T)
-                return TranslateValue((T)value);
+                return _translator.Translate((T)value);
             if (value is IEnumerable<T>)
-                return ((IEnumerable<T>)value).Select((item) => TranslateValue(item));
+                return ((IEnumerable<T>)value).Select((item) => _translator.Translate(item));
 
             return null;
-        }
-
-        /// <summary>
-        /// Traduce el valor de una instancia <see cref="T"/> a una cadena que la representa
-        /// en español.
-        /// </summary>
-        /// <param name="key">Instancia a traducir.</param>
-        /// <returns>Una cadena que representa el valor de la instancia.</returns>
-        private String TranslateValue(T key)
-        {
-            _keys.TryGetValue(key, out String value);
-            return value;
         }
 
         /// <summary>
@@ -66,11 +63,7 @@ namespace Acabus.Converters
         {
             if (!(value is String)) return null;
 
-            foreach (var item in _keys.Keys)
-                if (_keys[item] == value.ToString())
-                    return item;
-
-            return null;
+            return _translator.TranslateBack(value.ToString());
         }
     }
 }

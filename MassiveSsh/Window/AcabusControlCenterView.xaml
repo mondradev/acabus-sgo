@@ -6,28 +6,27 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
     x:Class="Acabus.Window.AcabusControlCenterView"
-        mc:Ignorable="d"
-        GlowBrush="Black"
-        BorderThickness="0"
-        ResizeMode="CanResizeWithGrip"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.FontWeight="Medium"
-        TextElement.FontSize="14"
-        FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
-        Title="Acabus Centro de Operaciones"
-        WindowStartupLocation="CenterScreen" MinWidth="860" MinHeight="550" Height="auto" Width="auto" Icon="/AcabusControlCenter;component/acabus_icon.ico">
+    mc:Ignorable="d"
+    GlowBrush="Black"
+    BorderThickness="0"
+    ResizeMode="CanResizeWithGrip"
+    Title="Acabus Centro de Operaciones"
+    WindowStartupLocation="CenterScreen"
+    MinWidth="860" MinHeight="550"
+    Height="auto" Width="auto"
+    Icon="/AcabusControlCenter;component/acabus_icon.ico"
+    Style="{StaticResource BaseStyle}">
     <materialDesign:DialogHost>
-        <Grid>
+        <Grid Margin="0"  Background="{DynamicResource MaterialDesignPaper}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="56"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1*" />
             </Grid.RowDefinitions>
-            <ToolBarTray Margin="0" Grid.Row="0" >
-                <ToolBar x:FieldModifier="private" x:Name="_mainToolBar" Style="{DynamicResource MaterialDesignToolBar}" ClipToBounds="False"/>
-            </ToolBarTray>
-            <materialDesign:Card VerticalAlignment="Stretch" Margin="0" Grid.Row="1" x:Name="_content" x:FieldModifier="private"/>
-            <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="_snackBar" x:FieldModifier="private" Grid.Row="1" MaxWidth="800" MinWidth="300"/>
+            <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" materialDesign:ShadowAssist.ShadowDepth="Depth2" VerticalAlignment="Stretch" Margin="0" Padding="8,0">
+                <DockPanel x:FieldModifier="private" x:Name="_mainToolBar" LastChildFill="False"/>
+            </materialDesign:ColorZone>
+            <DockPanel VerticalAlignment="Stretch" Margin="0" Grid.Row="1" x:Name="_content" x:FieldModifier="private" />
+            <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="_snackBar" x:FieldModifier="private" Grid.Row="1" MaxWidth="800" MinWidth="300" />
         </Grid>
     </materialDesign:DialogHost>
 </Controls:MetroWindow>

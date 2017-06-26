@@ -1,9 +1,6 @@
-﻿using Acabus.DataAccess;
-using Acabus.Modules.CctvReports.Models;
+﻿using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils.Mvvm;
-using Acabus.Window;
 using System;
-using System.Linq;
 using System.Windows.Input;
 
 namespace Acabus.Modules.CctvReports
@@ -72,26 +69,26 @@ namespace Acabus.Modules.CctvReports
 
         private void Export(object parameter)
         {
-            if (SelectedReport is null) return;
+            //if (SelectedReport is null) return;
 
-            String query = String.Format(SelectedReport.Query,
-                                     StartDateTime, FinishDateTime);
+            //String query = String.Format(SelectedReport.Query,
+            //                         StartDateTime, FinishDateTime);
 
-            var response = SQLiteAccess.ExecuteQuery(query, out String[] header);
+            //var response = SQLiteAccess.ExecuteQuery(query, out String[] header);
 
-            if (response.Length <= 1 || response[0].Length < 1)
-            {
-                AcabusControlCenterViewModel.ShowDialog("El periodo no obtuvo ningún resultado.");
-                return;
-            }
+            //if (response.Length <= 1 || response[0].Length < 1)
+            //{
+            //    AcabusControlCenterViewModel.ShowDialog("El periodo no obtuvo ningún resultado.");
+            //    return;
+            //}
 
-            Csv.Export(response.Select((item)
-                => item.Select((subitem)
-                    => subitem.ToString()).ToArray()).ToArray(),
-                header,
-                String.Format(FileName, SelectedReport.Description));
+            //Csv.Export(response.Select((item)
+            //    => item.Select((subitem)
+            //        => subitem.ToString()).ToArray()).ToArray(),
+            //    header,
+            //    String.Format(FileName, SelectedReport.Description));
 
-            AcabusControlCenterViewModel.ShowDialog("Información fue exportada correctamente.");
+            //AcabusControlCenterViewModel.ShowDialog("Información fue exportada correctamente.");
         }
     }
 }

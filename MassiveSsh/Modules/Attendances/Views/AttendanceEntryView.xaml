@@ -8,10 +8,7 @@
     xmlns:Models="clr-namespace:Acabus.Modules.Attendances.Models"
     xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels"
     x:Class="Acabus.Modules.Attendances.Views.AttendanceEntryView"
-             TextElement.FontWeight="Medium"
-             TextElement.FontSize="14"
-             FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
-             mc:Ignorable="d">
+    mc:Ignorable="d">
     <UserControl.Resources>
         <Converters:DateTimeConverter x:Key="DateTimeConverter"/>
         <Models:TurnsConverter x:Key="TurnsConverter"/>
@@ -36,7 +33,7 @@
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Asistencia (Entrada)" FontSize="24" FontWeight="Normal" />
+            <TextBlock Text="Asistencia (Entrada)" FontSize="20" FontWeight="Normal" />
             <ComboBox materialDesign:HintAssist.Hint="Nombre del técnico" Grid.Row="2" ItemsSource="{Binding Technicians}" SelectedItem="{Binding Technician}"/>
             <ComboBox materialDesign:HintAssist.Hint="Turno" Grid.Row="4" SelectedItem="{Binding Turn, Converter={StaticResource TurnsConverter}}" ItemsSource="{Binding Turns, Converter={StaticResource TurnsConverter}}"/>
             <materialDesign:TimePicker materialDesign:HintAssist.Hint="Hora de entrada" Grid.Row="6" SelectedTime="{Binding TimeEntry, Converter={StaticResource DateTimeConverter}}"/>
@@ -46,10 +43,10 @@
         </Grid>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
             <Button ToolTip="Descartar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0 0 8 0"
-                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsCancel="True" MinHeight="36">
                 <materialDesign:PackIcon Kind="Delete" Width="24" Height="24"/>
             </Button>
-            <Button ToolTip="Asistencia de Entrada" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterEntryCommand}">
+            <Button ToolTip="Asistencia de Entrada" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterEntryCommand}" MinHeight="36">
                 <materialDesign:PackIcon Kind="Walk" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
                     <materialDesign:PackIcon.RenderTransform>
                         <TransformGroup>

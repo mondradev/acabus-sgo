@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -22,6 +23,9 @@ namespace Acabus.Utils
         /// <returns></returns>
         public static Boolean Between(this DateTime toComparer, DateTime? value1, DateTime? value2)
         {
+            if (value1 is null && value2 is null)
+                return false;
+
             if (value1 is null)
                 return toComparer <= value2;
 
@@ -73,13 +77,11 @@ namespace Acabus.Utils
             return builder.ToString();
         }
 
-        public static ICollection<T> Where<T>(this ICollection<T> collection, Predicate<T> predicate)
+        public static IEnumerable<T> Combine<T>(this IEnumerable<IEnumerable<T>> enumerables)
         {
-            ICollection<T> listTemp = (IList<T>)Activator.CreateInstance(collection.GetType());
-            foreach (var item in collection)
-                if (predicate.Invoke(item))
-                    listTemp.Add(item);
-            return listTemp;
+            foreach (var enumerable in enumerables)
+                foreach (var item in enumerable)
+                    yield return item;
         }
 
         /// <summary>
@@ -97,7 +99,10 @@ namespace Acabus.Utils
             canvas.Children.Add(new Path()
             {
                 Data = Geometry.Parse(dataSvg),
-                Fill = Brushes.Black
+            });
+            (canvas.Children[0] as Path).SetBinding(Path.FillProperty, new Binding("Foreground")
+            {
+                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(Control), 1)
             });
             return new Viewbox()
             {

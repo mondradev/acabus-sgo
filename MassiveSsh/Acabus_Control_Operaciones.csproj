@@ -149,12 +149,14 @@
     <Compile Include="Converters\DateTimeConverter.cs" />
     <Compile Include="Converters\EnumToColorConverter.cs" />
     <Compile Include="Converters\IsNullConverter.cs" />
+    <Compile Include="Converters\MultiExpanderConverter.cs" />
     <Compile Include="Converters\NotIsNullConverter.cs" />
     <Compile Include="Converters\PriorityConverter.cs" />
     <Compile Include="Converters\TranslateEnumConverter.cs" />
     <Compile Include="DataAccess\Csv.cs" />
-    <Compile Include="DataAccess\SQLiteAccess.cs" />
-    <Compile Include="Models\DeviceBus.cs" />
+    <Compile Include="Models\CommonTranslators.cs" />
+    <Compile Include="Models\DeviceFault.cs" />
+    <Compile Include="Models\DeviceFaultCategory.cs" />
     <Compile Include="Modules\Attendances\AcabusData.cs" />
     <Compile Include="Modules\Attendances\Models\Attendance.cs" />
     <Compile Include="Modules\Attendances\Services\AttendanceService.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="Modules\CctvReports\AcabusData.cs" />
     <Compile Include="Modules\CctvReports\Models\RefundOfMoney.cs" />
     <Compile Include="Modules\CctvReports\Models\ReportQuery.cs" />
+    <Compile Include="Modules\CctvReports\ViewModels\IncidencesHistoryViewModel.cs" />
     <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
       <DependentUpon>AddIncidencesView.xaml</DependentUpon>
     </Compile>
@@ -193,20 +196,43 @@
     </Compile>
     <Compile Include="Modules\CctvReports\ViewModels\ExportDataViewModel.cs" />
     <Compile Include="Modules\CctvReports\Models\Alarm.cs" />
-    <Compile Include="Models\Location.cs" />
+    <Compile Include="Models\AssignableSection.cs" />
     <Compile Include="Models\Route.cs" />
-    <Compile Include="Models\Staff.cs" />
+    <Compile Include="Models\Technician.cs" />
     <Compile Include="Modules\CctvReports\Models\BusDisconnectedAlarm.cs" />
     <Compile Include="Modules\CctvReports\Models\Incidence.cs" />
+    <Compile Include="Modules\CctvReports\Views\IncidencesHistoryView.xaml.cs">
+      <DependentUpon>IncidencesHistoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\CctvReports\Views\ModifyIncidenceView.xaml.cs">
       <DependentUpon>ModifyIncidenceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\CctvReports\Services\CctvServices.cs" />
-    <Compile Include="Modules\Configurations\ConfigurationsView.xaml.cs">
-      <DependentUpon>ConfigurationsView.xaml</DependentUpon>
+    <Compile Include="Modules\Configurations\AcabusData.cs" />
+    <Compile Include="Modules\Configurations\Configuration.xaml.cs">
+      <DependentUpon>Configuration.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Configurations\ConfigurationsViewModel.cs" />
+    <Compile Include="Modules\Configurations\IConfigurable.cs" />
+    <Compile Include="Modules\Configurations\ViewModels\ConfigurationViewModel.cs" />
+    <Compile Include="Modules\Configurations\Views\ConfigurationView.xaml.cs">
+      <DependentUpon>ConfigurationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Core\Config\CoreConfig.cs" />
+    <Compile Include="Modules\Core\Config\ViewModels\AddDeviceViewModel.cs" />
+    <Compile Include="Modules\Core\Config\ViewModels\CoreConfigViewModel.cs" />
+    <Compile Include="Modules\Core\Config\ViewModels\ManualReassignRouteViewModel.cs" />
+    <Compile Include="Modules\Core\Config\Views\AddDeviceView.xaml.cs">
+      <DependentUpon>AddDeviceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Core\Config\Views\CoreConfigView.xaml.cs">
+      <DependentUpon>CoreConfigView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Core\Config\Views\ManualReassignRouteView.xaml.cs">
+      <DependentUpon>ManualReassignRouteView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Core\DataAccess\AcabusData.cs" />
     <Compile Include="Modules\OffDutyVehicles\AcabusData.cs" />
+    <Compile Include="Utils\EnumTranslate.cs" />
     <Compile Include="Utils\Mvvm\NotifyPropertyChanged.cs" />
     <Compile Include="Utils\Mvvm\ViewModelBase.cs" />
     <Compile Include="Utils\Mvvm\ViewModelService.cs" />
@@ -217,7 +243,6 @@
     <Compile Include="Models\Kvr.cs" />
     <Compile Include="Models\Link.cs" />
     <Compile Include="Models\Station.cs" />
-    <Compile Include="Models\Trunk.cs" />
     <Compile Include="Models\Vehicle.cs" />
     <Compile Include="Modules\CctvReports\Views\CctvReportsView.xaml.cs">
       <DependentUpon>CctvReportsView.xaml</DependentUpon>
@@ -292,11 +317,31 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Modules\CctvReports\Views\IncidencesHistoryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Modules\CctvReports\Views\ModifyIncidenceView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\Configurations\ConfigurationsView.xaml">
+    <Page Include="Modules\Configurations\Configuration.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Configurations\Views\ConfigurationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Core\Config\Views\AddDeviceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Core\Config\Views\CoreConfigView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Core\Config\Views\ManualReassignRouteView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -374,6 +419,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">
+      <Project>{f74fee3d-d536-44df-9e2c-53540ce78173}</Project>
+      <Name>InnSyTech.Standard</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

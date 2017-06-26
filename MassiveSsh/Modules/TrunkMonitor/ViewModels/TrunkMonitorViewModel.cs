@@ -172,7 +172,7 @@ namespace Acabus.Modules.TrunkMonitor
         /// <summary>
         /// Obtiene o establece la lista de enlaces de estaciones.
         /// </summary>
-        public ObservableCollection<Link> Links => AcabusData.CC.Links;
+        public ObservableCollection<Link> Links => Core.DataAccess.AcabusData.CC.Links;
 
         /// <summary>
         /// Obtiene el comando cuando se desencadena el evento Loaded de la vista.

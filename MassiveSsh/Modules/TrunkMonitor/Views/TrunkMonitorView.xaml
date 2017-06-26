@@ -4,10 +4,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="clr-namespace:Acabus.Modules.TrunkMonitor" x:Name="TrunkMonitor"
+    xmlns:local="clr-namespace:Acabus.Modules.TrunkMonitor" 
+    x:Name="TrunkMonitor"
     x:Class="Acabus.Modules.TrunkMonitor.TrunkMonitorView"
     mc:Ignorable="d" 
-      d:DesignHeight="300" d:DesignWidth="800">    
+    d:DesignHeight="300" d:DesignWidth="800">    
     <UserControl.DataContext>
         <local:TrunkMonitorViewModel/>
     </UserControl.DataContext>

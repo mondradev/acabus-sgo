@@ -15,18 +15,21 @@
                 <!-- Material Design -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Cyan.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Red.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Orange.xaml" />
 
                 <!-- Material Design: MahApps Compatibility -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Dragablz;component/Themes/materialdesign.xaml"/>
 
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Card.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Flipper.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Popupbox.xaml" />
+
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Material Design -->
-
             <SolidColorBrush x:Key="HighlightBrush" Color="{DynamicResource Primary700}"/>
             <SolidColorBrush x:Key="AccentColorBrush" Color="{DynamicResource Primary500}"/>
             <SolidColorBrush x:Key="AccentColorBrush2" Color="{DynamicResource Primary400}"/>
@@ -47,6 +50,13 @@
             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignFloatingHintComboBox}" />
             <Style TargetType="{x:Type DatePicker}" BasedOn="{StaticResource MaterialDesignFloatingHintDatePicker}" />
             <Style TargetType="{x:Type materialDesign:TimePicker}" BasedOn="{StaticResource MaterialDesignFloatingHintTimePicker}" />
+            <Style x:Key="BaseStyle" TargetType="{x:Type Control}">
+                <Setter Property="FontFamily" Value="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 

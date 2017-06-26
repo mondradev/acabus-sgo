@@ -2,6 +2,8 @@
 using Acabus.Modules.Attendances.Models;
 using Acabus.Modules.Attendances.Services;
 using Acabus.Utils.Mvvm;
+using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database.Utils;
 using System;
 
 namespace Acabus.Modules.CctvReports.Models
@@ -28,19 +30,20 @@ namespace Acabus.Modules.CctvReports.Models
     }
 
     /// <summary>
-    ///
+    /// Define la estructura de la incidencias de la operación de Acabus.
     /// </summary>
+    [Entity(TableName = "Incidences")]
     public class Incidence : NotifyPropertyChanged
     {
         /// <summary>
         /// Campo que provee a la propiedad 'AssignedAttendance'.
         /// </summary>
-        private String _assignedAttendance;
+        private Attendance _assignedAttendance;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Description'.
         /// </summary>
-        private String _description;
+        private DeviceFault _description;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Device'.
@@ -56,11 +59,6 @@ namespace Acabus.Modules.CctvReports.Models
         /// Campo que provee a la propiedad 'Folio'.
         /// </summary>
         private String _folio;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Location'.
-        /// </summary>
-        private Location _location;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Observations'.
@@ -85,7 +83,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Campo que provee a la propiedad 'Technician'.
         /// </summary>
-        private String _technician;
+        private Technician _technician;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Bussines'.
@@ -97,27 +95,38 @@ namespace Acabus.Modules.CctvReports.Models
         /// </summary>
         public Incidence(String folio)
         {
-            this._folio = folio;
-            this._status = IncidenceStatus.OPEN;
+            _folio = folio;
+            _status = IncidenceStatus.OPEN;
+        }
+
+        /// <summary>
+        /// Crea una instancia básica de <see cref="Incidence"/>.
+        /// </summary>
+        public Incidence()
+        {
+            _status = IncidenceStatus.OPEN;
         }
 
         /// <summary>
         /// Obtiene o establece la asistencia correspondiente.
         /// </summary>
-        public String AssignedAttendance {
+        [Column(IsForeignKey = true, Name = "Fk_Attendance_ID")]
+        public Attendance AssignedAttendance {
             get => _assignedAttendance;
             set {
                 _assignedAttendance = value;
                 OnPropertyChanged("AssignedAttendance");
-                AttendanceService.CountIncidences(value);
+                if (value != null)
+                    AttendanceService.CountIncidences(value);
             }
         }
 
         /// <summary>
         /// Obtiene o establece la descripción de la incidencia.
         /// </summary>
-        public String Description {
-            get => _description?.ToUpper();
+        [Column(Name = "Fk_Fault_ID", IsForeignKey = true)]
+        public DeviceFault Description {
+            get => _description;
             set {
                 _description = value;
                 OnPropertyChanged("Description");
@@ -127,6 +136,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el equipo el cual presenta la incidencia.
         /// </summary>
+        [Column(IsForeignKey = true, Name = "Fk_Device_ID")]
         public Device Device {
             get => _device;
             set {
@@ -148,18 +158,37 @@ namespace Acabus.Modules.CctvReports.Models
         }
 
         /// <summary>
-        /// Obtiene el folio de la incidencia.
+        /// Campo que provee a la propiedad 'RefundOfMoney'.
         /// </summary>
-        public String Folio => _folio;
+        private RefundOfMoney _refundOfMoney;
 
         /// <summary>
-        /// Obtiene o establece la ubicación de la inicidencia.
+        /// Obtiene o establece la devolución de dinero
         /// </summary>
-        public Location Location {
-            get => _location;
+        [Column(ForeignKeyName = "Fk_Incidence_ID")]
+        public RefundOfMoney RefundOfMoney {
+            get => _refundOfMoney;
             set {
-                _location = value;
-                OnPropertyChanged("Location");
+                _refundOfMoney = value;
+                OnPropertyChanged(nameof(RefundOfMoney));
+            }
+        }
+
+        /// <summary>
+        /// Indica si la incidencia tiene una devolución de dinero.
+        /// </summary>
+        /// <returns></returns>
+        public Boolean HasRefundOfMoney() => RefundOfMoney != null;
+
+        /// <summary>
+        /// Obtiene el folio de la incidencia.
+        /// </summary>
+        [Column(IsPrimaryKey = true)]
+        public String Folio {
+            get => _folio;
+            private set {
+                _folio = value;
+                OnPropertyChanged("Folio");
             }
         }
 
@@ -177,6 +206,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece la prioridad de la incidencia.
         /// </summary>
+        [Column(Converter = typeof(DbEnumConverter<Priority>))]
         public Priority Priority {
             get => _priority;
             set {
@@ -200,6 +230,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el estado de la incidencia (Abierta|Cerrada).
         /// </summary>
+        [Column(Converter = typeof(DbEnumConverter<IncidenceStatus>))]
         public IncidenceStatus Status {
             get => _status;
             set {
@@ -211,7 +242,8 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece el técnico que resolvió la incidencia.
         /// </summary>
-        public String Technician {
+        [Column(IsForeignKey = true, Name = "Fk_Technicia_ID")]
+        public Technician Technician {
             get => _technician;
             set {
                 _technician = value;
@@ -222,6 +254,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene el tiempo total de la solución.
         /// </summary>
+        [Column(IsIgnored = true)]
         public TimeSpan? TotalTime => FinishDate - StartDate;
 
         /// <summary>
@@ -238,20 +271,29 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Representa la instancia de incidencia en una cadena utilizable para subir el reporte.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Una cadena que representa la incidencia.</returns>
         public String ToReportString()
         {
-            return String.Format("*{0}* {1} {2} {3}",
+            return String.Format("*{0}* {1} {2} {3} {4}",
                 Folio,
-                Location is Vehicle
+                Device?.Vehicle != null
                     ? String.Format("{0} {1}",
-                        (Location as Vehicle),
+                        Device?.Vehicle.Description,
                         Device)
-                    : Device.NumeSeri,
-                Description,
-                String.IsNullOrEmpty(AssignedAttendance)
+                    : Device?.NumeSeri,
+                String.Format("*{0}*, {1}", Description?.Category?.Description, Description),
+                AssignedAttendance is null
                 ? String.Empty
-                : String.Format("\n*Asignado:* {0}", AssignedAttendance));
+                : String.Format("\n*Asignado:* {0}", AssignedAttendance),
+                String.IsNullOrEmpty(Observations?.Trim())
+                ? String.Empty
+                : Observations?.Trim().ToUpper());
         }
+
+        /// <summary>
+        /// Representa la instancia actual como una cadena.
+        /// </summary>
+        /// <returns>Una cadena que representa la instancia actual.</returns>
+        public override string ToString() => ToReportString();
     }
 }

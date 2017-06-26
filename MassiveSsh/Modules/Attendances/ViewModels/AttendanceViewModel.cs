@@ -4,7 +4,6 @@ using Acabus.Modules.Attendances.Services;
 using Acabus.Modules.Attendances.Views;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
-using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
 using MaterialDesignThemes.Wpf;
@@ -92,12 +91,11 @@ namespace Acabus.Modules.Attendances.ViewModels
 
         public ICommand ModifyAttendanceCommand { get; }
 
+        public ICommand OpenedIncidenceToClipboardCommand { get; }
+
         public ICommand RegisterDepartureCommand { get; }
 
         public ICommand RegisterEntryCommand { get; }
-
-        public ICommand OpenedIncidenceToClipboardCommand { get; }
-
 
         /// <summary>
         /// Obtiene o establece la asistencia seleccionada en la tabla.
@@ -108,6 +106,144 @@ namespace Acabus.Modules.Attendances.ViewModels
                 _selectedAttendance = value;
                 OnPropertyChanged("SelectedAttendance");
             }
+        }
+
+        /// <summary>
+        /// Obtiene una lista de el valor de esta propiedad.
+        /// </summary>
+        public IEnumerable<WorkShift> Turns => Enum.GetValues(typeof(WorkShift)).Cast<WorkShift>();
+
+        /// <summary>
+        /// Reasigna tecnicos a las incidencias abiertas.
+        /// </summary>
+        public void AssignTechnicianIncoming()
+        {
+            IEnumerable<Incidence> openedIncidences
+                   = ViewModelService.GetViewModel<CctvReports.CctvReportsViewModel>()?.IncidencesOpened;
+
+            foreach (Incidence incidence in openedIncidences)
+            {
+                if (incidence.Status != IncidenceStatus.OPEN) continue;
+                if (AttendanceService.GetTurn(incidence.StartDate)
+                    != AttendanceService.GetTurn(DateTime.Now)) continue;
+
+                incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
+                    .GetTechnicianAssigned(incidence.Device, incidence.StartDate, incidence.Description);
+                incidence.Update();
+            }
+            UpdateCounters();
+        }
+
+        /// <summary>
+        /// Obtiene la asistencia para la asignación de la incidencia.
+        /// </summary>
+        public Attendance GetTechnicianAssigned(Device device, DateTime startTime, DeviceFault fault = null)
+        {
+            AssignableSection location = (AssignableSection)device?.Station
+                ?? device?.Vehicle?.Route ?? null;
+
+            var attendances = Attendances.Cast<Attendance>();
+            var attendancesPrevious = attendances;
+
+            if (fault != null)
+            {
+                /// Asignación por area
+                attendances = attendances.Where(attendance
+                   => Enum.GetName(typeof(AreaAssignable), fault?.Assignable)
+                   .Contains(Enum.GetName(typeof(AreaAssignable), attendance.Technician?.Area)));
+
+                if (attendances.Count() == 1)
+                    return attendances.First();
+                else if (attendances.Count() < 1)
+                    attendances = attendancesPrevious;
+                else
+                    attendancesPrevious = attendances;
+            }
+
+            /// Asignación cuando al menos hay un tecnico en turno.
+            attendances = attendances
+                .Where(attendance => attendance.DateTimeDeparture is null
+                && AttendanceService.GetTurn(DateTime.Now) == attendance.Turn);
+
+            if (attendances.Count() == 1)
+                return attendances.First();
+            else if (attendances.Count() < 1)
+                return null;
+            else
+                attendancesPrevious = attendances;
+
+            if (AttendanceService.GetTurn(DateTime.Now) != WorkShift.NIGHT_SHIFT)
+            {
+                /// Asignación por tramo.
+                attendances = attendances.Where(attendance
+                   => attendance.DateTimeDeparture is null
+                       && attendance.Section == location.Section);
+
+                if (attendances.Count() == 1)
+                    return attendances.First();
+                else if (attendances.Count() < 1)
+                    attendances = attendancesPrevious;
+                else
+                    attendancesPrevious = attendances;
+
+                /// Asignación por turno.
+                attendances = attendances.Where(attendance
+                  => attendance.Turn == AttendanceService.GetTurn(startTime) || startTime.Date < DateTime.Now.Date);
+
+                if (attendances.Count() == 1)
+                    return attendances.First();
+                else if (attendances.Count() < 1)
+                    attendances = attendancesPrevious;
+                else
+                    attendancesPrevious = attendances;
+
+                /// Asignación por llave.
+                if (location is Route)
+                    attendances = attendances.Where(attendance
+                          => attendance.HasNemaKey || attendance.Section.Contains("AUTOBUSES"));
+                else
+                    attendances = attendances.Where(attendance
+                          => attendance.HasKvrKey || attendance.Section.Contains("ESTACIONES"));
+
+                if (attendances.Count() == 1)
+                    return attendances.First();
+                else if (attendances.Count() < 1)
+                    attendances = attendancesPrevious;
+                else
+                    attendancesPrevious = attendances;
+            }
+            else
+            {
+                if (location.GetType() != typeof(Vehicle) && !location.Name.Contains("TERMINAL DE TRANSFERENCIA"))
+                    return null;
+
+                if (device?.Vehicle?.BusType == VehicleType.ARTICULATED
+                       || device?.Vehicle?.BusType == VehicleType.STANDARD)
+                    attendances = attendances.Where(attendance
+                       => attendance.DateTimeDeparture is null
+                           && attendance.Section.Contains("PATIO"));
+                else if (device?.Vehicle?.BusType == VehicleType.CONVENTIONAL)
+                    attendances = attendances.Where(attendance
+                       => attendance.DateTimeDeparture is null
+                           && attendance.Section.Contains("TERMINAL DE TRANSFERENCIA"));
+
+                if (attendances.Count() == 1)
+                    return attendances.First();
+                else if (attendances.Count() < 1)
+                    attendances = attendancesPrevious;
+                else
+                    attendancesPrevious = attendances;
+            }
+
+            /// Asignación por carga.
+            return attendances.Aggregate((attendance1, attendance2)
+                =>
+            {
+                if (attendance1.CountOpenedIncidences > attendance2.CountOpenedIncidences)
+                    return attendance2;
+                else
+                    return attendance1;
+            });
         }
 
         /// <summary>
@@ -123,128 +259,10 @@ namespace Acabus.Modules.Attendances.ViewModels
                 if (incidence.Status != IncidenceStatus.OPEN) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                    .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
+                    .GetTechnicianAssigned(incidence.Device, incidence.StartDate, incidence.Description);
                 incidence.Update();
             }
             UpdateCounters();
-        }
-
-        /// <summary>
-        /// Reasigna tecnicos a las incidencias abiertas.
-        /// </summary>
-        public void AssignTechnicianIncoming()
-        {
-            IEnumerable<Incidence> openedIncidences
-                   = ViewModelService.GetViewModel<CctvReports.CctvReportsViewModel>()?.IncidencesOpened;
-
-            foreach (Incidence incidence in openedIncidences)
-            {
-                if (incidence.Status != IncidenceStatus.OPEN) continue;
-                if (AttendanceService.GetTurn(incidence.StartDate) 
-                    != AttendanceService.GetTurn(DateTime.Now)) continue;
-
-                incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                    .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
-                incidence.Update();
-            }
-            UpdateCounters();
-        }
-
-        /// <summary>
-        /// Obtiene una lista de el valor de esta propiedad.
-        /// </summary>
-        public IEnumerable<WorkShift> Turns => Enum.GetValues(typeof(WorkShift)).Cast<WorkShift>();
-
-        /// <summary>
-        /// Obtiene la asistencia para la asignación de la incidencia.
-        /// </summary>
-        public String GetTechnicianAssigned(Location location, Device device, DateTime startTime)
-        {
-            /// Asignación cuando al menos hay un tecnico en turno.
-            var attendances = (IEnumerable<Attendance>)Attendances
-                .Where(attendance => attendance.DateTimeDeparture is null
-                && AttendanceService.GetTurn(DateTime.Now) == attendance.Turn);
-            var attendancesPrevious = attendances;
-
-            if (attendances.Count() == 1)
-                return attendances.First()?.Technician;
-            else if (attendances.Count() < 1)
-                return null;
-            else
-                attendancesPrevious = attendances;
-
-            if (AttendanceService.GetTurn(DateTime.Now) != WorkShift.NIGHT_SHIFT)
-            {
-                /// Asignación por tramo.
-                attendances = attendances.Where(attendance
-                   => attendance.DateTimeDeparture is null
-                       && attendance.Section == location.Section);
-
-                if (attendances.Count() == 1)
-                    return attendances.First()?.Technician;
-                else if (attendances.Count() < 1)
-                    attendances = attendancesPrevious;
-                else
-                    attendancesPrevious = attendances;
-
-                /// Asignación por turno.
-                attendances = attendances.Where(attendance
-                  => attendance.Turn == AttendanceService.GetTurn(startTime));
-
-                if (attendances.Count() == 1)
-                    return attendances.First()?.Technician;
-                else if (attendances.Count() < 1)
-                    attendances = attendancesPrevious;
-                else
-                    attendancesPrevious = attendances;
-
-                /// Asignación por llave.
-                if (location is Vehicle)
-                    attendances = attendances.Where(attendance
-                          => attendance.HasNemaKey || attendance.Section.Contains("AUTOBUS"));
-                else
-                    attendances = attendances.Where(attendance
-                          => attendance.HasKvrKey || attendance.Section.Contains("ESTACI"));
-
-                if (attendances.Count() == 1)
-                    return attendances.First()?.Technician;
-                else if (attendances.Count() < 1)
-                    attendances = attendancesPrevious;
-                else
-                    attendancesPrevious = attendances;
-            }
-            else
-            {
-                if (location.GetType() != typeof(Vehicle) && !location.Name.Contains("RENA"))
-                    return null;
-
-                if ((location as Vehicle).BusType == VehicleType.ARTICULATED
-                       || (location as Vehicle).BusType == VehicleType.STANDARD)
-                    attendances = attendances.Where(attendance
-                       => attendance.DateTimeDeparture is null
-                           && attendance.Section.Contains("PATIO"));
-                else if ((location as Vehicle).BusType == VehicleType.CONVENTIONAL)
-                    attendances = attendances.Where(attendance
-                       => attendance.DateTimeDeparture is null
-                           && attendance.Section.Contains("RENA"));
-
-                if (attendances.Count() == 1)
-                    return attendances.First()?.Technician;
-                else if (attendances.Count() < 1)
-                    attendances = attendancesPrevious;
-                else
-                    attendancesPrevious = attendances;
-            }
-
-            /// Asignación por carga.
-            return attendances.Aggregate((attendance1, attendance2)
-                =>
-            {
-                if (attendance1.CountOpenedIncidences > attendance2.CountOpenedIncidences)
-                    return attendance2;
-                else
-                    return attendance1;
-            })?.Technician;
         }
 
         public void UpdateCounters()

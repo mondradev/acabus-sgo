@@ -6,10 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:Converters="clr-namespace:Acabus.Converters"
              xmlns:Models="clr-namespace:Acabus.Modules.Attendances.Models"
-             xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels"
-             mc:Ignorable="d" TextElement.FontWeight="Medium"
-             TextElement.FontSize="14"
-             FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto">
+             xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels">
     <UserControl.Resources>
         <Converters:DateTimeConverter x:Key="DateTimeConverter"/>
         <Models:TurnsConverter x:Key="TurnsConverter"/>
@@ -30,18 +27,18 @@
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Modificar asignación" FontSize="24" FontWeight="Normal" />
-            <TextBox materialDesign:HintAssist.Hint="Nombre del técnico" Grid.Row="2" Text="{Binding Attendance.Technician}"/>
+            <TextBlock Text="Modificar asignación" FontSize="20" FontWeight="Normal" />
+            <TextBox materialDesign:HintAssist.Hint="Nombre del técnico" Grid.Row="2" Text="{Binding Attendance.Technician, Mode=OneWay}"/>
             <ComboBox materialDesign:HintAssist.Hint="Asignación" Grid.Row="4" ItemsSource="{Binding Sections}" SelectedItem="{Binding Section}" />
             <CheckBox Content="Llaves de KVR" Grid.Row="6" IsChecked="{Binding HasKvrKey}"  />
             <CheckBox Content="Llaves de Caja Nema" Grid.Row="8" IsChecked="{Binding HasNemaKey}"  />
         </Grid>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
             <Button ToolTip="Descartar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0 0 8 0"
-                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsCancel="True" MinHeight="36">
                 <materialDesign:PackIcon Kind="Delete" Width="24" Height="24"/>
             </Button>
-            <Button ToolTip="Modificar asignación" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding ModifyCommand}">
+            <Button ToolTip="Modificar asignación" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding ModifyCommand}" MinHeight="36">
                 <materialDesign:PackIcon Kind="CheckboxMarkedOutline" Width="24" Height="24"/>
             </Button>
         </StackPanel>

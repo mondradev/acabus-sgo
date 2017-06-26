@@ -7,11 +7,8 @@
     xmlns:Converters="clr-namespace:Acabus.Converters"
     xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels"
     xmlns:Models="clr-namespace:Acabus.Modules.Attendances.Models"
-    x:Class="Acabus.Modules.Attendances.Views.AttendanceDepartureView"
-             TextElement.FontWeight="Medium"
-             TextElement.FontSize="14"
-             FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
-             mc:Ignorable="d">
+    x:Class="Acabus.Modules.Attendances.Views.AttendanceDepartureView"             
+    mc:Ignorable="d">
     <UserControl.Resources>
         <Models:TurnsConverter x:Key="TurnsConverter"/>
         <Converters:DateTimeConverter x:Key="DateTimeConverter"/>
@@ -39,7 +36,7 @@
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Asistencia (Salida)" FontSize="24" FontWeight="Normal" />
+                <TextBlock Text="Asistencia (Salida)" FontSize="20" FontWeight="Normal" />
                 <TextBox Focusable="False" materialDesign:HintAssist.Hint="Nombre del técnico" Grid.Row="2" IsReadOnly="True" Text="{Binding Attendance.Technician}"/>
                 <TextBox Focusable="False"  materialDesign:HintAssist.Hint="Turno" Grid.Row="4" IsReadOnly="True" Text="{Binding Attendance.Turn, Converter={StaticResource TurnsConverter}}"/>
                 <materialDesign:TimePicker materialDesign:HintAssist.Hint="Hora de salida" Grid.Row="8" SelectedTime="{Binding TimeDeparture, Converter={StaticResource DateTimeConverter}}"/>
@@ -59,10 +56,10 @@
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
                 <Button ToolTip="Descartar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0 0 8 0"
-                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsCancel="True" MinHeight="36">
                     <materialDesign:PackIcon Kind="Delete" Width="24" Height="24"/>
                 </Button>
-                <Button ToolTip="Asistencia de Salida" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterDepartureCommand}">
+                <Button ToolTip="Asistencia de Salida" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding RegisterDepartureCommand}" MinHeight="36">
                     <materialDesign:PackIcon Kind="Walk" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
                         <materialDesign:PackIcon.RenderTransform>
                             <TransformGroup>

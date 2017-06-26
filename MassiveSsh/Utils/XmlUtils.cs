@@ -8,9 +8,9 @@ namespace Acabus.Utils
     public static class XmlUtils
     {
 
-        public static String GetAttribute(XmlNode node, String name)
+        public static String GetAttribute(XmlNode node, String name, String defaultValue = null)
         {
-            return node.Attributes[name]?.Value?.ToString();
+            return node.Attributes[name]?.Value?.ToString() ?? defaultValue;
         }
 
 

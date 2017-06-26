@@ -51,7 +51,7 @@ namespace ACABUS_Control_de_operacion
             this.dgvResult.Columns.Add("KVR", "Id KVR");
             this.dgvResult.Columns.Add("Vta", "Total de Ventas");
             this.dgvResult.Columns.Add("Sto", "Total de Stock");
-            this.dgvResult.Columns.Add("Sum", "Total de Suministro");
+            this.dgvResult.Columns.Add("Rch", "Total de Rechazadas");
 
             foreach (Kvr kvr in kvrs)
             {
@@ -61,13 +61,7 @@ namespace ACABUS_Control_de_operacion
                      {
                          Int16 sales = Int16.Parse(QuerySales(kvr));
                          Int16 stock = Int16.Parse(QueryStock(kvr));
-                         Int16 sum = 0;
-                         if (kvr.MaxCard > stock && stock > kvr.MinCard)
-                             sum = (Int16)(sales * 1.5);
-                         else if (kvr.MinCard > stock && stock != 0)
-                             sum = (Int16)(sales * 2);
-                         else if (stock == 0)
-                             sum = (Int16)kvr.MaxCard;
+                         Int16 sum = Int16.Parse(QueryReject(kvr));
 
                          String[] row = new String[] {
                             kvr.GetNumeSeri(),
@@ -88,6 +82,21 @@ namespace ACABUS_Control_de_operacion
                  });
             }
 
+        }
+
+        private string QueryReject(Kvr kvr)
+        {
+            SshPostgreSQL sql = SshPostgreSQL.CreateConnection(AcabusData.PG_PATH,
+                kvr.IP,
+                5432,
+                _username,
+                 kvr.Status && !kvr.Station.Connected ? "admin" : _password,
+                 kvr.Status && !kvr.Station.Connected ? kvr.DataBaseName : _database,
+                 kvr.Status && !kvr.Station.Connected ? "Administrador" : _usernameSsh,
+                 kvr.Status && !kvr.Station.Connected ? "Administrador*2016" : _passwordSsh
+            );
+            String[][] response = sql.ExecuteQuery("SELECT tarj_rech_reco FROM sitm_disp.sbop_sum_tarj ORDER BY fch_oper DESC LIMIT 1");
+            return response.Length > 1 ? response[1][0] : "0";
         }
 
         private static string QueryStock(Kvr kvr)

@@ -6,6 +6,7 @@ using Acabus.Utils.Mvvm;
 using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
+using System.Collections.Generic;
 using System.Windows.Input;
 
 namespace Acabus.Modules.Attendances.ViewModels
@@ -89,7 +90,7 @@ namespace Acabus.Modules.Attendances.ViewModels
 
         private void RegisterDepartureExecute(object parameter)
         {
-            System.Collections.Generic.ICollection<Incidence> openedIncidences = Attendance.OpenedIncidences;
+            IEnumerable<Incidence> openedIncidences = Attendance.OpenedIncidences;
             Attendance.DateTimeDeparture = DateTime.Now.Date.AddTicks(TimeDeparture.Ticks);
             Attendance.Observations = Observations;
             if (Attendance.Update())
@@ -98,7 +99,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                 foreach (Incidence incidence in openedIncidences)
                 {
                     incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                        .GetTechnicianAssigned(incidence.Location, incidence.Device, incidence.StartDate);
+                        .GetTechnicianAssigned(incidence.Device, incidence.StartDate, incidence.Description);
 
                     incidence.Update();
                 }

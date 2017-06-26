@@ -1,6 +1,7 @@
 ﻿using Acabus.Models;
 using Acabus.Utils.Mvvm;
 using System;
+using System.Linq;
 
 namespace Acabus.Modules.CctvReports.Models
 {
@@ -10,25 +11,35 @@ namespace Acabus.Modules.CctvReports.Models
     public sealed class Alarm : NotifyPropertyChanged
     {
         /// <summary>
+        /// Campo que provee a la propiedad 'DateTime'.
+        /// </summary>
+        private DateTime _dateTime;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'Description'.
         /// </summary>
         private String _description;
 
         /// <summary>
-        /// Obtiene o establece la descripción de la alarma.
+        /// Campo que provee a la propiedad 'Device'.
         /// </summary>
-        public String Description {
-            get => _description?.ToUpper();
-            set {
-                _description = value;
-                OnPropertyChanged("Description");
-            }
-        }
+        private Device _device;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'DateTime'.
+        /// Campo que provee a la propiedad 'ID'.
         /// </summary>
-        private DateTime _dateTime;
+        private UInt32 _id;
+
+        /// <summary>
+        /// Campo que provee a la propiedad 'Priority'.
+        /// </summary>
+        private Priority _priority;
+
+        /// <summary>
+        /// Crea una instancia de alarma de dispositivo.
+        /// </summary>
+        /// <param name="id">Identificador de alarma.</param>
+        public Alarm(UInt32 id) => _id = id;
 
         /// <summary>
         /// Obtiene o establece la fecha y hora de la alarma.
@@ -42,9 +53,15 @@ namespace Acabus.Modules.CctvReports.Models
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Device'.
+        /// Obtiene o establece la descripción de la alarma.
         /// </summary>
-        private Device _device;
+        public String Description {
+            get => _description?.ToUpper();
+            set {
+                _description = value;
+                OnPropertyChanged("Description");
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece el equipo que produce la alarma.
@@ -58,20 +75,9 @@ namespace Acabus.Modules.CctvReports.Models
         }
 
         /// <summary>
-        /// Campo que provee a la propiedad 'ID'.
-        /// </summary>
-        private UInt32 _id;
-
-        /// <summary>
         /// Obtiene el identificador de la alarma.
         /// </summary>
         public UInt32 ID => _id;
-
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Priority'.
-        /// </summary>
-        private Priority _priority;
 
         /// <summary>
         /// Obtiene o establece la prioridad de la incidencia.
@@ -83,12 +89,6 @@ namespace Acabus.Modules.CctvReports.Models
                 OnPropertyChanged("Priority");
             }
         }
-
-        /// <summary>
-        /// Crea una instancia de alarma de dispositivo.
-        /// </summary>
-        /// <param name="id">Identificador de alarma.</param>
-        public Alarm(UInt32 id) => _id = id;
 
         /// <summary>
         /// Crea una instancia nueva de alarma de dispositivo.
@@ -105,33 +105,10 @@ namespace Acabus.Modules.CctvReports.Models
             {
                 Description = description,
                 DateTime = dateTime,
-                Device = DataAccess.AcabusData.FindDevice((device)
+                Device = Core.DataAccess.AcabusData.AllDevices.FirstOrDefault((device)
                             => device.NumeSeri.Equals(numeSeri)),
                 Priority = priority
             };
-        }
-
-        /// <summary>
-        /// Representa la instancia actual con una cadena.
-        /// </summary>
-        /// <returns>Una cadena que representa una alarma.</returns>
-        public override string ToString()
-        {
-            return String.Format("{0} {1} {2}: {3}", ID, Device, DateTime, Description);
-        }
-
-        /// <summary>
-        /// Operador lógico de igualdad, determina si dos instancias <see cref="Alarm"/> son iguales.
-        /// </summary>
-        /// <param name="alarm">Una instancia.</param>
-        /// <param name="otherAlarm">Otra instancia.</param>
-        /// <returns>Un valor <code>true</code> si el ID y el Device es igual en ambas instancias <see cref="Alarm"/>.</returns>
-        public static bool operator ==(Alarm alarm, Alarm otherAlarm)
-        {
-            if (otherAlarm.ID == alarm.ID && otherAlarm.Device == alarm.Device)
-                return true;
-
-            return false;
         }
 
         /// <summary>
@@ -148,5 +125,40 @@ namespace Acabus.Modules.CctvReports.Models
             return false;
         }
 
+        /// <summary>
+        /// Operador lógico de igualdad, determina si dos instancias <see cref="Alarm"/> son iguales.
+        /// </summary>
+        /// <param name="alarm">Una instancia.</param>
+        /// <param name="otherAlarm">Otra instancia.</param>
+        /// <returns>Un valor <code>true</code> si el ID y el Device es igual en ambas instancias <see cref="Alarm"/>.</returns>
+        public static bool operator ==(Alarm alarm, Alarm otherAlarm)
+        {
+            if (otherAlarm.ID == alarm.ID && otherAlarm.Device == alarm.Device)
+                return true;
+
+            return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null)
+                return false;
+
+            if (obj.GetType() != GetType())
+                return false;
+
+            return (this.Description == (obj as Alarm).Description && this.Device == (obj as Alarm).Device);
+        }
+
+        public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
+        /// Representa la instancia actual con una cadena.
+        /// </summary>
+        /// <returns>Una cadena que representa una alarma.</returns>
+        public override string ToString()
+        {
+            return String.Format("{0} {1} {2}: {3}", ID, Device, DateTime, Description);
+        }
     }
 }

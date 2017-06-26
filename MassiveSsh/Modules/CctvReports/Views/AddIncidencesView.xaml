@@ -5,110 +5,102 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converters="clr-namespace:Acabus.Converters"
-             xmlns:da="clr-namespace:Acabus.DataAccess"
              xmlns:local="clr-namespace:Acabus.Modules.CctvReports"
              xmlns:converters1="clr-namespace:Acabus.Modules.CctvReports.Converters"
-             xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
-        <converters:DateTimeConverter x:Key="DateTimeConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:DateTimeConverter x:Key="DateTimeConverter" />
         <converters:PriorityConverter x:Key="PriorityConverter" />
-        <converters1:CollapseBooleanConverter x:Key="CollapseBooleanConverter"/>
+        <converters1:CollapseBooleanConverter x:Key="CollapseBooleanConverter" />
     </UserControl.Resources>
     <UserControl.DataContext>
         <local:AddIncidencesViewModel />
     </UserControl.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Margin="0" MinWidth="300" MaxWidth="400">
-            <Grid.Resources>
-                <CollectionViewSource Source="{x:Static da:AcabusData.CommonFaults}" x:Key="CommonFaultsCollection">
-                    <CollectionViewSource.SortDescriptions>
-                        <scm:SortDescription Direction="Ascending" />
-                    </CollectionViewSource.SortDescriptions>
-                </CollectionViewSource>
-            </Grid.Resources>
+        <Grid Margin="0" Width="500">
+
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Margin="16,24,16,0" TextWrapping="Wrap" Text="{Binding TitleSection}" FontWeight="Bold" FontSize="16" d:LayoutOverrides="Height"/>
+            <TextBlock Margin="16,24,16,0" TextWrapping="Wrap" Text="{Binding TitleSection}" FontSize="20" />
             <Grid Margin="16" Grid.Row="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <ToggleButton HorizontalAlignment="Right" Margin="0" IsChecked="{Binding IsBusIncidences}" Visibility="{Binding IsNewIncidences, Converter={StaticResource CollapseBooleanConverter}}" />
-                <TextBlock HorizontalAlignment="Right" Margin="0,0,42,0" TextWrapping="Wrap" Text="Incidencia de autobus" TextAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsNewIncidences, Converter={StaticResource CollapseBooleanConverter}}"/>
-                <ComboBox materialDesign:HintAssist.Hint="Quién Reporta" Margin="0" 
-                                  VerticalAlignment="Top" Grid.Row="2" SelectedItem="{Binding WhoReporting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding Business}" IsEditable="True"/>
-                <ComboBox materialDesign:HintAssist.Hint="Descripción de la incidencia" 
-                                  Margin="0" Grid.Row="4" Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding Mode=OneWay, Source={StaticResource CommonFaultsCollection}}" VerticalAlignment="Top" IsSynchronizedWithCurrentItem="False" IsEditable="True" IsEnabled="{Binding IsNewIncidences}"/>
+                <TextBlock HorizontalAlignment="Right" Margin="0,0,42,0" TextWrapping="Wrap" Text="Incidencia de autobus" TextAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsNewIncidences, Converter={StaticResource CollapseBooleanConverter}}" />
+                <ComboBox materialDesign:HintAssist.Hint="Quién Reporta" Margin="0"
+                                  VerticalAlignment="Top" Grid.Row="2" SelectedItem="{Binding WhoReporting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding Business}" IsEditable="True" />
+                <ComboBox materialDesign:HintAssist.Hint="Descripción de la incidencia"
+                                  Margin="0" Grid.Row="4" SelectedItem="{Binding SelectedDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding DeviceFaults, Mode=OneWay}" VerticalAlignment="Top" IsEnabled="{Binding IsNewIncidences}" />
                 <Grid Margin="0" Grid.Row="6">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <Grid Margin="0 0 16 0" Visibility="{Binding IsBusIncidences, Converter={StaticResource CollapseBooleanConverter}}">
-                        <ComboBox materialDesign:HintAssist.Hint="Ruta"  Margin="0"  MinWidth="200"
-                        VerticalAlignment="Top" ItemsSource="{Binding Routes}" SelectedItem="{Binding SelectedRoute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEditable="True" />
+                    <ComboBox  materialDesign:HintAssist.Hint="{Binding HeaderTextRouteOrStation}"  Margin="0"  MinWidth="200"
+                        VerticalAlignment="Top" ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation, ValidatesOnDataErrors=True}" IsEditable="True" />
+                    <Grid Grid.Column="1" Margin="16 0 0 0" Visibility="{Binding IsBusIncidences, Converter={StaticResource CollapseBooleanConverter}}">
+                        <ComboBox materialDesign:HintAssist.Hint="Vehículo"  Width="200"
+                            Margin="0" VerticalAlignment="Top" ItemsSource="{Binding Vehicles}" SelectedItem="{Binding SelectedVehicle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEditable="True" />
                     </Grid>
-                    <ComboBox materialDesign:HintAssist.Hint="{Binding HeaderTextRouteOrStation}"  Grid.Column="1"
-                            Margin="0" VerticalAlignment="Top" ItemsSource="{Binding Locations}" SelectedItem="{Binding Location, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEditable="True" />
                 </Grid>
                 <ComboBox materialDesign:HintAssist.Hint="{Binding HeaderTextDeviceOrVehicle}"
-                                  VerticalAlignment="Top" Grid.Row="8" ItemsSource="{Binding Devices}" SelectedItem="{Binding Device, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                  VerticalAlignment="Top" Grid.Row="8" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                 <ComboBox materialDesign:HintAssist.Hint="Prioridad" VerticalAlignment="Top"
-                                  Grid.Row="12" Margin="0" SelectedItem="{Binding Priority, Converter={StaticResource PriorityConverter}}" 
+                                  Grid.Row="12" Margin="0" SelectedItem="{Binding SelectedPriority, Converter={StaticResource PriorityConverter}}"
                                   ItemsSource="{Binding Priorities, Converter={StaticResource PriorityConverter}}"
-                                  Visibility="{Binding IsNewIncidences, Converter={StaticResource CollapseBooleanConverter}}"/>
+                                  Visibility="{Binding IsNewIncidences, Converter={StaticResource CollapseBooleanConverter}}" />
                 <materialDesign:TimePicker Grid.Row="10" materialDesign:HintAssist.Hint="Hora de la incidencia"  Style="{StaticResource MaterialDesignFloatingHintTimePicker}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedTime="{Binding StartTime, Converter={StaticResource DateTimeConverter}}" />
             </Grid>
         </Grid>
         <Grid Margin="16 0 0 0" Grid.Column="1" Visibility="{Binding IsRefundOfMoney, Converter={StaticResource CollapseBooleanConverter}}">
             <Grid Margin="0,60,16,0" MinWidth="250" VerticalAlignment="Top">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="16"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="16"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="16"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="16"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="16" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="16" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="16" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="16" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <StackPanel Margin="0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <TextBlock Text="Monedas" Margin="0 0 16 0"/>
+                    <TextBlock Text="Monedas" Margin="0 0 16 0" />
                     <ToggleButton Margin="0" IsChecked="{Binding IsMoney, Converter={StaticResource InverseBooleanConverter}}" />
-                    <TextBlock Text="Billetes" Margin="16 0 0 0"/>
+                    <TextBlock Text="Billetes" Margin="16 0 0 0" />
                 </StackPanel>
                 <Grid Margin="0" Grid.Row="2" HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <materialDesign:PackIcon Kind="CurrencyUsd" Width="24" Height="24" VerticalAlignment="Bottom" Margin="0 0 8 0"/>
+                    <materialDesign:PackIcon Kind="CurrencyUsd" Width="24" Height="24" VerticalAlignment="Bottom" Margin="0 0 8 0" />
                     <TextBox materialDesign:HintAssist.Hint="Cantidad" Margin="0" Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
                 <ComboBox materialDesign:HintAssist.Hint="Destino" Grid.Row="4" ItemsSource="{Binding CashDestinies}" SelectedItem="{Binding CashDestiny}" />
@@ -117,13 +109,13 @@
             </Grid>
         </Grid>
         <StackPanel Margin="0,2,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Grid.ColumnSpan="2" d:LayoutOverrides="Height">
-            <Button Command="{Binding CloseCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left" 
-                                HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}">
-                <materialDesign:PackIcon  Kind="Delete" Width="24" Height="24"/>
+            <Button Command="{Binding CloseCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left"
+                                HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True" MinHeight="36">
+                <materialDesign:PackIcon  Kind="Delete" Width="24" Height="24" />
             </Button>
-            <Button ToolTip="Agregar" Height="Auto" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,8,8,8" Style="{StaticResource MaterialDesignFlatButton}" 
-                          Command="{Binding AddCommand}">
-                <materialDesign:PackIcon  Kind="Check" Width="24" Height="24"/>
+            <Button ToolTip="Agregar" Height="Auto" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,8,8,8" Style="{StaticResource MaterialDesignFlatButton}"
+                          Command="{Binding AddCommand}" MinHeight="36">
+                <materialDesign:PackIcon  Kind="Check" Width="24" Height="24" />
             </Button>
         </StackPanel>
     </Grid>

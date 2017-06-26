@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows.Input;
 
 namespace Acabus.Utils.Mvvm
 {
@@ -118,6 +119,19 @@ namespace Acabus.Utils.Mvvm
         /// </summary>
         /// <param name="propertyName"></param>
         protected virtual void OnValidation(string propertyName) { }
+
+        public ICommand LoadCommand { get; }
+        public ICommand UnloadCommand { get; }
+
+        protected virtual void OnLoad(object arg) { }
+
+        protected virtual void OnUnload(object arg) { }
+
+        public ViewModelBase()
+        {
+            LoadCommand = new CommandBase(OnLoad);
+            UnloadCommand = new CommandBase(OnUnload);
+        }
 
     }
 }

@@ -17,6 +17,11 @@ namespace InnSyTech.Standard.Database
         private IDbConverter _converter;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'ForeignKeyName'
+        /// </summary>
+        private String _foreignKeyName;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'IsAutonumerical'.
         /// </summary>
         private Boolean _isAutonumerical;
@@ -63,6 +68,11 @@ namespace InnSyTech.Standard.Database
         /// Obtiene el convertidor de datos para el campo en la base de datos.
         /// </summary>
         public IDbConverter Converter => _converter;
+
+        /// <summary>
+        /// Obtiene el nombre de la llave forenea de una relación de uno a varios.
+        /// </summary>
+        public String ForeignKeyName => _foreignKeyName;
 
         /// <summary>
         /// Obtiene si el campo es autonumerico.
@@ -113,7 +123,8 @@ namespace InnSyTech.Standard.Database
                             yield return new DbField(name, property, columnAttribute.IsPrimaryKey, columnAttribute.Converter)
                             {
                                 _isForeignKey = columnAttribute.IsForeignKey,
-                                _isAutonumerical = columnAttribute.IsAutonumerical
+                                _isAutonumerical = columnAttribute.IsAutonumerical,
+                                _foreignKeyName = columnAttribute.ForeignKeyName
                             };
                         }
                 }
@@ -129,7 +140,14 @@ namespace InnSyTech.Standard.Database
         /// <returns>El campo con llave primaria.</returns>
         public static DbField GetPrimaryKey(Type typeOfInstance)
         {
-            return GetFields(typeOfInstance).First(field => field.IsPrimaryKey);
+            try
+            {
+                return GetFields(typeOfInstance).First(field => field.IsPrimaryKey);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"La estructura de la instancia {typeOfInstance.FullName} no contiene llave primaria.", ex);
+            }
         }
 
         /// <summary>
@@ -159,11 +177,17 @@ namespace InnSyTech.Standard.Database
             try
             {
                 if (Converter is null)
-                    _propertyInfo.SetValue(instance, value);
+                    if (Nullable.GetUnderlyingType(PropertyType) is null)
+                        _propertyInfo.SetValue(instance, Convert.ChangeType(value, PropertyType));
+                    else
+                        _propertyInfo.SetValue(instance, Convert.ChangeType(value, Nullable.GetUnderlyingType(PropertyType)));
                 else
                     _propertyInfo.SetValue(instance, Converter.ConverterFromDb(value));
             }
-            catch { }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
