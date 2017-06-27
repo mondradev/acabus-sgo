@@ -186,6 +186,12 @@ namespace Acabus.Modules.Attendances.Models
                     => Incidences?.Where(incidence => incidence.Status != IncidenceStatus.CLOSE);
 
         /// <summary>
+        /// Indica si la asistencia sigue en turno.
+        /// </summary>
+        /// <returns></returns>
+        public bool InTurn() => DateTimeDeparture == null;
+
+        /// <summary>
         /// Obtiene o establece el tramo asignado.
         /// </summary>
         public String Section {

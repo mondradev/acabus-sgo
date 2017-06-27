@@ -62,7 +62,7 @@
                                             HorizontalAlignment="Stretch" Margin="0,12,0,0" SelectedDate="{Binding FinishDate, NotifyOnValidationError=True}" />
                 <materialDesign:TimePicker  materialDesign:HintAssist.Hint="Hora de solución"
                                                             Grid.Row="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,12,0,0"
-                                                            SelectedTime="{Binding FinishTime, Converter={StaticResource DateTimeConverter}, NotifyOnValidationError=True}" />
+                                                            SelectedTime="{Binding FinishTime, Converter={StaticResource DateTimeConverter}, NotifyOnValidationError=True, StringFormat=\{0:HH:mm\}}" Is24Hours="True" />
                 <TextBox  materialDesign:HintAssist.Hint="Observaciones" TextWrapping="WrapWithOverflow"
                                          VerticalScrollBarVisibility="Auto"  Grid.Row="10" HorizontalAlignment="Stretch" VerticalAlignment="Top"
                                          AcceptsReturn="True" Text="{Binding Observations}" />

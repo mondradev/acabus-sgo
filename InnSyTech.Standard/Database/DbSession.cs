@@ -696,7 +696,7 @@ namespace InnSyTech.Standard.Database
         /// <param name="transaction">Instancia <see cref="DbTransaction"/> que administra la transacción actual.</param>
         /// <param name="dependenceInstance">Instancia dependiente.</param>
         /// <returns>Una instancia del tipo especificado.</returns>
-        private TResult ReadData<TResult>(Type typeOfInstance, object idKey, DbTransaction transaction, Object dependenceInstance = null)
+        private TResult ReadData<TResult>(Type typeOfInstance, object idKey, DbTransaction transaction, Object dependenceInstance = null, String ForeingKeyName = "")
         {
             DbCommand command = _connection.CreateCommand();
             DbField primaryKeyField = DbField.GetPrimaryKey(typeOfInstance);
@@ -704,9 +704,11 @@ namespace InnSyTech.Standard.Database
 
             command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@{1}",
                                                     GetTableName(typeOfInstance),
-                                                    primaryKeyField.Name);
+                                                   String.IsNullOrEmpty(ForeingKeyName) ? primaryKeyField.Name : ForeingKeyName);
 
-            CreateParameter(command, primaryKeyField.Name, idKey);
+            CreateParameter(command,
+                String.IsNullOrEmpty(ForeingKeyName) ? primaryKeyField.Name : ForeingKeyName,
+                idKey);
 
             IEnumerable<DbField> fields = DbField.GetFields(typeOfInstance);
             DbDataReader reader = null;
@@ -742,6 +744,14 @@ namespace InnSyTech.Standard.Database
 
                         if (HasChildren(field, out Type typeChildren))
                             ReadList<Object>(typeChildren, (field.GetValue(data) as IList), transaction, data, field.ForeignKeyName);
+                        else if (!String.IsNullOrEmpty(field.ForeignKeyName))
+                            field.SetValue(data, ReadData<Object>(
+                                field.PropertyType,
+                                primaryKeyField.GetValue(data),
+                                transaction,
+                                data,
+                                field.ForeignKeyName
+                                ));
                         else
                         {
                             if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
@@ -846,6 +856,14 @@ namespace InnSyTech.Standard.Database
 
                         if (HasChildren(field, out Type typeChildren))
                             ReadList<Object>(typeChildren, (field.GetValue(data) as IList), transaction, data, field.ForeignKeyName);
+                        else if (!String.IsNullOrEmpty(field.ForeignKeyName))
+                            field.SetValue(data, ReadData<Object>(
+                                field.PropertyType,
+                                primaryKeyField.GetValue(data),
+                                transaction,
+                                data,
+                                field.ForeignKeyName
+                                ));
                         else
                         {
                             if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
@@ -889,5 +907,90 @@ namespace InnSyTech.Standard.Database
         }
 
         #endregion GetUnidirectional
+
+        #region Batch
+
+        /// <summary>
+        /// Ejecuta una consulta de lectura.
+        /// </summary>
+        /// <param name="query">Consulta a realizar.</param>
+        /// <param name="header">Nombre de las columnas.</param>
+        /// <returns>Una matriz con todos los datos obtenidos.</returns>
+        public Object[][] ExecuteQuery(String query, out String[] header)
+        {
+            List<Object[]> responseData = new List<Object[]>();
+
+            DbTransaction transaction = null;
+            DbCommand command = _connection.CreateCommand();
+            ValidateConnection();
+            lock (_transactions)
+            {
+                try
+                {
+                    transaction = BeginTransaction();
+
+                    command.Transaction = transaction;
+                    command.CommandText = query;
+                    command.CommandType = System.Data.CommandType.Text;
+
+                    var response = command.ExecuteReader();
+                    int i = 0;
+                    header = new string[response.FieldCount];
+                    for (int j = 0; j < response.FieldCount; j++)
+                        header[j] = response.GetName(j);
+                    while (response.Read())
+                    {
+                        responseData.Add(new Object[response.FieldCount]);
+                        for (int j = 0; j < responseData[i].Length; j++)
+                            try
+                            {
+                                responseData[i][j] = response[j];
+                            }
+                            catch (Exception)
+                            {
+                                responseData[i][j] = response.GetString(j);
+                            }
+                        i++;
+                    }
+                    response.Close();
+
+                    transaction.Commit();
+
+                    return responseData.ToArray();
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(String.Format("Error al realizar la consulta: {0}; Mensaje: {1}", query, ex.Message), "ERROR");
+
+                    if (transaction != null)
+                        transaction.Rollback();
+                    header = null;
+                    return responseData.ToArray();
+                }
+                finally
+                {
+                    if (transaction != null)
+                    {
+                        _transactions.Remove(transaction);
+                        transaction.Dispose();
+                    }
+
+                    if (_connection != null)
+                        _connection.Close();
+
+                    Monitor.Pulse(_transactions);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ejecuta una consulta de lectura.
+        /// </summary>
+        /// <param name="query">Consulta a realizar.</param>
+        /// <returns>Una matriz con todos los datos obtenidos.</returns>
+        public Object[][] ExecuteQuery(String query)
+            => ExecuteQuery(query, out String[] header);
+
+        #endregion
     }
 }

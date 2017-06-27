@@ -74,6 +74,7 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         private Timer _updatePriority;
+        private bool _inLoad;
 
         /// <summary>
         ///
@@ -174,8 +175,9 @@ namespace Acabus.Modules.CctvReports
             BusDisconnectedAlarms.CollectionChanged += BusAlarmsCollectionChanged;
             Incidences.CollectionChanged += IncidenceCollectionChanged;
 
+            _inLoad = true;
             Incidences.LoadFromDataBase();
-
+            _inLoad = false;
             //_updatePriority = new Timer((target) =>
             // {
             //     foreach (var item in IncidencesOpened)
@@ -448,7 +450,7 @@ namespace Acabus.Modules.CctvReports
             {
                 foreach (Incidence item in e.NewItems)
                 {
-                    if (item.Status == IncidenceStatus.OPEN)
+                    if (item.Status == IncidenceStatus.OPEN && !_inLoad)
                         AcabusControlCenterViewModel.AddNotify(String.Format("{0:dd/MM/yyyy HH:mm:ss} {1} - {2}",
                             item.StartDate,
                             item.Device?.Station is null
@@ -509,7 +511,7 @@ namespace Acabus.Modules.CctvReports
                         if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description.Equals(
                             Core.DataAccess.AcabusData.AllFaults
                                .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
-                                .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA")))
+                                .FirstOrDefault(fault => (fault as DeviceFault).Description.Contains("UNIDAD DESCONECTADA")))
                         && incidence.Device.Vehicle != null)
                             /// A pasado el tiempo para cerrar automáticamente ? 30 MIN
                             if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
@@ -527,10 +529,10 @@ namespace Acabus.Modules.CctvReports
                         /// Verificación de las incidencias ABIERTAS
 
                         if (incidence.Status != IncidenceStatus.OPEN
-                                || (incidence.Description != null && incidence.Description.Equals(
+                                || (incidence.Description != null && !incidence.Description.Equals(
                                     Core.DataAccess.AcabusData.AllFaults
                                         .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
-                                        .FirstOrDefault(fault => (fault as DeviceFault).Description.Equals("UNIDAD DESCONECTADA"))))
+                                        .FirstOrDefault(fault => (fault as DeviceFault).Description.Contains("UNIDAD DESCONECTADA"))))
                                     || incidence.Device?.Vehicle is null) continue;
 
                         bool exists = false;

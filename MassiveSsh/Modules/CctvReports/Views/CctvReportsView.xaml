@@ -73,7 +73,7 @@
                 </i:Interaction.Triggers>
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Folio}" Header="Folio" />
-                    <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia" />
+                    <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia" MaxWidth="500"/>
                     <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta" />
                     <DataGridTextColumn Binding="{Binding Device.Location}" Header="Estación/Vehículo" />
                     <DataGridTextColumn Binding="{Binding Device}" Header="Equipo" />
@@ -120,7 +120,7 @@
                 </i:Interaction.Triggers>
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Folio}" Header="Folio" />
-                    <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia" />
+                    <DataGridTextColumn Binding="{Binding Description}" Header="Descripción de incidencia" MaxWidth="500" />
                     <DataGridTextColumn Binding="{Binding WhoReporting}" Header="Reporta" />
                     <DataGridTextColumn Binding="{Binding Device.Location}" Header="Estación/Vehículo" />
                     <DataGridTextColumn Binding="{Binding Device}" Header="Equipo" />

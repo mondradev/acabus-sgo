@@ -47,8 +47,10 @@ namespace Acabus.DataAccess
         {
             File.Delete(filename);
             File.AppendAllText(filename, GetValues(header) + "\n", Encoding.UTF8);
+            StringBuilder csv = new StringBuilder();
             foreach (var dataItem in data)
-                File.AppendAllText(filename, GetValues(dataItem) + "\n", Encoding.UTF8);
+                csv.Append(GetValues(dataItem) + "\n");
+            File.AppendAllText(filename, csv.ToString(), Encoding.UTF8);
         }
 
         private static String GetValues(IEnumerable<String> data)

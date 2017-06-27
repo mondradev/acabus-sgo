@@ -124,7 +124,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             foreach (Incidence incidence in openedIncidences)
             {
                 if (incidence.Status != IncidenceStatus.OPEN) continue;
-                if (AttendanceService.GetTurn(incidence.StartDate)
+                if (incidence.AssignedAttendance != null && incidence.AssignedAttendance.Turn
                     != AttendanceService.GetTurn(DateTime.Now)) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
@@ -142,7 +142,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             AssignableSection location = (AssignableSection)device?.Station
                 ?? device?.Vehicle?.Route ?? null;
 
-            var attendances = Attendances.Cast<Attendance>();
+            var attendances = Attendances.Where(attendance=> attendance.InTurn());
             var attendancesPrevious = attendances;
 
             if (fault != null)
@@ -162,8 +162,7 @@ namespace Acabus.Modules.Attendances.ViewModels
 
             /// Asignación cuando al menos hay un tecnico en turno.
             attendances = attendances
-                .Where(attendance => attendance.DateTimeDeparture is null
-                && AttendanceService.GetTurn(DateTime.Now) == attendance.Turn);
+                .Where(attendance => AttendanceService.GetTurn(DateTime.Now) == attendance.Turn);
 
             if (attendances.Count() == 1)
                 return attendances.First();

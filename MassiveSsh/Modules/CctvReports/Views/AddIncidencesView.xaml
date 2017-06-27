@@ -74,7 +74,7 @@
                                   Grid.Row="12" Margin="0" SelectedItem="{Binding SelectedPriority, Converter={StaticResource PriorityConverter}}"
                                   ItemsSource="{Binding Priorities, Converter={StaticResource PriorityConverter}}"
                                   Visibility="{Binding IsNewIncidences, Converter={StaticResource CollapseBooleanConverter}}" />
-                <materialDesign:TimePicker Grid.Row="10" materialDesign:HintAssist.Hint="Hora de la incidencia"  Style="{StaticResource MaterialDesignFloatingHintTimePicker}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedTime="{Binding StartTime, Converter={StaticResource DateTimeConverter}}" />
+                <materialDesign:TimePicker Grid.Row="10" materialDesign:HintAssist.Hint="Hora de la incidencia"  Style="{StaticResource MaterialDesignFloatingHintTimePicker}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedTime="{Binding StartTime, Converter={StaticResource DateTimeConverter}, StringFormat=\{0:HH:mm\}}" Is24Hours="True" />
             </Grid>
         </Grid>
         <Grid Margin="16 0 0 0" Grid.Column="1" Visibility="{Binding IsRefundOfMoney, Converter={StaticResource CollapseBooleanConverter}}">

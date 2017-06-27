@@ -165,7 +165,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Obtiene o establece la devolución de dinero
         /// </summary>
-        [Column(ForeignKeyName = "Fk_Incidence_ID")]
+        [Column(ForeignKeyName = "Fk_Folio")]
         public RefundOfMoney RefundOfMoney {
             get => _refundOfMoney;
             set {

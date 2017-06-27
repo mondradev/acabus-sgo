@@ -23,8 +23,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// </summary>
         BILL
     }
-
-    [ValueConversion(typeof(CashType), typeof(String))]
+    
     public sealed class CashTypeTraslatorConverter : TranslateEnumConverter<CashType>
     {
         public CashTypeTraslatorConverter() : base(new Dictionary<CashType, string>()

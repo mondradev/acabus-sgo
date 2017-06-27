@@ -126,8 +126,8 @@ namespace Acabus.Modules.CctvReports.Services
         {
             if (alarm.Device != null && !alarm.Device.Equals(incidence?.Device)) return false;
             DeviceFault deviceFault = CreateDeviceFault(alarm);
-            if (deviceFault != null && deviceFault.Equals(incidence.Description))
-                if (alarm.DateTime == incidence.StartDate)
+            if (deviceFault != null && deviceFault.ID.Equals(incidence.Description.ID))
+                if (alarm.DateTime == incidence.StartDate || incidence.Status == IncidenceStatus.OPEN)
                     return true;
 
             return false;
@@ -196,7 +196,7 @@ namespace Acabus.Modules.CctvReports.Services
             ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>();
             foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).Status != IncidenceStatus.CLOSE))
                 incidences.Add(incidenceData as Incidence);
-            foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).StartDate > DateTime.Now.AddDays(-45)
+            foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).StartDate > DateTime.Now.AddDays(-35)
                                                                                 && (incidence as Incidence).Status == IncidenceStatus.CLOSE))
                 incidences.Add(incidenceData as Incidence);
         }

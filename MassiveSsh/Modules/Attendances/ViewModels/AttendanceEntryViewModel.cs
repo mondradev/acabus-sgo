@@ -204,7 +204,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                     if (Technician is null)
                         AddError("Technician", "Falta seleccionar el técnico que ingresa.");
                     if (Attendances.Where(attendance => attendance.DateTimeDeparture is null
-                            && attendance.Technician == Technician).Count() > 0)
+                            && attendance.Technician?.Name == Technician?.Name).Count() > 0)
                         AddError("Technician", "Ya hay una asistencia en curso del técnico.");
                     break;
 

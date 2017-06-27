@@ -23,7 +23,7 @@
             <i:InvokeCommandAction Command="{Binding LoadCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <Grid MinWidth="800" MinHeight="600" MaxWidth="1200" MaxHeight="800">
+    <Grid Width="1200" Height="500">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -48,7 +48,7 @@
                     <DataGridTextColumn Header="Tiempo en solucionar" Binding="{Binding TotalTime}"/>
                     <DataGridTextColumn Header="Observaciones" Binding="{Binding Observations}"/>
                     <DataGridTextColumn Binding="{Binding RefundOfMoney.Quantity, StringFormat=\{0:C\}}" Header="Cantidad"/>
-                    <DataGridTextColumn Binding="{Binding RefundOfMoney.CashType, Converter={StaticResource CashTypeTraslatorConverter}}" Header="Tipo de dinero"/>
+                    <DataGridTextColumn Binding="{Binding RefundOfMoney.CashDestiny.CashType, Converter={StaticResource CashTypeTraslatorConverter}}" Header="Tipo de dinero"/>
                 </DataGrid.Columns>
             </DataGrid>
             <Button Grid.Row="1" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="CERRAR" Margin="8" VerticalAlignment="Bottom" IsCancel="True" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Right" MinHeight="36"/>
@@ -71,7 +71,7 @@
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="160"/>
                     <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="160"/>
                     <ColumnDefinition/>
@@ -93,8 +93,8 @@
                     <TextBlock Margin="0" Text="Devolución dinero" />
                     <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding HasRefundOfMoney, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
-                <DatePicker Margin="0,0,15,0" VerticalAlignment="Stretch" Grid.Row="2" materialDesign:HintAssist.Hint="Fecha inicial" SelectedDate="{Binding StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2"/>
-                <DatePicker Margin="2,0,14,0" VerticalAlignment="Stretch" Grid.Row="2" Grid.Column="2" materialDesign:HintAssist.Hint="Fecha final" SelectedDate="{Binding FinishDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2"/>
+                <DatePicker Margin="0,0,15,0" VerticalAlignment="Bottom" Grid.Row="2" materialDesign:HintAssist.Hint="Fecha inicial" SelectedDate="{Binding StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2"/>
+                <DatePicker Margin="2,0,14,0" VerticalAlignment="Bottom" Grid.Row="2" Grid.Column="2" materialDesign:HintAssist.Hint="Fecha final" SelectedDate="{Binding FinishDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2"/>
                 <ComboBox Margin="3,0,12,0" VerticalAlignment="Stretch" Grid.Row="2" materialDesign:HintAssist.Hint="Equipo" Grid.Column="4" SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllDevices}" Grid.ColumnSpan="2"/>
                 <StackPanel Grid.Column="6" Margin="0" Grid.Row="2">
                     <TextBlock Text="{Binding HeadingIncidenceType}" Margin="0,0,0,2" />

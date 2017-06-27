@@ -189,5 +189,9 @@ namespace InnSyTech.Standard.Database
                 throw ex;
             }
         }
+
+        public override string ToString() 
+            => String.Format("{0}:[IsPrimaryKey:{1}, IsAutonumerical:{2}, IsForeingKey:{3}, ForeignKeyName:{4}, HasConverter: {5}]", 
+                Name, IsPrimaryKey, IsAutonumerical, IsForeignKey, ForeignKeyName, Converter != null);
     }
 }

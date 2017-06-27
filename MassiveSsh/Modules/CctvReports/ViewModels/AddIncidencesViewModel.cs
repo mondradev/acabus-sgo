@@ -527,7 +527,7 @@ namespace Acabus.Modules.CctvReports
             {
                 if (incidence.Status == IncidenceStatus.CLOSE) continue;
 
-                if (exists = (incidence.Description?.ID == SelectedDescription?.ID
+                if (exists = (incidence.Description?.Category?.ID == SelectedDescription?.Category?.ID
                     && incidence.Device == SelectedDevice)) break;
             }
             if (exists)
@@ -563,17 +563,23 @@ namespace Acabus.Modules.CctvReports
                         Status = CashDestiny?.Description == "CAU" ? RefundOfMoneyStatus.UNCOMMIT : RefundOfMoneyStatus.COMMIT,
                         RefundDate = CashDestiny?.Description == "CAU" ? null : (DateTime?)incidence.StartDate
                     };
-                    if (refundOfMoney.Save())
+                    if (refundOfMoney.Save() && incidence.Update())
+                    {
                         ViewModelService.GetViewModel<CctvReportsViewModel>().UpdateData();
+                        AcabusControlCenterViewModel.ShowDialog("Devolución registrada correctamente.");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        Clipboard.Clear();
+                        Clipboard.SetDataObject(incidence.ToReportString().ToUpper());
+                        AcabusControlCenterViewModel.ShowDialog("Incidencia agregada y copiada al portapapeles.");
+                    }
+                    catch { }
                 }
 
-                try
-                {
-                    Clipboard.Clear();
-                    Clipboard.SetDataObject(incidence.ToReportString().ToUpper());
-                    AcabusControlCenterViewModel.ShowDialog("Incidencia agregada y copiada al portapapeles.");
-                }
-                catch { }
             });
             ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
             CloseCommand.Execute(parameter);
