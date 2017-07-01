@@ -550,11 +550,12 @@ namespace Acabus.Modules.CctvReports
                     WhoReporting
                 );
 
+                incidence.Observations = Observations;
+
                 if (IsRefundOfMoney)
                 {
                     incidence.Status = CashDestiny.Description == "CAU" ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
                     incidence.Technician = SelectedTechnician;
-                    incidence.Observations = Observations;
                     incidence.FinishDate = CashDestiny.Description == "CAU" ? null : (DateTime?)incidence.StartDate;
                     var refundOfMoney = new RefundOfMoney(incidence)
                     {

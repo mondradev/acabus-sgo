@@ -13,7 +13,7 @@ namespace Acabus.Modules.Attendances.Services
         public static void CountIncidences(Attendance technician)
             => technician.CountAssignedIncidences();
 
-        public static WorkShift GetTurn(DateTime startTime)
+        public static WorkShift GetWorkShift(this DateTime startTime)
         {
             if (startTime.TimeOfDay.Between(TimeSpan.FromHours(6), new TimeSpan(13, 59, 59)))
                 return WorkShift.MONING_SHIFT;
@@ -23,6 +23,9 @@ namespace Acabus.Modules.Attendances.Services
 
             return WorkShift.NIGHT_SHIFT;
         }
+
+        public static Boolean IsOperationWorkShift(this DateTime startTime)
+            => startTime.TimeOfDay.Between(TimeSpan.FromHours(9), TimeSpan.FromHours(18));
 
         public static void LoadFromDataBase(this ICollection<Attendance> attendances)
         {

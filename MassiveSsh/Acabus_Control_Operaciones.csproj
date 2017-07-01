@@ -158,6 +158,7 @@
     <Compile Include="Models\DeviceFault.cs" />
     <Compile Include="Models\DeviceFaultCategory.cs" />
     <Compile Include="Modules\Attendances\AcabusData.cs" />
+    <Compile Include="Modules\Attendances\Converter\InWorkShiftConverter.cs" />
     <Compile Include="Modules\Attendances\Models\Attendance.cs" />
     <Compile Include="Modules\Attendances\Services\AttendanceService.cs" />
     <Compile Include="Modules\Attendances\ViewModels\AttendanceDepartureViewModel.cs" />

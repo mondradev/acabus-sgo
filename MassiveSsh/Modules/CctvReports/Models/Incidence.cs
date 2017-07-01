@@ -287,7 +287,7 @@ namespace Acabus.Modules.CctvReports.Models
                 : String.Format("\n*Asignado:* {0}", AssignedAttendance),
                 String.IsNullOrEmpty(Observations?.Trim())
                 ? String.Empty
-                : Observations?.Trim().ToUpper());
+                : String.Format("\n*Observaciones:* {0}", Observations?.Trim().ToUpper()));
         }
 
         /// <summary>

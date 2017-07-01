@@ -141,7 +141,8 @@ namespace Acabus.Modules.CctvReports
                if (SelectedIncidence is null) return;
 
                NewWhoReporting = SelectedIncidence.WhoReporting;
-               AcabusControlCenterViewModel.ShowDialog(new ModifyIncidenceView() { DataContext = parameter });
+               AcabusControlCenterViewModel.ShowDialog(new ModifyIncidenceView() { DataContext = parameter }, 
+                   CopyingRowClipboardHandlerCommand.Execute);
            });
 
             SaveIncidenceCommand = new CommandBase((parameter) =>

@@ -222,7 +222,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                     if (Turn != null)
                     {
                         Boolean error = false;
-                        Attendance.WorkShift turn = AttendanceService.GetTurn(DateTime.Now.Date.AddTicks(TimeEntry.Ticks));
+                        Attendance.WorkShift turn = AttendanceService.GetWorkShift(DateTime.Now.Date.AddTicks(TimeEntry.Ticks));
 
                         if (turn == Attendance.WorkShift.MONING_SHIFT && Turn == Attendance.WorkShift.NIGHT_SHIFT)
                             error = true;

@@ -74,7 +74,7 @@ namespace Acabus.Modules.CctvReports.Services
                 case "FALLA EN EXPENDEDOR":
                 case "FALLA EN EL DISPENSADOR":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "TARJETA ATASCADA CANALIZARLO CON CALL CENTER");
+                        => (fault as DeviceFault).Description.Contains("TARJETA ATASCADA"));
 
                 case "BILLETERA LLENA":
                     return (DeviceFault)faults.FirstOrDefault(fault

@@ -10,8 +10,10 @@ namespace Acabus.Modules.CctvReports.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool)
+            if (value is bool && !String.Equals(parameter?.ToString(), "NOT"))
                 return (bool)value ? Visibility.Visible : Visibility.Collapsed;
+            else if (value is bool && String.Equals(parameter?.ToString(), "NOT"))
+                return (bool)value ? Visibility.Collapsed : Visibility.Visible;
             return Visibility.Collapsed;
         }
 

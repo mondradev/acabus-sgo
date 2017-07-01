@@ -24,8 +24,8 @@ namespace InnSyTech.Debug
 
         public static IEnumerable<T> GetObjects<T>() => _session.GetObjects<T>().Select(item => (T)item);
 
-        public static bool Save<T>(T instance) => _session.Save(instance);
+        public static bool Save<T>(T instance) => _session.Save(ref instance);
 
-        public static bool Update<T>(T instance) => _session.Update(instance);
+        public static bool Update<T>(T instance) => _session.Update(ref instance);
     }
 }

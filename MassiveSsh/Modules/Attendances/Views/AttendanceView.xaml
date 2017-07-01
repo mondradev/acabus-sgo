@@ -7,18 +7,27 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:Models="clr-namespace:Acabus.Modules.Attendances.Models"
     xmlns:ViewModels="clr-namespace:Acabus.Modules.Attendances.ViewModels"
+    xmlns:converter="clr-namespace:Acabus.Modules.Attendances.Converter"
+    xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     x:Class="Acabus.Modules.Attendances.Views.AttendanceView"
     x:Name="Attendance"
     mc:Ignorable="d" 
     d:DesignHeight="300" d:DesignWidth="900">
     <UserControl.Resources>
+        <CollectionViewSource x:Key="AttendanceCollection" Source="{Binding Attendances}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="DateTimeDepture" Direction="Ascending" />
+                <scm:SortDescription PropertyName="DateTimeEntry" Direction="Descending" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
         <Models:TurnsConverter x:Key="TurnsConverter"/>
+        <converter:InWorkShiftConverter x:Key="InWorkShiftConverter" />
     </UserControl.Resources>
     <UserControl.DataContext>
         <ViewModels:AttendanceViewModel/>
     </UserControl.DataContext>
     <Grid>
-        <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Attendances}" IsReadOnly="True" SelectedItem="{Binding SelectedAttendance}" Margin="0,8,0,0" >
+        <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource AttendanceCollection}}" IsReadOnly="True" SelectedItem="{Binding SelectedAttendance}" Margin="0,8,0,0" >
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
                     <i:InvokeCommandAction Command="{Binding RegisterDepartureCommand}"/>
@@ -34,6 +43,11 @@
                 <DataGridTextColumn Header="Incidencias abiertas" Binding="{Binding CountOpenedIncidences}" />
                 <DataGridTextColumn Header="Fecha/Hora Salida" Binding="{Binding DateTimeDeparture, StringFormat=\{0:dd MMM yyyy hh:mm:ss tt\}}" />
             </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="{x:Type DataGridRow}">
+                    <Setter Property="Background" Value="{Binding DateTimeDeparture, Converter={StaticResource InWorkShiftConverter}}" />
+                </Style>
+            </DataGrid.RowStyle>
         </DataGrid>
         <materialDesign:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
                                  ToggleCheckedContentCommand="{Binding RegisterEntryCommand}"

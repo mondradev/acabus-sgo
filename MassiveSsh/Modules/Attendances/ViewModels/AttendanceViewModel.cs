@@ -125,7 +125,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             {
                 if (incidence.Status != IncidenceStatus.OPEN) continue;
                 if (incidence.AssignedAttendance != null && incidence.AssignedAttendance.Turn
-                    != AttendanceService.GetTurn(DateTime.Now)) continue;
+                    != AttendanceService.GetWorkShift(DateTime.Now) && incidence.AssignedAttendance.Turn != WorkShift.OPERATION_SHIT) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
                     .GetTechnicianAssigned(incidence.Device, incidence.StartDate, incidence.Description);
@@ -142,7 +142,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             AssignableSection location = (AssignableSection)device?.Station
                 ?? device?.Vehicle?.Route ?? null;
 
-            var attendances = Attendances.Where(attendance=> attendance.InTurn());
+            var attendances = Attendances.Where(attendance => attendance.InWorkShift());
             var attendancesPrevious = attendances;
 
             if (fault != null)
@@ -161,8 +161,10 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
 
             /// Asignación cuando al menos hay un tecnico en turno.
+            WorkShift currenteWorkShift = DateTime.Now.GetWorkShift();
             attendances = attendances
-                .Where(attendance => AttendanceService.GetTurn(DateTime.Now) == attendance.Turn);
+                .Where(attendance => currenteWorkShift == attendance.Turn
+                || (DateTime.Now.IsOperationWorkShift() && attendance.Turn == WorkShift.OPERATION_SHIT));
 
             if (attendances.Count() == 1)
                 return attendances.First();
@@ -171,7 +173,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             else
                 attendancesPrevious = attendances;
 
-            if (AttendanceService.GetTurn(DateTime.Now) != WorkShift.NIGHT_SHIFT)
+            if (AttendanceService.GetWorkShift(DateTime.Now) != WorkShift.NIGHT_SHIFT)
             {
                 /// Asignación por tramo.
                 attendances = attendances.Where(attendance
@@ -187,7 +189,7 @@ namespace Acabus.Modules.Attendances.ViewModels
 
                 /// Asignación por turno.
                 attendances = attendances.Where(attendance
-                  => attendance.Turn == AttendanceService.GetTurn(startTime) || startTime.Date < DateTime.Now.Date);
+                  => attendance.Turn == AttendanceService.GetWorkShift(startTime) || startTime.Date < DateTime.Now.Date);
 
                 if (attendances.Count() == 1)
                     return attendances.First();
