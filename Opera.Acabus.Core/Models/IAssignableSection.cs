@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Opera.Acabus.Core
+namespace Opera.Acabus.Core.Models
 {
-    public class Class1
+    public interface IAssignableSection
     {
+        String AssignedSection { get; set; }
     }
 }
