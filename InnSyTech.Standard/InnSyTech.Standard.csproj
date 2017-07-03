@@ -30,6 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,6 +50,10 @@
     <Compile Include="Database\DbSession.cs" />
     <Compile Include="Database\IDbConfiguration.cs" />
     <Compile Include="Database\Utils\SQLiteDateTimeConverter.cs" />
+    <Compile Include="Mvvm\Command.cs" />
+    <Compile Include="Mvvm\NotifyPropertyChanged.cs" />
+    <Compile Include="Mvvm\ViewModelBase.cs" />
+    <Compile Include="Mvvm\ViewModelService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
