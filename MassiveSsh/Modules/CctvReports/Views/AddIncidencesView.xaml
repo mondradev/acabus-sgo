@@ -95,7 +95,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <StackPanel Margin="0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <TextBlock Text="{Binding CashDestiny.CashType, Converter={StaticResource CashTypeTraslatorConverter}}" Margin="0 0 16 0" />
+                    <TextBlock Text="{Binding CashTypeName}" Margin="0 0 16 0" />
                     <ToggleButton Margin="0" IsChecked="{Binding IsMoney, Converter={StaticResource InverseBooleanConverter}}" />
                 </StackPanel>
                 <Grid Margin="0" Grid.Row="2" HorizontalAlignment="Stretch">

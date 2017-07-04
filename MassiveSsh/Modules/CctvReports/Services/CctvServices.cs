@@ -88,7 +88,10 @@ namespace Acabus.Modules.CctvReports.Services
                 case "FALLA MONEDERO":
                     return (DeviceFault)faults.FirstOrDefault(fault
                         => (fault as DeviceFault).Description == "NO ACEPTA MONEDAS");
-
+                case "FALLA CONTADOR EN CERO":
+                    return faults.FirstOrDefault(fault => fault.Description == "NO SE TIENE CONTEO DE PASAJEROS");
+                case "FALLA CONTADOR":
+                    return faults.FirstOrDefault(fault => fault.Description == "EL CONTEO DE PASAJEROS ES MENOR A LAS VALIDACIONES");
                 default: return null;
             }
         }
@@ -157,8 +160,11 @@ namespace Acabus.Modules.CctvReports.Services
                 var numeseri = row[1];
                 var exists = false;
                 foreach (var alert in alarms)
+                {
+                    if (alert.ID == 0) continue;
                     if (alert.ID == UInt32.Parse(row[0]) && alert.Device.NumeSeri == numeseri)
                         exists = true;
+                }
                 if (!exists)
                     Application.Current.Dispatcher.Invoke(()
                         => alarms.Add(Alarm.CreateAlarm(UInt32.Parse(row[0]), numeseri, row[2], DateTime.Parse(row[3]), (Priority)(UInt16.Parse(row[4]) - 1))));
@@ -168,7 +174,7 @@ namespace Acabus.Modules.CctvReports.Services
         public static void GetBusDisconnectedAlarms(this ObservableCollection<BusDisconnectedAlarm> busAlarms)
         {
             if (DateTime.Now.TimeOfDay > TimeSpan.FromHours(21)
-                || DateTime.Now.TimeOfDay < TimeSpan.FromHours(6)) return;
+                || DateTime.Now.TimeOfDay < TimeSpan.FromHours(3)) return;
 
             busAlarms.Clear();
             Vehicle[] vehicles = new Vehicle[Core.DataAccess.AcabusData.OffDutyVehicles.Count];
@@ -209,5 +215,34 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Update(this Incidence incidence)
             => AcabusData.Session.Update(ref incidence);
+
+        public static void SearchCountersFailing(this ObservableCollection<Alarm> alarms)
+        {
+            var response = AcabusData.ExecuteQueryInServerDB(AcabusData.CountersFailingQuery);
+            foreach (var row in response)
+            {
+                if (row[0] == "no_econ")
+                    continue;
+
+                if (row.Length < 2) break;
+                var economicNumber = row[0];
+                var exists = false;
+                foreach (var alert in alarms.Where(alarm => alarm.Device.Type == DeviceType.CONT))
+                    if (alert.Device.Vehicle?.EconomicNumber == economicNumber)
+                        exists = true;
+                if (!exists)
+                    Application.Current.Dispatcher.Invoke(()
+                        => alarms.Add(new Alarm(0)
+                        {
+                            DateTime = DateTime.Now,
+                            Description = row[3],
+                            Device = Core.DataAccess.AcabusData.AllDevices.FirstOrDefault(device
+                                => device.Type == DeviceType.CONT
+                                    && device.Vehicle != null
+                                    && device.Vehicle.EconomicNumber == economicNumber),
+                            Priority = row[3].Contains("CERO") ? Priority.HIGH : Priority.MEDIUM
+                        }));
+            }
+        }
     }
 }

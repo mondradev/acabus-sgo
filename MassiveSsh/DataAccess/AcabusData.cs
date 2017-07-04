@@ -157,6 +157,11 @@ namespace Acabus.DataAccess
         private static XmlDocument _xmlConfig = null;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'CountersFailingQuery'
+        /// </summary>
+        private static string _countersFailingQuery;
+
+        /// <summary>
         /// Crea una instancia de 'AcabusData' y realiza la carga del archivo de configuración.
         /// </summary>
         static AcabusData()
@@ -294,12 +299,15 @@ namespace Acabus.DataAccess
         /// </summary>
         public static String TrunkAlertQuery => _trunkAlertQuery;
 
-
-
         /// <summary>
         /// Obtiene la sentencia SQL utilizada para la descarga de los datos de los vehículos.
         /// </summary>
         public static String VehiclesQuery => _vehiclesQuery;
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la revisión de contadores.
+        /// </summary>
+        public static string CountersFailingQuery => _countersFailingQuery;
 
         /// <summary>
         /// Ejecuta una consulta en el servidor de base de datos.
@@ -383,27 +391,7 @@ namespace Acabus.DataAccess
         /// </summary>
         public static void LoadOffDutyVehiclesSettings()
         {
-            var filename = String.Format(OFF_DUTY_VEHICLES_FILENAME, DateTime.Now);
 
-            OffDutyVehicles.Clear();
-            try
-            {
-                if (!File.Exists(filename)) return;
-
-                var lines = File.ReadAllLines(filename);
-
-                foreach (var line in lines)
-                {
-                    var economicNumber = line.Split('|')?[0];
-                    var status = line.Split('|')?[1];
-
-                    //OffDutyVehicles.Add(new Vehicle(economicNumber, (VehicleStatus)Enum.Parse(typeof(VehicleStatus), status)));
-                }
-            }
-            catch (IOException)
-            {
-                Trace.WriteLine("Ocurrió un error al intentar leer el archivo de la lista de vehículos.", "ERROR");
-            }
         }
 
         /// <summary>
@@ -417,6 +405,8 @@ namespace Acabus.DataAccess
             _pgPort = UInt16.Parse(GetProperty("Port", "PGSetting"));
             _trunkAlertQuery = GetProperty("TrunkAlert", "Command-Sql");
             _busDisconnectedQuery = GetProperty("BusDisconnected", "Command-Sql");
+            _countersFailingQuery = GetProperty("CountersFailing", "Command-Sql");
+
 
             _stationsQuery = GetProperty("Stations", "Command-Sql");
             _devicesQuery = GetProperty("Devices", "Command-Sql");
@@ -523,7 +513,6 @@ namespace Acabus.DataAccess
 
                 LoadSettings();
                 LoadTechniciansSettings();
-                LoadOffDutyVehiclesSettings();
                 LoadCompaniesSettings();
 
                 LoadModuleSettings();

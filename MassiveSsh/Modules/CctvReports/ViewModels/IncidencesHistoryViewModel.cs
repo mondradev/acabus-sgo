@@ -101,6 +101,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
             _isEnabled = false;
             _isExpanded = false;
             _hasRefundOfMoney = false;
+            _isStartDate = true;
 
             SearchCommand = new CommandBase(SeachIncidences);
             ClearCommand = new CommandBase(ClearFields);
@@ -360,9 +361,9 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 _result = _result.Where(incidence => incidence.Device?.Vehicle == SelectedVehicle);
 
             if (IsStartDate && (StartDate != null || FinishDate != null))
-                _result = _result.Where(incidence => incidence.StartDate.Between(StartDate, FinishDate));
+                _result = _result.Where(incidence => incidence.StartDate.Date.Between(StartDate, FinishDate));
             else if (!IsStartDate && (StartDate != null || FinishDate != null))
-                _result = _result.Where(incidence => incidence.FinishDate != null && incidence.FinishDate.Value.Between(StartDate, FinishDate));
+                _result = _result.Where(incidence => incidence.FinishDate != null && incidence.FinishDate.Value.Date.Between(StartDate, FinishDate));
 
             if (SelectedDevice != null)
                 _result = _result.Where(incidence => incidence.Device == SelectedDevice);

@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace Acabus.DataAccess
 {
-    internal partial class AcabusData
+    internal static partial class AcabusData
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Configurables'.

@@ -352,6 +352,11 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
+        /// Obtiene el titulo del tipo de dinero.
+        /// </summary>
+        public String CashTypeName => IsMoney ? "MONEDAS" : "BILLETES";
+
+        /// <summary>
         /// Obtiene o establece si la devolución de dinero son monedas.
         /// </summary>
         public Boolean IsMoney {
@@ -360,6 +365,7 @@ namespace Acabus.Modules.CctvReports
                 _isMoney = value;
                 OnPropertyChanged("IsMoney");
                 OnPropertyChanged("CashDestinies");
+                OnPropertyChanged("CashTypeName");
                 SetDescriptionAndObservation();
             }
         }
@@ -580,7 +586,6 @@ namespace Acabus.Modules.CctvReports
                     }
                     catch { }
                 }
-
             });
             ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
             CloseCommand.Execute(parameter);

@@ -12,14 +12,18 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Acabus.Modules.CctvReports
 {
     public sealed class CctvReportsViewModel : ViewModelBase
     {
+        private const string TEMP_COUNTERS_FAILING = "~$tmp_counterfailings.dat";
+
         /// <summary>
         /// Campo que provee a la propiedad 'Alarms'.
         /// </summary>
@@ -55,10 +59,14 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         private ObservableCollection<Incidence> _incidences;
 
+        private bool _inLoad;
+
         /// <summary>
         /// Campo que provee a la propiedad 'NewWhoReporting'.
         /// </summary>
         private String _newWhoReporting;
+
+        private Timer _seachCounterFailing;
 
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedIncidence'.
@@ -74,7 +82,6 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         private Timer _updatePriority;
-        private bool _inLoad;
 
         /// <summary>
         ///
@@ -134,16 +141,16 @@ namespace Acabus.Modules.CctvReports
             });
 
             ModifyIncidenceDialogCommand = new CommandBase((parameter) =>
-           {
-               ClearErrors();
+            {
+                ClearErrors();
 
-               if (parameter is null) return;
-               if (SelectedIncidence is null) return;
+                if (parameter is null) return;
+                if (SelectedIncidence is null) return;
 
-               NewWhoReporting = SelectedIncidence.WhoReporting;
-               AcabusControlCenterViewModel.ShowDialog(new ModifyIncidenceView() { DataContext = parameter }, 
-                   CopyingRowClipboardHandlerCommand.Execute);
-           });
+                NewWhoReporting = SelectedIncidence.WhoReporting;
+                AcabusControlCenterViewModel.ShowDialog(new ModifyIncidenceView() { DataContext = parameter },
+                    CopyingRowClipboardHandlerCommand.Execute);
+            });
 
             SaveIncidenceCommand = new CommandBase((parameter) =>
             {
@@ -163,48 +170,71 @@ namespace Acabus.Modules.CctvReports
             OpenDialogExportCommand = new CommandBase(async (parameter) => await DialogHost.Show(parameter));
 
             OpenOffDutyVehiclesDialog = new CommandBase((parameter) =>
-           {
-               var dialogContent = new OffDutyVehicles.OffDutyVehiclesView();
-               AcabusControlCenterViewModel.ShowDialog(dialogContent, (response) =>
-               {
-                   if (response.ToString().Equals("LISTO"))
-                       InitBusAlarmsMonitor();
-               });
-           });
+            {
+                var dialogContent = new OffDutyVehicles.OffDutyVehiclesView();
+                AcabusControlCenterViewModel.ShowDialog(dialogContent, (response) =>
+                {
+                    if (response.ToString().Equals("LISTO"))
+                        InitBusAlarmsMonitor();
+                });
+            });
+
+            WaitHandle[] waitHandles = new WaitHandle[] {
+                new EventWaitHandle(false, EventResetMode.AutoReset),
+                new EventWaitHandle(false, EventResetMode.AutoReset),
+                new EventWaitHandle(false, EventResetMode.AutoReset),
+                new EventWaitHandle(false, EventResetMode.AutoReset)
+            };
+
+            RefreshIncidences = new CommandBase(parameter =>
+            {
+                Task.Run(() =>
+                {
+                    Trace.WriteLine("Actualizando lista de incidencias", "DEBUG");
+
+                    AcabusControlCenterViewModel.AddNotify("ACTUALIZACIÓN DE LISTA DE INCIDENCIAS...");
+
+                    if (_inLoad) return;
+
+                    _inLoad = true;
+
+                    if (_updatePriority != null) _updatePriority.Dispose(waitHandles[0]);
+                    else (waitHandles[0] as EventWaitHandle).Set();
+                    if (_alarmsMonitor != null) _alarmsMonitor.Dispose(waitHandles[1]);
+                    else (waitHandles[1] as EventWaitHandle).Set();
+                    if (_busAlarmsMonitor != null) _busAlarmsMonitor.Dispose(waitHandles[2]);
+                    else (waitHandles[2] as EventWaitHandle).Set();
+                    if (_seachCounterFailing != null) _seachCounterFailing.Dispose(waitHandles[3]);
+                    else (waitHandles[3] as EventWaitHandle).Set();
+
+                    WaitHandle.WaitAll(waitHandles, 600);
+
+                    Incidences.Clear();
+                    UpdateData();
+                    Incidences.LoadFromDataBase();
+
+                    _inLoad = false;
+
+                    UpdateData();
+                    InitAlarmsMonitor();
+                    InitUpdatePriority();
+
+                    AcabusControlCenterViewModel.AddNotify("LISTA DE INCIDENCIAS ACTUALIZADA");
+                });
+            });
 
             Alarms.CollectionChanged += AlarmsCollectionChanged;
             BusDisconnectedAlarms.CollectionChanged += BusAlarmsCollectionChanged;
             Incidences.CollectionChanged += IncidenceCollectionChanged;
 
             _inLoad = true;
+
             Incidences.LoadFromDataBase();
+
             _inLoad = false;
-            //_updatePriority = new Timer((target) =>
-            // {
-            //     foreach (var item in IncidencesOpened)
-            //     {
-            //         if (item.Status == IncidenceStatus.UNCOMMIT && item.Priority != Priority.NONE)
-            //         {
-            //             item.Priority = Priority.NONE;
-            //             item.Update();
-            //         }
-            //         if (item.Status == IncidenceStatus.UNCOMMIT || item.Priority == Priority.NONE) continue;
-            //         var time = DateTime.Now - item.StartDate;
-            //         var type = item.Device.Vehicle != null;
-            //         var maxLowPriority = type
-            //                    ? AcabusData.TimeMaxLowPriorityIncidenceBus : AcabusData.TimeMaxLowPriorityIncidence;
-            //         var maxMediumPriority = type
-            //                    ? AcabusData.TimeMaxMediumPriorityIncidenceBus : AcabusData.TimeMaxMediumPriorityIncidence;
 
-            //         if (time > maxMediumPriority)
-            //             item.Priority = Priority.HIGH;
-            //         else if (time > maxLowPriority && item.Priority < Priority.HIGH)
-            //             item.Priority = Priority.MEDIUM;
-
-            //         if (item.Status == IncidenceStatus.OPEN)
-            //             item.Update();
-            //     }
-            // }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
+            UpdateData();
+            InitUpdatePriority();
         }
 
         ~CctvReportsViewModel()
@@ -276,31 +306,50 @@ namespace Acabus.Modules.CctvReports
         /// <summary>
         /// Obtiene una lista de la incidencias generadas por alarmas.
         /// </summary>
-        public ObservableCollection<Incidence> IncidencesClosed
-            => new ObservableCollection<Incidence>(Incidences.Where((incidence)
-                =>
-            {
-                Boolean isClosed = incidence.Status == IncidenceStatus.CLOSE;
-                Boolean isMatch = String.IsNullOrEmpty(ToSearchClosed)
-                            || (incidence.Technician != null && incidence.Technician.Name.ToUpper().Contains(ToSearchClosed.ToUpper()))
-                            || incidence.Description.ToString().ToUpper().Contains(ToSearchClosed.ToUpper());
+        public ObservableCollection<Incidence> IncidencesClosed {
+            get {
+                try
+                {
+                    return new ObservableCollection<Incidence>(Incidences.Where((incidence)
+                             =>
+                         {
+                             Boolean isClosed = incidence.Status == IncidenceStatus.CLOSE;
+                             Boolean isMatch = String.IsNullOrEmpty(ToSearchClosed)
+                             || (incidence.Technician != null && incidence.Technician.Name.ToUpper().Contains(ToSearchClosed.ToUpper()))
+                             || incidence.Description.ToString().ToUpper().Contains(ToSearchClosed.ToUpper());
 
-                return isClosed && isMatch;
-            }).OrderByDescending(incidence => incidence.FinishDate));
+                             return isClosed && isMatch;
+                         }).OrderByDescending(incidence => incidence.FinishDate));
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
 
         /// <summary>
         /// Obtiene una lista de las incidencias abiertas.
         /// </summary>
-        public ObservableCollection<Incidence> IncidencesOpened
-            => new ObservableCollection<Incidence>(Incidences.Where((incidence)
-                =>
-            {
-                Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
-                Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.ToUpper().Contains(FolioToSearch.ToUpper());
+        public ObservableCollection<Incidence> IncidencesOpened {
+            get {
+                try
+                {
+                    return new ObservableCollection<Incidence>(Incidences.Where((incidence)
+                         =>
+                     {
+                         Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
+                         Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.ToUpper().Contains(FolioToSearch.ToUpper());
 
-                return isOpen && isMatch;
-            }));
-
+                         return isOpen && isMatch;
+                     }).OrderByDescending(incidence => incidence.StartDate));
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
 
         /// <summary>
         ///
@@ -330,6 +379,8 @@ namespace Acabus.Modules.CctvReports
 
         public ICommand ReassignTechnician { get; }
 
+        public ICommand RefreshIncidences { get; }
+
         /// <summary>
         ///
         /// </summary>
@@ -339,6 +390,8 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         public ICommand SaveIncidenceCommand { get; }
+
+        public ICommand SearchToHistoryCommand { get; }
 
         /// <summary>
         /// Obtiene o establece la incidencia actualmente seleccionada.
@@ -368,10 +421,6 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         public ICommand UpdateDataCommand { get; }
 
-        public ICommand SearchToHistoryCommand { get; }
-
-        protected override void OnLoad(object arg) => InitAlarmsMonitor();
-
         public void ReloadData()
         {
             Incidences.Clear();
@@ -383,6 +432,8 @@ namespace Acabus.Modules.CctvReports
             OnPropertyChanged("IncidencesOpened");
             OnPropertyChanged("IncidencesClosed");
         }
+
+        protected override void OnLoad(object arg) => InitAlarmsMonitor();
 
         /// <summary>
         ///
@@ -461,8 +512,11 @@ namespace Acabus.Modules.CctvReports
                     item.Save();
                 }
             }
-            OnPropertyChanged("IncidencesOpened");
-            OnPropertyChanged("IncidencesClosed");
+            if (!_inLoad)
+            {
+                OnPropertyChanged("IncidencesOpened");
+                OnPropertyChanged("IncidencesClosed");
+            }
         }
 
         /// <summary>
@@ -470,6 +524,8 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         private void InitAlarmsMonitor()
         {
+            InitSearchCountersFailing();
+
             _alarmsMonitor = new Timer(delegate
             {
                 Trace.WriteLine("Actualizando alarmas", "DEBUG");
@@ -493,7 +549,7 @@ namespace Acabus.Modules.CctvReports
                 if (_busUpdating) return;
                 _busUpdating = true;
 
-                if (DateTime.Now.TimeOfDay > new TimeSpan(6, 0, 0))
+                if (DateTime.Now.TimeOfDay > new TimeSpan(3, 0, 0))
                 {
                     Trace.WriteLine("Actualizando autobuses sin conexión", "DEBUG");
                     BusDisconnectedAlarms.GetBusDisconnectedAlarms();
@@ -514,8 +570,8 @@ namespace Acabus.Modules.CctvReports
                                .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
                                 .FirstOrDefault(fault => (fault as DeviceFault).Description.Contains("UNIDAD DESCONECTADA")))
                         && incidence.Device.Vehicle != null)
-                            /// A pasado el tiempo para cerrar automáticamente ? 30 MIN
-                            if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(30))
+                            /// A pasado el tiempo para cerrar automáticamente ? 10 MIN
+                            if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(10))
                             {
                                 incidence.Status = IncidenceStatus.CLOSE;
                                 if (AcabusData.OffDutyVehicles.Where(vehicle
@@ -558,6 +614,81 @@ namespace Acabus.Modules.CctvReports
                 }
                 _busUpdating = false;
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+        }
+
+        private void InitSearchCountersFailing()
+        {
+            if (_seachCounterFailing != null) return;
+
+            _seachCounterFailing = new Timer(delegate
+            {
+                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(22), new TimeSpan(23, 59, 59)))
+                {
+                    Trace.WriteLine("Buscando contadores en mal estado", "DEBUG");
+                    try
+                    {
+                        if (File.Exists(TEMP_COUNTERS_FAILING))
+                        {
+                            String date = File.ReadAllText(TEMP_COUNTERS_FAILING);
+                            DateTime lastUpdate = DateTime.Parse(date);
+
+                            if (lastUpdate.Date.Equals(DateTime.Now.Date))
+                                return;
+                        }
+
+                        Alarms.SearchCountersFailing();
+                        File.WriteAllText(TEMP_COUNTERS_FAILING, DateTime.Now.ToString());
+                    }
+                    catch (IOException)
+                    {
+                        File.Delete(TEMP_COUNTERS_FAILING);
+                    }
+                }
+                else
+                {
+                    Trace.WriteLine("No se require buscar contadores", "DEBUG");
+                }
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
+        }
+
+        private void InitUpdatePriority()
+        {
+            _updatePriority = new Timer((target) =>
+            {
+                if (_inLoad) return;
+
+                foreach (var item in IncidencesOpened)
+                {
+                    if (_inLoad) break;
+
+                    if (item.Status == IncidenceStatus.UNCOMMIT && item.Priority != Priority.NONE)
+                    {
+                        item.Priority = Priority.NONE;
+                        item.Update();
+                    }
+
+                    if (item.Status == IncidenceStatus.UNCOMMIT
+                       || item.Priority == Priority.NONE
+                       || item.Priority == Priority.HIGH) continue;
+
+                    var time = DateTime.Now - item.StartDate;
+                    var isBus = item.Device.Vehicle != null;
+                    var maxLowPriority = isBus
+                               ? AcabusData.TimeMaxLowPriorityIncidenceBus : AcabusData.TimeMaxLowPriorityIncidence;
+                    var maxMediumPriority = isBus
+                               ? AcabusData.TimeMaxMediumPriorityIncidenceBus : AcabusData.TimeMaxMediumPriorityIncidence;
+
+                    var oldPriority = item.Priority;
+
+                    if (time > maxMediumPriority)
+                        item.Priority = Priority.HIGH;
+                    else if (time > maxLowPriority && item.Priority < Priority.HIGH)
+                        item.Priority = Priority.MEDIUM;
+
+                    if (item.Status == IncidenceStatus.OPEN && !oldPriority.Equals(item.Priority))
+                        item.Update();
+                }
+            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
         }
     }
 }

@@ -16,7 +16,7 @@
     <UserControl.Resources>
         <CollectionViewSource x:Key="AttendanceCollection" Source="{Binding Attendances}">
             <CollectionViewSource.SortDescriptions>
-                <scm:SortDescription PropertyName="DateTimeDepture" Direction="Ascending" />
+                <scm:SortDescription PropertyName="DateTimeDeparture" Direction="Ascending" />
                 <scm:SortDescription PropertyName="DateTimeEntry" Direction="Descending" />
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>

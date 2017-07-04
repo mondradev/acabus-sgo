@@ -423,7 +423,11 @@ namespace Acabus.Models
             if (device is null && otherDevice is null) return true;
 
             if (!(device is null) && !(otherDevice is null))
-                return device.ID == otherDevice.ID && device.NumeSeri == otherDevice.NumeSeri;
+                return device.ID == otherDevice.ID
+                    && device.NumeSeri == otherDevice.NumeSeri
+                    && device.Type == otherDevice.Type
+                    && device.Station == otherDevice.Station
+                    && device.Vehicle == otherDevice.Vehicle;
 
             return false;
         }

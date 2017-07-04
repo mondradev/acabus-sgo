@@ -93,6 +93,11 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
+        /// Obtiene el titulo del tipo de dinero.
+        /// </summary>
+        public String CashTypeName => IsMoney ? "MONEDAS" : "BILLETES";
+
+        /// <summary>
         ///
         /// </summary>
         public ICommand CloseIncidenceCommand { get; }
@@ -146,6 +151,7 @@ namespace Acabus.Modules.CctvReports
                 _isMoney = value;
                 OnPropertyChanged("IsMoney");
                 OnPropertyChanged("Destinies");
+                OnPropertyChanged("CashTypeName");
             }
         }
 
@@ -334,7 +340,7 @@ namespace Acabus.Modules.CctvReports
                         SelectedCashDestiny?.Description);
                 isDone = refund.Save();
             }
-                isDone = SelectedIncidence.Update();
+            isDone = SelectedIncidence.Update();
 
             if (!isDone)
             {
