@@ -124,6 +124,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             foreach (Incidence incidence in openedIncidences)
             {
                 if (incidence.Status != IncidenceStatus.OPEN) continue;
+
                 if (incidence.AssignedAttendance != null && incidence.AssignedAttendance.Turn
                     != AttendanceService.GetWorkShift(DateTime.Now) && incidence.AssignedAttendance.Turn != WorkShift.OPERATION_SHIT) continue;
 
@@ -139,6 +140,10 @@ namespace Acabus.Modules.Attendances.ViewModels
         /// </summary>
         public Attendance GetTechnicianAssigned(Device device, DateTime startTime, DeviceFault fault = null)
         {
+            if (DateTime.Now.GetWorkShift() != WorkShift.NIGHT_SHIFT
+               && device.Type == DeviceType.CONT)
+                return null;
+
             AssignableSection location = (AssignableSection)device?.Station
                 ?? device?.Vehicle?.Route ?? null;
 
@@ -215,7 +220,7 @@ namespace Acabus.Modules.Attendances.ViewModels
             }
             else
             {
-                if (location.GetType() != typeof(Vehicle) && !location.Name.Contains("TERMINAL DE TRANSFERENCIA"))
+                if (device.Station != null && !device.Station.Name.Contains("RENACIMIENTO"))
                     return null;
 
                 if (device?.Vehicle?.BusType == VehicleType.ARTICULATED

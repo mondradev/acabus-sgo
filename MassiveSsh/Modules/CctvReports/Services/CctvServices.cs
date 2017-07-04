@@ -129,10 +129,10 @@ namespace Acabus.Modules.CctvReports.Services
         {
             if (alarm.Device != null && !alarm.Device.Equals(incidence?.Device)) return false;
             DeviceFault deviceFault = CreateDeviceFault(alarm);
-            if (deviceFault != null && deviceFault.ID.Equals(incidence.Description.ID))
+            if (deviceFault != null && deviceFault.ID.Equals(incidence.Description.ID)
+                || (alarm.Device.Type == DeviceType.CONT && deviceFault.Category == incidence.Description.Category))
                 if (alarm.DateTime == incidence.StartDate || incidence.Status == IncidenceStatus.OPEN)
                     return true;
-
             return false;
         }
 

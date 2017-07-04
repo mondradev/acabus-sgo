@@ -57,7 +57,7 @@
                 <TextBlock HorizontalAlignment="Right" Margin="0,0,42,0" TextWrapping="Wrap" Text="Incidencia de autobus" TextAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsNewIncidences, Converter={StaticResource CollapseBooleanConverter}}" />
                 <ComboBox materialDesign:HintAssist.Hint="Quién Reporta" Margin="0"
                                   VerticalAlignment="Top" Grid.Row="2" SelectedItem="{Binding WhoReporting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding Business}" IsEditable="True" />
-                <Grid Margin="0" Grid.Row="6">
+                <Grid Margin="0" Grid.Row="4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="Auto" />
@@ -70,9 +70,9 @@
                     </Grid>
                 </Grid>
                 <ComboBox materialDesign:HintAssist.Hint="{Binding HeaderTextDeviceOrVehicle}"
-                                  VerticalAlignment="Top" Grid.Row="8" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                  VerticalAlignment="Top" Grid.Row="6" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                 <ComboBox materialDesign:HintAssist.Hint="Descripción de la incidencia"
-                                  Margin="0" Grid.Row="4" SelectedItem="{Binding SelectedDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding DeviceFaults, Mode=OneWay}" VerticalAlignment="Top" IsEnabled="{Binding IsNewIncidences}" />
+                                  Margin="0" Grid.Row="8" SelectedItem="{Binding SelectedDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding DeviceFaults, Mode=OneWay}" VerticalAlignment="Top" IsEnabled="{Binding IsNewIncidences}" />
                 <materialDesign:TimePicker Grid.Row="10" materialDesign:HintAssist.Hint="Hora de la incidencia"  Style="{StaticResource MaterialDesignFloatingHintTimePicker}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedTime="{Binding StartTime, Converter={StaticResource DateTimeConverter}, StringFormat=\{0:HH:mm\}}" Is24Hours="True" />
                 <ComboBox materialDesign:HintAssist.Hint="Prioridad" VerticalAlignment="Top"
                                   Grid.Row="12" Margin="0" SelectedItem="{Binding SelectedPriority, Converter={StaticResource PriorityConverter}}"

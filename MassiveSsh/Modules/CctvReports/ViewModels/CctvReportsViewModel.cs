@@ -449,6 +449,16 @@ namespace Acabus.Modules.CctvReports
                     Boolean exists = false;
                     foreach (var incidence in Incidences)
                         if (exists = CctvService.Equals(alarm, incidence)) break;
+                    if (alarm.Device.Type == DeviceType.CONT)
+                        foreach (var incidence in Incidences.Where(incidenceTemp
+                            => incidenceTemp.Status == IncidenceStatus.CLOSE
+                            && incidenceTemp.Device.Type == DeviceType.CONT
+                            && alarm.Device.Vehicle == incidenceTemp.Device.Vehicle
+                            && (DateTime.Now - incidenceTemp.FinishDate) < TimeSpan.FromDays(2)))
+                        {
+                            exists = true;
+                            break;
+                        }
                     if (!exists)
                         Incidences.CreateIncidence(
                            CctvService.CreateDeviceFault(alarm),
@@ -622,7 +632,7 @@ namespace Acabus.Modules.CctvReports
 
             _seachCounterFailing = new Timer(delegate
             {
-                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(22), new TimeSpan(23, 59, 59)))
+                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(12), new TimeSpan(23, 59, 59)))
                 {
                     Trace.WriteLine("Buscando contadores en mal estado", "DEBUG");
                     try
