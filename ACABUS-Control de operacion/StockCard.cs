@@ -76,6 +76,15 @@ namespace ACABUS_Control_de_operacion
                              dgvResult.Rows.Add(tempRow);
                          }));
                      }
+                     else
+                     {
+                         if (!this.IsDisposed)
+                             this.BeginInvoke(new Action(() =>
+                             {
+                                 String[] tempRow = new string[] { kvr.GetNumeSeri() };
+                                 dgvResult.Rows.Add(tempRow);
+                             }));
+                     }
                  }, (ex) =>
                  {
                      Trace.WriteLine(String.Format("Ocurrió un error al consultar el host: {0}", kvr.IP), "ERROR");
@@ -95,7 +104,7 @@ namespace ACABUS_Control_de_operacion
                  kvr.Status && !kvr.Station.Connected ? "Administrador" : _usernameSsh,
                  kvr.Status && !kvr.Station.Connected ? "Administrador*2016" : _passwordSsh
             );
-            String[][] response = sql.ExecuteQuery("SELECT tarj_rech_reco FROM sitm_disp.sbop_sum_tarj ORDER BY fch_oper DESC LIMIT 1");
+            String[][] response = sql.ExecuteQuery("SELECT tarj_rech_sist FROM sitm_disp.sbop_sum_tarj ORDER BY fch_oper DESC LIMIT 1");
             return response.Length > 1 ? response[1][0] : "0";
         }
 
