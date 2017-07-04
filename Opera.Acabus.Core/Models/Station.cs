@@ -1,0 +1,257 @@
+﻿using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Mvvm;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+namespace Opera.Acabus.Core.Models
+{
+    /// <summary>
+    /// Esta clase define toda estación en el sistema BTR.
+    /// </summary>
+    [Entity(TableName ="Stations")]
+    public sealed class Station : NotifyPropertyChanged, IAssignableSection, ILocation, IComparable<Station>, IComparable
+    {
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="AcceptablePing" />.
+        /// </summary>
+        private UInt16 _acceptablePing;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="AssignedSection"/>
+        /// </summary>
+        private String _assignedSection;
+
+        ///<summary>
+        /// Campo que provee a la propiedad <see cref="Devices"/>.
+        ///</summary>
+        private ObservableCollection<Object> _devices;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="ID" />.
+        /// </summary>
+        private UInt32 _id;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="IdealPing" />.
+        /// </summary>
+        private UInt16 _idealPing;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="IsConnected" />.
+        /// </summary>
+        private Boolean _isConnected;
+
+        ///<summary>
+        /// Campo que provee a la propiedad <see cref="Name"/>.
+        ///</summary>
+        private String _name;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="Route" />.
+        /// </summary>
+        private Route _route;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="StationNumber"/>.
+        /// </summary>
+        private UInt16 _stationNumber;
+
+        /// <summary>
+        /// Obtiene o establece el valor aceptable de latencia en la conexión remota a la estación.
+        /// </summary>
+        public UInt16 AcceptablePing {
+            get => _acceptablePing;
+            set {
+                _acceptablePing = value;
+                OnPropertyChanged(nameof(AcceptablePing));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la sección de atención a esta ubicación.
+        /// </summary>
+        public String AssignedSection {
+            get => _assignedSection ?? (_assignedSection = String.Empty);
+            set {
+                _assignedSection = value;
+                OnPropertyChanged(nameof(AssignedSection));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene la lista de todos los dispositivos asignados a esta ubicación.
+        /// </summary>
+        [Column(ForeignKeyName = "Fk_Station_ID")]
+        public ICollection<object> Devices
+                      => _devices ?? (_devices = new ObservableCollection<object>());
+
+        /// <summary>
+        /// Obtiene el identificador único de estación.
+        /// </summary>
+        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
+        public UInt32 ID {
+            get => _id;
+            private set {
+                _id = value;
+                OnPropertyChanged(nameof(ID));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el valor ideal de latencia en la conexión remota a la estación.
+        /// </summary>
+        public UInt16 IdealPing {
+            get => _idealPing;
+            set {
+                _idealPing = value;
+                OnPropertyChanged(nameof(IdealPing));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece si la estación tiene comunicación con el sistema.
+        /// </summary>
+        public Boolean IsConnected {
+            get => _isConnected;
+            set {
+                _isConnected = value;
+                OnPropertyChanged(nameof(IsConnected));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el nombre de esta ubicación.
+        /// </summary>
+        public String Name {
+            get => _name ?? (_name = string.Empty);
+            set {
+                _name = value;
+                OnPropertyChanged(nameof(Name));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la ruta a la cual está asignada esta estación.
+        /// </summary>
+        [Column(IsForeignKey = true, Name = "Fk_Route_ID")]
+        public Route Route {
+            get => _route;
+            set {
+                _route = value;
+                OnPropertyChanged(nameof(Route));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el número de estación.
+        /// </summary>
+        public UInt16 StationNumber {
+            get => _stationNumber;
+            private set {
+                _stationNumber = value;
+                OnPropertyChanged(nameof(StationNumber));
+            }
+        }
+
+        /// <summary>
+        /// Compara dos instancias de <see cref="Station"/> y determina si son diferentes.
+        /// </summary>
+        /// <param name="station">Una estación a comparar.</param>
+        /// <param name="anotherStation">Otra estación a comparar.</param>
+        /// <returns>Un valor <see cref="true"/> si las estaciones son diferentes.</returns>
+        public static bool operator !=(Station station, Station anotherStation)
+        {
+            if (station is null && anotherStation is null) return false;
+            if (station is null || anotherStation is null) return true;
+
+            if (station.StationNumber != anotherStation.StationNumber) return true;
+            if (station.Route != anotherStation.Route) return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Compara dos instancias de <see cref="Station"/> y determina si son iguales.
+        /// </summary>
+        /// <param name="station">Una estación a comparar.</param>
+        /// <param name="anotherStation">Otra estación a comparar.</param>
+        /// <returns>Un valor <see cref="true"/> si las estaciones son iguales.</returns>
+        public static bool operator ==(Station station, Station anotherStation)
+        {
+            if (station is null && anotherStation is null) return true;
+            if (station is null || anotherStation is null) return false;
+
+            if (station.StationNumber != anotherStation.StationNumber) return false;
+            if (station.Route != anotherStation.Route) return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Compara la instancia <see cref="Station"/> actual con otra instancia <see cref="Station"/> y
+        /// devuelve un entero que indica si la posición de la instancia actual es anterior,
+        /// posterior o igual que la del otro objeto en el criterio de ordenación.
+        /// </summary>
+        /// <param name="other">Otra instancia <see cref="Station"/>.</param>
+        /// <returns>
+        /// Un valor 0 si las instancias son iguales, 1 si la instancia es mayor que la otra y -1 si
+        /// la instancia menor que la otra.
+        /// </returns>
+        public int CompareTo(Station other)
+        {
+            if (other is null) return 1;
+            if (other.Route == Route)
+                return StationNumber.CompareTo(other.StationNumber);
+            return Route.CompareTo(other.Route);
+        }
+
+        /// <summary>
+        /// Compara la instancia <see cref="Station"/> actual con otra instancia y
+        /// devuelve un entero que indica si la posición de la instancia actual es anterior,
+        /// posterior o igual que la del otro objeto en el criterio de ordenación.
+        /// </summary>
+        /// <param name="other">Otra instancia.</param>
+        /// <returns>
+        /// Un valor 0 si las instancias son iguales, 1 si la instancia es mayor que la otra y -1 si
+        /// la instancia menor que la otra.
+        /// </returns>
+        public int CompareTo(object other)
+        {
+            if (other.GetType() != GetType()) return 1;
+            return CompareTo(other as Station);
+        }
+
+        /// <summary>
+        /// Determina si la instancia actual es igual a la pasada por argumento de la función.
+        /// </summary>
+        /// <param name="obj">Instancia a comparar con la actual.</param>
+        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la acutal.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (obj.GetType() != GetType()) return false;
+
+            var anotherStation = obj as Station;
+
+            if (anotherStation.StationNumber != StationNumber) return false;
+            if (anotherStation.Route != Route) return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Devuelve el código hash de la instancia actual.
+        /// </summary>
+        /// <returns>Un código hash que representa la instancia actual.</returns>
+        public override int GetHashCode()
+            => Tuple.Create(StationNumber, Route).GetHashCode();
+
+        /// <summary>
+        /// Devuelve el código de la estación actual que es formado a partir de el número de ruta y de estación.
+        /// </summary>
+        /// <returns>Un código de estación.</returns>
+        public String GetStationCode()
+            => String.Format("{0:D2}{1:D2}", Route.RouteNumber, StationNumber);
+    }
+}

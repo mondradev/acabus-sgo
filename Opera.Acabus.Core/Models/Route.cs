@@ -2,6 +2,8 @@
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Opera.Acabus.Core.Models
 {
@@ -30,30 +32,35 @@ namespace Opera.Acabus.Core.Models
     /// Esta clase define toda ruta que circula por el sistema BTR.
     /// </summary>
     [Entity(TableName = "Routes")]
-    public sealed class Route : NotifyPropertyChanged, IAssignableSection, IComparable<Route>
+    public class Route : NotifyPropertyChanged, IAssignableSection, IComparable<Route>, IComparable
     {
         /// <summary>
-        /// Campo que provee a la propiedad 'AssignedSection'
+        /// Campo que provee a la propiedad <see cref="AssignedSection"/>.
         /// </summary>
         private String _assignedSection;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'ID'.
+        /// Campo que provee a la propiedad <see cref="ID"/>.
         /// </summary>
         private UInt64 _id;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Name'.
+        /// Campo que provee a la propiedad <see cref="Name"/>.
         /// </summary>
         private String _name;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'RouteNumber'.
+        /// Campo que provee a la propiedad <see cref="RouteNumber"/>.
         /// </summary>
         private UInt16 _routeNumber;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Type'.
+        /// Campo que provee a la propiedad <see cref="Stations" />.
+        /// </summary>
+        private ICollection<Station> _stations;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="Type"/>.
         /// </summary>
         private RouteType _type;
 
@@ -101,6 +108,13 @@ namespace Opera.Acabus.Core.Models
                 OnPropertyChanged(nameof(RouteNumber));
             }
         }
+
+        /// <summary>
+        /// Obtiene una lista de la lista de estaciones asignadas a esta ruta.
+        /// </summary>
+        [Column(ForeignKeyName = "Fk_Route_ID")]
+        public ICollection<Station> Stations
+              => _stations ?? (_stations = new ObservableCollection<Station>());
 
         /// <summary>
         /// Obtiene o establece el tipo de la ruta.
@@ -151,9 +165,9 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
-        /// Compara la instancia <see cref="Route"/> actual con otra instancia <see cref="Route"/>
-        /// del mismo tipo y devuelve un entero que indica si la posición de la instancia actual es
-        /// anterior, posterior o igual que la del otro objeto en el criterio de ordenación.
+        /// Compara la instancia <see cref="Route"/> actual con otra instancia <see cref="Route"/> y
+        /// devuelve un entero que indica si la posición de la instancia actual es anterior,
+        /// posterior o igual que la del otro objeto en el criterio de ordenación.
         /// </summary>
         /// <param name="other">Otra instancia <see cref="Route"/>.</param>
         /// <returns>
@@ -167,6 +181,22 @@ namespace Opera.Acabus.Core.Models
                 return RouteNumber.CompareTo(other.RouteNumber);
             else
                 return Type.CompareTo(other.Type);
+        }
+
+        /// <summary>
+        /// Compara la instancia <see cref="Route"/> actual con otra instancia y devuelve un entero
+        /// que indica si la posición de la instancia actual es anterior, posterior o igual que la
+        /// del otro objeto en el criterio de ordenación.
+        /// </summary>
+        /// <param name="other">Otra instancia.</param>
+        /// <returns>
+        /// Un valor 0 si las instancias son iguales, 1 si la instancia es mayor que la otra y -1 si
+        /// la instancia menor que la otra.
+        /// </returns>
+        public int CompareTo(object other)
+        {
+            if (other.GetType() != GetType()) return 1;
+            return CompareTo(other as Route);
         }
 
         /// <summary>
@@ -189,18 +219,18 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
-        /// Obtiene el código de la ruta actual.
-        /// </summary>
-        /// <returns>Una cadena que representa una instancia.</returns>
-        public String GetCodeRoute()
-            => String.Format("R{0}{1}", Enum.GetName(typeof(RouteType), Type)?[0], RouteNumber);
-
-        /// <summary>
         /// Devuelve el código hash de la instancia actual.
         /// </summary>
         /// <returns>Un código hash que representa la instancia actual.</returns>
         public override int GetHashCode()
             => Tuple.Create(Name, RouteNumber, Type).GetHashCode();
+
+        /// <summary>
+        /// Obtiene el código de la ruta actual.
+        /// </summary>
+        /// <returns>Una cadena que representa una instancia.</returns>
+        public String GetRouteCode()
+            => String.Format("R{0}{1}", Enum.GetName(typeof(RouteType), Type)?[0], RouteNumber);
 
         /// <summary>
         /// Representa en una cadena la instancia de <see cref="Route"/> actual.
