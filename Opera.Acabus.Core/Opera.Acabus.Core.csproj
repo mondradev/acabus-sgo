@@ -40,7 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\DbIPAddressConverter.cs" />
     <Compile Include="Models\Bus.cs" />
+    <Compile Include="Models\Device.cs" />
     <Compile Include="Models\IAssignableSection.cs" />
     <Compile Include="Models\ILocation.cs" />
     <Compile Include="Models\Route.cs" />
@@ -49,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Converters\" />
-    <Folder Include="DataAccess\" />
     <Folder Include="Resources\" />
     <Folder Include="Services\" />
     <Folder Include="ViewModels\" />

@@ -29,7 +29,7 @@ namespace Opera.Acabus.Core.Models
     }
 
     /// <summary>
-    /// Esta clase define toda ruta que circula por el sistema BTR.
+    /// Esta clase define toda ruta que circula por el sistema BRT.
     /// </summary>
     [Entity(TableName = "Routes")]
     public class Route : NotifyPropertyChanged, IAssignableSection, IComparable<Route>, IComparable
@@ -240,5 +240,6 @@ namespace Opera.Acabus.Core.Models
         public override String ToString()
             => String.Format("RUTA {0}{1} - {2}",
                 Enum.GetName(typeof(RouteType), Type)?[0], RouteNumber.ToString("D2"), Name);
+
     }
 }

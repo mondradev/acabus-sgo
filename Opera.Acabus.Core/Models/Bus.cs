@@ -1,4 +1,5 @@
 ﻿using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,32 @@ using System.Collections.ObjectModel;
 
 namespace Opera.Acabus.Core.Models
 {
+    /// <summary>
+    /// Define los estados posibles de un autobus.
+    /// </summary>
+    public enum BusStatus
+    {
+        /// <summary>
+        /// En operación (Valor predeterminado).
+        /// </summary>
+        OPERATIONAL,
+
+        /// <summary>
+        /// En reparación o taller mecánico.
+        /// </summary>
+        IN_REPAIR,
+
+        /// <summary>
+        /// Sin energía en baterías.
+        /// </summary>
+        WITHOUT_ENERGY,
+
+        /// <summary>
+        /// Otras razones.
+        /// </summary>
+        OTHERS_REASONS
+    }
+
     /// <summary>
     /// Enumera todos los tipos de autobuses.
     /// </summary>
@@ -33,14 +60,15 @@ namespace Opera.Acabus.Core.Models
     }
 
     /// <summary>
-    /// Esta clase define los autobuses que circulan por el BTR.
+    /// Esta clase define los autobuses que circulan por el BRT.
     /// </summary>
+    [Entity(TableName = "Buses")]
     public sealed class Bus : NotifyPropertyChanged, ILocation, IComparable<Bus>, IComparable
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Devices" />.
         /// </summary>
-        private ICollection<Object> _devices;
+        private ICollection<Device> _devices;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="EconomicNumber" />.
@@ -50,12 +78,17 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Campo que provee a la propiedad <see cref="ID" />.
         /// </summary>
-        private UInt32 _id;
+        private UInt64 _id;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Route" />.
         /// </summary>
         private Route _route;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="Status" />.
+        /// </summary>
+        private BusStatus _status;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Type" />.
@@ -66,15 +99,15 @@ namespace Opera.Acabus.Core.Models
         /// Obtiene una lista de los dispositivos asignados a este autobus.
         /// </summary>
         [Column(ForeignKeyName = "Fk_Bus_ID")]
-        public ICollection<Object> Devices
-             => _devices ?? (_devices = new ObservableCollection<Object>());
+        public ICollection<Device> Devices
+             => _devices ?? (_devices = new ObservableCollection<Device>());
 
         /// <summary>
         /// Obtiene o establece el número económico del autobus.
         /// </summary>
         public String EconomicNumber {
             get => _economicNumber;
-            set {
+            private set {
                 _economicNumber = value;
                 OnPropertyChanged(nameof(EconomicNumber));
             }
@@ -83,8 +116,8 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el identificador único del autobus.
         /// </summary>
-        [Column(IsPrimaryKey = true)]
-        public UInt32 ID {
+        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
+        public UInt64 ID {
             get => _id;
             private set {
                 _id = value;
@@ -113,8 +146,21 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
+        /// Obtiene o establece el estado actual de la unidad.
+        /// </summary>
+        [Column(Converter = typeof(DbEnumConverter<BusStatus>))]
+        public BusStatus Status {
+            get => _status;
+            set {
+                _status = value;
+                OnPropertyChanged(nameof(Status));
+            }
+        }
+
+        /// <summary>
         /// Obtiene o establece el tipo de autobus.
         /// </summary>
+        [Column(Converter = typeof(DbEnumConverter<BusType>))]
         public BusType Type {
             get => _type;
             set {

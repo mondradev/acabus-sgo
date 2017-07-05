@@ -7,16 +7,11 @@ using System.Collections.ObjectModel;
 namespace Opera.Acabus.Core.Models
 {
     /// <summary>
-    /// Esta clase define toda estación en el sistema BTR.
+    /// Esta clase define toda estación en el sistema BRT.
     /// </summary>
     [Entity(TableName = "Stations")]
     public sealed class Station : NotifyPropertyChanged, IAssignableSection, ILocation, IComparable<Station>, IComparable
     {
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="AcceptablePing" />.
-        /// </summary>
-        private UInt16 _acceptablePing;
-
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AssignedSection"/>
         /// </summary>
@@ -25,22 +20,12 @@ namespace Opera.Acabus.Core.Models
         ///<summary>
         /// Campo que provee a la propiedad <see cref="Devices"/>.
         ///</summary>
-        private ObservableCollection<Object> _devices;
+        private ObservableCollection<Device> _devices;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="ID" />.
         /// </summary>
-        private UInt32 _id;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="IdealPing" />.
-        /// </summary>
-        private UInt16 _idealPing;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="IsConnected" />.
-        /// </summary>
-        private Boolean _isConnected;
+        private UInt64 _id;
 
         ///<summary>
         /// Campo que provee a la propiedad <see cref="Name"/>.
@@ -58,17 +43,6 @@ namespace Opera.Acabus.Core.Models
         private UInt16 _stationNumber;
 
         /// <summary>
-        /// Obtiene o establece el valor aceptable de latencia en la conexión remota a la estación.
-        /// </summary>
-        public UInt16 AcceptablePing {
-            get => _acceptablePing;
-            set {
-                _acceptablePing = value;
-                OnPropertyChanged(nameof(AcceptablePing));
-            }
-        }
-
-        /// <summary>
         /// Obtiene o establece la sección de atención a esta ubicación.
         /// </summary>
         public String AssignedSection {
@@ -83,40 +57,18 @@ namespace Opera.Acabus.Core.Models
         /// Obtiene la lista de todos los dispositivos asignados a esta ubicación.
         /// </summary>
         [Column(ForeignKeyName = "Fk_Station_ID")]
-        public ICollection<object> Devices
-                      => _devices ?? (_devices = new ObservableCollection<object>());
+        public ICollection<Device> Devices
+                      => _devices ?? (_devices = new ObservableCollection<Device>());
 
         /// <summary>
         /// Obtiene el identificador único de estación.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt32 ID {
+        public UInt64 ID {
             get => _id;
             private set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
-            }
-        }
-
-        /// <summary>
-        /// Obtiene o establece el valor ideal de latencia en la conexión remota a la estación.
-        /// </summary>
-        public UInt16 IdealPing {
-            get => _idealPing;
-            set {
-                _idealPing = value;
-                OnPropertyChanged(nameof(IdealPing));
-            }
-        }
-
-        /// <summary>
-        /// Obtiene o establece si la estación tiene comunicación con el sistema.
-        /// </summary>
-        public Boolean IsConnected {
-            get => _isConnected;
-            set {
-                _isConnected = value;
-                OnPropertyChanged(nameof(IsConnected));
             }
         }
 

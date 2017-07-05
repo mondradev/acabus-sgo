@@ -11,7 +11,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene la lista de todos los dispositivos asignados a esta ubicación.
         /// </summary>
-        ICollection<Object> Devices { get; }
+        ICollection<Device> Devices { get; }
 
         /// <summary>
         /// Obtiene o establece el nombre de esta ubicación.
