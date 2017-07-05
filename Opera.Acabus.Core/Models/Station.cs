@@ -9,7 +9,7 @@ namespace Opera.Acabus.Core.Models
     /// <summary>
     /// Esta clase define toda estación en el sistema BTR.
     /// </summary>
-    [Entity(TableName ="Stations")]
+    [Entity(TableName = "Stations")]
     public sealed class Station : NotifyPropertyChanged, IAssignableSection, ILocation, IComparable<Station>, IComparable
     {
         /// <summary>
@@ -218,6 +218,7 @@ namespace Opera.Acabus.Core.Models
         /// </returns>
         public int CompareTo(object other)
         {
+            if (other is null) return 1;
             if (other.GetType() != GetType()) return 1;
             return CompareTo(other as Station);
         }
@@ -226,7 +227,7 @@ namespace Opera.Acabus.Core.Models
         /// Determina si la instancia actual es igual a la pasada por argumento de la función.
         /// </summary>
         /// <param name="obj">Instancia a comparar con la actual.</param>
-        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la acutal.</returns>
+        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la actual.</returns>
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
@@ -253,5 +254,12 @@ namespace Opera.Acabus.Core.Models
         /// <returns>Un código de estación.</returns>
         public String GetStationCode()
             => String.Format("{0:D2}{1:D2}", Route.RouteNumber, StationNumber);
+
+        /// <summary>
+        /// Representa en una cadena la instancia de <see cref="Station"/> actual.
+        /// </summary>
+        /// <returns>Una cadena que representa una instancia <see cref="Station"/>.</returns>
+        public override string ToString()
+            => Name;
     }
 }

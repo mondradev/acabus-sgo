@@ -8,7 +8,7 @@ using System.Collections.ObjectModel;
 namespace Opera.Acabus.Core.Models
 {
     /// <summary>
-    /// Define los tipos de rutas que existen.
+    /// Enumera todos los tipos de rutas que existen.
     /// </summary>
     public enum RouteType
     {
@@ -195,6 +195,7 @@ namespace Opera.Acabus.Core.Models
         /// </returns>
         public int CompareTo(object other)
         {
+            if (other is null) return 1;
             if (other.GetType() != GetType()) return 1;
             return CompareTo(other as Route);
         }
@@ -203,7 +204,7 @@ namespace Opera.Acabus.Core.Models
         /// Determina si la instancia actual es igual a la pasada por argumento de la función.
         /// </summary>
         /// <param name="obj">Instancia a comparar con la actual.</param>
-        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la acutal.</returns>
+        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la actual.</returns>
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
