@@ -47,6 +47,7 @@
     <Compile Include="Models\ILocation.cs" />
     <Compile Include="Models\Route.cs" />
     <Compile Include="Models\Station.cs" />
+    <Compile Include="Models\TIStaff.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
