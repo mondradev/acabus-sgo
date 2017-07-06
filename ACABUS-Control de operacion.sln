@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.3
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acabus_Control_Operaciones", "MassiveSsh\Acabus_Control_Operaciones.csproj", "{E196B435-1093-4704-8F4D-FC430842FFCD}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opera.Acabus.Core", "Opera.Acabus.Core\Opera.Acabus.Core.csproj", "{5870B3E0-A665-4014-94D1-4ED21CEB442F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACABUS-Control de operacion", "ACABUS-Control de operacion\ACABUS-Control de operacion.csproj", "{A58C906C-F542-42B9-9169-2D58A2B7C80D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opera.Acabus.Sgo", "Opera.Acabus.Sgo\Opera.Acabus.Sgo.csproj", "{522A755B-997F-40F4-AC59-DFFF094F5FF3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -159,6 +161,22 @@ Global
 		{A58C906C-F542-42B9-9169-2D58A2B7C80D}.Release|x64.Build.0 = Release|Any CPU
 		{A58C906C-F542-42B9-9169-2D58A2B7C80D}.Release|x86.ActiveCfg = Release|Any CPU
 		{A58C906C-F542-42B9-9169-2D58A2B7C80D}.Release|x86.Build.0 = Release|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Debug|ARM.Build.0 = Debug|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Debug|x64.Build.0 = Debug|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Debug|x86.Build.0 = Debug|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Release|ARM.ActiveCfg = Release|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Release|ARM.Build.0 = Release|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Release|x64.ActiveCfg = Release|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Release|x64.Build.0 = Release|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Release|x86.ActiveCfg = Release|Any CPU
+		{522A755B-997F-40F4-AC59-DFFF094F5FF3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
