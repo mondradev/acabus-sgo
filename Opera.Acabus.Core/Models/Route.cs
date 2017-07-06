@@ -40,6 +40,11 @@ namespace Opera.Acabus.Core.Models
         private String _assignedSection;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="Buses" />.
+        /// </summary>
+        private ICollection<Bus> _buses;
+
+        /// <summary>
         /// Campo que provee a la propiedad <see cref="ID"/>.
         /// </summary>
         private UInt64 _id;
@@ -63,6 +68,20 @@ namespace Opera.Acabus.Core.Models
         /// Campo que provee a la propiedad <see cref="Type"/>.
         /// </summary>
         private RouteType _type;
+        private ushort number;
+
+        /// <summary>
+        /// Crea una instancia persistente de <see cref="Route"/>.
+        /// </summary>
+        /// <param name="id">Identificador único de la ruta.</param>
+        /// <param name="number">Número de ruta.</param>
+        /// <param name="type">Tipo de ruta.</param>
+        public Route(ushort id, ushort number, RouteType type)
+        {
+            ID = id;
+            this.number = number;
+            Type = type;
+        }
 
         /// <summary>
         /// Obtiene o establece la sección asignada para la atención de la ruta.
@@ -74,6 +93,12 @@ namespace Opera.Acabus.Core.Models
                 OnPropertyChanged(nameof(AssignedSection));
             }
         }
+
+        /// <summary>
+        /// Obtiene una lista de los autobuses asignados a esta ruta.
+        /// </summary>
+        public ICollection<Bus> Buses
+            => _buses ?? (_buses = new ObservableCollection<Bus>());
 
         /// <summary>
         /// Obtiene o establece identificador único de la ruta.
@@ -240,6 +265,5 @@ namespace Opera.Acabus.Core.Models
         public override String ToString()
             => String.Format("RUTA {0}{1} - {2}",
                 Enum.GetName(typeof(RouteType), Type)?[0], RouteNumber.ToString("D2"), Name);
-
     }
 }

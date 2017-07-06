@@ -95,6 +95,19 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         private BusType _type;
 
+        private object economicNumber;
+
+        /// <summary>
+        /// Crea una nueva instancia persistente de <see cref="Bus"/>.
+        /// </summary>
+        /// <param name="id">Identificador único de autobus.</param>
+        /// <param name="economicNumber">Número económico de estación.</param>
+        public Bus(ulong id, object economicNumber)
+        {
+            ID = id;
+            this.economicNumber = economicNumber;
+        }
+
         /// <summary>
         /// Obtiene una lista de los dispositivos asignados a este autobus.
         /// </summary>

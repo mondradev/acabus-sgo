@@ -183,6 +183,32 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         private DeviceType _type;
 
+        private DeviceType? selectedType;
+
+        /// <summary>
+        /// Crea una instancia persistente de <see cref="Device"/>.
+        /// </summary>
+        /// <param name="id">Identificador único del equipo.</param>
+        /// <param name="serialNumber">Número de serie del equipo.</param>
+        /// <param name="type">Tipo de equipo.</param>
+        public Device(ulong id, string serialNumber, DeviceType type)
+        {
+            ID = id;
+            SerialNumber = serialNumber;
+            Type = type;
+        }
+
+        /// <summary>
+        /// Crea una instancia de <see cref="Device"/>.
+        /// </summary>
+        /// <param name="serialNumber"></param>
+        /// <param name="selectedType"></param>
+        public Device(string serialNumber, DeviceType? selectedType)
+        {
+            SerialNumber = serialNumber;
+            this.selectedType = selectedType;
+        }
+
         /// <summary>
         /// Obtiene o establece el autobus al que se encuentra asignado este equipo.
         /// </summary>
@@ -201,7 +227,7 @@ namespace Opera.Acabus.Core.Models
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
         public UInt64 ID {
             get => _id;
-            set {
+            private set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }
@@ -231,7 +257,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         public String SerialNumber {
             get => _serialNumber ?? (_serialNumber = String.Empty);
-            set {
+            private set {
                 _serialNumber = value;
                 OnPropertyChanged(nameof(SerialNumber));
             }
@@ -255,7 +281,7 @@ namespace Opera.Acabus.Core.Models
         [Column(Converter = typeof(DbEnumConverter<DeviceType>))]
         public DeviceType Type {
             get => _type;
-            set {
+            private set {
                 _type = value;
                 OnPropertyChanged(nameof(Type));
             }

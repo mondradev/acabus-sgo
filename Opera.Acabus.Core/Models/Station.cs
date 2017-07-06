@@ -43,6 +43,17 @@ namespace Opera.Acabus.Core.Models
         private UInt16 _stationNumber;
 
         /// <summary>
+        /// Crea una instancia persistente de <see cref="Station"/>.
+        /// </summary>
+        /// <param name="id">Identificador único de estación.</param>
+        /// <param name="stationNumber">Número de estación.</param>
+        public Station(ushort id, ushort stationNumber)
+        {
+            ID = id;
+            StationNumber = stationNumber;
+        }
+
+        /// <summary>
         /// Obtiene o establece la sección de atención a esta ubicación.
         /// </summary>
         public String AssignedSection {
