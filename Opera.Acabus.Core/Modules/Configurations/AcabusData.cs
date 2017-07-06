@@ -43,7 +43,7 @@ namespace Opera.Acabus.Core.DataAccess
 
             foreach (Tuple<String, String, String> configurableInfo in _configurablesInfo)
             {
-                Trace.WriteLine($"Cargando configurable {configurableInfo.Item1}...");
+                Trace.WriteLine($"Cargando configurable: '{configurableInfo.Item1}'...", "DEBUG");
 
                 Assembly assembly = Assembly.LoadFrom(configurableInfo.Item3);
                 Type configurableClass = assembly.GetType(configurableInfo.Item2);

@@ -12,36 +12,75 @@ using System.Windows.Media;
 namespace Opera.Acabus.Core.Modules.Configurations
 {
     /// <summary>
-    /// Lógica de interacción para Configuration.xaml
+    /// Define la lógica del componente visual <see cref="Configuration"/>.
     /// </summary>
     public partial class Configuration : UserControl
     {
+        /// <summary>
+        /// Define la propiedad de dependencia para la maneja la lista de las secciones configurables
+        /// de la aplicación.
+        /// </summary>
         public static readonly DependencyProperty ConfigurablesProperty =
-            DependencyProperty.Register("Configurables", typeof(ObservableCollection<IConfigurable>), typeof(Configuration), new PropertyMetadata(new ObservableCollection<IConfigurable>()));
+            DependencyProperty.Register("Configurables", typeof(ObservableCollection<IConfigurable>),
+                typeof(Configuration), new PropertyMetadata(new ObservableCollection<IConfigurable>()));
 
+        /// <summary>
+        /// Indica si ya fue dibujada la vista.
+        /// </summary>
         private bool _drawn;
 
+        /// <summary>
+        /// Contiene una lista de textos que muestran datos para la información previa.
+        /// </summary>
         private List<TextBlock> _previewTexts;
 
+        /// <summary>
+        /// Crea una instancia nueva de <see cref="Configuration"/>.
+        /// </summary>
         public Configuration()
         {
             _previewTexts = new List<TextBlock>();
 
-            Loaded += UpdatePreview;
+            Loaded += delegate
+            {
+                foreach (var item in _previewTexts)
+                {
+                    var data = item.DataContext as Tuple<String, Func<Object>>;
+                    item.Text = String.Format("{0}: {1}", data.Item1, "Cagando...");
+                    Task.Run(() =>
+                    {
+                        var result = data.Item2.Invoke().ToString();
+                        Application.Current.Dispatcher.Invoke(() =>
+                            item.Text = String.Format("{0}: {1}", data.Item1, result));
+                    });
+                }
+            };
 
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Obtiene o establece la lista de las vistas configurables de la aplicación.
+        /// </summary>
         [Description("Obtiene o establece la lista de las vistas configurables."), Category("Común")]
         public ObservableCollection<IConfigurable> Configurables {
             get { return (ObservableCollection<IConfigurable>)GetValue(ConfigurablesProperty); }
             set {
                 SetValue(ConfigurablesProperty, value);
                 if (value != null)
-                    value.CollectionChanged += UpdateCards;
+                    value.CollectionChanged += (sender, e) =>
+                     {
+                         if (e.Action == NotifyCollectionChangedAction.Move) return;
+
+                         _drawn = false;
+                     };
             }
         }
 
+        /// <summary>
+        /// Función llamada cuando el componente visual está siendo renderizado.
+        /// </summary>
+        /// <param name="drawingContext">Contexto gráfico de la aplicación.</param>
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
@@ -50,13 +89,18 @@ namespace Opera.Acabus.Core.Modules.Configurations
                 DrawCards();
         }
 
+        /// <summary>
+        /// Crea una tarjeta tipo Material Design para mostrar comando e información previa de la configuración disponible.
+        /// </summary>
+        /// <param name="configurable">Instancia del configurable.</param>
+        /// <returns>Una instancia <see cref="Card"/> que representa la vista configurable.</returns>
         private Card CreateCard(IConfigurable configurable)
         {
             Card confCard = new Card()
             {
                 Margin = new Thickness(4, 4, 0, 0),
                 Width = 350,
-                Height = 200
+                Height = 220
             };
             Grid container = new Grid();
             container.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(0, GridUnitType.Auto) });
@@ -122,6 +166,9 @@ namespace Opera.Acabus.Core.Modules.Configurations
             return confCard;
         }
 
+        /// <summary>
+        /// Dibuja cada una de las tarjetas necesarias por cada una de las vistas configurables.
+        /// </summary>
         private void DrawCards()
         {
             _container?.Children.Clear();
@@ -131,28 +178,6 @@ namespace Opera.Acabus.Core.Modules.Configurations
                 _container?.Children.Add(CreateCard(configurable));
 
             _drawn = true;
-        }
-
-        private void UpdateCards(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Move) return;
-
-            _drawn = false;
-        }
-
-        private void UpdatePreview(object sender, RoutedEventArgs e)
-        {
-            foreach (var item in _previewTexts)
-            {
-                var data = item.DataContext as Tuple<String, Func<Object>>;
-                item.Text = String.Format("{0}: {1}", data.Item1, "Cagando...");
-                Task.Run(() =>
-                {
-                    var result = data.Item2.Invoke().ToString();
-                    Application.Current.Dispatcher.Invoke(() =>
-                        item.Text = String.Format("{0}: {1}", data.Item1, result));
-                });
-            }
         }
     }
 }

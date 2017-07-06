@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Opera.Acabus.Core.Converters
 {
     /// <summary>
-    /// Esta clase define un convertidor de valores para la enumaración <see cref="RouteType"/>.
+    /// Esta clase define un convertidor de valores para la enumeración <see cref="RouteType"/>.
     /// </summary>
     public sealed class RouteTypeSpanishConverter : TranslateEnumConverter<RouteType>
     {

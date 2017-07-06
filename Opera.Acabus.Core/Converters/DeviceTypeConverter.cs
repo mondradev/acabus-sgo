@@ -6,7 +6,7 @@ using System.Windows.Data;
 namespace Opera.Acabus.Core.Converters
 {
     /// <summary>
-    /// Esta clase define un convertidor de valores para la enumaración <see cref="DeviceType"/>.
+    /// Esta clase define un convertidor de valores para la enumeración <see cref="DeviceType"/>.
     /// </summary>
     [ValueConversion(typeof(DeviceType), typeof(String))]
     public sealed class DeviceTypeSpanishConverter : TranslateEnumConverter<DeviceType>

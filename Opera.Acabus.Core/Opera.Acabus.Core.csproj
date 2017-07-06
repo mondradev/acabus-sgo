@@ -84,6 +84,7 @@
     <Compile Include="Config\Views\ManualReassignRouteView.xaml.cs">
       <DependentUpon>ManualReassignRouteView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\AssignableAreaSpanishConverter.cs" />
     <Compile Include="Converters\BusStatusSpanishConverter.cs" />
     <Compile Include="Converters\BusTypeSpanishConverter.cs" />
     <Compile Include="Converters\DeviceTypeConverter.cs" />

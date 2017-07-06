@@ -16,7 +16,7 @@
         <ViewModels:CoreConfigViewModel />
     </UserControl.DataContext>
     <Grid>
-        <dragablz:TabablzControl>
+        <dragablz:TabablzControl Background="{Binding Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}">
             <TabItem>
                 <TabItem.Header>
                     <TextBlock Text="EQUIPOS" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
@@ -89,6 +89,23 @@
                             <DataGridTextColumn Binding="{Binding Type, Converter={StaticResource RouteTypeConverter}}" ClipboardContentBinding="{x:Null}" Header="Tipo" />
                             <DataGridTextColumn Binding="{Binding Buses.Count}" ClipboardContentBinding="{x:Null}" Header="Número de autobuses" />
                             <DataGridTextColumn Binding="{Binding Stations.Count}" ClipboardContentBinding="{x:Null}" Header="Número de estaciones" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="PERSONAL TI" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
+                </TabItem.Header>
+                <Grid>
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding ITStaff}" IsReadOnly="True">
+                        <DataGrid.Resources>
+                            <converters:AssignableAreaSpanishConverter x:Key="AssignableAreaConverter" />
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding ID}" ClipboardContentBinding="{x:Null}" Header="ID" />
+                            <DataGridTextColumn Binding="{Binding Name}" ClipboardContentBinding="{x:Null}" Header="Nombre" />
+                            <DataGridTextColumn Binding="{Binding Area, Converter={StaticResource AssignableAreaConverter}}" ClipboardContentBinding="{x:Null}" Header="Área" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

@@ -60,7 +60,7 @@ namespace Opera.Acabus.Core.Models
     /// Define la estructura del personal del área de TI.
     /// </summary>
     [Entity]
-    public class TIStaff : NotifyPropertyChanged, IComparable, IComparable<TIStaff>
+    public class ITStaff : NotifyPropertyChanged, IComparable, IComparable<ITStaff>
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Area'.
@@ -113,12 +113,12 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
-        /// Compara dos instancias de <see cref="TIStaff"/> y determina si son diferentes.
+        /// Compara dos instancias de <see cref="ITStaff"/> y determina si son diferentes.
         /// </summary>
         /// <param name="tiStaff">Un miembro del personal a comparar.</param>
         /// <param name="anotherTIStaff">Otro miembro del personal a comparar.</param>
         /// <returns>Un valor <see cref="true"/> si los miembros son diferentes.</returns>
-        public static bool operator !=(TIStaff tiStaff, TIStaff anotherTIStaff)
+        public static bool operator !=(ITStaff tiStaff, ITStaff anotherTIStaff)
         {
             if (tiStaff is null && anotherTIStaff is null) return false;
             if (tiStaff is null || anotherTIStaff is null) return true;
@@ -130,12 +130,12 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
-        /// Compara dos instancias de <see cref="TIStaff"/> y determina si son iguales.
+        /// Compara dos instancias de <see cref="ITStaff"/> y determina si son iguales.
         /// </summary>
         /// <param name="tiStaff">Un miembro del personal a comparar.</param>
         /// <param name="anotherTIStaff">Otro miembro del personal a comparar.</param>
         /// <returns>Un valor <see cref="true"/> si ambos miembros son iguales.</returns>
-        public static bool operator ==(TIStaff tiStaff, TIStaff anotherTIStaff)
+        public static bool operator ==(ITStaff tiStaff, ITStaff anotherTIStaff)
         {
             if (tiStaff is null && anotherTIStaff is null) return true;
             if (tiStaff is null || anotherTIStaff is null) return false;
@@ -147,16 +147,16 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
-        /// Compara la instancia <see cref="TIStaff"/> actual con otra instancia <see cref="TIStaff"/> y
+        /// Compara la instancia <see cref="ITStaff"/> actual con otra instancia <see cref="ITStaff"/> y
         /// devuelve un entero que indica si la posición de la instancia actual es anterior,
         /// posterior o igual que la del otro objeto en el criterio de ordenación.
         /// </summary>
-        /// <param name="other">Otra instancia <see cref="TIStaff"/>.</param>
+        /// <param name="other">Otra instancia <see cref="ITStaff"/>.</param>
         /// <returns>
         /// Un valor 0 si las instancias son iguales, 1 si la instancia es mayor que la otra y -1 si
         /// la instancia menor que la otra.
         /// </returns>
-        public int CompareTo(TIStaff other)
+        public int CompareTo(ITStaff other)
         {
             if (other is null) return 1;
             if (other.Area == Area)
@@ -165,7 +165,7 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
-        /// Compara la instancia <see cref="TIStaff"/> actual con otra instancia y
+        /// Compara la instancia <see cref="ITStaff"/> actual con otra instancia y
         /// devuelve un entero que indica si la posición de la instancia actual es anterior,
         /// posterior o igual que la del otro objeto en el criterio de ordenación.
         /// </summary>
@@ -178,7 +178,7 @@ namespace Opera.Acabus.Core.Models
         {
             if (other is null) return 1;
             if (other.GetType() != GetType()) return 1;
-            return CompareTo(other as TIStaff);
+            return CompareTo(other as ITStaff);
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace Opera.Acabus.Core.Models
             if (obj is null) return false;
             if (obj.GetType() != GetType()) return false;
 
-            var anotherTechnician = obj as TIStaff;
+            var anotherTechnician = obj as ITStaff;
 
             if (anotherTechnician.Area != Area) return false;
             if (anotherTechnician.Name != Name) return false;
@@ -207,7 +207,7 @@ namespace Opera.Acabus.Core.Models
             => Tuple.Create(Name, Area).GetHashCode();
 
         /// <summary>
-        /// Representa la instancia de <see cref="TIStaff"/> en una cadena.
+        /// Representa la instancia de <see cref="ITStaff"/> en una cadena.
         /// </summary>
         /// <returns>El nombre del elemento del personal.</returns>
         public override string ToString()

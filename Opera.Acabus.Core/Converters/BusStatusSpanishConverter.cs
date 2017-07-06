@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Opera.Acabus.Core.Converters
 {
     /// <summary>
-    /// Esta clase define un convertidor de valores para la enumaración <see cref="BusStatus"/>.
+    /// Esta clase define un convertidor de valores para la enumeración <see cref="BusStatus"/>.
     /// </summary>
     public sealed class BusStatusSpanishConverter : TranslateEnumConverter<BusStatus>
     {

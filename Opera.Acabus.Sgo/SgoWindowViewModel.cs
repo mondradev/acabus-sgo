@@ -93,7 +93,7 @@ namespace Opera.Acabus.Sgo
         {
             foreach (var moduleName in AcabusData.ModulesNames)
             {
-                Trace.WriteLine($"Cargando el módulo: {moduleName.Item1}...", "DEBUG");
+                Trace.WriteLine($"Cargando el módulo: '{moduleName.Item1}'...", "DEBUG");
                 Assembly assembly = Assembly.LoadFrom(moduleName.Item3);
                 var type = assembly.GetType(moduleName.Item2);
                 var instanceTemp = Activator.CreateInstance(type);
@@ -105,10 +105,10 @@ namespace Opera.Acabus.Sgo
                 UserControl moduleView = null;
                 Instance?._view.AddToolButton(moduleInfo.Name, new Command(parameter =>
                 {
-                    if (!moduleInfo.IsLoad)
+                    if (!moduleInfo.IsLoaded)
                     {
                         moduleView = (UserControl)Activator.CreateInstance(moduleInfo.Type);
-                        moduleInfo.IsLoad = true;
+                        moduleInfo.IsLoaded = true;
                     }
 
                     Instance?._view.ShowContent(moduleView);

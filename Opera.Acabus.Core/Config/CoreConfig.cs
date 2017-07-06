@@ -20,6 +20,8 @@ namespace Opera.Acabus.Core.Config
         ///</summary>
         private List<Tuple<String, ICommand>> _commands;
 
+        private bool _isLoaded;
+
         ///<summary>
         /// Campo que provee a la propiedad <see cref="PreviewData"/>.
         ///</summary>
@@ -44,17 +46,25 @@ namespace Opera.Acabus.Core.Config
                 new Tuple<string, Func<Object>>("Equipos", () => AcabusData.AllDevices.Count()),
                 new Tuple<string, Func<Object>>("Estaciones", () => AcabusData.AllStations.Count()),
                 new Tuple<string, Func<Object>>("Autobuses", () => AcabusData.AllBuses.Count()),
-                new Tuple<string, Func<Object>>("Rutas", () => AcabusData.AllRoutes.Count())
+                new Tuple<string, Func<Object>>("Rutas", () => AcabusData.AllRoutes.Count()),
+                new Tuple<string, Func<Object>>("Personal TI", () => AcabusData.ITStaff.Count())
             };
 
             _commands = new List<Tuple<string, ICommand>>()
             {
                 new Tuple<string, ICommand>("DETALLES", new Command(parameter
-                            => AcabusData.RequestShowContent(_view)))
+                => {
+                    if (!_isLoaded)
+                    {
+                        _view = new CoreConfigView();
+                        _viewModel = _view.DataContext as CoreConfigViewModel;
+                        _isLoaded=true;
+                    }
+                    AcabusData.RequestShowContent(_view);
+                }))
             };
 
-            _view = new CoreConfigView();
-            _viewModel = _view.DataContext as CoreConfigViewModel;
+            _isLoaded = false;
         }
 
         /// <summary>
@@ -70,6 +80,6 @@ namespace Opera.Acabus.Core.Config
         /// <summary>
         /// Obtiene el título de la sección en el panel de configuración.
         /// </summary>
-        public string Title => "EQUIPOS, ESTACIONES, AUTOBUSES Y RUTAS";
+        public string Title => "CATALOGOS DE USO GENERAL";
     }
 }

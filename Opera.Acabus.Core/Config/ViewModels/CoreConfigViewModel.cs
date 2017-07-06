@@ -30,6 +30,11 @@ namespace Opera.Acabus.Core.Config.ViewModels
         private ICollection<Device> _devices;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="ITStaff" />.
+        /// </summary>
+        private ICollection<ITStaff> _itStaff;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'Routes'.
         /// </summary>
         private ICollection<Route> _routes;
@@ -145,6 +150,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// Obtiene el comando para descargar la información del servidor.
         /// </summary>
         public ICommand DownloadDataCommand { get; }
+
+        /// <summary>
+        /// Obtiene una lista de el personal del área de TI.
+        /// </summary>
+        public ICollection<ITStaff> ITStaff
+            => _itStaff ?? (_itStaff = new ObservableCollection<ITStaff>());
 
         /// <summary>
         /// Obtiene el comando para actualizar la información desde la base de datos local.
@@ -339,6 +350,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
             Application.Current.Dispatcher.Invoke(() => Buses.Clear());
             Application.Current.Dispatcher.Invoke(() => Stations.Clear());
             Application.Current.Dispatcher.Invoke(() => Routes.Clear());
+            Application.Current.Dispatcher.Invoke(() => ITStaff.Clear());
 
             AcabusData.ReloadData();
 
@@ -358,6 +370,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 Buses.Select(vehicle => vehicle.Devices).Merge()
             }))
                 Application.Current.Dispatcher.Invoke(() => Devices.Add(device));
+
+            foreach (var itStaff in AcabusData.ITStaff)
+                Application.Current.Dispatcher.Invoke(() => ITStaff.Add(itStaff));
         }
     }
 }

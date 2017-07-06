@@ -37,7 +37,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Obtiene o establece si el módulo está cargado.
         /// </summary>
-        Boolean IsLoad { get; set; }
+        Boolean IsLoaded { get; set; }
 
         /// <summary>
         /// Obtiene si el módulo es secundario.
@@ -104,9 +104,9 @@ namespace Opera.Acabus.Core.DataAccess
         private static DbSession _session;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="TIStaff"/>.
+        /// Campo que provee a la propiedad <see cref="ITStaff"/>.
         /// </summary>
-        private static IEnumerable<TIStaff> _tiStaff;
+        private static IEnumerable<ITStaff> _itStaff;
 
         /// <summary>
         /// Constructor estático de <see cref="AcabusData"/>.
@@ -235,7 +235,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Obtiene la lista de todos los miembros del personal registrados.
         /// </summary>
-        public static IEnumerable<TIStaff> TIStaff => _tiStaff;
+        public static IEnumerable<ITStaff> ITStaff => _itStaff;
 
         /// <summary>
         /// Agrega una módulo al SGO.
@@ -252,7 +252,7 @@ namespace Opera.Acabus.Core.DataAccess
             ModuleInfo moduleInfo = new ModuleInfo()
             {
                 Icon = icon,
-                IsLoad = false,
+                IsLoaded = false,
                 IsSecundary = secundaryModule,
                 Name = moduleName,
                 Type = moduleClass
@@ -363,7 +363,7 @@ namespace Opera.Acabus.Core.DataAccess
         private static void LoadFromDatabase()
         {
             _allRoutes = Session.GetObjects<Route>();
-            _tiStaff = Session.GetObjects<TIStaff>()
+            _itStaff = Session.GetObjects<ITStaff>()
                                 .OrderBy(tiStaff => tiStaff.Name);
 
             _cc = AllDevices
@@ -420,7 +420,7 @@ namespace Opera.Acabus.Core.DataAccess
             /// <summary>
             /// Obtiene o establece si el módulo está cargado.
             /// </summary>
-            public Boolean IsLoad { get; set; }
+            public Boolean IsLoaded { get; set; }
 
             /// <summary>
             /// Obtiene o establece si el módulo es secundario.
