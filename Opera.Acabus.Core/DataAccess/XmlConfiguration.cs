@@ -75,6 +75,8 @@ namespace Opera.Acabus.Core.DataAccess
             XmlElement settingNode = _xmlDocument.CreateElement(settingName);
             XmlNode sectionNode = _xmlDocument.SelectSingleNode(sectionName);
 
+            if (sectionNode is null) return;
+
             foreach (var key in attributes.Keys)
             {
                 XmlAttribute attribute = _xmlDocument.CreateAttribute(key);
@@ -94,15 +96,16 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Una lista de configuraciones.</returns>
         public static ICollection<ISetting> GetSettings(String settingName, String sectionName)
         {
-            XmlNode sectionNode = _xmlDocument.SelectSingleNode(sectionName);
-            XmlNodeList settingNodeList = sectionNode.SelectNodes(settingName);
+            XmlNode sectionNode = _xmlDocument.SelectSingleNode("SGO")?.SelectSingleNode(sectionName);
+            XmlNodeList settingNodeList = sectionNode?.SelectNodes(settingName);
 
             ICollection<ISetting> settingList = new List<ISetting>();
+            if (settingNodeList is null) return settingList;
 
-            foreach (XmlNode settingNode in settingNodeList)
+            foreach (XmlElement settingNode in settingNodeList)
             {
                 Setting setting = new Setting(settingNode.Name);
-                foreach (XmlAttribute attribute in sectionNode.Attributes)
+                foreach (XmlAttribute attribute in settingNode.Attributes)
                     setting.Add(attribute.Name, attribute.Value);
 
                 settingList.Add(setting);

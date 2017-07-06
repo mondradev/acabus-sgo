@@ -19,6 +19,8 @@ namespace Opera.Acabus.Core.Modules.Configurations.Views
                 new PackIcon() { Kind = PackIconKind.Settings },
                 "Configuración",
                 true);
+
+            AcabusData.LoadConfigurables();
         }
 
         /// <summary>

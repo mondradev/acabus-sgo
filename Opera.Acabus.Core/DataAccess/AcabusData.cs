@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using static Opera.Acabus.Core.DataAccess.RequestSendMessageArg;
 
@@ -24,6 +25,37 @@ namespace Opera.Acabus.Core.DataAccess
     public delegate void RequestShowContentHandler(RequestShowContentArg arg);
 
     /// <summary>
+    /// Define la estructura de la información de un módulo de la aplicación.
+    /// </summary>
+    public interface IModuleInfo
+    {
+        /// <summary>
+        /// Obtiene icono del módulo.
+        /// </summary>
+        System.Windows.FrameworkElement Icon { get; }
+
+        /// <summary>
+        /// Obtiene o establece si el módulo está cargado.
+        /// </summary>
+        Boolean IsLoad { get; set; }
+
+        /// <summary>
+        /// Obtiene si el módulo es secundario.
+        /// </summary>
+        Boolean IsSecundary { get; }
+
+        /// <summary>
+        /// Obtiene el nombre de módulo.
+        /// </summary>
+        String Name { get; }
+
+        /// <summary>
+        /// Obtiene clase de la vista principal del módulo.
+        /// </summary>
+        Type Type { get; }
+    }
+
+    /// <summary>
     /// Esta clase provee de datos al nucleo del sistema de ACABUS SGO, así como las conexiones a los
     /// diferentes equipos asociados con la operación. Cada transferencia de datos por red, archivos
     /// o base de datos debe ser gestionada desde aqui para centralizar las comunicaciones.También
@@ -31,6 +63,11 @@ namespace Opera.Acabus.Core.DataAccess
     /// </summary>
     public static partial class AcabusData
     {
+        /// <summary>
+        /// Nombre del directorio de recursos.
+        /// </summary>
+        private static readonly string RESOURCES_DIRECTORY = Path.Combine(Environment.CurrentDirectory, "Resources");
+
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AllRoutes"/>.
         /// </summary>
@@ -49,7 +86,12 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Modules" />.
         /// </summary>
-        private static ICollection<ModuleInfo> _module;
+        private static ICollection<IModuleInfo> _module;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="ModulesNames"/>.
+        /// </summary>
+        private static ICollection<Tuple<String, String, String>> _modulesNames;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Queries" />.
@@ -71,8 +113,12 @@ namespace Opera.Acabus.Core.DataAccess
         /// </summary>
         static AcabusData()
         {
+            if (!Directory.Exists(RESOURCES_DIRECTORY))
+                Directory.CreateDirectory(RESOURCES_DIRECTORY);
+
             FillList(ref _credentials, SettingToCredential, "Credentials", "Credential");
             FillList(ref _queries, SettingToQuery, "SqlSentences", "Tuple");
+            FillList(ref _modulesNames, SettingToModuleName, "ModulesNames", "Tuple");
 
             _session = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
             LoadFromDatabase();
@@ -87,13 +133,13 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Evento que se desencadena cuando se realiza una petición para mostrar el contenido.
         /// </summary>
-        internal static event RequestShowContentHandler RequestingShowContent;
+        public static event RequestShowContentHandler RequestingShowContent;
 
         /// <summary>
         /// Evento que se desencadena cuando se realiza una petición para mostrar el contenido a
         /// través de un cuadro de diálogo.
         /// </summary>
-        internal static event RequestShowContentHandler RequestingShowDialog;
+        public static event RequestShowContentHandler RequestingShowDialog;
 
         /// <summary>
         /// Obtiene una lista de todos los vehículos registrados en la base de datos.
@@ -145,6 +191,18 @@ namespace Opera.Acabus.Core.DataAccess
             => Queries.FirstOrDefault(query => query.Item1 == "Devices").Item2;
 
         /// <summary>
+        /// Obtiene una lista de los modulos actualmente añadidos al SGO.
+        /// </summary>
+        public static ICollection<IModuleInfo> Modules
+            => _module ?? (_module = new ObservableCollection<IModuleInfo>());
+
+        /// <summary>
+        /// Obtiene una lista de los nombres de los modulos de esta aplicación.
+        /// </summary>
+        public static ICollection<Tuple<String, String, String>> ModulesNames
+            => _modulesNames ?? (_modulesNames = new ObservableCollection<Tuple<String, String, String>>());
+
+        /// <summary>
         /// Obtiene una lista de los autobuses sin operar.
         /// </summary>
         public static IEnumerable<Bus> OffDutyBus
@@ -178,12 +236,6 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene la lista de todos los miembros del personal registrados.
         /// </summary>
         public static IEnumerable<TIStaff> TIStaff => _tiStaff;
-
-        /// <summary>
-        /// Obtiene una lista de los modulos actualmente añadidos al SGO.
-        /// </summary>
-        internal static ICollection<ModuleInfo> Modules
-            => _module ?? (_module = new ObservableCollection<ModuleInfo>());
 
         /// <summary>
         /// Agrega una módulo al SGO.
@@ -253,7 +305,8 @@ namespace Opera.Acabus.Core.DataAccess
             => RequestingShowContent?.Invoke(new RequestShowContentArg(content));
 
         /// <summary>
-        /// Solicita a la ventana principal del SGO mostrar el contenido especificado y realizar una función cuando este sea ocultado.
+        /// Solicita a la ventana principal del SGO mostrar el contenido especificado y realizar una
+        /// función cuando este sea ocultado.
         /// </summary>
         /// <param name="content">Contenido a mostrar.</param>
         /// <param name="execute">Acción a realizar al ocultar el contenido.</param>
@@ -286,7 +339,8 @@ namespace Opera.Acabus.Core.DataAccess
                 .Invoke(new RequestSendMessageArg(message, RequestSendType.NOTIFY));
 
         /// <summary>
-        /// Convierte las configuraciones guardadas en el archivo de configuración de la aplicación en instancias del tipo representado.
+        /// Convierte las configuraciones guardadas en el archivo de configuración de la aplicación
+        /// en instancias del tipo representado.
         /// </summary>
         /// <typeparam name="T">Tipo destino de la configuración.</typeparam>
         /// <param name="list">Colección de elementos leidos desde la configuración.</param>
@@ -313,7 +367,7 @@ namespace Opera.Acabus.Core.DataAccess
                                 .OrderBy(tiStaff => tiStaff.Name);
 
             _cc = AllDevices
-                .Single(device => device.Type == DeviceType.DB)?
+                .FirstOrDefault(device => device.Type == DeviceType.DB)?
                 .Station;
         }
 
@@ -331,7 +385,22 @@ namespace Opera.Acabus.Core.DataAccess
             );
 
         /// <summary>
-        /// Convierte una instancia <see cref="ISetting"/> en una <see cref="Tuple{String, String}"/> donde el primero elemento es el nombre de la etiqueta de la sentencia y el segundo es la sentencia Sql.
+        /// Convierte una instancia <see cref="ISetting"/> en una instancia <see
+        /// cref="Tuple{String,String,String}"/> donde el primer valor es el nombre del módulo, el
+        /// segundo el nombre completo de la clase del módulo y el tercero el nombre del ensamblado
+        /// que lo contiene.
+        /// </summary>
+        /// <param name="arg">Instancia <see cref="ISetting"/> a convertir.</param>
+        /// <returns>
+        /// Una instancia de <see cref="Tuple{String, String, String}"/> que representa un módulo.
+        /// </returns>
+        private static Tuple<String, String, String> SettingToModuleName(ISetting arg)
+            => Tuple.Create(arg["Item1"].ToString(), arg["Item2"].ToString(), arg["Item3"].ToString());
+
+        /// <summary>
+        /// Convierte una instancia <see cref="ISetting"/> en una <see cref="Tuple{String, String}"/>
+        /// donde el primero elemento es el nombre de la etiqueta de la sentencia y el segundo es la
+        /// sentencia Sql.
         /// </summary>
         /// <param name="arg">Instancia <see cref="ISetting"/> a convertir.</param>
         /// <returns>Una <see cref="Tuple{String, String}"/> que representa un sentencia Sql.</returns>
@@ -341,7 +410,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Define la estructura de la información de un módulo del SGO.
         /// </summary>
-        internal sealed class ModuleInfo
+        private sealed class ModuleInfo : IModuleInfo
         {
             /// <summary>
             /// Obtiene o establece icono del módulo.
@@ -435,7 +504,8 @@ namespace Opera.Acabus.Core.DataAccess
     }
 
     /// <summary>
-    /// Define la estructura de los argumentos utilizados para la solicitud de muestra de contenido o cuadros de dialogos con función de llamada de vuelta.
+    /// Define la estructura de los argumentos utilizados para la solicitud de muestra de contenido o
+    /// cuadros de dialogos con función de llamada de vuelta.
     /// </summary>
     public sealed class RequestShowContentArg : EventArgs
     {

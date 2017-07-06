@@ -109,12 +109,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-    <Folder Include="Services\" />
-    <Folder Include="ViewModels\" />
-    <Folder Include="Views\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">
       <Project>{F74FEE3D-D536-44DF-9E2C-53540CE78173}</Project>
