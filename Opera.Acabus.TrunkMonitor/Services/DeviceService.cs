@@ -40,14 +40,14 @@ namespace Opera.Acabus.TrunkMonitor.Service
         {
             var ping = ConnectionTCP.SendToPing(device.IPAddress.ToString(), 3);
 
-            if (_devicePing.ContainsKey(device))
+            if (!_devicePing.ContainsKey(device))
                 _devicePing.Add(device, ping);
             else
                 _devicePing[device] = ping;
 
             var linkState = device.CalculateLinkState();
 
-            if (_deviceLinkState.ContainsKey(device))
+            if (!_deviceLinkState.ContainsKey(device))
                 _deviceLinkState.Add(device, linkState);
             else
                 _deviceLinkState[device] = linkState;

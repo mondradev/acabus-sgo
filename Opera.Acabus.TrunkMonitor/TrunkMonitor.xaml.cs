@@ -179,7 +179,7 @@ namespace Opera.Acabus.TrunkMonitor
                 DataContext = station,
                 Content = new Grid()
                 {
-                    Width = 110,
+                    Width = 150,
                     Height = 20
                 },
                 Foreground = (Brush)TryFindResource("AccentColorBrush"),

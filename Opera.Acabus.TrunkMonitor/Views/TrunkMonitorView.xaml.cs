@@ -1,5 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.TrunkMonitor.DataAccess;
 using System.Windows.Controls;
 
 namespace Opera.Acabus.TrunkMonitor.Views
@@ -22,6 +23,7 @@ namespace Opera.Acabus.TrunkMonitor.Views
         /// </summary>
         static TrunkMonitorView()
         {
+            AcabusDataExtensions.LoadTrunkMonitor();
             AcabusData.AddModule(
                 typeof(TrunkMonitorView),
                 new PackIcon() { Kind = PackIconKind.SourceMerge },

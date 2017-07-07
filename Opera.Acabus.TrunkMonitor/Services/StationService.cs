@@ -51,14 +51,14 @@ namespace Opera.Acabus.TrunkMonitor.Service
                 }
             }
 
-            if (_stationPing.ContainsKey(station))
+            if (!_stationPing.ContainsKey(station))
                 _stationPing.Add(station, (Int16)(ping / nDevice));
             else
                 _stationPing[station] = (Int16)(ping / nDevice);
 
             var linkState = station.CalculateLinkState();
 
-            if (_stationLinkState.ContainsKey(station))
+            if (!_stationLinkState.ContainsKey(station))
                 _stationLinkState.Add(station, linkState);
             else
                 _stationLinkState[station] = linkState;
@@ -76,7 +76,7 @@ namespace Opera.Acabus.TrunkMonitor.Service
         {
             var linkDevice = station.Devices.FirstOrDefault(device => device.Type == DeviceType.SW);
             if (linkDevice == null)
-                linkDevice = station.Devices.First();
+                linkDevice = station.Devices.FirstOrDefault();
             if (linkDevice == null) return -1;
             var ping = DeviceService.DoPing(linkDevice);
             return ping;
