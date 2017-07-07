@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Opera.Acabus.Core.DataAccess
 {
-    /***
+    /**
      * Esta clase proporciona la comunicación con el módulo de <see cref="Opera.Acabus.Core.Modules.Configurations"/>.
      */
 

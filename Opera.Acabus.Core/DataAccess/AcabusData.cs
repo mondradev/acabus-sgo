@@ -366,9 +366,7 @@ namespace Opera.Acabus.Core.DataAccess
             _itStaff = Session.GetObjects<ITStaff>()
                                 .OrderBy(tiStaff => tiStaff.Name);
 
-            _cc = AllDevices
-                .FirstOrDefault(device => device.Type == DeviceType.DB)?
-                .Station;
+            _cc = AllStations.FirstOrDefault(station => station.Name.Contains("CENTRO DE CONTROL"));
         }
 
         /// <summary>
