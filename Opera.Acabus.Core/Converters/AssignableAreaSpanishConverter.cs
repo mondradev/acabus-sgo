@@ -1,14 +1,9 @@
 ﻿using InnSyTech.Standard.Mvvm.Utils;
 using Opera.Acabus.Core.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.Converters
 {
-
     /// <summary>
     /// Esta clase define un convertidor de valores para la enumeración <see cref="AssignableArea"/>.
     /// </summary>

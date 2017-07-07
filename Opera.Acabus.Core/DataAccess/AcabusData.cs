@@ -171,7 +171,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene la consulta para la descarga de los autobuses desde el servidor de base de datos.
         /// </summary>
         public static String BusQuery
-            => Queries.FirstOrDefault(query => query.Item1 == "Buses").Item2;
+            => Queries.FirstOrDefault(query => query.Item1 == "DownloadBuses").Item2;
 
         /// <summary>
         /// Obtiene o establece una instancia de estación que representa al centro de control.
@@ -188,7 +188,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene la consulta para la descarga de los equipos desde el servidor de base de datos.
         /// </summary>
         public static String DeviceQuery
-            => Queries.FirstOrDefault(query => query.Item1 == "Devices").Item2;
+            => Queries.FirstOrDefault(query => query.Item1 == "DownloadDevices").Item2;
 
         /// <summary>
         /// Obtiene una lista de los modulos actualmente añadidos al SGO.
@@ -218,7 +218,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene la consulta para la descarga de las rutas desde el servidor de base de datos.
         /// </summary>
         public static String RouteQuery
-            => Queries.FirstOrDefault(query => query.Item1 == "Routes").Item2;
+            => Queries.FirstOrDefault(query => query.Item1 == "DownloadRoutes").Item2;
 
         /// <summary>
         /// Obtiene de la sesión de la base de datos de la aplicación.
@@ -230,7 +230,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene la consulta para la descarga de las estaciones desde el servidor de base de datos.
         /// </summary>
         public static String StationQuery
-            => Queries.FirstOrDefault(query => query.Item1 == "Stations").Item2;
+            => Queries.FirstOrDefault(query => query.Item1 == "DownloadStations").Item2;
 
         /// <summary>
         /// Obtiene la lista de todos los miembros del personal registrados.

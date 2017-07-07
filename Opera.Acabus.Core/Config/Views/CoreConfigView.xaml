@@ -10,7 +10,7 @@
     x:Class="Opera.Acabus.Core.Config.Views.CoreConfigView"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="279.2">
     <UserControl.Resources>
-        <converters:BusStatusSpanishConverter x:Key="BusStatusSpanishConverter"/>
+        <converters:BusStatusSpanishConverter x:Key="BusStatusSpanishConverter" />
     </UserControl.Resources>
     <UserControl.DataContext>
         <ViewModels:CoreConfigViewModel />
@@ -114,7 +114,7 @@
 
         <materialDesignMahApps:PopupBox Style="{DynamicResource MaterialDesignMultiFloatingActionAccentPopupBox}"
             PlacementMode="TopAndAlignCentres"
-            Margin="0,0,16,16" ToggleCheckedContentCommand="{Binding ShowAddDeviceCommand}" 
+            Margin="0,0,16,16" ToggleCheckedContentCommand="{Binding ShowAddDeviceCommand}"
             ToolTip="Añadir equipo" Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" PopupMode="MouseOver" Grid.RowSpan="4">
             <materialDesignMahApps:PopupBox.ToggleCheckedContent>
                 <materialDesignMahApps:PackIcon Kind="GlassStange" Width="24" Height="24" />

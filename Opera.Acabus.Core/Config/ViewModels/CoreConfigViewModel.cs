@@ -197,6 +197,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
         {
             try
             {
+                if (String.IsNullOrEmpty(AcabusData.BusQuery)) return false;
+
                 var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.BusQuery);
 
                 foreach (var row in resultSet)
@@ -204,8 +206,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     var id = UInt64.Parse(row[0].Trim());
                     var type = (BusType)UInt16.Parse(row[1].Trim());
                     var economicNumber = row[2].Trim();
-                    var ipAddress = row[3].Trim();
-                    var routeAsigned = AcabusData.AllRoutes.FirstOrDefault(route => route.ID == UInt16.Parse(row[4].Trim()));
+                    var routeAsigned = AcabusData.AllRoutes.FirstOrDefault(route => route.ID == UInt16.Parse(row[3].Trim()));
 
                     Bus vehicle = new Bus(id, economicNumber)
                     {
@@ -237,6 +238,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
         {
             try
             {
+                if (String.IsNullOrEmpty(AcabusData.DeviceQuery)) return false;
+
                 var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.DeviceQuery);
 
                 foreach (var row in resultSet)
@@ -281,6 +284,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
         {
             try
             {
+                if (String.IsNullOrEmpty(AcabusData.RouteQuery)) return false;
+
                 var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.RouteQuery);
 
                 foreach (var row in resultSet)
@@ -311,6 +316,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
         {
             try
             {
+                if (String.IsNullOrEmpty(AcabusData.StationQuery)) return false;
+
                 var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.StationQuery);
 
                 foreach (var row in resultSet)

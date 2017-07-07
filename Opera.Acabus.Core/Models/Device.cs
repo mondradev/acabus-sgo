@@ -183,8 +183,6 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         private DeviceType _type;
 
-        private DeviceType? selectedType;
-
         /// <summary>
         /// Crea una instancia persistente de <see cref="Device"/>.
         /// </summary>
@@ -193,21 +191,26 @@ namespace Opera.Acabus.Core.Models
         /// <param name="type">Tipo de equipo.</param>
         public Device(ulong id, string serialNumber, DeviceType type)
         {
-            ID = id;
-            SerialNumber = serialNumber;
-            Type = type;
+            _id = id;
+            _serialNumber = serialNumber;
+            _type = type;
         }
 
         /// <summary>
         /// Crea una instancia de <see cref="Device"/>.
         /// </summary>
-        /// <param name="serialNumber"></param>
-        /// <param name="selectedType"></param>
-        public Device(string serialNumber, DeviceType? selectedType)
+        /// <param name="serialNumber">El número de serie del equipo.</param>
+        /// <param name="type">El tipo de equipo.</param>
+        public Device(string serialNumber, DeviceType type)
         {
-            SerialNumber = serialNumber;
-            this.selectedType = selectedType;
+            _serialNumber = serialNumber;
+            _type = type;
         }
+
+        /// <summary>
+        /// Crea una instancia de <see cref="Device"/>.
+        /// </summary>
+        public Device() { }
 
         /// <summary>
         /// Obtiene o establece el autobus al que se encuentra asignado este equipo.
@@ -256,7 +259,7 @@ namespace Opera.Acabus.Core.Models
         /// Obtiene o establece el número de seria del equipo.
         /// </summary>
         public String SerialNumber {
-            get => _serialNumber ?? (_serialNumber = String.Empty);
+            get => _serialNumber;
             private set {
                 _serialNumber = value;
                 OnPropertyChanged(nameof(SerialNumber));

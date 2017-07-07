@@ -49,9 +49,14 @@ namespace Opera.Acabus.Core.Models
         /// <param name="stationNumber">Número de estación.</param>
         public Station(ushort id, ushort stationNumber)
         {
-            ID = id;
-            StationNumber = stationNumber;
+            _id = id;
+            _stationNumber = stationNumber;
         }
+
+        /// <summary>
+        /// Crea una instancia de <see cref="Station"/>.
+        /// </summary>
+        public Station() { }
 
         /// <summary>
         /// Obtiene o establece la sección de atención a esta ubicación.

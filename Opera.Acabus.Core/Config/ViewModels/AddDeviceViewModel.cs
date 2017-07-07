@@ -183,7 +183,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddDeviceExecute(object obj)
         {
-            Device device = new Device(SerialNumber, SelectedType)
+            Device device = new Device(SerialNumber, SelectedType.Value)
             {
                 Station = SelectedStation,
                 Bus = SelectedBus,

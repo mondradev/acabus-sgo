@@ -68,7 +68,6 @@ namespace Opera.Acabus.Core.Models
         /// Campo que provee a la propiedad <see cref="Type"/>.
         /// </summary>
         private RouteType _type;
-        private ushort number;
 
         /// <summary>
         /// Crea una instancia persistente de <see cref="Route"/>.
@@ -78,10 +77,15 @@ namespace Opera.Acabus.Core.Models
         /// <param name="type">Tipo de ruta.</param>
         public Route(ushort id, ushort number, RouteType type)
         {
-            ID = id;
-            this.number = number;
-            Type = type;
+            _id = id;
+            _routeNumber = number;
+            _type = type;
         }
+
+        /// <summary>
+        /// Crea una instancia de <see cref="Route"/>.
+        /// </summary>
+        public Route() { }
 
         /// <summary>
         /// Obtiene o establece la sección asignada para la atención de la ruta.
@@ -97,8 +101,9 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene una lista de los autobuses asignados a esta ruta.
         /// </summary>
+        [Column(ForeignKeyName = "Fk_Route_ID")]
         public ICollection<Bus> Buses
-            => _buses ?? (_buses = new ObservableCollection<Bus>());
+               => _buses ?? (_buses = new ObservableCollection<Bus>());
 
         /// <summary>
         /// Obtiene o establece identificador único de la ruta.

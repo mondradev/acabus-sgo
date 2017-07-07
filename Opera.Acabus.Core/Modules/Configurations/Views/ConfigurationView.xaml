@@ -12,6 +12,6 @@
         <ViewModel:ConfigurationViewModel />
     </UserControl.DataContext>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Configurations:Configuration Configurables="{Binding Configurables}"/>
+        <Configurations:Configuration Configurables="{Binding Configurables}" />
     </ScrollViewer>
 </UserControl>
