@@ -83,12 +83,12 @@ namespace Opera.Acabus.Sgo
         /// <param name="actionName">Nombre de la acción a realizar.</param>
         internal void AddMessage(String message, Action action = null, String actionName = "OCULTAR")
         {
-            if (_messages.Contains(message)) return;
+            if (_messages.Contains(message.ToUpper())) return;
 
             Application.Current?.Invoke(() =>
             {
-                _snackBar.MessageQueue.Enqueue(message, actionName, action);
-                _messages.Enqueue(message);
+                _snackBar.MessageQueue.Enqueue(message.ToUpper(), actionName, action);
+                _messages.Enqueue(message.ToUpper());
                 new Task(() =>
                 {
                     Thread.Sleep(TimeSpan.FromSeconds(3));

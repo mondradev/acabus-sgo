@@ -4,6 +4,7 @@ using Opera.Acabus.Core.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Windows.Controls;
 
@@ -93,26 +94,33 @@ namespace Opera.Acabus.Sgo
         {
             foreach (var moduleName in AcabusData.ModulesNames)
             {
-                Trace.WriteLine($"Cargando el módulo: '{moduleName.Item1}'...", "DEBUG");
-                Assembly assembly = Assembly.LoadFrom(moduleName.Item3);
-                var type = assembly.GetType(moduleName.Item2);
-                var instanceTemp = Activator.CreateInstance(type);
-                GC.SuppressFinalize(instanceTemp);
+                try
+                {
+                    Trace.WriteLine($"Cargando el módulo: '{moduleName.Item1}'...", "DEBUG");
+                    Assembly assembly = Assembly.LoadFrom(moduleName.Item3);
+                    var type = assembly.GetType(moduleName.Item2);
+                    var instanceTemp = Activator.CreateInstance(type);
+                    GC.SuppressFinalize(instanceTemp);
+                }
+                catch (FileNotFoundException)
+                {
+                    AcabusData.SendNotify($"No se cargó el módulo '{moduleName.Item1}'");
+                }
             }
 
             foreach (IModuleInfo moduleInfo in AcabusData.Modules)
             {
                 UserControl moduleView = null;
-                Instance?._view.AddToolButton(moduleInfo.Name, new Command(parameter =>
-                {
-                    if (!moduleInfo.IsLoaded)
-                    {
-                        moduleView = (UserControl)Activator.CreateInstance(moduleInfo.Type);
-                        moduleInfo.IsLoaded = true;
-                    }
+                Instance?._view.AddToolButton(moduleInfo.Name.Replace(' ', '_'), new Command(parameter =>
+                 {
+                     if (!moduleInfo.IsLoaded)
+                     {
+                         moduleView = (UserControl)Activator.CreateInstance(moduleInfo.Type);
+                         moduleInfo.IsLoaded = true;
+                     }
 
-                    Instance?._view.ShowContent(moduleView);
-                }), moduleInfo.Icon, moduleInfo.Name, moduleInfo.IsSecundary);
+                     Instance?._view.ShowContent(moduleView);
+                 }), moduleInfo.Icon, moduleInfo.Name, moduleInfo.IsSecundary);
             }
         }
 
@@ -141,7 +149,7 @@ namespace Opera.Acabus.Sgo
                 if (messageData.Length > 0 && messageData[0] == "NOTIFY" && !Instance.messageSkiped.Contains(messageData[1]))
                     Instance._view.AddMessage(
                         messageData[1],
-                        () => Instance.messageSkiped.Add(messageData[1]),
+                        () => Instance.messageSkiped.Add(messageData[1].ToUpper()),
                         "OMITIR");
             }
         }
