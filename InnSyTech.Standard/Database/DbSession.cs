@@ -676,10 +676,17 @@ namespace InnSyTech.Standard.Database
             }
         }
 
+        /// <summary>
+        /// Determina si el campo es una colección de entidades dependientes.
+        /// </summary>
+        /// <param name="field">Campo a evaluar.</param>
+        /// <param name="typeChildren">Tipo de las entidades dependientes.</param>
+        /// <returns>Un valor <see cref="true"/> si es una colección de entidades dependientes.</returns>
         private bool HasChildren(DbField field, out Type typeChildren)
         {
             if (!String.IsNullOrEmpty(field.ForeignKeyName)
-                && (field.PropertyType as TypeInfo).ImplementedInterfaces.Contains(typeof(ICollection)))
+                && ((field.PropertyType as TypeInfo).ImplementedInterfaces.Contains(typeof(ICollection))
+                || (field.PropertyType as TypeInfo).ImplementedInterfaces.Contains(typeof(IEnumerable))))
             {
                 typeChildren = field.PropertyType.GetGenericArguments().FirstOrDefault();
                 return true;
