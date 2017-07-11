@@ -7,6 +7,7 @@ using Acabus.Utils.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 
@@ -92,6 +93,8 @@ namespace Acabus.Modules.CctvReports.Services
                     return faults.FirstOrDefault(fault => fault.Description == "NO SE TIENE CONTEO DE PASAJEROS");
                 case "FALLA CONTADOR":
                     return faults.FirstOrDefault(fault => fault.Description == "EL CONTEO DE PASAJEROS ES MENOR A LAS VALIDACIONES");
+                case "SE REQUIERE BACKUP":
+                    return faults.FirstOrDefault(fault => fault.Description.Contains("NO SE TIENE INFORMACIÓN DE LAS OPERACIONES"));
                 default: return null;
             }
         }
@@ -166,8 +169,17 @@ namespace Acabus.Modules.CctvReports.Services
                         exists = true;
                 }
                 if (!exists)
-                    Application.Current.Dispatcher.Invoke(()
-                        => alarms.Add(Alarm.CreateAlarm(UInt32.Parse(row[0]), numeseri, row[2], DateTime.Parse(row[3]), (Priority)(UInt16.Parse(row[4]) - 1))));
+                    Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            try
+                            {
+                                alarms.Add(Alarm.CreateAlarm(UInt32.Parse(row[0]), numeseri, row[2], DateTime.Parse(row[3]), (Priority)(UInt16.Parse(row[4]) - 1)));
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                Trace.WriteLine($"ALARMA DE EQUIPO DESCONOCIDO ({numeseri}) FUE IGNORADA", "NOTIFY");
+                            }
+                        });
             }
         }
 
@@ -241,6 +253,35 @@ namespace Acabus.Modules.CctvReports.Services
                                     && device.Vehicle != null
                                     && device.Vehicle.EconomicNumber == economicNumber),
                             Priority = row[3].Contains("CERO") ? Priority.HIGH : Priority.MEDIUM
+                        }));
+            }
+        }
+
+        public static void SearchMissingBackups(this ObservableCollection<Alarm> alarms)
+        {
+            var response = AcabusData.ExecuteQueryInServerDB(AcabusData.MissingBackupsQuery);
+            foreach (var row in response)
+            {
+                if (row[0] == "no_econ")
+                    continue;
+
+                if (row.Length < 1) break;
+                var economicNumber = row[0];
+                var exists = false;
+                foreach (var alert in alarms.Where(alarm => alarm.Device.Type == DeviceType.PCA))
+                    if (alert.Device.Vehicle?.EconomicNumber == economicNumber)
+                        exists = true;
+                if (!exists)
+                    Application.Current.Dispatcher.Invoke(()
+                        => alarms.Add(new Alarm(0)
+                        {
+                            DateTime = DateTime.Now,
+                            Description = "SE REQUIERE BACKUP",
+                            Device = Core.DataAccess.AcabusData.AllDevices.FirstOrDefault(device
+                                => device.Type == DeviceType.PCA
+                                    && device.Vehicle != null
+                                    && device.Vehicle.EconomicNumber == economicNumber),
+                            Priority = Priority.HIGH
                         }));
             }
         }

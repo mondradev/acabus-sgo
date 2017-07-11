@@ -10,6 +10,9 @@ namespace Acabus.DataAccess
 {
     internal static partial class AcabusData
     {
+        private static String _missingBackupsQuery;
+
+        public static String MissingBackupsQuery => _missingBackupsQuery;
 
         /// <summary>
         /// Campo que provee a la propiedad 'ReportQueries'.
@@ -45,6 +48,7 @@ namespace Acabus.DataAccess
         {
             ReportQueries.Clear();
             FillList(ref _reportQueries, XmlToReportQuery, "Reports", "Report");
+            _missingBackupsQuery = GetProperty("MissingBackups", "Command-Sql");
         }
 
 

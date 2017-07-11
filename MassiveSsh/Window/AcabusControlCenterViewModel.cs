@@ -136,9 +136,16 @@ namespace Acabus.Window
         /// <param name="message">Mensaje simple para mostrar.</param>
         public async static void ShowDialog(String message)
         {
-            DialogHost.CloseDialogCommand.Execute(null, null);
-            System.Threading.Thread.Sleep(1000);
-            await DialogHost.Show(new DialogTemplateView() { Message = message });
+            try
+            {
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                System.Threading.Thread.Sleep(1000);
+                await DialogHost.Show(new DialogTemplateView() { Message = message });
+            }
+            catch
+            {
+                AddNotify(message);
+            }
         }
 
         /// <summary>

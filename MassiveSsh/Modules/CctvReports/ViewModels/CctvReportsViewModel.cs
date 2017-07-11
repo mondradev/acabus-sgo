@@ -22,7 +22,7 @@ namespace Acabus.Modules.CctvReports
 {
     public sealed class CctvReportsViewModel : ViewModelBase
     {
-        private const string TEMP_COUNTERS_FAILING = "~$tmp_counterfailings.dat";
+        private const string TEMP_NIGHT_TASKS = "~$tmp_counterfailings.dat";
 
         /// <summary>
         /// Campo que provee a la propiedad 'Alarms'.
@@ -66,7 +66,7 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         private String _newWhoReporting;
 
-        private Timer _seachCounterFailing;
+        private Timer _nightTasks;
 
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedIncidence'.
@@ -204,7 +204,7 @@ namespace Acabus.Modules.CctvReports
                     else (waitHandles[1] as EventWaitHandle).Set();
                     if (_busAlarmsMonitor != null) _busAlarmsMonitor.Dispose(waitHandles[2]);
                     else (waitHandles[2] as EventWaitHandle).Set();
-                    if (_seachCounterFailing != null) _seachCounterFailing.Dispose(waitHandles[3]);
+                    if (_nightTasks != null) _nightTasks.Dispose(waitHandles[3]);
                     else (waitHandles[3] as EventWaitHandle).Set();
 
                     WaitHandle.WaitAll(waitHandles, 600);
@@ -519,7 +519,7 @@ namespace Acabus.Modules.CctvReports
                                 ? String.Format("{0} {1}", item.Device?.Vehicle, item.Device)
                                 : item.Device?.ToString(),
                             item.Description));
-                    item.Save();
+                    Task.Run(() => item.Save());
                 }
             }
             if (!_inLoad)
@@ -534,7 +534,7 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         private void InitAlarmsMonitor()
         {
-            InitSearchCountersFailing();
+            InitNightTasks();
 
             _alarmsMonitor = new Timer(delegate
             {
@@ -587,7 +587,7 @@ namespace Acabus.Modules.CctvReports
                                 if (AcabusData.OffDutyVehicles.Where(vehicle
                                     => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count() > 0)
                                     incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
-                                else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMATICAMENTE";
+                                else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMÁTICAMENTE";
                                 incidence.Update();
                                 UpdateData();
                                 continue;
@@ -626,37 +626,35 @@ namespace Acabus.Modules.CctvReports
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
         }
 
-        private void InitSearchCountersFailing()
+        private void InitNightTasks()
         {
-            if (_seachCounterFailing != null) return;
+            if (_nightTasks != null) return;
 
-            _seachCounterFailing = new Timer(delegate
+            _nightTasks = new Timer(delegate
             {
                 if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(22), new TimeSpan(23, 59, 59)))
                 {
-                    Trace.WriteLine("Buscando contadores en mal estado", "DEBUG");
+
                     try
                     {
-                        if (File.Exists(TEMP_COUNTERS_FAILING))
+                        if (File.Exists(TEMP_NIGHT_TASKS))
                         {
-                            String date = File.ReadAllText(TEMP_COUNTERS_FAILING);
+                            String date = File.ReadAllText(TEMP_NIGHT_TASKS);
                             DateTime lastUpdate = DateTime.Parse(date);
 
                             if (lastUpdate.Date.Equals(DateTime.Now.Date))
                                 return;
                         }
-
+                        Trace.WriteLine("Buscando contadores en mal estado", "DEBUG");
                         Alarms.SearchCountersFailing();
-                        File.WriteAllText(TEMP_COUNTERS_FAILING, DateTime.Now.ToString());
+                        Trace.WriteLine("Buscando backups faltantes", "DEBUG");
+                        Alarms.SearchMissingBackups();
+                        File.WriteAllText(TEMP_NIGHT_TASKS, DateTime.Now.ToString());
                     }
                     catch (IOException)
                     {
-                        File.Delete(TEMP_COUNTERS_FAILING);
+                        File.Delete(TEMP_NIGHT_TASKS);
                     }
-                }
-                else
-                {
-                    Trace.WriteLine("No se require buscar contadores", "DEBUG");
                 }
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
         }
