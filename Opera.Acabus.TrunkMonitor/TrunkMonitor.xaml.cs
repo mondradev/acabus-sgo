@@ -233,7 +233,7 @@ namespace Opera.Acabus.TrunkMonitor
                 (stationCard.Content as Grid).Children.Add(label);
 
                 Ellipse indicator = new Ellipse() { Height = 16, Width = 16 };
-                indicator.SetBinding(Shape.FillProperty, new Binding("State")
+                indicator.SetBinding(Shape.FillProperty, new Binding("Status")
                 {
                     Source = (stationCard.DataContext as Station).GetStateInfo(),
                     Converter = new ConverterConnectionStateToBrush()

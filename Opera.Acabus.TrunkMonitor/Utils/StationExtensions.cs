@@ -43,8 +43,9 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// <param name="link">Enlace nuevo que se añadirá.</param>
         public static void AddLink(this Station station, Link link)
         {
-            if (!_stations.ContainsKey(station))
-                _stations.Add(station, new ObservableCollection<Link>());
+            lock (_stations)
+                if (!_stations.ContainsKey(station))
+                    _stations.Add(station, new ObservableCollection<Link>());
             _stations[station].Add(link);
         }
 
@@ -55,8 +56,9 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// <returns>Una lista de <see cref="Link"/>.</returns>
         public static ObservableCollection<Link> GetLinks(this Station station)
         {
-            if (!_stations.ContainsKey(station))
-                _stations.Add(station, new ObservableCollection<Link>());
+            lock (_stations)
+                if (!_stations.ContainsKey(station))
+                    _stations.Add(station, new ObservableCollection<Link>());
             return _stations[station];
         }
 
@@ -67,8 +69,9 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// <returns>La latencia máxima aceptable.</returns>
         public static UInt16 GetMaximunAcceptablePing(this Station station)
         {
-            if (!_stationMaximunAcceptablePing.ContainsKey(station))
-                _stationMaximunAcceptablePing.Add(station, 600);
+            lock (_stationMaximunAcceptablePing)
+                if (!_stationMaximunAcceptablePing.ContainsKey(station))
+                    _stationMaximunAcceptablePing.Add(station, 600);
 
             return _stationMaximunAcceptablePing[station];
         }
@@ -80,8 +83,9 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// <returns>El limite de latencia optima.</returns>
         public static UInt16 GetMaximunPing(this Station station)
         {
-            if (!_stationMaximunPing.ContainsKey(station))
-                _stationMaximunPing.Add(station, 90);
+            lock (_stationMaximunPing)
+                if (!_stationMaximunPing.ContainsKey(station))
+                    _stationMaximunPing.Add(station, 90);
 
             return _stationMaximunPing[station];
         }
@@ -95,8 +99,9 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// <returns>La información del estado de la estación.</returns>
         public static StationStateInfo GetStateInfo(this Station station)
         {
-            if (!_stationStateInfo.ContainsKey(station))
-                _stationStateInfo.Add(station, new StationStateInfo(station));
+            lock (_stationStateInfo)
+                if (!_stationStateInfo.ContainsKey(station))
+                    _stationStateInfo.Add(station, new StationStateInfo(station));
 
             return _stationStateInfo[station];
         }
@@ -108,8 +113,9 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// <param name="link">Enlace a remover.</param>
         public static void RemoveLink(this Station station, Link link)
         {
-            if (!_stations.ContainsKey(station))
-                _stations.Add(station, new ObservableCollection<Link>());
+            lock (_stations)
+                if (!_stations.ContainsKey(station))
+                    _stations.Add(station, new ObservableCollection<Link>());
             _stations[station].Remove(link);
         }
 
@@ -120,9 +126,10 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// <param name="maxAcceptablePing">La latencia máxima aceptable.</param>
         public static void SetMaximunAcceptablePing(this Station station, UInt16 maxAcceptablePing)
         {
-            if (!_stationMaximunAcceptablePing.ContainsKey(station))
-                _stationMaximunAcceptablePing.Add(station, maxAcceptablePing);
-            else _stationMaximunAcceptablePing[station] = maxAcceptablePing;
+            lock (_stationMaximunAcceptablePing)
+                if (!_stationMaximunAcceptablePing.ContainsKey(station))
+                    _stationMaximunAcceptablePing.Add(station, maxAcceptablePing);
+                else _stationMaximunAcceptablePing[station] = maxAcceptablePing;
         }
 
         /// <summary>
@@ -132,9 +139,10 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// <param name="maxPing">El limite de latencia optima.</param>
         public static void SetMaximunPing(this Station station, UInt16 maxPing)
         {
-            if (!_stationMaximunPing.ContainsKey(station))
-                _stationMaximunPing.Add(station, maxPing);
-            else _stationMaximunPing[station] = maxPing;
+            lock (_stationMaximunPing)
+                if (!_stationMaximunPing.ContainsKey(station))
+                    _stationMaximunPing.Add(station, maxPing);
+                else _stationMaximunPing[station] = maxPing;
         }
     }
 }

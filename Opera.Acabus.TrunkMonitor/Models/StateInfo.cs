@@ -9,9 +9,9 @@ namespace Opera.Acabus.TrunkMonitor.Models
     public class StationStateInfo : NotifyPropertyChanged
     {
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="State" />.
+        /// Campo que provee a la propiedad <see cref="Status" />.
         /// </summary>
-        private LinkState _state;
+        private LinkState _status;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Station"/>.
@@ -30,11 +30,11 @@ namespace Opera.Acabus.TrunkMonitor.Models
         /// <summary>
         /// Obtiene o establece el estado de la estación.
         /// </summary>
-        public LinkState State {
-            get => _state;
+        public LinkState Status {
+            get => _status;
             set {
-                _state = value;
-                OnPropertyChanged(nameof(State));
+                _status = value;
+                OnPropertyChanged(nameof(Status));
             }
         }
 

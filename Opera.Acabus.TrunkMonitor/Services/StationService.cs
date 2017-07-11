@@ -51,17 +51,19 @@ namespace Opera.Acabus.TrunkMonitor.Service
                 }
             }
 
-            if (!_stationPing.ContainsKey(station))
-                _stationPing.Add(station, (Int16)(ping / nDevice));
-            else
-                _stationPing[station] = (Int16)(ping / nDevice);
+            lock (_stationPing)
+                if (!_stationPing.ContainsKey(station))
+                    _stationPing.Add(station, (Int16)(ping / nDevice));
+                else
+                    _stationPing[station] = (Int16)(ping / nDevice);
 
             var linkState = station.CalculateLinkState();
 
-            if (!_stationLinkState.ContainsKey(station))
-                _stationLinkState.Add(station, linkState);
-            else
-                _stationLinkState[station] = linkState;
+            lock (_stationLinkState)
+                if (!_stationLinkState.ContainsKey(station))
+                    _stationLinkState.Add(station, linkState);
+                else
+                    _stationLinkState[station] = linkState;
 
             return station.GetPing();
         }

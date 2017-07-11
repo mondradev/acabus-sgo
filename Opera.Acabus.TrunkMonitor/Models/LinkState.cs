@@ -8,6 +8,11 @@ namespace Opera.Acabus.TrunkMonitor.Models
     public enum LinkState
     {
         /// <summary>
+        /// Conexión con enlace desconectado.
+        /// </summary>
+        DISCONNECTED,
+
+        /// <summary>
         /// Conexión con enlace malo.
         /// </summary>
         BAD,
@@ -20,12 +25,7 @@ namespace Opera.Acabus.TrunkMonitor.Models
         /// <summary>
         /// Conexión con enlace bueno.
         /// </summary>
-        GOOD,
-
-        /// <summary>
-        /// Conexión con enlace desconectado.
-        /// </summary>
-        DISCONNECTED
+        GOOD
     }
 
     /// <summary>

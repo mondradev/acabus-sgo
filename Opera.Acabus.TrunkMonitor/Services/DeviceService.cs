@@ -38,21 +38,25 @@ namespace Opera.Acabus.TrunkMonitor.Service
         /// <returns></returns>
         public static Int16 DoPing(this Device device)
         {
-            var ping = ConnectionTCP.SendToPing(device.IPAddress.ToString(), 3);
 
-            if (!_devicePing.ContainsKey(device))
-                _devicePing.Add(device, ping);
-            else
-                _devicePing[device] = ping;
+            var ping = ConnectionTCP.SendToPing(device.IPAddress.ToString(), 3);
+            lock (_devicePing)
+                if (!_devicePing.ContainsKey(device))
+                    _devicePing.Add(device, ping);
+                else
+                    _devicePing[device] = ping;
 
             var linkState = device.CalculateLinkState();
 
-            if (!_deviceLinkState.ContainsKey(device))
-                _deviceLinkState.Add(device, linkState);
-            else
-                _deviceLinkState[device] = linkState;
+            lock (_deviceLinkState)
+                if (!_deviceLinkState.ContainsKey(device))
+                    _deviceLinkState.Add(device, linkState);
+                else
+                    _deviceLinkState[device] = linkState;
+
 
             return device.GetPing();
+
         }
 
         /// <summary>
