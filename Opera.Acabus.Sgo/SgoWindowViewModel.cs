@@ -146,9 +146,9 @@ namespace Opera.Acabus.Sgo
                 if (Instance == null) return;
 
                 String[] messageData = message.Split(new Char[] { ':' }, 2);
-                if (messageData.Length > 0 && messageData[0] == "NOTIFY" && !Instance.messageSkiped.Contains(messageData[1]))
+                if (messageData.Length > 0 && messageData[0] == "NOTIFY" && !Instance.messageSkiped.Contains(messageData[1].ToUpper()))
                     Instance._view.AddMessage(
-                        messageData[1],
+                        messageData[1].ToUpper(),
                         () => Instance.messageSkiped.Add(messageData[1].ToUpper()),
                         "OMITIR");
             }
