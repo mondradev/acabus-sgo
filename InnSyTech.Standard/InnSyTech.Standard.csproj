@@ -69,6 +69,7 @@
     <Compile Include="SecureShell\Scp.cs" />
     <Compile Include="SecureShell\Ssh.cs" />
     <Compile Include="SecureShell\SshPsql.cs" />
+    <Compile Include="Structures\Trees\Tree.cs" />
     <Compile Include="Utils\ConnectionTCP.cs" />
     <Compile Include="Utils\Credential.cs" />
     <Compile Include="Utils\EnumTranslate.cs" />

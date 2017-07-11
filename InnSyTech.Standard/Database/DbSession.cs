@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InnSyTech.Standard.Structures.Trees;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -815,13 +816,18 @@ namespace InnSyTech.Standard.Database
             DbCommand command = _connection.CreateCommand();
 
             command.Transaction = transaction;
-            if (dependenceInstance is null)
-                command.CommandText = String.Format("SELECT * FROM {0}", GetTableName(typeOfInstance));
-            else
-            {
-                command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@ForeignKey", GetTableName(typeOfInstance), foreignKeyName);
-                CreateParameter(command, "ForeignKey", dependencePrimaryKeyField.GetValue(dependenceInstance));
-            }
+            //if (dependenceInstance is null)
+            //    command.CommandText = String.Format("SELECT * FROM {0}", GetTableName(typeOfInstance));
+            //else
+            //{
+            //    command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@ForeignKey", GetTableName(typeOfInstance), foreignKeyName);
+            //    CreateParameter(command, "ForeignKey", dependencePrimaryKeyField.GetValue(dependenceInstance));
+            //}
+
+            StringBuilder tablesNames = new StringBuilder();
+            Tree<Tuple<Type, String>> treeControl = null;
+            String commandText = CreateStatement(typeOfInstance, ref treeControl, tablesNames);
+            command.CommandText = String.Format("SELECT {0} FROM {1}", commandText, tablesNames.ToString());
 
             DbDataReader reader = null;
             try
@@ -833,7 +839,7 @@ namespace InnSyTech.Standard.Database
 
                 while (reader.Read())
                 {
-                    data = (T)Activator.CreateInstance(typeOfInstance);
+                    /** data = (T)Activator.CreateInstance(typeOfInstance);
 
                     DbField primaryKeyField = DbField.GetPrimaryKey(typeOfInstance);
                     primaryKeyField.SetValue(data, reader[primaryKeyField.Name]);
@@ -899,7 +905,9 @@ namespace InnSyTech.Standard.Database
                                 field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
                         }
                     }
+                    */
 
+                    data = ToInstance<T>(typeOfInstance, reader, treeControl);
                     objects.Add(data);
                 }
             }
@@ -914,6 +922,89 @@ namespace InnSyTech.Standard.Database
         }
 
         #endregion GetUnidirectional
+
+        #region NewImplementation
+
+        public static T ToInstance<T>(Type type, DbDataReader reader, Tree<Tuple<Type, String>> parent)
+        {
+            var primaryKey = DbField.GetPrimaryKey(type);
+            var dbFields = DbField.GetFields(type).SkipWhile(field => field.IsPrimaryKey);
+
+            var instance = Activator.CreateInstance(type);
+            var alias = parent.Value.Item2;
+
+            object dbValue = reader[String.Format("{0}_{1}", alias, primaryKey.Name)];
+            if (dbValue is DBNull) return default(T);
+
+            primaryKey.SetValue(instance, dbValue);
+
+            foreach (var dbField in dbFields.OrderBy(field => field))
+            {
+                if (dbField.IsPrimaryKey) continue;
+                if (dbField.IsForeignKey)
+                {
+                    dbField.SetValue(instance, ToInstance<Object>(dbField.PropertyType, reader, parent.Children.Single(node => node.Value.Item1 == dbField.PropertyType)));
+                }
+                else if (String.IsNullOrEmpty(dbField.ForeignKeyName))
+                {
+                    dbValue = reader[String.Format("{0}_{1}", alias, dbField.Name)];
+                    if (dbValue is DBNull) continue;
+
+                    dbField.SetValue(instance, dbValue);
+                }
+            }
+
+            return (T)instance;
+        }
+
+        public String CreateStatement(Type type, ref Tree<Tuple<Type, String>> parent, StringBuilder tables = null)
+        {
+            if (!IsEntity(type)) return "";
+
+            Tree<Tuple<Type, string>> tree;
+
+            if (parent is null)
+            {
+                parent = new Tree<Tuple<Type, string>>(new Tuple<Type, string>(type, "T0"));
+                tree = parent;
+            }
+            else
+            {
+                tree = new Tree<Tuple<Type, string>>(new Tuple<Type, string>(type, "T" + (parent.Root.Descendants.Count() + 1)));
+                parent.Add(tree);
+            }
+
+            var dbFields = DbField.GetFields(type);
+            StringBuilder fields = new StringBuilder();
+            tables = tables ?? new StringBuilder();
+            string alias = tree.Single(child => child.Value.Item1 == type).Value.Item2;
+
+            if (tree.Root == tree)
+                tables.AppendFormat("{0} {1} ", GetTableName(type), alias);
+
+            foreach (var dbField in dbFields.OrderBy(field => field))
+            {
+                if (dbField.IsForeignKey)
+                {
+                    StringBuilder childtable = new StringBuilder();
+                    fields.AppendFormat("{0}, ", CreateStatement(dbField.PropertyType, ref tree, childtable));
+                    tables.AppendFormat("LEFT OUTER JOIN {0} {2} ON {2}.{1}={3}.{4} ",
+                        GetTableName(dbField.PropertyType),
+                        DbField.GetPrimaryKey(dbField.PropertyType).Name,
+                        tree.Children.Single(child => child.Value.Item1 == dbField.PropertyType).Value.Item2,
+                        alias,
+                        dbField.Name
+                        ).Append(childtable.ToString());
+                }
+                else if (String.IsNullOrEmpty(dbField.ForeignKeyName))
+                {
+                    fields.AppendFormat("{0}.{1} {0}_{1}, ", alias, dbField.Name);
+                }
+            }
+            return fields.Remove(fields.Length - 2, 1).ToString();
+        }
+
+        #endregion NewImplementation
 
         #region Batch
 
@@ -998,6 +1089,6 @@ namespace InnSyTech.Standard.Database
         public Object[][] ExecuteQuery(String query)
             => ExecuteQuery(query, out String[] header);
 
-        #endregion
+        #endregion Batch
     }
 }
