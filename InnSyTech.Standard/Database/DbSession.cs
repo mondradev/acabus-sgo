@@ -1,4 +1,5 @@
-﻿using InnSyTech.Standard.Structures.Trees;
+﻿using InnSyTech.Standard.Database.Utils;
+using InnSyTech.Standard.Structures.Trees;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -631,7 +632,7 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="typeOfInstance">Tipo a devolver de la base de datos.</param>
         /// <returns>Una colección de instancias del tipo especificado.</returns>
-        public ICollection<TResult> GetObjects<TResult>()
+        public ICollection<TResult> GetObjects<TResult>(DbFilter filter = null)
         {
             if (_cache.ContainsKey(typeof(TResult))) _cache[typeof(TResult)].Clear();
 
@@ -645,7 +646,7 @@ namespace InnSyTech.Standard.Database
                 {
                     transaction = BeginTransaction();
 
-                    ReadList<TResult>(typeOfInstance, objects as IList, transaction);
+                    ReadList<TResult>(typeOfInstance, objects as IList, transaction, filter);
 
                     transaction.Commit();
 
@@ -704,94 +705,43 @@ namespace InnSyTech.Standard.Database
         /// <param name="transaction">Instancia <see cref="DbTransaction"/> que administra la transacción actual.</param>
         /// <param name="dependenceInstance">Instancia dependiente.</param>
         /// <returns>Una instancia del tipo especificado.</returns>
-        private TResult ReadData<TResult>(Type typeOfInstance, object idKey, DbTransaction transaction, Object dependenceInstance = null, String ForeingKeyName = "")
+        private TResult ReadData<TResult>(Type typeOfInstance, object idKey, DbTransaction transaction, Object dependenceInstance = null, String foreignKeyName = "")
         {
-            DbCommand command = _connection.CreateCommand();
             DbField primaryKeyField = DbField.GetPrimaryKey(typeOfInstance);
+
+            if (_cache.ContainsKey(typeOfInstance) && dependenceInstance is null)
+                if ((_cache[typeOfInstance] as List<TResult>).FirstOrDefault(item
+                    => primaryKeyField.GetValue(item).Equals(idKey)) != null)
+                    return (_cache[typeOfInstance] as List<TResult>).FirstOrDefault(item
+                        => primaryKeyField.GetValue(item).Equals(idKey));
+
+            DbField dependencePrimaryKeyField = dependenceInstance is null ? null : DbField.GetPrimaryKey(dependenceInstance.GetType());
+            DbCommand command = _connection.CreateCommand();
+
             command.Transaction = transaction;
 
-            command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@{1}",
-                                                    GetTableName(typeOfInstance),
-                                                   String.IsNullOrEmpty(ForeingKeyName) ? primaryKeyField.Name : ForeingKeyName);
+            StringBuilder tablesNames = new StringBuilder();
+            Tree<Tuple<Type, String>> treeControl = null;
+            String commandText = CreateStatement(typeOfInstance, ref treeControl, tablesNames);
+            String dependenceStatement = String.Format("WHERE {0}.{1}=@Key",
+                treeControl.Value.Item2,
+                String.IsNullOrEmpty(foreignKeyName) ? primaryKeyField.Name : foreignKeyName);
 
-            CreateParameter(command,
-                String.IsNullOrEmpty(ForeingKeyName) ? primaryKeyField.Name : ForeingKeyName,
-                idKey);
+            command.CommandText = String.Format("SELECT {0} FROM {1} {2}", commandText, tablesNames.ToString(),
+                dependenceStatement);
+
+            CreateParameter(command, "Key", idKey);
 
             IEnumerable<DbField> fields = DbField.GetFields(typeOfInstance);
             DbDataReader reader = null;
-            TResult data = default(TResult);
             try
             {
                 reader = command.ExecuteReader();
 
                 while (reader.Read())
-                {
-                    data = (TResult)Activator.CreateInstance(typeOfInstance);
-                    primaryKeyField.SetValue(data, reader[primaryKeyField.Name]);
+                    return ToInstance<TResult>(typeOfInstance, reader, treeControl, transaction);
 
-                    if (_cache.ContainsKey(data.GetType()))
-                    {
-                        Boolean exists = false;
-                        foreach (var item in _cache[data.GetType()])
-                            if (exists = primaryKeyField.GetValue(data).Equals(primaryKeyField.GetValue(item)))
-                            {
-                                data = (TResult)item;
-                                break;
-                            }
-
-                        if (!exists) _cache[data.GetType()].Add(data);
-                        else continue;
-                    }
-                    else
-                        _cache.Add(data.GetType(), new List<Object>() { data });
-
-                    foreach (DbField field in fields)
-                    {
-                        if (field.IsPrimaryKey) continue;
-
-                        if (HasChildren(field, out Type typeChildren))
-                            ReadList<Object>(typeChildren, (field.GetValue(data) as IList), transaction, data, field.ForeignKeyName);
-                        else if (!String.IsNullOrEmpty(field.ForeignKeyName))
-                            field.SetValue(data, ReadData<Object>(
-                                field.PropertyType,
-                                primaryKeyField.GetValue(data),
-                                transaction,
-                                data,
-                                field.ForeignKeyName
-                                ));
-                        else
-                        {
-                            if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
-                                continue;
-
-                            if (reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(DateTime)
-                                || reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(TimeSpan))
-                                if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
-                                    continue;
-
-                            Object dbFieldValue = reader[field.Name];
-
-                            if (!field.IsForeignKey)
-                                field.SetValue(data, dbFieldValue);
-                            else if (dependenceInstance != null && field.PropertyType == dependenceInstance.GetType())
-                            {
-                                DbField dependencePrimaryKeyField = DbField.GetPrimaryKey(dependenceInstance.GetType());
-                                var valueFromDb = Convert.ChangeType(dbFieldValue, dependencePrimaryKeyField.PropertyType);
-                                var key = dependencePrimaryKeyField.GetValue(dependenceInstance);
-
-                                if (valueFromDb.Equals(key))
-                                    field.SetValue(data, dependenceInstance);
-                                else
-                                    field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
-                            }
-                            else
-                                field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
-                        }
-                    }
-                }
-
-                return (TResult)data;
+                return default(TResult);
             }
             finally
             {
@@ -810,28 +760,39 @@ namespace InnSyTech.Standard.Database
         /// <param name="objects"></param>
         /// <param name="transaction"></param>
         /// <param name="dependenceInstance"></param>
-        private void ReadList<T>(Type typeOfInstance, IList objects, DbTransaction transaction, Object dependenceInstance = null, String foreignKeyName = "")
+        private void ReadList<T>(Type typeOfInstance, IList objects, DbTransaction transaction, DbFilter filter, Object dependenceInstance = null, String foreignKeyName = "")
         {
             DbField dependencePrimaryKeyField = dependenceInstance is null ? null : DbField.GetPrimaryKey(dependenceInstance.GetType());
+
             DbCommand command = _connection.CreateCommand();
 
             command.Transaction = transaction;
-            //if (dependenceInstance is null)
-            //    command.CommandText = String.Format("SELECT * FROM {0}", GetTableName(typeOfInstance));
-            //else
-            //{
-            //    command.CommandText = String.Format("SELECT * FROM {0} WHERE {1}=@ForeignKey", GetTableName(typeOfInstance), foreignKeyName);
-            //    CreateParameter(command, "ForeignKey", dependencePrimaryKeyField.GetValue(dependenceInstance));
-            //}
 
             StringBuilder tablesNames = new StringBuilder();
             Tree<Tuple<Type, String>> treeControl = null;
             String commandText = CreateStatement(typeOfInstance, ref treeControl, tablesNames);
-            command.CommandText = String.Format("SELECT {0} FROM {1}", commandText, tablesNames.ToString());
+            String dependenceStatement = !String.IsNullOrEmpty(foreignKeyName)
+                ? String.Format("WHERE {0}.{1}=@ForeignKey", treeControl.Value.Item2, foreignKeyName)
+                : String.Empty;
+
+            if (filter != null)
+                if (String.IsNullOrEmpty(dependenceStatement))
+                    dependenceStatement = String.Format("WHERE {0}", ToStringFilters(filter, treeControl.Value.Item2));
+                else
+                    dependenceStatement += String.Format(" AND {0}", ToStringFilters(filter, treeControl.Value.Item2));
+
+            command.CommandText = String.Format("SELECT {0} FROM {1} {2}", commandText, tablesNames.ToString(),
+                dependenceStatement);
+            if (dependencePrimaryKeyField != null)
+                CreateParameter(command, "ForeignKey", dependencePrimaryKeyField.GetValue(dependenceInstance));
+            if (filter != null)
+                foreach (var item in filter.GetFilters())
+                    CreateParameter(command, item.Item1.Item1, item.Item1.Item2);
 
             DbDataReader reader = null;
             try
             {
+
                 reader = command.ExecuteReader();
 
                 T data = default(T);
@@ -839,75 +800,7 @@ namespace InnSyTech.Standard.Database
 
                 while (reader.Read())
                 {
-                    /** data = (T)Activator.CreateInstance(typeOfInstance);
-
-                    DbField primaryKeyField = DbField.GetPrimaryKey(typeOfInstance);
-                    primaryKeyField.SetValue(data, reader[primaryKeyField.Name]);
-
-                    if (_cache.ContainsKey(data.GetType()))
-                    {
-                        Boolean exists = false;
-                        foreach (var item in _cache[data.GetType()])
-                            if (exists = primaryKeyField.GetValue(data).Equals(primaryKeyField.GetValue(item)))
-                            {
-                                data = (T)item;
-                                break;
-                            }
-                        if (!exists) _cache[data.GetType()].Add(data);
-                        else
-                        {
-                            objects.Add(data);
-                            continue;
-                        };
-                    }
-                    else
-                        _cache.Add(data.GetType(), new List<Object>() { data });
-
-                    foreach (DbField field in fields)
-                    {
-                        if (field.IsPrimaryKey) continue;
-
-                        if (HasChildren(field, out Type typeChildren))
-                            ReadList<Object>(typeChildren, (field.GetValue(data) as IList), transaction, data, field.ForeignKeyName);
-                        else if (!String.IsNullOrEmpty(field.ForeignKeyName))
-                            field.SetValue(data, ReadData<Object>(
-                                field.PropertyType,
-                                primaryKeyField.GetValue(data),
-                                transaction,
-                                data,
-                                field.ForeignKeyName
-                                ));
-                        else
-                        {
-                            if (reader.IsDBNull(reader.GetOrdinal(field.Name)))
-                                continue;
-
-                            if (reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(DateTime)
-                                || reader.GetFieldType(reader.GetOrdinal(field.Name)) == typeof(TimeSpan))
-                                if (String.IsNullOrEmpty(reader.GetString(reader.GetOrdinal(field.Name)).Trim()))
-                                    continue;
-
-                            Object dbFieldValue = reader[field.Name];
-
-                            if (!field.IsForeignKey)
-                                field.SetValue(data, dbFieldValue);
-                            else if (dependenceInstance != null && field.PropertyType == dependenceInstance.GetType())
-                            {
-                                var valueFromDb = Convert.ChangeType(dbFieldValue, dependencePrimaryKeyField.PropertyType);
-                                var key = dependencePrimaryKeyField.GetValue(dependenceInstance);
-
-                                if (valueFromDb.Equals(key))
-                                    field.SetValue(data, dependenceInstance);
-                                else
-                                    field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
-                            }
-                            else
-                                field.SetValue(data, ReadData<Object>(field.PropertyType, dbFieldValue, transaction, data));
-                        }
-                    }
-                    */
-
-                    data = ToInstance<T>(typeOfInstance, reader, treeControl);
+                    data = ToInstance<T>(typeOfInstance, reader, treeControl, transaction);
                     objects.Add(data);
                 }
             }
@@ -921,11 +814,45 @@ namespace InnSyTech.Standard.Database
             }
         }
 
+        private String ToStringFilters(DbFilter filter, String alias)
+        {
+            StringBuilder filtersSql = new StringBuilder();
+            var filters = filter.GetFilters();
+            foreach (var f in filters)
+            {
+                object value = f.Item1.Item2;
+                filtersSql.AppendFormat("{2} {3}.{0}{4}@{0} ", f.Item1.Item1, value, f.Item2, alias, GetOperator(f.Item1.Item3));
+            }
+            var lenght = filters[0].Item2.ToString().Length;
+            return filtersSql.ToString().Substring(lenght);
+        }
+
+        private String GetOperator(WhereOperator item3)
+        {
+            switch (item3)
+            {
+                case WhereOperator.LESS_THAT:
+                    return "<";
+                case WhereOperator.GREAT_THAT:
+                    return ">";
+                case WhereOperator.EQUALS:
+                    return "=";
+                case WhereOperator.NO_EQUALS:
+                    return "<>";
+                case WhereOperator.LESS_AND_EQUALS:
+                    return "<=";
+                case WhereOperator.GREAT_AND_EQUALS:
+                    return ">=";
+                default:
+                    return "=";
+            }
+        }
+
         #endregion GetUnidirectional
 
         #region NewImplementation
 
-        public static T ToInstance<T>(Type type, DbDataReader reader, Tree<Tuple<Type, String>> parent)
+        public T ToInstance<T>(Type type, DbDataReader reader, Tree<Tuple<Type, String>> parent, DbTransaction transaction = null)
         {
             var primaryKey = DbField.GetPrimaryKey(type);
             var dbFields = DbField.GetFields(type).SkipWhile(field => field.IsPrimaryKey);
@@ -933,28 +860,99 @@ namespace InnSyTech.Standard.Database
             var instance = Activator.CreateInstance(type);
             var alias = parent.Value.Item2;
 
-            object dbValue = reader[String.Format("{0}_{1}", alias, primaryKey.Name)];
-            if (dbValue is DBNull) return default(T);
+            if (!TrySetDbValue(primaryKey, instance, reader, String.Format("{0}_{1}", alias, primaryKey.Name)))
+                return default(T);
 
-            primaryKey.SetValue(instance, dbValue);
+            if (_cache.ContainsKey(instance.GetType()))
+            {
+                Boolean exists = false;
+                foreach (var item in _cache[instance.GetType()])
+                    if (exists = primaryKey.GetValue(instance).Equals(primaryKey.GetValue(item)))
+                        return (T)item;
+                if (!exists) _cache[instance.GetType()].Add(instance);
+            }
+            else
+                _cache.Add(instance.GetType(), new List<Object>() { instance });
 
             foreach (var dbField in dbFields.OrderBy(field => field))
             {
                 if (dbField.IsPrimaryKey) continue;
                 if (dbField.IsForeignKey)
                 {
-                    dbField.SetValue(instance, ToInstance<Object>(dbField.PropertyType, reader, parent.Children.Single(node => node.Value.Item1 == dbField.PropertyType)));
+                    dbField.SetValue(instance, ToInstance<Object>(dbField.PropertyType, reader, parent.Children.Single(node => node.Value.Item1 == dbField.PropertyType), transaction));
                 }
                 else if (String.IsNullOrEmpty(dbField.ForeignKeyName))
                 {
-                    dbValue = reader[String.Format("{0}_{1}", alias, dbField.Name)];
-                    if (dbValue is DBNull) continue;
-
-                    dbField.SetValue(instance, dbValue);
+                    string fieldName = String.Format("{0}_{1}", alias, dbField.Name);
+                    TrySetDbValue(dbField, instance, reader, fieldName);
                 }
+                else if (HasChildren(dbField, out Type typeChildren) && transaction != null)
+                {
+                    var initT = DateTime.Now;
+                    if (_cache.ContainsKey(typeChildren))
+                    {
+                        var foreignField = DbField.GetFields(typeChildren).FirstOrDefault(field => field.Name.Equals(dbField.ForeignKeyName));
+                        if (foreignField != null)
+                        {
+                            List<object> source = (_cache[typeChildren] as List<Object>);
+                            if (source != null)
+                            {
+                                var list = source.Where(item =>
+                                {
+                                    var foreignValue = foreignField.GetValue(item);
+                                    if (foreignValue != null)
+                                        return primaryKey.GetValue(foreignValue).Equals(primaryKey.GetValue(instance));
+                                    return false;
+                                });
+
+                                if (list != null && list.Count() > 0)
+                                {
+                                    if (dbField.GetValue(instance) is ICollection<Object> objects)
+                                    {
+                                        foreach (var item in list)
+                                            objects.Add(item);
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ReadList<Object>(typeChildren, (dbField.GetValue(instance) as IList), transaction, null, instance, dbField.ForeignKeyName);
+                    Trace.WriteLine($"Read list {DateTime.Now - initT}: {typeChildren.FullName} --> {dbField.ForeignKeyName}:{primaryKey.GetValue(instance)}", "DEBUG");
+                }
+                else if (!String.IsNullOrEmpty(dbField.ForeignKeyName))
+                    dbField.SetValue(instance, ReadData<Object>(dbField.PropertyType, primaryKey.GetValue(instance), transaction, instance, dbField.ForeignKeyName));
             }
 
             return (T)instance;
+        }
+
+        private bool TrySetDbValue(DbField dbField, Object instance, DbDataReader reader, string fieldName)
+        {
+            try
+            {
+                var ordinal = reader.GetOrdinal(fieldName);
+                if (reader.IsDBNull(ordinal)) return false;
+
+                object dbValue;
+                if (reader.GetFieldType(ordinal) == typeof(DateTime))
+                {
+                    var datetimeStr = reader.GetString(ordinal);
+                    if (DateTime.TryParse(datetimeStr, out DateTime result))
+                        dbValue = result;
+                    else
+                        dbValue = default(DateTime);
+                }
+                else
+                    dbValue = reader[ordinal];
+
+                dbField.SetValue(instance, dbValue);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public String CreateStatement(Type type, ref Tree<Tuple<Type, String>> parent, StringBuilder tables = null)
