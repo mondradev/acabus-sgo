@@ -722,7 +722,7 @@ namespace InnSyTech.Standard.Database
 
             StringBuilder tablesNames = new StringBuilder();
             Tree<Tuple<Type, String>> treeControl = null;
-            String commandText = CreateStatement(typeOfInstance, ref treeControl, tablesNames);
+            String commandText = CreateStatement(typeOfInstance, ref treeControl, out String alias, tablesNames);
             String dependenceStatement = String.Format("WHERE {0}.{1}=@Key",
                 treeControl.Value.Item2,
                 String.IsNullOrEmpty(foreignKeyName) ? primaryKeyField.Name : foreignKeyName);
@@ -770,7 +770,7 @@ namespace InnSyTech.Standard.Database
 
             StringBuilder tablesNames = new StringBuilder();
             Tree<Tuple<Type, String>> treeControl = null;
-            String commandText = CreateStatement(typeOfInstance, ref treeControl, tablesNames);
+            String commandText = CreateStatement(typeOfInstance, ref treeControl, out String alias, tablesNames);
             String dependenceStatement = !String.IsNullOrEmpty(foreignKeyName)
                 ? String.Format("WHERE {0}.{1}=@ForeignKey", treeControl.Value.Item2, foreignKeyName)
                 : String.Empty;
@@ -955,9 +955,13 @@ namespace InnSyTech.Standard.Database
             }
         }
 
-        public String CreateStatement(Type type, ref Tree<Tuple<Type, String>> parent, StringBuilder tables = null)
+        public String CreateStatement(Type type, ref Tree<Tuple<Type, String>> parent, out String aliasType, StringBuilder tables = null)
         {
-            if (!IsEntity(type)) return "";
+            if (!IsEntity(type))
+            {
+                aliasType = "";
+                return "";
+            }
 
             Tree<Tuple<Type, string>> tree;
 
@@ -976,7 +980,7 @@ namespace InnSyTech.Standard.Database
             StringBuilder fields = new StringBuilder();
             tables = tables ?? new StringBuilder();
             string alias = tree.Single(child => child.Value.Item1 == type).Value.Item2;
-
+            aliasType = alias;
             if (tree.Root == tree)
                 tables.AppendFormat("{0} {1} ", GetTableName(type), alias);
 
@@ -985,11 +989,11 @@ namespace InnSyTech.Standard.Database
                 if (dbField.IsForeignKey)
                 {
                     StringBuilder childtable = new StringBuilder();
-                    fields.AppendFormat("{0}, ", CreateStatement(dbField.PropertyType, ref tree, childtable));
+                    fields.AppendFormat("{0}, ", CreateStatement(dbField.PropertyType, ref tree, out String childAlias, childtable));
                     tables.AppendFormat("LEFT OUTER JOIN {0} {2} ON {2}.{1}={3}.{4} ",
                         GetTableName(dbField.PropertyType),
                         DbField.GetPrimaryKey(dbField.PropertyType).Name,
-                        tree.Children.Single(child => child.Value.Item1 == dbField.PropertyType).Value.Item2,
+                        childAlias,
                         alias,
                         dbField.Name
                         ).Append(childtable.ToString());

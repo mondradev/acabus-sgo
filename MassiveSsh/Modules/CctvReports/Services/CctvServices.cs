@@ -4,6 +4,7 @@ using Acabus.Modules.Attendances.ViewModels;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils;
 using Acabus.Utils.Mvvm;
+using InnSyTech.Standard.Database;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -193,11 +194,19 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void LoadFromDataBase(this IList<Incidence> incidences)
         {
-            ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>();
-            foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).Status != IncidenceStatus.CLOSE))
+            var filter = new DbFilter();
+            filter.AddWhere(new DbFilterExpression(nameof(Incidence.Status), (Int16)IncidenceStatus.CLOSE, WhereOperator.EQUALS), WhereType.AND);
+            filter.AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), DateTime.Now.AddDays(-30), WhereOperator.GREAT_THAT), WhereType.AND);
+
+            ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>(new DbFilter(new List<DbFilterValue>() {
+                new DbFilterValue(new DbFilterExpression(nameof(Incidence.Status), (Int16)IncidenceStatus.CLOSE, WhereOperator.NO_EQUALS), WhereType.AND)
+            }));
+
+            foreach (var incidenceData in incidencesFromDb)
                 incidences.Add(incidenceData as Incidence);
-            foreach (var incidenceData in incidencesFromDb.Where(incidence => (incidence as Incidence).StartDate > DateTime.Now.AddDays(-35)
-                                                                                && (incidence as Incidence).Status == IncidenceStatus.CLOSE))
+
+            ICollection<Incidence> history = AcabusData.Session.GetObjects<Incidence>(filter);
+            foreach (var incidenceData in history)
                 incidences.Add(incidenceData as Incidence);
         }
 
