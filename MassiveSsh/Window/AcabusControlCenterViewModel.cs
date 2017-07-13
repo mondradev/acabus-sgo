@@ -105,8 +105,7 @@ namespace Acabus.Window
             foreach (var moduleName in DataAccess.AcabusData.Modules)
             {
                 var type = Type.GetType(moduleName);
-                var instanceTemp = Activator.CreateInstance(type);
-                GC.SuppressFinalize(instanceTemp);
+                type.GetMethod("LoadModule")?.Invoke(null, null);
             }
         }
 

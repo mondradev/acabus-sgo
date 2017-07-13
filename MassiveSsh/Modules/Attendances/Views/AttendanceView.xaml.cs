@@ -10,7 +10,7 @@ namespace Acabus.Modules.Attendances.Views
     /// </summary>
     public partial class AttendanceView : UserControl
     {
-        static AttendanceView()
+        public static void LoadModule()
         {
             AcabusData.LoadAttendanceModule();
             AcabusControlCenterViewModel.AddModule(

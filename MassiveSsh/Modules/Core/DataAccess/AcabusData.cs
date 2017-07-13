@@ -174,9 +174,7 @@ namespace Acabus.Modules.Core.DataAccess
             _allTechnicians = Acabus.DataAccess.AcabusData.Session.GetObjects<Technician>()
                                 .OrderBy(technician => technician.Name);
 
-            _cc = AllStations.FirstOrDefault(station =>
-                station.Devices.FirstOrDefault(device =>
-                    device.Type == DeviceType.DB) != null);
+            _cc = AllStations.FirstOrDefault(station => station.Name.Contains("CENTRO DE CONTROL"));
 
             LoadOffDutyVehiclesSettings();
         }

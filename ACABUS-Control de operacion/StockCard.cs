@@ -81,7 +81,7 @@ namespace ACABUS_Control_de_operacion
                          if (!this.IsDisposed)
                              this.BeginInvoke(new Action(() =>
                              {
-                                 String[] tempRow = new string[] { kvr.GetNumeSeri() };
+                                 String[] tempRow = new string[] { kvr.GetNumeSeri(), "N/C", "N/C", "N/C" };
                                  dgvResult.Rows.Add(tempRow);
                              }));
                      }

@@ -10,7 +10,7 @@ namespace Acabus.Modules.Configurations.Views
     /// </summary>
     public partial class ConfigurationView : UserControl
     {
-        static ConfigurationView()
+        public static void LoadModule()
         {
             AcabusData.LoadConfigModules();
             AcabusControlCenterViewModel.AddModule(new ConfigurationView(), new PackIcon() { Kind = PackIconKind.Settings }, "Configuración", true);

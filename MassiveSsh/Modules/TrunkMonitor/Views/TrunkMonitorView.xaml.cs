@@ -20,7 +20,7 @@ namespace Acabus.Modules.TrunkMonitor
         /// <summary>
         /// Constructor estático de la clase, permite la carga del modulo en la aplicación.
         /// </summary>
-        static TrunkMonitorView()
+        public static void LoadModule()
         {
             AcabusControlCenterViewModel.AddModule(
                 new TrunkMonitorView(),
