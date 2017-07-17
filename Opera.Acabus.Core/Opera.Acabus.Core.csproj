@@ -99,15 +99,16 @@
     <Compile Include="Models\Route.cs" />
     <Compile Include="Models\Station.cs" />
     <Compile Include="Models\TIStaff.cs" />
-    <Compile Include="Modules\Configurations\AcabusData.cs" />
     <Compile Include="Modules\Configurations\Configuration.xaml.cs">
       <DependentUpon>Configuration.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\Configurations\ConfigurationModule.cs" />
     <Compile Include="Modules\Configurations\IConfigurable.cs" />
     <Compile Include="Modules\Configurations\ViewModels\ConfigurationViewModel.cs" />
     <Compile Include="Modules\Configurations\Views\ConfigurationView.xaml.cs">
       <DependentUpon>ConfigurationView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\ISgoModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -61,7 +61,7 @@ namespace Opera.Acabus.Core.DataAccess
     /// o base de datos debe ser gestionada desde aqui para centralizar las comunicaciones.También
     /// ofrece funciones para realizar la comunicación con la ventana principal.
     /// </summary>
-    public static partial class AcabusData
+    public static class AcabusData
     {
         /// <summary>
         /// Nombre del directorio de recursos.
@@ -84,9 +84,9 @@ namespace Opera.Acabus.Core.DataAccess
         private static ICollection<Credential> _credentials;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Modules" />.
+        /// Campo que provee a la propiedad <see cref="ITStaff"/>.
         /// </summary>
-        private static ICollection<IModuleInfo> _module;
+        private static IEnumerable<ITStaff> _itStaff;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="ModulesNames"/>.
@@ -102,11 +102,6 @@ namespace Opera.Acabus.Core.DataAccess
         /// Campo que provee a la propiedad <see cref="Session" />.
         /// </summary>
         private static DbSession _session;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="ITStaff"/>.
-        /// </summary>
-        private static IEnumerable<ITStaff> _itStaff;
 
         /// <summary>
         /// Constructor estático de <see cref="AcabusData"/>.
@@ -191,10 +186,9 @@ namespace Opera.Acabus.Core.DataAccess
             => Queries.FirstOrDefault(query => query.Item1 == "DownloadDevices").Item2;
 
         /// <summary>
-        /// Obtiene una lista de los modulos actualmente añadidos al SGO.
+        /// Obtiene la lista de todos los miembros del personal registrados.
         /// </summary>
-        public static ICollection<IModuleInfo> Modules
-            => _module ?? (_module = new ObservableCollection<IModuleInfo>());
+        public static IEnumerable<ITStaff> ITStaff => _itStaff;
 
         /// <summary>
         /// Obtiene una lista de los nombres de los modulos de esta aplicación.
@@ -233,36 +227,6 @@ namespace Opera.Acabus.Core.DataAccess
             => Queries.FirstOrDefault(query => query.Item1 == "DownloadStations").Item2;
 
         /// <summary>
-        /// Obtiene la lista de todos los miembros del personal registrados.
-        /// </summary>
-        public static IEnumerable<ITStaff> ITStaff => _itStaff;
-
-        /// <summary>
-        /// Agrega una módulo al SGO.
-        /// </summary>
-        /// <param name="module">Vista principal del módulo a agregar.</param>
-        /// <param name="icon">Icono que usará para mostrarse en el menú principal.</param>
-        /// <param name="moduleName">Nombre del módulo.</param>
-        /// <param name="secundaryModule">
-        /// Si es <see cref="true"/>, el botón aparecerá del lado derecho de la barra de menú.
-        /// </param>
-        public static void AddModule(Type moduleClass, System.Windows.FrameworkElement icon,
-            String moduleName, Boolean secundaryModule)
-        {
-            ModuleInfo moduleInfo = new ModuleInfo()
-            {
-                Icon = icon,
-                IsLoaded = false,
-                IsSecundary = secundaryModule,
-                Name = moduleName,
-                Type = moduleClass
-            };
-
-            if (Modules.Where(module => module.Name == moduleInfo.Name).Count() < 1)
-                Modules.Add(moduleInfo);
-        }
-
-        /// <summary>
         /// Ejecuta una sentencia SQL en el servidor de base de datos.
         /// </summary>
         /// <param name="query">Sentencia Sql de selección.</param>
@@ -291,6 +255,25 @@ namespace Opera.Acabus.Core.DataAccess
 
             var response = psql.ExecuteQuery(query);
             return response.Skip(1).ToArray();
+        }
+
+        /// <summary>
+        /// Convierte las configuraciones guardadas en el archivo de configuración de la aplicación
+        /// en instancias del tipo representado.
+        /// </summary>
+        /// <typeparam name="T">Tipo destino de la configuración.</typeparam>
+        /// <param name="list">Colección de elementos leidos desde la configuración.</param>
+        /// <param name="converterFunction">Función para convertir la configuración en instancia.</param>
+        /// <param name="sectionName">Nombre de la sección de configuraciones.</param>
+        /// <param name="settingName">Nombre de los elementos de configuración.</param>
+        public static void FillList<T>(ref ICollection<T> list, Func<ISetting, T> converterFunction,
+            String sectionName, String settingName)
+        {
+            if (list is null) list = new ObservableCollection<T>();
+
+            var settings = XmlConfiguration.GetSettings(settingName, sectionName);
+            foreach (ISetting setting in settings)
+                list.Add(converterFunction.Invoke(setting));
         }
 
         /// <summary>
@@ -339,25 +322,6 @@ namespace Opera.Acabus.Core.DataAccess
                 .Invoke(new RequestSendMessageArg(message, RequestSendType.NOTIFY));
 
         /// <summary>
-        /// Convierte las configuraciones guardadas en el archivo de configuración de la aplicación
-        /// en instancias del tipo representado.
-        /// </summary>
-        /// <typeparam name="T">Tipo destino de la configuración.</typeparam>
-        /// <param name="list">Colección de elementos leidos desde la configuración.</param>
-        /// <param name="converterFunction">Función para convertir la configuración en instancia.</param>
-        /// <param name="sectionName">Nombre de la sección de configuraciones.</param>
-        /// <param name="settingName">Nombre de los elementos de configuración.</param>
-        private static void FillList<T>(ref ICollection<T> list, Func<ISetting, T> converterFunction,
-            String sectionName, String settingName)
-        {
-            if (list is null) list = new ObservableCollection<T>();
-
-            var settings = XmlConfiguration.GetSettings(settingName, sectionName);
-            foreach (ISetting setting in settings)
-                list.Add(converterFunction.Invoke(setting));
-        }
-
-        /// <summary>
         /// Realiza una consulta a la base de datos de la aplicación y obtiene los catálogos.
         /// </summary>
         private static void LoadFromDatabase()
@@ -404,37 +368,6 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Una <see cref="Tuple{String, String}"/> que representa un sentencia Sql.</returns>
         private static Tuple<string, string> SettingToQuery(ISetting arg)
             => Tuple.Create(arg["Item1"].ToString(), arg["Item2"].ToString());
-
-        /// <summary>
-        /// Define la estructura de la información de un módulo del SGO.
-        /// </summary>
-        private sealed class ModuleInfo : IModuleInfo
-        {
-            /// <summary>
-            /// Obtiene o establece icono del módulo.
-            /// </summary>
-            public System.Windows.FrameworkElement Icon { get; set; }
-
-            /// <summary>
-            /// Obtiene o establece si el módulo está cargado.
-            /// </summary>
-            public Boolean IsLoaded { get; set; }
-
-            /// <summary>
-            /// Obtiene o establece si el módulo es secundario.
-            /// </summary>
-            public Boolean IsSecundary { get; set; }
-
-            /// <summary>
-            /// Obtiene o establece el nombre de módulo.
-            /// </summary>
-            public String Name { get; set; }
-
-            /// <summary>
-            /// Obtiene o establece clase de la vista principal del módulo.
-            /// </summary>
-            public Type Type { get; set; }
-        }
 
         /// <summary>
         /// Define la configuración básica de la base de datos local.
