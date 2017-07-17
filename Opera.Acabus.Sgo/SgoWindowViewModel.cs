@@ -3,8 +3,10 @@ using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Core.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
 
@@ -19,6 +21,11 @@ namespace Opera.Acabus.Sgo
         /// Campo que provee a la propiedad 'Instance'.
         /// </summary>
         private static SgoWindowModelView _instance;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="Modules" />.
+        /// </summary>
+        private static ICollection<IModuleInfo> _module;
 
         /// <summary>
         /// Instancia de la vista de la ventana principal.
@@ -88,6 +95,37 @@ namespace Opera.Acabus.Sgo
         public static SgoWindowModelView Instance => _instance;
 
         /// <summary>
+        /// Obtiene una lista de los modulos actualmente añadidos al SGO.
+        /// </summary>
+        public static ICollection<IModuleInfo> Modules
+            => _module ?? (_module = new ObservableCollection<IModuleInfo>());
+
+        /// <summary>
+        /// Agrega una módulo al SGO.
+        /// </summary>
+        /// <param name="module">Vista principal del módulo a agregar.</param>
+        /// <param name="icon">Icono que usará para mostrarse en el menú principal.</param>
+        /// <param name="moduleName">Nombre del módulo.</param>
+        /// <param name="secundaryModule">
+        /// Si es <see cref="true"/>, el botón aparecerá del lado derecho de la barra de menú.
+        /// </param>
+        public static void AddModule(Type moduleClass, System.Windows.FrameworkElement icon,
+            String moduleName, Boolean secundaryModule)
+        {
+            ModuleInfo moduleInfo = new ModuleInfo()
+            {
+                Icon = icon,
+                IsLoaded = false,
+                IsSecundary = secundaryModule,
+                Name = moduleName,
+                Type = moduleClass
+            };
+
+            if (Modules.Where(module => module.Name == moduleInfo.Name).Count() < 1)
+                Modules.Add(moduleInfo);
+        }
+
+        /// <summary>
         /// Carga todos los modulos leidos del archivo de configuración de la aplicación.
         /// </summary>
         private static void LoadModule()
@@ -99,16 +137,35 @@ namespace Opera.Acabus.Sgo
                     Trace.WriteLine($"Cargando el módulo: '{moduleName.Item1}'...", "DEBUG");
                     Assembly assembly = Assembly.LoadFrom(moduleName.Item3);
                     var type = assembly.GetType(moduleName.Item2);
-                    var instanceTemp = Activator.CreateInstance(type);
-                    GC.SuppressFinalize(instanceTemp);
+                    var moduleInfo = Activator.CreateInstance(type);
+
+                    var viewType = type.GetProperty("View");
+                    var icon = type.GetProperty("Icon");
+                    var name = type.GetProperty("Name");
+                    var isSecundary = type.GetProperty("IsSecundary");
+                    var isService = type.GetProperty("IsService");
+
+                    if (!(bool)isService.GetValue(moduleInfo))
+                    {
+                        AddModule(viewType.GetValue(moduleInfo) as Type,
+                            icon.GetValue(moduleInfo) as System.Windows.FrameworkElement,
+                            name.GetValue(moduleInfo).ToString(),
+                            (bool)isSecundary.GetValue(moduleInfo));
+                    }
+
+                    var moduleLoaded = type.GetMethod("LoadModule")?.Invoke(moduleInfo, null);
+                    if (moduleLoaded is Boolean && (Boolean)moduleLoaded)
+                        AcabusData.SendNotify($"Módulo '{moduleName.Item1}' cargado");
+                    else
+                        AcabusData.SendNotify($"No se logró cargar el módulo '{moduleName.Item1}'");
                 }
                 catch (FileNotFoundException)
                 {
-                    AcabusData.SendNotify($"No se cargó el módulo '{moduleName.Item1}'");
+                    AcabusData.SendNotify($"No se encontró el módulo '{moduleName.Item1}'");
                 }
             }
 
-            foreach (IModuleInfo moduleInfo in AcabusData.Modules)
+            foreach (IModuleInfo moduleInfo in Modules)
             {
                 UserControl moduleView = null;
                 Instance?._view.AddToolButton(moduleInfo.Name.Replace(' ', '_'), new Command(parameter =>
@@ -122,6 +179,37 @@ namespace Opera.Acabus.Sgo
                      Instance?._view.ShowContent(moduleView);
                  }), moduleInfo.Icon, moduleInfo.Name, moduleInfo.IsSecundary);
             }
+        }
+
+        /// <summary>
+        /// Define la estructura de la información de un módulo del SGO.
+        /// </summary>
+        private sealed class ModuleInfo : IModuleInfo
+        {
+            /// <summary>
+            /// Obtiene o establece icono del módulo.
+            /// </summary>
+            public System.Windows.FrameworkElement Icon { get; set; }
+
+            /// <summary>
+            /// Obtiene o establece si el módulo está cargado.
+            /// </summary>
+            public Boolean IsLoaded { get; set; }
+
+            /// <summary>
+            /// Obtiene o establece si el módulo es secundario.
+            /// </summary>
+            public Boolean IsSecundary { get; set; }
+
+            /// <summary>
+            /// Obtiene o establece el nombre de módulo.
+            /// </summary>
+            public String Name { get; set; }
+
+            /// <summary>
+            /// Obtiene o establece clase de la vista principal del módulo.
+            /// </summary>
+            public Type Type { get; set; }
         }
 
         /// <summary>
