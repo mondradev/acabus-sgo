@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Structures.Trees;
+﻿using InnSyTech.Standard.Structures.Trees;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -679,6 +678,25 @@ namespace InnSyTech.Standard.Database
         }
 
         /// <summary>
+        /// Convierte el filtro en una cadena valida para una sentencia Sql.
+        /// </summary>
+        /// <param name="filter">Filtro a aplicar a la sentencia.</param>
+        /// <param name="alias">Alias de entidad a aplicar el filtro.</param>
+        /// <returns>Una cadena valida para una sentencia Sql.</returns>
+        private String FilterToString(DbFilter filter, String alias)
+        {
+            StringBuilder filtersSql = new StringBuilder();
+            var filters = filter.GetFilters();
+            foreach (var f in filters)
+            {
+                object value = f.Item1.Item2;
+                filtersSql.AppendFormat("{2} {3}.{0}{4}@{0} ", f.Item1.Item1, value, f.Item2, alias, OperatorToString(f.Item1.Item3));
+            }
+            var lenght = filters[0].Item2.ToString().Length;
+            return filtersSql.ToString().Substring(lenght);
+        }
+
+        /// <summary>
         /// Determina si el campo es una colección de entidades dependientes.
         /// </summary>
         /// <param name="field">Campo a evaluar.</param>
@@ -695,6 +713,38 @@ namespace InnSyTech.Standard.Database
             }
             typeChildren = null;
             return false;
+        }
+
+        /// <summary>
+        /// Convierte la instancia <see cref="WhereOperator"/> en el operador lógico Sql.
+        /// </summary>
+        /// <param name="@operator">Instancia a convertir en cadena.</param>
+        /// <returns>La cadena que representa el operador lógico Sql.</returns>
+        private String OperatorToString(WhereOperator @operator)
+        {
+            switch (@operator)
+            {
+                case WhereOperator.LESS_THAT:
+                    return "<";
+
+                case WhereOperator.GREAT_THAT:
+                    return ">";
+
+                case WhereOperator.EQUALS:
+                    return "=";
+
+                case WhereOperator.NO_EQUALS:
+                    return "<>";
+
+                case WhereOperator.LESS_AND_EQUALS:
+                    return "<=";
+
+                case WhereOperator.GREAT_AND_EQUALS:
+                    return ">=";
+
+                default:
+                    return "=";
+            }
         }
 
         /// <summary>
@@ -721,7 +771,7 @@ namespace InnSyTech.Standard.Database
             command.Transaction = transaction;
 
             StringBuilder tablesNames = new StringBuilder();
-            Tree<Tuple<Type, String>> treeControl = null;
+            Tree<Tuple<Type, String, ParsedInstance>> treeControl = null;
             String commandText = CreateStatement(typeOfInstance, ref treeControl, out String alias, tablesNames);
             String dependenceStatement = String.Format("WHERE {0}.{1}=@Key",
                 treeControl.Value.Item2,
@@ -769,7 +819,7 @@ namespace InnSyTech.Standard.Database
             command.Transaction = transaction;
 
             StringBuilder tablesNames = new StringBuilder();
-            Tree<Tuple<Type, String>> treeControl = null;
+            Tree<Tuple<Type, String, ParsedInstance>> treeControl = null;
             String commandText = CreateStatement(typeOfInstance, ref treeControl, out String alias, tablesNames);
             String dependenceStatement = !String.IsNullOrEmpty(foreignKeyName)
                 ? String.Format("WHERE {0}.{1}=@ForeignKey", treeControl.Value.Item2, foreignKeyName)
@@ -777,9 +827,9 @@ namespace InnSyTech.Standard.Database
 
             if (filter != null)
                 if (String.IsNullOrEmpty(dependenceStatement))
-                    dependenceStatement = String.Format("WHERE {0}", ToStringFilters(filter, treeControl.Value.Item2));
+                    dependenceStatement = String.Format("WHERE {0}", FilterToString(filter, treeControl.Value.Item2));
                 else
-                    dependenceStatement += String.Format(" AND {0}", ToStringFilters(filter, treeControl.Value.Item2));
+                    dependenceStatement += String.Format(" AND {0}", FilterToString(filter, treeControl.Value.Item2));
 
             command.CommandText = String.Format("SELECT {0} FROM {1} {2}", commandText, tablesNames.ToString(),
                 dependenceStatement);
@@ -792,7 +842,6 @@ namespace InnSyTech.Standard.Database
             DbDataReader reader = null;
             try
             {
-
                 reader = command.ExecuteReader();
 
                 T data = default(T);
@@ -800,6 +849,9 @@ namespace InnSyTech.Standard.Database
 
                 while (reader.Read())
                 {
+                    foreach (var node in treeControl)
+                        node.Value.Item3.Parsed = false;
+
                     data = ToInstance<T>(typeOfInstance, reader, treeControl, transaction);
                     objects.Add(data);
                 }
@@ -814,51 +866,27 @@ namespace InnSyTech.Standard.Database
             }
         }
 
-        private String ToStringFilters(DbFilter filter, String alias)
-        {
-            StringBuilder filtersSql = new StringBuilder();
-            var filters = filter.GetFilters();
-            foreach (var f in filters)
-            {
-                object value = f.Item1.Item2;
-                filtersSql.AppendFormat("{2} {3}.{0}{4}@{0} ", f.Item1.Item1, value, f.Item2, alias, GetOperator(f.Item1.Item3));
-            }
-            var lenght = filters[0].Item2.ToString().Length;
-            return filtersSql.ToString().Substring(lenght);
-        }
-
-        private String GetOperator(WhereOperator item3)
-        {
-            switch (item3)
-            {
-                case WhereOperator.LESS_THAT:
-                    return "<";
-                case WhereOperator.GREAT_THAT:
-                    return ">";
-                case WhereOperator.EQUALS:
-                    return "=";
-                case WhereOperator.NO_EQUALS:
-                    return "<>";
-                case WhereOperator.LESS_AND_EQUALS:
-                    return "<=";
-                case WhereOperator.GREAT_AND_EQUALS:
-                    return ">=";
-                default:
-                    return "=";
-            }
-        }
-
         #endregion GetUnidirectional
 
-        #region NewImplementation
+        #region ReadData
 
-        public T ToInstance<T>(Type type, DbDataReader reader, Tree<Tuple<Type, String>> parent, DbTransaction transaction = null)
+        /// <summary>
+        /// Traduce el resultado Sql en instancias que representan esta informacion.
+        /// </summary>
+        /// <typeparam name="T">Tipo de la instancia padre.</typeparam>
+        /// <param name="type">Tipo de dato de la instancia padre.</param>
+        /// <param name="reader">Lector de la base de datos.</param>
+        /// <param name="parent">Arbol de jerarquía que lleva el control de la lectura de los datos.</param>
+        /// <param name="transaction">Instancia de la transaccion con la cual se ha hecho la lectura.</param>
+        /// <returns>Una instancia con la informacion persistida.</returns>
+        internal T ToInstance<T>(Type type, DbDataReader reader, Tree<Tuple<Type, String, ParsedInstance>> parent, DbTransaction transaction = null)
         {
             var primaryKey = DbField.GetPrimaryKey(type);
             var dbFields = DbField.GetFields(type).SkipWhile(field => field.IsPrimaryKey);
 
             var instance = Activator.CreateInstance(type);
             var alias = parent.Value.Item2;
+            parent.Value.Item3.Parsed = true;
 
             if (!TrySetDbValue(primaryKey, instance, reader, String.Format("{0}_{1}", alias, primaryKey.Name)))
                 return default(T);
@@ -879,7 +907,7 @@ namespace InnSyTech.Standard.Database
                 if (dbField.IsPrimaryKey) continue;
                 if (dbField.IsForeignKey)
                 {
-                    dbField.SetValue(instance, ToInstance<Object>(dbField.PropertyType, reader, parent.Children.Single(node => node.Value.Item1 == dbField.PropertyType), transaction));
+                    dbField.SetValue(instance, ToInstance<Object>(dbField.PropertyType, reader, parent.Children.FirstOrDefault(node => node.Value.Item1 == dbField.PropertyType && !node.Value.Item3.Parsed), transaction));
                 }
                 else if (String.IsNullOrEmpty(dbField.ForeignKeyName))
                 {
@@ -927,6 +955,73 @@ namespace InnSyTech.Standard.Database
             return (T)instance;
         }
 
+        /// <summary>
+        /// Crea un enunciado Sql valido para obtener todos los datos que representan al tipo de dato pasador por argumento.
+        /// </summary>
+        /// <param name="type">Tipo de datos a obtener de la base de datos.</param>
+        /// <param name="parent">Arbol de jerarquia que lleva el control de la traduccion de los datos.</param>
+        /// <param name="aliasType">Alias de la entidad.</param>
+        /// <param name="tables">Sentencia de las entidades.</param>
+        /// <returns></returns>
+        private String CreateStatement(Type type, ref Tree<Tuple<Type, String, ParsedInstance>> parent, out String aliasType, StringBuilder tables = null)
+        {
+            if (!IsEntity(type))
+            {
+                aliasType = "";
+                return "";
+            }
+
+            Tree<Tuple<Type, string, ParsedInstance>> tree;
+
+            if (parent is null)
+            {
+                parent = new Tree<Tuple<Type, string, ParsedInstance>>(new Tuple<Type, string, ParsedInstance>(type, "T0", new ParsedInstance(false)));
+                tree = parent;
+            }
+            else
+            {
+                tree = new Tree<Tuple<Type, string, ParsedInstance>>(new Tuple<Type, string, ParsedInstance>(type, "T" + (parent.Root.Descendants.Count() + 1), new ParsedInstance(false)));
+                parent.Add(tree);
+            }
+
+            var dbFields = DbField.GetFields(type);
+            StringBuilder fields = new StringBuilder();
+            tables = tables ?? new StringBuilder();
+            string alias = tree.First(child => child.Value.Item1 == type).Value.Item2;
+            aliasType = alias;
+            if (tree.Root == tree)
+                tables.AppendFormat("{0} {1} ", GetTableName(type), alias);
+
+            foreach (var dbField in dbFields.OrderBy(field => field))
+            {
+                if (dbField.IsForeignKey)
+                {
+                    StringBuilder childtable = new StringBuilder();
+                    fields.AppendFormat("{0}, ", CreateStatement(dbField.PropertyType, ref tree, out String childAlias, childtable));
+                    tables.AppendFormat("LEFT OUTER JOIN {0} {2} ON {2}.{1}={3}.{4} ",
+                        GetTableName(dbField.PropertyType),
+                        DbField.GetPrimaryKey(dbField.PropertyType).Name,
+                        childAlias,
+                        alias,
+                        dbField.Name
+                        ).Append(childtable.ToString());
+                }
+                else if (String.IsNullOrEmpty(dbField.ForeignKeyName))
+                {
+                    fields.AppendFormat("{0}.{1} {0}_{1}, ", alias, dbField.Name);
+                }
+            }
+            return fields.Remove(fields.Length - 2, 1).ToString();
+        }
+
+        /// <summary>
+        /// Intenta obtener el valor desde la base de datos.
+        /// </summary>
+        /// <param name="dbField">Campo a settear desde la base de datos.</param>
+        /// <param name="instance">Instancia a settear la propiedad.</param>
+        /// <param name="reader">Lector de la base de datos.</param>
+        /// <param name="fieldName">Nombre del campo de la base de datos.</param>
+        /// <returns>Un valor <see cref="true"/> en caso de establecer el valor correctamente.</returns>
         private bool TrySetDbValue(DbField dbField, Object instance, DbDataReader reader, string fieldName)
         {
             try
@@ -955,55 +1050,22 @@ namespace InnSyTech.Standard.Database
             }
         }
 
-        public String CreateStatement(Type type, ref Tree<Tuple<Type, String>> parent, out String aliasType, StringBuilder tables = null)
+        /// <summary>
+        /// Estructura auxiliar para la lectura correcta del arbol de jerarquía de control de datos.
+        /// </summary>
+        internal class ParsedInstance
         {
-            if (!IsEntity(type))
-            {
-                aliasType = "";
-                return "";
-            }
+            /// <summary>
+            /// Crea una nueva instancia de <see cref="ParsedInstance"/>.
+            /// </summary>
+            /// <param name="parsed">Indica si la instancia ya fue parseada.</param>
+            public ParsedInstance(Boolean parsed)
+                => Parsed = parsed;
 
-            Tree<Tuple<Type, string>> tree;
-
-            if (parent is null)
-            {
-                parent = new Tree<Tuple<Type, string>>(new Tuple<Type, string>(type, "T0"));
-                tree = parent;
-            }
-            else
-            {
-                tree = new Tree<Tuple<Type, string>>(new Tuple<Type, string>(type, "T" + (parent.Root.Descendants.Count() + 1)));
-                parent.Add(tree);
-            }
-
-            var dbFields = DbField.GetFields(type);
-            StringBuilder fields = new StringBuilder();
-            tables = tables ?? new StringBuilder();
-            string alias = tree.Single(child => child.Value.Item1 == type).Value.Item2;
-            aliasType = alias;
-            if (tree.Root == tree)
-                tables.AppendFormat("{0} {1} ", GetTableName(type), alias);
-
-            foreach (var dbField in dbFields.OrderBy(field => field))
-            {
-                if (dbField.IsForeignKey)
-                {
-                    StringBuilder childtable = new StringBuilder();
-                    fields.AppendFormat("{0}, ", CreateStatement(dbField.PropertyType, ref tree, out String childAlias, childtable));
-                    tables.AppendFormat("LEFT OUTER JOIN {0} {2} ON {2}.{1}={3}.{4} ",
-                        GetTableName(dbField.PropertyType),
-                        DbField.GetPrimaryKey(dbField.PropertyType).Name,
-                        childAlias,
-                        alias,
-                        dbField.Name
-                        ).Append(childtable.ToString());
-                }
-                else if (String.IsNullOrEmpty(dbField.ForeignKeyName))
-                {
-                    fields.AppendFormat("{0}.{1} {0}_{1}, ", alias, dbField.Name);
-                }
-            }
-            return fields.Remove(fields.Length - 2, 1).ToString();
+            /// <summary>
+            /// Obtiene o establece si la instancia ya fue parseada.
+            /// </summary>
+            public bool Parsed { get; set; }
         }
 
         #endregion NewImplementation
