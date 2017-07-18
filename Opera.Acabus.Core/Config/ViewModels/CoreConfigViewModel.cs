@@ -1,11 +1,9 @@
 ﻿using InnSyTech.Standard.Mvvm;
-using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Config.Views;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -20,31 +18,6 @@ namespace Opera.Acabus.Core.Config.ViewModels
     public class CoreConfigViewModel : ViewModelBase
     {
         /// <summary>
-        /// Campo que provee a la propiedad 'Vehicles'.
-        /// </summary>
-        private ICollection<Bus> _buses;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Devices'.
-        /// </summary>
-        private ICollection<Device> _devices;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="ITStaff" />.
-        /// </summary>
-        private ICollection<ITStaff> _itStaff;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Routes'.
-        /// </summary>
-        private ICollection<Route> _routes;
-
-        /// <summary>
-        /// Campo que provee a la propiedad 'Stations'.
-        /// </summary>
-        private ICollection<Station> _stations;
-
-        /// <summary>
         /// Crea una instancia de <see cref="CoreConfigViewModel"/>.
         /// </summary>
         public CoreConfigViewModel()
@@ -56,24 +29,24 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     AcabusData.SendNotify("DESCARGANDO RUTAS...");
                     if (DownloadRoutes())
                     {
-                        AcabusData.ReloadData();
+                        OnPropertyChanged(nameof(Routes));
                         AcabusData.SendNotify("RUTAS DESCARGAS CORRECTAMENTE, DESCAGANDO AUTOBUSES...");
                         if (DownloadBuses())
                         {
                             AcabusData.SendNotify("AUTOBUSES DESCARGADOS Y REASIGNADOS A SUS RUTAS CORRECTAMENTE.");
-                            AcabusData.ReloadData();
+                            OnPropertyChanged(nameof(Buses));
                         }
                         else
                             AcabusData.SendNotify("ERROR: FALLA AL DESCARGAR LOS AUTOBUSES");
                         AcabusData.SendNotify("DESCARGANDO ESTACIONES...");
                         if (DownloadStations())
                         {
-                            AcabusData.ReloadData();
+                            OnPropertyChanged(nameof(Stations));
                             AcabusData.SendNotify("ESTACIONES DESCARGADAS CORRECTAMENTE, DESCARGANDO EQUIPOS ASIGNADOS...");
                             if (DownloadDevices())
                             {
                                 AcabusData.SendNotify("EQUIPOS DESCARGADOS CORRECTAMENTE.");
-                                RefreshData();
+                                OnPropertyChanged(nameof(Devices));
                             }
                             else
                                 AcabusData.SendNotify("ERROR: FALLA AL DESCARGAR LOS EQUIPOS");
@@ -105,6 +78,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
                             AcabusData.SendNotify("DESCAGANDO AUTOBUSES Y REASIGNANDO...");
                             if (DownloadBuses())
                                 AcabusData.SendNotify("VEHÍCULOS AUTOBUSES Y REASIGNADOS.");
+                            OnPropertyChanged(nameof(Routes));
+                            OnPropertyChanged(nameof(Buses));
                         });
                         break;
 
@@ -122,13 +97,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de todos los autobuses.
         /// </summary>
-        public ICollection<Bus> Buses {
-            get {
-                if (_buses == null)
-                    _buses = new ObservableCollection<Bus>();
-                return _buses;
-            }
-        }
+        public IEnumerable<Bus> Buses => AcabusData.AllBuses;
 
         /// <summary>
         /// Obtiene el comando para reasignar ruta a los autobuses.
@@ -138,13 +107,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de todos los dispositivos.
         /// </summary>
-        public ICollection<Device> Devices {
-            get {
-                if (_devices == null)
-                    _devices = new ObservableCollection<Device>();
-                return _devices;
-            }
-        }
+        public IEnumerable<Device> Devices => AcabusData.AllDevices;
 
         /// <summary>
         /// Obtiene el comando para descargar la información del servidor.
@@ -154,8 +117,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de el personal del área de TI.
         /// </summary>
-        public ICollection<ITStaff> ITStaff
-            => _itStaff ?? (_itStaff = new ObservableCollection<ITStaff>());
+        public IEnumerable<ITStaff> ITStaff => AcabusData.ITStaff as ICollection<ITStaff>;
 
         /// <summary>
         /// Obtiene el comando para actualizar la información desde la base de datos local.
@@ -165,13 +127,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de todas las rutas.
         /// </summary>
-        public ICollection<Route> Routes {
-            get {
-                if (_routes == null)
-                    _routes = new ObservableCollection<Route>();
-                return _routes;
-            }
-        }
+        public ICollection<Route> Routes => AcabusData.AllRoutes as ICollection<Route>;
 
         /// <summary>
         /// Obtiene el comando para mostrar el formulario para añadir equipos.
@@ -181,12 +137,18 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de todas las estaciones.
         /// </summary>
-        public ICollection<Station> Stations {
-            get {
-                if (_stations == null)
-                    _stations = new ObservableCollection<Station>();
-                return _stations;
-            }
+        public IEnumerable<Station> Stations => AcabusData.AllStations;
+
+        /// <summary>
+        /// Carga los valor al momento de mostrar el módulo de configuración.
+        /// </summary>
+        /// <param name="parameter">Parametros de carga.</param>
+        protected override void OnLoad(object parameter)
+        {
+            OnPropertyChanged(nameof(Routes));
+            OnPropertyChanged(nameof(Buses));
+            OnPropertyChanged(nameof(Stations));
+            OnPropertyChanged(nameof(Devices));
         }
 
         /// <summary>
@@ -218,11 +180,16 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     if (Buses.Contains(vehicle))
                     {
                         var vehicleReassign = Buses.FirstOrDefault(vehicleTemp => vehicleTemp.ID == vehicle.ID);
+                        vehicleReassign.Route?.Buses.Remove(vehicle);
                         vehicleReassign.Route = vehicle.Route;
+
+                        if (vehicle.Route != null && !vehicle.Route.Buses.Contains(vehicle))
+                            vehicle.Route.Buses.Add(vehicle);
+
                         AcabusData.Session.Update(ref vehicleReassign);
                         continue;
                     }
-                    Application.Current.Dispatcher.Invoke(() => Buses.Add(vehicle));
+                    routeAsigned.Buses.Add(vehicle);
                     AcabusData.Session.Save(ref vehicle);
                 }
                 return true;
@@ -263,12 +230,22 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     if (Devices.Contains(device))
                     {
                         var deviceReassign = Devices.FirstOrDefault(deviceTemp => device.ID == deviceTemp.ID);
+                        deviceReassign.Station?.Devices.Remove(device);
+                        deviceReassign.Bus?.Devices.Remove(device);
                         deviceReassign.Station = station;
                         deviceReassign.Bus = bus;
+
+                        if (bus != null && !bus.Devices.Contains(device))
+                            bus.Devices.Add(device);
+
+                        if (station != null && !station.Devices.Contains(device))
+                            station.Devices.Add(device);
+
                         AcabusData.Session.Update(ref device);
                         continue;
                     }
-                    Application.Current.Dispatcher.Invoke(() => Devices.Add(device));
+                    station?.Devices.Add(device);
+                    bus?.Devices.Add(device);
                     AcabusData.Session.Save(ref device);
                 }
                 return true;
@@ -325,22 +302,27 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     var id = UInt16.Parse(row[0].Trim());
                     var name = row[1].Trim();
                     var stationNumber = UInt16.Parse(row[2].Trim());
-                    var routeAsigned = AcabusData.AllRoutes.FirstOrDefault(route => route.ID == UInt16.Parse(row[3].Trim()));
+                    var routeAssigned = AcabusData.AllRoutes.FirstOrDefault(route => route.ID == UInt16.Parse(row[3].Trim()));
 
                     Station station = new Station(id, stationNumber)
                     {
                         Name = name,
-                        Route = routeAsigned
+                        Route = routeAssigned
                     };
 
                     if (Stations.Contains(station))
                     {
                         var stationReassign = Stations.FirstOrDefault(stationTemp => stationTemp.ID == station.ID);
+                        stationReassign.Route?.Stations.Remove(station);
                         stationReassign.Route = station.Route;
+
+                        if (station.Route != null && !station.Route.Stations.Contains(station))
+                            station.Route.Stations.Add(station);
+
                         AcabusData.Session.Update(ref stationReassign);
                         continue;
                     }
-                    Application.Current.Dispatcher.Invoke(() => Stations.Add(station));
+                    routeAssigned.Stations.Add(station);
                     AcabusData.Session.Save(ref station);
                 }
                 return true;
@@ -353,33 +335,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// </summary>
         private void RefreshData()
         {
-            Application.Current.Dispatcher.Invoke(() => Devices.Clear());
-            Application.Current.Dispatcher.Invoke(() => Buses.Clear());
-            Application.Current.Dispatcher.Invoke(() => Stations.Clear());
-            Application.Current.Dispatcher.Invoke(() => Routes.Clear());
-            Application.Current.Dispatcher.Invoke(() => ITStaff.Clear());
-
             AcabusData.ReloadData();
-
-            IEnumerable<Route> routes = AcabusData.AllRoutes;
-
-            foreach (var route in routes)
-                Application.Current.Dispatcher.Invoke(() => Routes.Add(route));
-
-            foreach (var station in routes.Select(route => route.Stations).Merge())
-                Application.Current.Dispatcher.Invoke(() => Stations.Add(station));
-
-            foreach (var vehicle in routes.Select(route => route.Buses).Merge())
-                Application.Current.Dispatcher.Invoke(() => Buses.Add(vehicle));
-
-            foreach (var device in Extensions.Merge(new[] {
-                Stations.Select(station => station.Devices).Merge(),
-                Buses.Select(vehicle => vehicle.Devices).Merge()
-            }))
-                Application.Current.Dispatcher.Invoke(() => Devices.Add(device));
-
-            foreach (var itStaff in AcabusData.ITStaff)
-                Application.Current.Dispatcher.Invoke(() => ITStaff.Add(itStaff));
         }
     }
 }

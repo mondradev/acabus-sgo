@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ViewModels="clr-namespace:Opera.Acabus.Core.Config.ViewModels"
     xmlns:converters="clr-namespace:Opera.Acabus.Core.Converters"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
     x:Class="Opera.Acabus.Core.Config.Views.CoreConfigView"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="279.2">
     <UserControl.Resources>
@@ -15,6 +16,11 @@
     <UserControl.DataContext>
         <ViewModels:CoreConfigViewModel />
     </UserControl.DataContext>
+    <i:Interaction.Triggers>
+        <i:EventTrigger >
+            <i:InvokeCommandAction Command="{Binding LoadCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <dragablz:TabablzControl Background="{Binding Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}">
             <TabItem>

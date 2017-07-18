@@ -1,5 +1,4 @@
 ﻿using InnSyTech.Standard.Mvvm;
-using Opera.Acabus.Core.DataAccess;
 using System.Collections.Generic;
 
 namespace Opera.Acabus.Core.Modules.Configurations.ViewModels
@@ -17,6 +16,6 @@ namespace Opera.Acabus.Core.Modules.Configurations.ViewModels
         /// <summary>
         /// Obtiene una lista de las vistas configurables.
         /// </summary>
-        public ICollection<IConfigurable> Configurables => AcabusData.Configurables;
+        public ICollection<IConfigurable> Configurables => ConfigurationModule.Configurables;
     }
 }
