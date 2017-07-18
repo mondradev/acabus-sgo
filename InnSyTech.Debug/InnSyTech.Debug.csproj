@@ -60,15 +60,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CashDestiny.cs" />
-    <Compile Include="Common.cs" />
-    <Compile Include="DbDaoSqlite.cs" />
-    <Compile Include="Incidence.cs" />
-    <Compile Include="IncidenceDao.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RefundOfMoney.cs" />
-    <Compile Include="SqliteConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -78,6 +71,14 @@
     <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">
       <Project>{f74fee3d-d536-44df-9e2c-53540ce78173}</Project>
       <Name>InnSyTech.Standard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassiveSsh\Acabus_Control_Operaciones.csproj">
+      <Project>{E196B435-1093-4704-8F4D-FC430842FFCD}</Project>
+      <Name>Acabus_Control_Operaciones</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Opera.Acabus.Core\Opera.Acabus.Core.csproj">
+      <Project>{5870b3e0-a665-4014-94d1-4ed21ceb442f}</Project>
+      <Name>Opera.Acabus.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

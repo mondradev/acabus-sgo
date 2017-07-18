@@ -30,6 +30,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Mono.Security">
+      <HintPath>..\MassiveSsh\Libraries\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\MassiveSsh\Libraries\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="Renci.SshNet">
+      <HintPath>..\MassiveSsh\Libraries\Renci.SshNet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database\DbAttribute.cs" />
+    <Compile Include="Database\DbFilter.cs" />
     <Compile Include="Database\Utils\DbEnumConverter.cs" />
     <Compile Include="Database\IDbConverter.cs" />
     <Compile Include="Database\DbField.cs" />
@@ -48,7 +60,21 @@
     <Compile Include="Database\DbSession.cs" />
     <Compile Include="Database\IDbConfiguration.cs" />
     <Compile Include="Database\Utils\SQLiteDateTimeConverter.cs" />
+    <Compile Include="Mvvm\Command.cs" />
+    <Compile Include="Mvvm\Converters\TranslateEnumConverter.cs" />
+    <Compile Include="Mvvm\NotifyPropertyChanged.cs" />
+    <Compile Include="Mvvm\ViewModelBase.cs" />
+    <Compile Include="Mvvm\ViewModelService.cs" />
+    <Compile Include="PostgreSQL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecureShell\Scp.cs" />
+    <Compile Include="SecureShell\Ssh.cs" />
+    <Compile Include="SecureShell\SshPsql.cs" />
+    <Compile Include="Structures\Trees\Tree.cs" />
+    <Compile Include="Utils\ConnectionTCP.cs" />
+    <Compile Include="Utils\Credential.cs" />
+    <Compile Include="Utils\EnumTranslate.cs" />
+    <Compile Include="Utils\Extension.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

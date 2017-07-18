@@ -9,7 +9,7 @@ namespace InnSyTech.Standard.Database
     /// Define una estructura que permite establecer como se manejan los datos correspondientes a un
     /// campo dentro de la base de datos.
     /// </summary>
-    internal class DbField
+    internal class DbField : IComparable<DbField>
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Converter'.
@@ -151,6 +151,26 @@ namespace InnSyTech.Standard.Database
         }
 
         /// <summary>
+        /// Compara la instnacia actual con otra y determina en que posición con relación a la otra.
+        /// Devuelve un valor 1 si debe ir delante, 0 si son iguales y -1 si va atras.
+        /// </summary>
+        /// <param name="other">Una instancia de <see cref="DbField"/> a comparar.</param>
+        /// <returns></returns>
+        public int CompareTo(DbField other)
+        {
+            if (other.IsPrimaryKey && !IsPrimaryKey)
+                return -1;
+            if (!other.IsPrimaryKey && IsPrimaryKey)
+                return 1;
+            if (other.IsForeignKey && !IsForeignKey)
+                return -1;
+            if (!other.IsForeignKey && IsForeignKey)
+                return 1;
+
+            return Name.CompareTo(other.Name);
+        }
+
+        /// <summary>
         /// Obtiene el valor de la propiedad de la instancia especificada por el campo actual.
         /// </summary>
         /// <param name="instance">Instancia que contiene la propiedad.</param>
@@ -190,8 +210,8 @@ namespace InnSyTech.Standard.Database
             }
         }
 
-        public override string ToString() 
-            => String.Format("{0}:[IsPrimaryKey:{1}, IsAutonumerical:{2}, IsForeingKey:{3}, ForeignKeyName:{4}, HasConverter: {5}]", 
+        public override string ToString()
+            => String.Format("{0}:[IsPrimaryKey:{1}, IsAutonumerical:{2}, IsForeingKey:{3}, ForeignKeyName:{4}, HasConverter: {5}]",
                 Name, IsPrimaryKey, IsAutonumerical, IsForeignKey, ForeignKeyName, Converter != null);
     }
 }

@@ -101,7 +101,7 @@ namespace Acabus.Modules.CctvReports.Models
         public Incidence Incidence {
             get => _incidence;
             set {
-                if (value.Device.Type == DeviceType.KVR)
+                if (value is null || value.Device is null || value.Device.Type == DeviceType.KVR)
                 {
                     _incidence = value;
                     OnPropertyChanged("Incidence");
