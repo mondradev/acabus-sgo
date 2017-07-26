@@ -95,7 +95,7 @@ namespace Acabus.Modules.CctvReports.Services
                 case "FALLA CONTADOR":
                     return faults.FirstOrDefault(fault => fault.Description == "EL CONTEO DE PASAJEROS ES MENOR A LAS VALIDACIONES");
                 case "SE REQUIERE BACKUP":
-                    return faults.FirstOrDefault(fault => fault.Description.Contains("NO SE TIENE INFORMACIÓN DE LAS OPERACIONES"));
+                    return faults.FirstOrDefault(fault => fault.Description.Contains("INFORMACIÓN DE LAS OPERACIONES"));
                 default: return null;
             }
         }
@@ -131,13 +131,24 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Equals(Alarm alarm, Incidence incidence)
         {
-            if (alarm.Device != null && !alarm.Device.Equals(incidence?.Device)) return false;
-            DeviceFault deviceFault = CreateDeviceFault(alarm);
-            if (deviceFault != null && deviceFault.ID.Equals(incidence.Description.ID)
-                || (alarm.Device.Type == DeviceType.CONT && deviceFault.Category == incidence.Description.Category))
-                if (alarm.DateTime == incidence.StartDate || incidence.Status == IncidenceStatus.OPEN)
-                    return true;
-            return false;
+            try
+            {
+                if (alarm is null) return false;
+                if (alarm.Device != null && !alarm.Device.Equals(incidence?.Device)) return false;
+                DeviceFault deviceFault = CreateDeviceFault(alarm);
+                if (deviceFault is null)
+                    throw new Exception($"No existe la falla especificada --> {alarm.Description}");
+                if (deviceFault != null && deviceFault.ID.Equals(incidence.Description.ID)
+                    || (alarm.Device.Type == DeviceType.CONT && deviceFault.Category == incidence.Description.Category))
+                    if (alarm.DateTime == incidence.StartDate || incidence.Status == IncidenceStatus.OPEN)
+                        return true;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message, "ERROR");
+                return false;
+            }
         }
 
         public static Boolean Equals(BusDisconnectedAlarm alarm, Incidence incidence)

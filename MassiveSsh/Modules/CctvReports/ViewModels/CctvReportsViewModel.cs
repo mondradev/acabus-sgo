@@ -446,27 +446,41 @@ namespace Acabus.Modules.CctvReports
             {
                 foreach (Alarm alarm in e.NewItems)
                 {
-                    Boolean exists = false;
-                    foreach (var incidence in Incidences)
-                        if (exists = CctvService.Equals(alarm, incidence)) break;
-                    if (alarm.Device.Type == DeviceType.CONT)
-                        foreach (var incidence in Incidences.Where(incidenceTemp
-                            => incidenceTemp.Status == IncidenceStatus.CLOSE
-                            && incidenceTemp.Device.Type == DeviceType.CONT
-                            && alarm.Device.Vehicle == incidenceTemp.Device.Vehicle
-                            && (DateTime.Now - incidenceTemp.FinishDate) < TimeSpan.FromDays(2)))
+                    try
+                    {
+                        if (alarm is null) continue;
+                        Boolean exists = false;
+                        foreach (var incidence in Incidences)
+                            if (exists = CctvService.Equals(alarm, incidence)) break;
+                        if (alarm.Device.Type == DeviceType.CONT)
+                            foreach (var incidence in Incidences.Where(incidenceTemp
+                                => incidenceTemp.Status == IncidenceStatus.CLOSE
+                                && incidenceTemp.Device.Type == DeviceType.CONT
+                                && alarm.Device.Vehicle == incidenceTemp.Device.Vehicle
+                                && (DateTime.Now - incidenceTemp.FinishDate) < TimeSpan.FromDays(2)))
+                            {
+                                exists = true;
+                                break;
+                            }
+                        if (!exists)
                         {
-                            exists = true;
-                            break;
+                            DeviceFault deviceFault = CctvService.CreateDeviceFault(alarm);
+                            if (deviceFault is null)
+                                continue;
+                            Incidences.CreateIncidence(
+                                deviceFault,
+                                alarm.Device,
+                                alarm.DateTime,
+                                alarm.Priority,
+                                "SISTEMA"
+                                );
                         }
-                    if (!exists)
-                        Incidences.CreateIncidence(
-                           CctvService.CreateDeviceFault(alarm),
-                            alarm.Device,
-                            alarm.DateTime,
-                            alarm.Priority,
-                            "SISTEMA"
-                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(ex.Message, "ERROR");
+                        continue;
+                    }
                 }
             }
         }
