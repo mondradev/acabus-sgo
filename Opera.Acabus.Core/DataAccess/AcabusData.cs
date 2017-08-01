@@ -120,6 +120,16 @@ namespace Opera.Acabus.Core.DataAccess
         }
 
         /// <summary>
+        /// Autentica a un usuario de SGO, permitiendo realizar diversas funciones según sus privilegios.
+        /// </summary>
+        /// <param name="credential">Credenciales del usuario a autenticarse.</param>
+        /// <returns>Un true si el usuario se autenticó correctamente.</returns>
+        public static bool Authenticate(Credential credential)
+        {
+            return true;
+        }
+
+        /// <summary>
         /// Evento que se desencadena cuando se realiza una petición para envíar un mensaje o
         /// notificación a la interfaz.
         /// </summary>

@@ -43,6 +43,17 @@ namespace InnSyTech.Standard.Utils
         }
 
         /// <summary>
+        /// Crea una instancia nueva de una credencial de acceso.
+        /// </summary>
+        public Credential()
+        {
+            _username = String.Empty;
+            _password = String.Empty;
+            _type = String.Empty;
+            _isRoot = false;
+        }
+
+        /// <summary>
         /// Obtiene si el usuario actual tiene permisos especiales.
         /// </summary>
         public Boolean IsRoot => _isRoot;

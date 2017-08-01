@@ -1,0 +1,22 @@
+﻿using System.ServiceProcess;
+
+namespace Opera.Acabus.Server
+{
+    public partial class ServerService : ServiceBase
+    {
+        public ServerService()
+        {
+            InitializeComponent();
+        }
+
+        protected override void OnStart(string[] args)
+        {
+            Core.Services.Server.Initialize();
+        }
+
+        protected override void OnStop()
+        {
+            Core.Services.Server.CloseAllSessions();
+        }
+    }
+}

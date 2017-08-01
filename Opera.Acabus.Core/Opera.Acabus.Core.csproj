@@ -47,12 +47,6 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="MaterialDesignColors, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialDesignColors.1.1.2\lib\net45\MaterialDesignColors.dll</HintPath>
-    </Reference>
-    <Reference Include="MaterialDesignThemes.Wpf, Version=2.3.0.823, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialDesignThemes.2.3.0.823\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -67,37 +61,14 @@
     <Reference Include="System.Data.SQLite.Linq, Version=1.0.105.2, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Data.SQLite.Linq.1.0.105.2\lib\net451\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
-    <Reference Include="System.Windows.Interactivity">
-      <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\CoreConfig.cs" />
-    <Compile Include="Config\ViewModels\AddDeviceViewModel.cs" />
-    <Compile Include="Config\ViewModels\CoreConfigViewModel.cs" />
-    <Compile Include="Config\ViewModels\ManualReassignRouteViewModel.cs" />
-    <Compile Include="Config\Views\AddDeviceView.xaml.cs">
-      <DependentUpon>AddDeviceView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Config\Views\CoreConfigView.xaml.cs">
-      <DependentUpon>CoreConfigView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Config\Views\ManualReassignRouteView.xaml.cs">
-      <DependentUpon>ManualReassignRouteView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Converters\AssignableAreaSpanishConverter.cs" />
-    <Compile Include="Converters\BusStatusSpanishConverter.cs" />
-    <Compile Include="Converters\BusTypeSpanishConverter.cs" />
-    <Compile Include="Converters\DeviceTypeConverter.cs" />
-    <Compile Include="Converters\RouteTypeSpanishConverter.cs" />
     <Compile Include="DataAccess\AcabusData.cs" />
     <Compile Include="DataAccess\DbIPAddressConverter.cs" />
     <Compile Include="DataAccess\XmlConfiguration.cs" />
@@ -108,19 +79,10 @@
     <Compile Include="Models\Route.cs" />
     <Compile Include="Models\Station.cs" />
     <Compile Include="Models\TIStaff.cs" />
-    <Compile Include="Modules\Configurations\Configuration.xaml.cs">
-      <DependentUpon>Configuration.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Modules\Configurations\ConfigurationModule.cs" />
-    <Compile Include="Modules\Configurations\IConfigurable.cs" />
-    <Compile Include="Modules\Configurations\ViewModels\ConfigurationViewModel.cs" />
-    <Compile Include="Modules\Configurations\Views\ConfigurationView.xaml.cs">
-      <DependentUpon>ConfigurationView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Modules\ISgoModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\Client.cs" />
-    <Compile Include="Services\Server.cs" />
+    <Compile Include="Services\Extensions.cs" />
+    <Compile Include="Services\Messages.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -133,28 +95,6 @@
     <None Include="App.config" />
     <None Include="Opera.Acabus.pfx" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="Config\Views\AddDeviceView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Config\Views\CoreConfigView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Config\Views\ManualReassignRouteView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Modules\Configurations\Configuration.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Modules\Configurations\Views\ConfigurationView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.105.2\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.105.2\build\net451\System.Data.SQLite.Core.targets')" />
