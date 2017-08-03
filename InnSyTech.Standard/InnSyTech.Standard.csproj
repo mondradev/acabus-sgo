@@ -65,13 +65,14 @@
     <Compile Include="Mvvm\NotifyPropertyChanged.cs" />
     <Compile Include="Mvvm\ViewModelBase.cs" />
     <Compile Include="Mvvm\ViewModelService.cs" />
+    <Compile Include="Net\Messenger\Iso8583\Message.cs" />
     <Compile Include="PostgreSQL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SecureShell\Scp.cs" />
     <Compile Include="SecureShell\Ssh.cs" />
     <Compile Include="SecureShell\SshPsql.cs" />
     <Compile Include="Structures\Trees\Tree.cs" />
-    <Compile Include="Utils\ConnectionTCP.cs" />
+    <Compile Include="Net\ConnectionTCP.cs" />
     <Compile Include="Utils\Credential.cs" />
     <Compile Include="Utils\EnumTranslate.cs" />
     <Compile Include="Utils\Extension.cs" />

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 
-namespace InnSyTech.Standard.Utils
+namespace InnSyTech.Standard.Net
 {
     /// <summary>
     /// Esta clase contiene funciones básicas para evaluar la disponibilidad de un
