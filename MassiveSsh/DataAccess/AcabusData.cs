@@ -515,6 +515,8 @@ namespace Acabus.DataAccess
                 LoadTechniciansSettings();
                 LoadCompaniesSettings();
 
+                Acabus.Modules.Core.DataAccess.AcabusData.ReloadData();
+
                 LoadModuleSettings();
 
                 _loadedData = true;

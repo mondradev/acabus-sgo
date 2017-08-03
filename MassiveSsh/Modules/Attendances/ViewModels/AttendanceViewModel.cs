@@ -61,7 +61,8 @@ namespace Acabus.Modules.Attendances.ViewModels
                 }
                 StringBuilder openedIncidence = new StringBuilder();
                 foreach (Incidence incidence in SelectedAttendance.OpenedIncidences)
-                    openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]);
+                    openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]
+                        + (String.IsNullOrEmpty(incidence.Observations) ? String.Empty : String.Format("\n*OBSERVACIONES:* {0}", incidence.Observations)));
                 openedIncidence.AppendFormat("*ASIGNADO:* {0}", SelectedAttendance.Technician);
 
                 try

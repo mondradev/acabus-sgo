@@ -2,6 +2,7 @@
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils;
 using Acabus.Utils.Mvvm;
+using InnSyTech.Standard.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,8 +38,6 @@ namespace Acabus.Modules.CctvReports.ViewModels
         /// Campo que provee a la propiedad 'HasRefundOfMoney'.
         /// </summary>
         private Boolean _hasRefundOfMoney;
-
-        private ICollection<Incidence> _incidences;
 
         /// <summary>
         /// Campo que provee a la propiedad 'IsBusIncidences'.
@@ -117,12 +116,13 @@ namespace Acabus.Modules.CctvReports.ViewModels
                             ? null
                             : SelectedVehicle.Devices;
 
-        public IEnumerable<DeviceFault> AllFaults => SelectedDevice is null
+        public IEnumerable<DeviceFault> AllFaults => (SelectedDevice is null
                     ? Core.DataAccess.AcabusData.AllFaults
                         .GroupBy(fault => fault.Description)
                         .Select(group => group.FirstOrDefault())
                     : Core.DataAccess.AcabusData.AllFaults
-                        .Where(fault => fault.Category.DeviceType == SelectedDevice.Type);
+                        .Where(fault => fault.Category.DeviceType == SelectedDevice.Type))
+            .OrderBy(fault => fault.Description);
 
         public IEnumerable<AssignableSection> AllLocations => IsBusIncidences
                     ? Core.DataAccess.AcabusData.AllRoutes.Cast<AssignableSection>()
@@ -317,21 +317,21 @@ namespace Acabus.Modules.CctvReports.ViewModels
             get => _startDate;
             set {
                 _startDate = value;
+                if (value != null && (_finishDate == null || _finishDate <= value))
+                    _finishDate = value?.AddDays(1);
                 OnPropertyChanged(nameof(StartDate));
+                OnPropertyChanged(nameof(FinishDate));
             }
         }
 
         protected override void OnLoad(object arg)
         {
-            Task.Run(() =>
-            {
-                _incidences = DataAccess.AcabusData.Session.GetObjects<Incidence>();
-                Application.Current.Dispatcher.Invoke(() => IsEnabled = true);
-                Application.Current.Dispatcher.Invoke(() => IsExpanded = true);
-            });
+            ClearFields();
+            IsExpanded = true;
+            IsEnabled = true;
         }
 
-        private void ClearFields(object obj)
+        private void ClearFields(object obj = null)
         {
             Folio = null;
             SelectedDescription = null;
@@ -343,50 +343,60 @@ namespace Acabus.Modules.CctvReports.ViewModels
             SelectedWhoReporting = null;
             StartDate = null;
             FinishDate = null;
+            HasRefundOfMoney = false;
+            _result = null;
         }
 
-        private void SeachIncidences(object obj)
+        private void SeachIncidences(object obj = null)
         {
             IsEnabled = false;
 
-            _result = _incidences.ToList();
+            var filter = new DbFilter();
 
             if (!String.IsNullOrEmpty(Folio))
-                _result = _result.Where(incidence => incidence.Folio.Contains(Folio));
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Folio), String.Format("%{0}%", Folio), WhereOperator.LIKE));
 
             if (SelectedLocation != null && SelectedLocation is Station)
-                _result = _result.Where(incidence => incidence.Device?.Station == SelectedLocation as Station);
+                filter.AddWhere(new DbFilterExpression("T4.ID", (SelectedLocation as Station).ID, WhereOperator.EQUALS));
 
             if (IsBusIncidences && SelectedVehicle != null)
-                _result = _result.Where(incidence => incidence.Device?.Vehicle == SelectedVehicle);
+                filter.AddWhere(new DbFilterExpression("T6.ID", SelectedVehicle.ID, WhereOperator.EQUALS));
 
-            if (IsStartDate && (StartDate != null || FinishDate != null))
-                _result = _result.Where(incidence => incidence.StartDate.Date.Between(StartDate, FinishDate));
-            else if (!IsStartDate && (StartDate != null || FinishDate != null))
-                _result = _result.Where(incidence => incidence.FinishDate != null && incidence.FinishDate.Value.Date.Between(StartDate, FinishDate));
+            if (IsStartDate && (StartDate != null && FinishDate != null))
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), String.Format("{0:yyyy-MM-dd}", StartDate), WhereOperator.GREAT_AND_EQUALS))
+                    .AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), String.Format("{0:yyyy-MM-dd}", FinishDate), WhereOperator.LESS_AND_EQUALS));
+            else if (!IsStartDate && (StartDate != null && FinishDate != null))
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.FinishDate), String.Format("{0:yyyy-MM-dd}", StartDate), WhereOperator.GREAT_AND_EQUALS))
+                    .AddWhere(new DbFilterExpression(nameof(Incidence.FinishDate), String.Format("{0:yyyy-MM-dd}", FinishDate), WhereOperator.LESS_AND_EQUALS));
 
             if (SelectedDevice != null)
-                _result = _result.Where(incidence => incidence.Device == SelectedDevice);
+                filter.AddWhere(new DbFilterExpression("T3.ID", SelectedDevice.ID, WhereOperator.EQUALS));
 
             if (SelectedTechnician != null)
-                _result = _result.Where(incidence => incidence.Technician == SelectedTechnician);
+                filter.AddWhere(new DbFilterExpression("T10.ID", SelectedTechnician, WhereOperator.EQUALS));
 
             if (SelectedDescription != null)
-                _result = _result.Where(incidence => incidence.Description != null
-                    && incidence.Description.Description == SelectedDescription.Description);
+                filter.AddWhere(new DbFilterExpression("T8.Description", String.Format("%{0}%", SelectedDescription.Description), WhereOperator.LIKE));
 
             if (SelectedStatus != null)
-                _result = _result.Where(incidence => incidence.Status == SelectedStatus);
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Status), (int)SelectedStatus, WhereOperator.EQUALS));
 
             if (!String.IsNullOrEmpty(SelectedWhoReporting))
-                _result = _result.Where(incidence => incidence.WhoReporting == SelectedWhoReporting);
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.WhoReporting), SelectedWhoReporting, WhereOperator.EQUALS));
 
             if (HasRefundOfMoney)
-                _result = _result.Where(incidence => incidence.HasRefundOfMoney());
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Folio), "(SELECT Fk_Folio FROM RefundOfMoney)", WhereOperator.IN));
+            Task.Run(() =>
+            {
+                _result = DataAccess.AcabusData.Session.GetObjects<Incidence>(filter);
 
-            OnPropertyChanged(nameof(Result));
-            IsExpanded = false;
-            IsEnabled = true;
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    OnPropertyChanged(nameof(Result));
+                    IsExpanded = false;
+                    IsEnabled = true;
+                });
+            });
         }
     }
 }

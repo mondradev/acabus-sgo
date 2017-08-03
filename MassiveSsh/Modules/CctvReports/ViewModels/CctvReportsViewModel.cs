@@ -23,6 +23,7 @@ namespace Acabus.Modules.CctvReports
     public sealed class CctvReportsViewModel : ViewModelBase
     {
         private const string TEMP_NIGHT_TASKS = "~$tmp_counterfailings.dat";
+        private const string TEMP_NIGHT_TASKS_KVR = "~$tmp_task_kvr.dat";
 
         /// <summary>
         /// Campo que provee a la propiedad 'Alarms'.
@@ -449,31 +450,52 @@ namespace Acabus.Modules.CctvReports
                     try
                     {
                         if (alarm is null) continue;
+                        if (alarm.Device is null) continue;
+
                         Boolean exists = false;
-                        foreach (var incidence in Incidences)
-                            if (exists = CctvService.Equals(alarm, incidence)) break;
+                        var incidences = Incidences.Where(incidence => incidence.Device == alarm.Device);
+                        if (incidences.Count() > 0)
+                            foreach (var incidence in incidences)
+                                if (exists = CctvService.Equals(alarm, incidence)) break;
                         if (alarm.Device.Type == DeviceType.CONT)
-                            foreach (var incidence in Incidences.Where(incidenceTemp
-                                => incidenceTemp.Status == IncidenceStatus.CLOSE
-                                && incidenceTemp.Device.Type == DeviceType.CONT
-                                && alarm.Device.Vehicle == incidenceTemp.Device.Vehicle
-                                && (DateTime.Now - incidenceTemp.FinishDate) < TimeSpan.FromDays(2)))
-                            {
+                        {
+                            incidences = Incidences.Where(incidenceTemp
+                                  => incidenceTemp.Status == IncidenceStatus.CLOSE
+                                  && incidenceTemp.Device.Type == DeviceType.CONT
+                                  && alarm.Device.Vehicle == incidenceTemp.Device.Vehicle
+                                  && (DateTime.Now - incidenceTemp.FinishDate) < TimeSpan.FromDays(2));
+                            if (incidences.Count() > 0)
                                 exists = true;
-                                break;
-                            }
+                        }
                         if (!exists)
                         {
                             DeviceFault deviceFault = CctvService.CreateDeviceFault(alarm);
                             if (deviceFault is null)
                                 continue;
-                            Incidences.CreateIncidence(
+
+                            if (alarm.IsHistorial)
+                                Incidences.CreateIncidence(
                                 deviceFault,
                                 alarm.Device,
                                 alarm.DateTime,
                                 alarm.Priority,
-                                "SISTEMA"
+                                "SISTEMA",
+                                alarm.Comments,
+                                IncidenceStatus.CLOSE,
+                                null,
+                                Core.DataAccess.AcabusData.AllTechnicians
+                                                    .FirstOrDefault(technician => technician.Name == "SISTEMA"),
+                                alarm.DateTime
                                 );
+                            else
+                                Incidences.CreateIncidence(
+                                    deviceFault,
+                                    alarm.Device,
+                                    alarm.DateTime,
+                                    alarm.Priority,
+                                    "SISTEMA",
+                                    alarm.Comments
+                                    );
                         }
                     }
                     catch (Exception ex)
@@ -640,6 +662,8 @@ namespace Acabus.Modules.CctvReports
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
         }
 
+        bool connected = false;
+
         private void InitNightTasks()
         {
             if (_nightTasks != null) return;
@@ -664,6 +688,32 @@ namespace Acabus.Modules.CctvReports
                         Trace.WriteLine("Buscando backups faltantes", "DEBUG");
                         Alarms.SearchMissingBackups();
                         File.WriteAllText(TEMP_NIGHT_TASKS, DateTime.Now.ToString());
+                    }
+                    catch (IOException)
+                    {
+                        File.Delete(TEMP_NIGHT_TASKS);
+                    }
+                }
+                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(0), TimeSpan.FromHours(3)))
+                {
+                    if (connected) return;
+                    try
+                    {
+                        if (File.Exists(TEMP_NIGHT_TASKS_KVR))
+                        {
+                            String date = File.ReadAllText(TEMP_NIGHT_TASKS_KVR);
+                            DateTime lastUpdate = DateTime.Parse(date);
+
+                            if (lastUpdate.Date.Equals(DateTime.Now.Date))
+                                return;
+                        }
+                        connected = true;
+                        Trace.WriteLine("Buscando recaudos", "DEBUG");
+                        Alarms.SearchPickUpMoney();
+                        Trace.WriteLine("Buscando suministros", "DEBUG");
+                        Alarms.SearchFillStock();
+                        File.WriteAllText(TEMP_NIGHT_TASKS_KVR, DateTime.Now.ToString());
+                        connected = false;
                     }
                     catch (IOException)
                     {

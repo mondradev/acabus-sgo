@@ -11,6 +11,11 @@ namespace Acabus.Modules.CctvReports.Models
     public sealed class Alarm : NotifyPropertyChanged
     {
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="Comments" />.
+        /// </summary>
+        private String _comments;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'DateTime'.
         /// </summary>
         private DateTime _dateTime;
@@ -31,6 +36,11 @@ namespace Acabus.Modules.CctvReports.Models
         private UInt32 _id;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="IsHistorial" />.
+        /// </summary>
+        private Boolean _isHistorial;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'Priority'.
         /// </summary>
         private Priority _priority;
@@ -40,6 +50,17 @@ namespace Acabus.Modules.CctvReports.Models
         /// </summary>
         /// <param name="id">Identificador de alarma.</param>
         public Alarm(UInt32 id) => _id = id;
+
+        /// <summary>
+        /// Obtiene o establece las observaciones de la alarma.
+        /// </summary>
+        public String Comments {
+            get => _comments;
+            set {
+                _comments = value;
+                OnPropertyChanged(nameof(Comments));
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece la fecha y hora de la alarma.
@@ -80,6 +101,17 @@ namespace Acabus.Modules.CctvReports.Models
         public UInt32 ID => _id;
 
         /// <summary>
+        /// Obtiene o establece si la alarma solo es historial.
+        /// </summary>
+        public Boolean IsHistorial {
+            get => _isHistorial;
+            set {
+                _isHistorial = value;
+                OnPropertyChanged(nameof(IsHistorial));
+            }
+        }
+
+        /// <summary>
         /// Obtiene o establece la prioridad de la incidencia.
         /// </summary>
         public Priority Priority {
@@ -99,7 +131,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <param name="dateTime">Fecha y hora de la alarma.</param>
         /// <param name="priority">La prioridad que requiere de atención.</param>
         /// <returns>Una alarma de dispositivo.</returns>
-        public static Alarm CreateAlarm(UInt32 id, String numeSeri, String description, DateTime dateTime, Priority priority)
+        public static Alarm CreateAlarm(UInt32 id, String numeSeri, String description, DateTime dateTime, Priority priority, String comments = null, Boolean isHistorial = false)
         {
             var device = Core.DataAccess.AcabusData.AllDevices.FirstOrDefault((dev)
                             => dev.NumeSeri.Equals(numeSeri));
@@ -110,7 +142,9 @@ namespace Acabus.Modules.CctvReports.Models
                 Description = description,
                 DateTime = dateTime,
                 Device = device,
-                Priority = priority
+                Priority = priority,
+                Comments = comments,
+                IsHistorial = isHistorial
             };
         }
 
