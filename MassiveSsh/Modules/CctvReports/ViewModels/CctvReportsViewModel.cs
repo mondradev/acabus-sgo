@@ -683,9 +683,9 @@ namespace Acabus.Modules.CctvReports
                             if (lastUpdate.Date.Equals(DateTime.Now.Date))
                                 return;
                         }
-                        Trace.WriteLine("Buscando contadores en mal estado", "DEBUG");
+                        Trace.WriteLine("Buscando contadores en mal estado", "NOTIFY");
                         Alarms.SearchCountersFailing();
-                        Trace.WriteLine("Buscando backups faltantes", "DEBUG");
+                        Trace.WriteLine("Buscando backups faltantes", "NOTIFY");
                         Alarms.SearchMissingBackups();
                         File.WriteAllText(TEMP_NIGHT_TASKS, DateTime.Now.ToString());
                     }
@@ -694,7 +694,7 @@ namespace Acabus.Modules.CctvReports
                         File.Delete(TEMP_NIGHT_TASKS);
                     }
                 }
-                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(0), TimeSpan.FromHours(3)))
+                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(2), TimeSpan.FromHours(3)))
                 {
                     if (connected) return;
                     try
@@ -708,9 +708,9 @@ namespace Acabus.Modules.CctvReports
                                 return;
                         }
                         connected = true;
-                        Trace.WriteLine("Buscando recaudos", "DEBUG");
+                        Trace.WriteLine("Buscando recaudos", "NOTIFY");
                         Alarms.SearchPickUpMoney();
-                        Trace.WriteLine("Buscando suministros", "DEBUG");
+                        Trace.WriteLine("Buscando suministros", "NOTIFY");
                         Alarms.SearchFillStock();
                         File.WriteAllText(TEMP_NIGHT_TASKS_KVR, DateTime.Now.ToString());
                         connected = false;
