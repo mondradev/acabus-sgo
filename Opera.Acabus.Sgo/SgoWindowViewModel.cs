@@ -1,6 +1,7 @@
 ﻿using InnSyTech.Standard.Mvvm;
 using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.Gui;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
+using static Opera.Acabus.Core.Gui.Dispatcher;
 
 namespace Opera.Acabus.Sgo
 {
@@ -32,10 +34,6 @@ namespace Opera.Acabus.Sgo
         /// </summary>
         private SgoWindowView _view;
 
-        /// <summary>
-        /// Contiene los mensajes de error omitidos en la aplicación.
-        /// </summary>
-        private List<String> messageSkiped = new List<string>();
 
         /// <summary>
         /// Agrega un escucha al Trace para poder capturar los mensajes y mostrar los de error en la Snackbar
@@ -55,12 +53,12 @@ namespace Opera.Acabus.Sgo
             _view = view;
             _instance = this;
 
-            AcabusData.RequestingShowContent += arg =>
+            Dispatcher.RequestingShowContent += arg =>
              {
                  Instance?._view.ShowContent(arg.Content);
              };
 
-            AcabusData.RequestingShowDialog += async arg =>
+            Dispatcher.RequestingShowDialog += async arg =>
             {
                 DialogHost.CloseDialogCommand.Execute(null, null);
 
@@ -70,7 +68,7 @@ namespace Opera.Acabus.Sgo
                 arg.Callback?.Invoke(response);
             };
 
-            AcabusData.RequestingSendMessageOrNotify += async arg =>
+            Dispatcher.RequestingSendMessageOrNotify += async arg =>
             {
                 switch (arg.SendType)
                 {
@@ -137,6 +135,10 @@ namespace Opera.Acabus.Sgo
                     Trace.WriteLine($"Cargando el módulo: '{moduleName.Item1}'...", "DEBUG");
                     Assembly assembly = Assembly.LoadFrom(moduleName.Item3);
                     var type = assembly.GetType(moduleName.Item2);
+
+                    if (type is null)
+                        throw new Exception($"Libería no contiene módulo especificado ---> {moduleName.Item1}");
+
                     var moduleInfo = Activator.CreateInstance(type);
 
                     var viewType = type.GetProperty("View");
@@ -155,13 +157,17 @@ namespace Opera.Acabus.Sgo
 
                     var moduleLoaded = type.GetMethod("LoadModule")?.Invoke(moduleInfo, null);
                     if (moduleLoaded is Boolean && (Boolean)moduleLoaded)
-                        AcabusData.SendNotify($"Módulo '{moduleName.Item1}' cargado");
+                        Dispatcher.SendNotify($"Módulo '{moduleName.Item1}' cargado");
                     else
-                        AcabusData.SendNotify($"No se logró cargar el módulo '{moduleName.Item1}'");
+                        Dispatcher.SendNotify($"No se logró cargar el módulo '{moduleName.Item1}'");
                 }
                 catch (FileNotFoundException)
                 {
-                    AcabusData.SendNotify($"No se encontró el módulo '{moduleName.Item1}'");
+                    Dispatcher.SendNotify($"No se encontró el módulo '{moduleName.Item1}'");
+                }
+                catch (Exception)
+                {
+                    Dispatcher.SendNotify($"No se encontró módulo '{moduleName.Item1}' en libería '{moduleName.Item3}'");
                 }
             }
 
@@ -234,11 +240,8 @@ namespace Opera.Acabus.Sgo
                 if (Instance == null) return;
 
                 String[] messageData = message.Split(new Char[] { ':' }, 2);
-                if (messageData.Length > 0 && messageData[0] == "NOTIFY" && !Instance.messageSkiped.Contains(messageData[1].ToUpper()))
-                    Instance._view.AddMessage(
-                        messageData[1].ToUpper(),
-                        () => Instance.messageSkiped.Add(messageData[1].ToUpper()),
-                        "OMITIR");
+                if (messageData.Length > 0 && messageData[0] == "NOTIFY")
+                    Instance._view.AddMessage(messageData[1].ToUpper());
             }
         }
     }

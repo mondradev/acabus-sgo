@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Opera.Acabus.Core.Config.Views
+namespace Opera.Acabus.Configurations.Config.Views
 {
     /// <summary>
     /// Define la lógica de <see cref="ManualReassignRouteView"/>.

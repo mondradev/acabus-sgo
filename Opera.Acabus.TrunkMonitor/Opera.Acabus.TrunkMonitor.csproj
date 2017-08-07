@@ -57,7 +57,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\TrunkMonitorConfig.cs" />
     <Compile Include="Models\Link.cs" />
     <Compile Include="Models\LinkState.cs" />
     <Compile Include="Models\StateInfo.cs" />
@@ -93,14 +92,15 @@
       <Project>{F74FEE3D-D536-44DF-9E2C-53540CE78173}</Project>
       <Name>InnSyTech.Standard</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Opera.Acabus.Core.Gui\Opera.Acabus.Core.Gui.csproj">
+      <Project>{5af35be9-b74b-4f44-84e3-1010cce72c5e}</Project>
+      <Name>Opera.Acabus.Core.Gui</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Opera.Acabus.Core\Opera.Acabus.Core.csproj">
       <Project>{5870b3e0-a665-4014-94d1-4ed21ceb442f}</Project>
       <Name>Opera.Acabus.Core</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Config\ViewModels\" />
-    <Folder Include="Config\Views\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

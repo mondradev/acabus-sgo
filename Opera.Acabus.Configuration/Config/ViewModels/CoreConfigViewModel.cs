@@ -1,6 +1,7 @@
 ﻿using InnSyTech.Standard.Mvvm;
-using Opera.Acabus.Core.Config.Views;
+using Opera.Acabus.Configurations.Config.Views;
 using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Opera.Acabus.Core.Config.ViewModels
+namespace Opera.Acabus.Configurations.Config.ViewModels
 {
     /// <summary>
     /// Define la estructura del modelo de la vista de <see cref="Views.CoreConfigView"/>.
@@ -26,36 +27,36 @@ namespace Opera.Acabus.Core.Config.ViewModels
             {
                 Task.Run(() =>
                 {
-                    AcabusData.SendNotify("DESCARGANDO RUTAS...");
+                    Dispatcher.SendNotify("DESCARGANDO RUTAS...");
                     if (DownloadRoutes())
                     {
                         OnPropertyChanged(nameof(Routes));
-                        AcabusData.SendNotify("RUTAS DESCARGAS CORRECTAMENTE, DESCAGANDO AUTOBUSES...");
+                        Dispatcher.SendNotify("RUTAS DESCARGAS CORRECTAMENTE, DESCAGANDO AUTOBUSES...");
                         if (DownloadBuses())
                         {
-                            AcabusData.SendNotify("AUTOBUSES DESCARGADOS Y REASIGNADOS A SUS RUTAS CORRECTAMENTE.");
+                            Dispatcher.SendNotify("AUTOBUSES DESCARGADOS Y REASIGNADOS A SUS RUTAS CORRECTAMENTE.");
                             OnPropertyChanged(nameof(Buses));
                         }
                         else
-                            AcabusData.SendNotify("ERROR: FALLA AL DESCARGAR LOS AUTOBUSES");
-                        AcabusData.SendNotify("DESCARGANDO ESTACIONES...");
+                            Dispatcher.SendNotify("ERROR: FALLA AL DESCARGAR LOS AUTOBUSES");
+                        Dispatcher.SendNotify("DESCARGANDO ESTACIONES...");
                         if (DownloadStations())
                         {
                             OnPropertyChanged(nameof(Stations));
-                            AcabusData.SendNotify("ESTACIONES DESCARGADAS CORRECTAMENTE, DESCARGANDO EQUIPOS ASIGNADOS...");
+                            Dispatcher.SendNotify("ESTACIONES DESCARGADAS CORRECTAMENTE, DESCARGANDO EQUIPOS ASIGNADOS...");
                             if (DownloadDevices())
                             {
-                                AcabusData.SendNotify("EQUIPOS DESCARGADOS CORRECTAMENTE.");
+                                Dispatcher.SendNotify("EQUIPOS DESCARGADOS CORRECTAMENTE.");
                                 OnPropertyChanged(nameof(Devices));
                             }
                             else
-                                AcabusData.SendNotify("ERROR: FALLA AL DESCARGAR LOS EQUIPOS");
+                                Dispatcher.SendNotify("ERROR: FALLA AL DESCARGAR LOS EQUIPOS");
                         }
                         else
-                            AcabusData.SendNotify("ERROR: FALLA AL DESCARGAR LAS ESTACIONES");
+                            Dispatcher.SendNotify("ERROR: FALLA AL DESCARGAR LAS ESTACIONES");
                     }
                     else
-                        AcabusData.SendNotify("ERROR: FALLA AL DESCARGAR LAS RUTAS");
+                        Dispatcher.SendNotify("ERROR: FALLA AL DESCARGAR LAS RUTAS");
                 });
             });
 
@@ -64,7 +65,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 Task.Run(() =>
                 {
                     RefreshData();
-                    AcabusData.SendNotify("LISTA DE EQUIPOS, ESTACIONES, AUTOBUSES Y RUTAS ACTUALIZADAS.");
+                    Dispatcher.SendNotify("LISTA DE EQUIPOS, ESTACIONES, AUTOBUSES Y RUTAS ACTUALIZADAS.");
                 });
             });
 
@@ -75,21 +76,21 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     case "0":
                         Task.Run(() =>
                         {
-                            AcabusData.SendNotify("DESCAGANDO AUTOBUSES Y REASIGNANDO...");
+                            Dispatcher.SendNotify("DESCAGANDO AUTOBUSES Y REASIGNANDO...");
                             if (DownloadBuses())
-                                AcabusData.SendNotify("VEHÍCULOS AUTOBUSES Y REASIGNADOS.");
+                                Dispatcher.SendNotify("VEHÍCULOS AUTOBUSES Y REASIGNADOS.");
                             OnPropertyChanged(nameof(Routes));
                             OnPropertyChanged(nameof(Buses));
                         });
                         break;
 
                     case "1":
-                        AcabusData.RequestShowDialog(new ManualReassignRouteView(), RefreshCommand.Execute);
+                        Dispatcher.RequestShowDialog(new ManualReassignRouteView(), RefreshCommand.Execute);
                         break;
                 }
             });
 
-            ShowAddDeviceCommand = new Command(parameter => AcabusData.RequestShowDialog(new AddDeviceView(), RefreshCommand.Execute));
+            ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), RefreshCommand.Execute));
 
             Task.Run(() => RefreshData());
         }

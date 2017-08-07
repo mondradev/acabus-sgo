@@ -4,9 +4,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ViewModels="clr-namespace:Opera.Acabus.Core.Config.ViewModels"
-    xmlns:converters="clr-namespace:Opera.Acabus.Core.Converters"
-    x:Class="Opera.Acabus.Core.Config.Views.AddDeviceView"
+    xmlns:ViewModels="clr-namespace:Opera.Acabus.Configurations.Config.ViewModels"
+    xmlns:converters="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
+    x:Class="Opera.Acabus.Configurations.Config.Views.AddDeviceView"
              mc:Ignorable="d">
     <UserControl.Resources>
         <converters:DeviceTypeSpanishConverter x:Key="DeviceTypeConverter" />
