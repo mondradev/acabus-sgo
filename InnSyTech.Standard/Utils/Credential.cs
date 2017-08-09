@@ -3,24 +3,30 @@
 namespace InnSyTech.Standard.Utils
 {
     /// <summary>
+    /// Permisos básicos de una credencial de acceso a sistemas informáticos.
+    /// </summary>
+    public enum Permissions
+    {
+        NONE,
+        READ,
+        WRITE,
+        ROOT
+    }
+
+    /// <summary>
     /// Define una estructura que almacena las credenciales de acceso a un dispositivo.
     /// </summary>
     public sealed class Credential
     {
-        /// <summary>
-        /// Campo que provee a la propiedad 'IsRoot'.
-        /// </summary>
-        private Boolean _isRoot;
-
         /// <summary>
         /// Campo que provee a la propiedad 'Password'.
         /// </summary>
         private String _password;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Type'.
+        /// Campo que provee a la propiedad <see cref="Permission"/>.
         /// </summary>
-        private String _type;
+        private Permissions _permission;
 
         /// <summary>
         /// Campo que provee a la propiedad 'Username'.
@@ -32,14 +38,12 @@ namespace InnSyTech.Standard.Utils
         /// </summary>
         /// <param name="username">Nombre de usuario.</param>
         /// <param name="password">Clave de acceso.</param>
-        /// <param name="type">El tipo de credencial.</param>
-        /// <param name="isRoot">Indica si el usuario tiene permisos especiales.</param>
-        public Credential(String username, String password, String type, Boolean isRoot = false)
+        /// <param name="permission">Permisos de acceso.</param>
+        public Credential(String username, String password, Permissions permission)
         {
             this._username = username;
             this._password = password;
-            this._type = type;
-            this._isRoot = isRoot;
+            _permission = permission;
         }
 
         /// <summary>
@@ -49,14 +53,7 @@ namespace InnSyTech.Standard.Utils
         {
             _username = String.Empty;
             _password = String.Empty;
-            _type = String.Empty;
-            _isRoot = false;
         }
-
-        /// <summary>
-        /// Obtiene si el usuario actual tiene permisos especiales.
-        /// </summary>
-        public Boolean IsRoot => _isRoot;
 
         /// <summary>
         /// Obtiene la clave de acceso.
@@ -64,13 +61,21 @@ namespace InnSyTech.Standard.Utils
         public String Password => _password;
 
         /// <summary>
-        /// Obtiene el tipo de credencial.
+        /// Obtiene los privilegios con los que cuenta el dispositivo.
         /// </summary>
-        public String Type => _type;
+        public Permissions Permission => _permission;
 
         /// <summary>
         /// Obtiene el nombre de usuario.
         /// </summary>
         public String Username => _username;
+
+        /// <summary>
+        /// Determina si la credencial cuenta con el permiso especificado.
+        /// </summary>
+        /// <param name="permission">Permiso a verificar.</param>
+        /// <returns>Un true si la credencial tiene el permiso.</returns>
+        public bool HasPermission(Permissions permission)
+            => permission >= _permission;
     }
 }
