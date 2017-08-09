@@ -161,13 +161,21 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         }
 
         /// <summary>
+        /// Obtiene un vector de bytes utilizados para el envío de información a travéz de sockets TCP/IP.
+        /// </summary>
+        /// <returns>Un vector de bytes.</returns>
+        public byte[] GetBytes()
+            => Encoding.UTF8.GetBytes(ToString());
+
+        /// <summary>
         /// Obtiene el valor de un campo especificado del mensaje.
         /// </summary>
+        /// <typeparam name="TResult">El tipo de dato del campo.</typeparam>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo especificado.</returns>
         /// <exception cref="ObjectDisposedException">Mensaje ya ha sido desechado.</exception>
         /// <exception cref="ArgumentException">El identificador del campo es 0.</exception>
-        public Object GetField(UInt16 id)
+        public TResult GetField<TResult>(UInt16 id)
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(Message).FullName);
@@ -175,7 +183,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
             if (id == 0)
                 throw new ArgumentException("El identificador del campo no puede ser 0.");
 
-            return _fields.FirstOrDefault(field => field.ID == id).Value;
+            return (TResult)_fields.FirstOrDefault(field => field.ID == id).Value;
         }
 
         /// <summary>
@@ -199,13 +207,6 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
                 return _fields.Remove(fieldToRemove);
             return false;
         }
-
-        /// <summary>
-        /// Obtiene un vector de bytes utilizados para el envío de información a travéz de sockets TCP/IP.
-        /// </summary>
-        /// <returns>Un vector de bytes.</returns>
-        public byte[] ToBytes()
-            => Encoding.UTF8.GetBytes(ToString());
 
         /// <summary>
         /// Crea una cadena que representa el mensaje codificado en ISO8583.
@@ -236,7 +237,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
                     var numeric = body.Substring(0, lengthField);
                     if (numeric.Contains('.'))
                         return Double.Parse(numeric);
-                    return Int32.Parse(numeric);
+                    return Int64.Parse(numeric);
 
                 case FieldType.LVAR:
                     length = int.Parse(body.Substring(0, 1)) + 1;
@@ -252,15 +253,15 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
 
                 case FieldType.LVBINARY:
                     length = int.Parse(body.Substring(0, 1)) * 2 + 1;
-                    return ToBytes(body.Substring(1, length - 1));
+                    return GetBytes(body.Substring(1, length - 1));
 
                 case FieldType.LLVBINARY:
                     length = int.Parse(body.Substring(0, 2)) * 2 + 2;
-                    return ToBytes(body.Substring(2, length - 2));
+                    return GetBytes(body.Substring(2, length - 2));
 
                 case FieldType.LLLVBINARY:
                     length = int.Parse(body.Substring(0, 3)) * 2 + 3;
-                    return ToBytes(body.Substring(3, length - 3));
+                    return GetBytes(body.Substring(3, length - 3));
             }
             throw new InvalidOperationException();
         }
@@ -326,7 +327,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
 
             var length = maxLength.ToString().Length;
 
-            return String.Format($"{{0:D{length}}}{{1}}", value.Length, ToString(value));
+            return String.Format($"{{0:D{length}}}{{1}}", value.Length, GetString(value));
         }
 
         /// <summary>
@@ -352,7 +353,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// </summary>
         /// <param name="byteString">Cadena que contiene los pares de caracteres.</param>
         /// <returns>Un vector de bytes.</returns>
-        private static byte[] ToBytes(string byteString)
+        private static byte[] GetBytes(string byteString)
         {
             var bytes = byteString.Cut(byteString.Length / 2);
             var byteList = new List<Byte>();
@@ -366,7 +367,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// </summary>
         /// <param name="bytes">Vector a convertir en cadena.</param>
         /// <returns>Una cadena que representa el vector en hexadecimal.</returns>
-        private static String ToString(byte[] bytes)
+        private static String GetString(byte[] bytes)
         {
             var builder = new StringBuilder();
             foreach (var @byte in bytes)
