@@ -16,7 +16,7 @@ namespace InnSyTech.Standard.Configuration
         }
 
         public object this[string name] => GetSetting(name);
-        public object this[string category, string name] => GetSetting(name, category);
+        public object this[string name, string category] => GetSetting(name, category);
 
         public Object GetSetting(string name, string category = null)
         {
@@ -57,18 +57,19 @@ namespace InnSyTech.Standard.Configuration
             foreach (XmlNode propertyNode in node.ChildNodes)
             {
                 var property = type.GetProperty(propertyNode.Name);
+                var value = propertyNode.Attributes["value"]?.Value ?? "";
                 if (!property.CanWrite)
                 {
                     var field = (type as TypeInfo).GetDeclaredField("_" + propertyNode.Name.Substring(0, 1).ToLower() + propertyNode.Name.Substring(1));
                     if (field is null)
                         continue;
                     if (field.FieldType.IsEnum)
-                        field.SetValue(instance, int.Parse(propertyNode.InnerText));
+                        field.SetValue(instance, int.Parse(value));
                     else
-                        field.SetValue(instance, Convert.ChangeType(propertyNode.InnerText, field.FieldType));
+                        field.SetValue(instance, Convert.ChangeType(value, field.FieldType));
                 }
                 else
-                    property.SetValue(instance, Convert.ChangeType(propertyNode.InnerText, property.PropertyType));
+                    property.SetValue(instance, Convert.ChangeType(value, property.PropertyType));
             }
 
             return instance;
