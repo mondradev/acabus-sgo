@@ -71,6 +71,8 @@ namespace Acabus.Models
                 { DeviceType.APP, "SERVIDOR DE APLICACIÓN" },
                 { DeviceType.DB, "SERVIDOR BASE DE DATOS" },
                 { DeviceType.PDE, "SERVIDOR PATIO DE ENCIERRO" },
+                { DeviceType.PGE, "PLANTA ELECTRÓGENA" },
+                { DeviceType.RACK, "RACK DE ESTACIÓN" },
                 { DeviceType.NONE, "NINGUNO" }
             })
             {

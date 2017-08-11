@@ -17,6 +17,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace Acabus.Modules.CctvReports
 {
@@ -124,11 +126,26 @@ namespace Acabus.Modules.CctvReports
                 UpdateData();
             });
 
+            UpdateSelectionCommand = new CommandBase(parameter =>
+            {
+                if (parameter is null || !(parameter is IList))
+                    return;
+
+                SelectedIncidences.Clear();
+
+                var selection = parameter as IList;
+
+                foreach (Incidence item in selection)
+                    SelectedIncidences.Add(item);
+            });
+
             CloseIncidenceDialogCommand = new CommandBase((parameter) =>
             {
                 if (SelectedIncidence is null) return;
-
-                AcabusControlCenterViewModel.ShowDialog(new CloseIncidenceView());
+                if (SelectedIncidences.Count > 1)
+                    AcabusControlCenterViewModel.ShowDialog(new MultiCloseIncidencesView());
+                else
+                    AcabusControlCenterViewModel.ShowDialog(new CloseIncidenceView());
             });
 
             AddIncidenceCommand = new CommandBase((parameter) =>
@@ -247,6 +264,9 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         public ICommand AddIncidenceCommand { get; }
+
+
+        public ICommand UpdateSelectionCommand { get; }
 
         /// <summary>
         /// Obtiene una lista de las alarmas lanzadas por los equipos en vía.
@@ -421,6 +441,17 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         public ICommand UpdateDataCommand { get; }
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="SelectedIncidences" />.
+        /// </summary>
+        private ICollection<Incidence> _selectedIncidences;
+
+        /// <summary>
+        /// Obtiene una lista de las incidencias seleccionadas en la vista.
+        /// </summary>
+        public ICollection<Incidence> SelectedIncidences
+            => _selectedIncidences ?? (_selectedIncidences = new ObservableCollection<Incidence>());
 
         public void ReloadData()
         {

@@ -158,7 +158,17 @@ namespace Acabus.Models
         /// <summary>
         /// PC Abordo.
         /// </summary>
-        PCA
+        PCA,
+
+        /// <summary>
+        /// Planta electrógena de estación.
+        /// </summary>
+        PGE,
+
+        /// <summary>
+        /// Rack de estación.
+        /// </summary>
+        RACK
     }
 
     /// <summary>

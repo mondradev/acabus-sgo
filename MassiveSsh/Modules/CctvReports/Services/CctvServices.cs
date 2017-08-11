@@ -25,8 +25,8 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean CommitRefund(this Incidence incidence, DateTime refundDateTime)
         {
-            var refund = AcabusData.Session.GetObjects<RefundOfMoney>()
-                .FirstOrDefault(refundOfMoney => (refundOfMoney as RefundOfMoney).Incidence.Folio == incidence.Folio) as RefundOfMoney;
+            var refund = AcabusData.Session.GetObjects<RefundOfMoney>(new DbFilter()
+                .AddWhere(new DbFilterExpression("Fk_Folio", incidence.Folio, WhereOperator.EQUALS))).FirstOrDefault();
 
             refund.RefundDate = refundDateTime;
             refund.Status = RefundOfMoneyStatus.COMMIT;
@@ -165,7 +165,8 @@ namespace Acabus.Modules.CctvReports.Services
                     alarmDatetime = alarmDatetime.AddMilliseconds(alarmDatetime.Millisecond * -1);
                     incidenceDatetime = incidenceDatetime.AddMilliseconds(incidenceDatetime.Millisecond * -1);
 
-                    if (alarmDatetime.Equals(incidenceDatetime) || incidence.Status == IncidenceStatus.OPEN)
+                    if (alarmDatetime.Equals(incidenceDatetime) || incidence.Status != IncidenceStatus.CLOSE
+                        || (incidence.Status == IncidenceStatus.CLOSE && alarm.DateTime < incidence.StartDate))
                         return true;
                 }
                 return false;
