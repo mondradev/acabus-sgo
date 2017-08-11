@@ -1,4 +1,5 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using InnSyTech.Standard.Configuration;
+using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Configurations.Views;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui.Modules;
@@ -77,34 +78,21 @@ namespace Opera.Acabus.Configurations
         }
 
         /// <summary>
-        /// Carga la configuración del módulo <see cref="Opera.Acabus.Core.Modules.Configurations"/>.
+        /// Carga la configuración del módulo <see cref="Core.Modules.Configurations"/>.
         /// </summary>
         private static void LoadConfigurables()
         {
-            AcabusData.FillList(ref _configurablesInfo, SettingToConfigurable, "Configurables", "Tuple");
+            var confs = ConfigurationManager.Settings.GetSettings("Configuration", "Configurables");
 
-            foreach (Tuple<String, String, String> configurableInfo in _configurablesInfo)
+            foreach (ConfigurableInfo configurableInfo in confs)
             {
-                Trace.WriteLine($"Cargando configurable: '{configurableInfo.Item1}'...", "DEBUG");
+                Trace.WriteLine($"Cargando configurable: '{configurableInfo.Name}'...", "DEBUG");
 
-                Assembly assembly = Assembly.LoadFrom(configurableInfo.Item3);
-                Type configurableClass = assembly.GetType(configurableInfo.Item2);
+                Assembly assembly = Assembly.LoadFrom(configurableInfo.AssemblyFilename);
+                Type configurableClass = assembly.GetType(configurableInfo.TypeClass);
                 Configurables.Add((IConfigurable)Activator.CreateInstance(configurableClass));
             }
         }
-
-        /// <summary>
-        /// Convierte una instancia <see cref="ISetting"/> en una <see cref="Tuple{String, String,
-        /// String}"/> donde el primer valor es el nombre del configurable, el segundo es el nombre
-        /// completo de la clase y el tercero es el nombre del ensamblado del configurable.
-        /// </summary>
-        /// <param name="arg">Instancia <see cref="ISetting"/> a convertir.</param>
-        /// <returns>Una instancia de <see cref="Tuple{String, String, String}"/>.</returns>
-        private static Tuple<String, String, String> SettingToConfigurable(ISetting arg)
-            => new Tuple<string, string, string>(
-                arg["Item1"].ToString(),
-                arg["Item2"].ToString(),
-                arg["Item3"].ToString()
-        );
+        
     }
 }

@@ -69,6 +69,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigurableInfo.cs" />
     <Compile Include="Config\CoreConfig.cs" />
     <Compile Include="Config\ViewModels\AddDeviceViewModel.cs" />
     <Compile Include="Config\ViewModels\CoreConfigViewModel.cs" />

@@ -6,9 +6,9 @@ using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Opera.Acabus.Core.DataAccess
 {
@@ -36,6 +36,11 @@ namespace Opera.Acabus.Core.DataAccess
         private static Station _cc;
 
         /// <summary>
+        /// Define el archivo de configuración de la aplicación.
+        /// </summary>
+        private static readonly string CONFIG_FILENAME;
+
+        /// <summary>
         /// Campo que provee a la propiedad <see cref="ITStaff"/>.
         /// </summary>
         private static IEnumerable<ITStaff> _itStaff;
@@ -50,12 +55,24 @@ namespace Opera.Acabus.Core.DataAccess
         /// </summary>
         static AcabusData()
         {
-            RESOURCES_DIRECTORY = ConfigurationManager.Settings["Directories", "Resources"].ToString();
+            CONFIG_FILENAME = Path.Combine(Environment.CurrentDirectory, "acabus.config");
+
+            ConfigurationManager.SetConfigurationFile(CONFIG_FILENAME);
+            Message.SetTemplate(CONFIG_FILENAME);
+
+            RESOURCES_DIRECTORY = Path.Combine(Environment.CurrentDirectory,
+                ConfigurationManager.Settings["Directory", "Resources"].ToString());
 
             if (!Directory.Exists(RESOURCES_DIRECTORY))
                 Directory.CreateDirectory(RESOURCES_DIRECTORY);
 
-            _session = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
+            Assembly assemblyFile = Assembly.LoadFrom(ConfigurationManager.Settings["assembly", "LocalDb"].ToString());
+
+            _session = DbManager.CreateSession(
+                assemblyFile.GetType(ConfigurationManager.Settings["type", "LocalDb"].ToString()),
+                new DbConfiguration()
+                );
+
             LoadFromDatabase();
         }
 
@@ -114,13 +131,19 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Una matriz con el resultado de la consulta.</returns>
         public static String[][] ExecuteQueryInServerDB(String query)
         {
-            var credential = ConfigurationManager.Settings.GetSettings("dbcredential", "dbserver")?.SingleOrDefault() as Credential;
-            var credentialSsh = ConfigurationManager.Settings.GetSettings("sshcredential", "dbserver")?.SingleOrDefault() as Credential;
-            var dbName = ConfigurationManager.Settings["dbname", "dbserver"]?.ToString();
-            var ipAddress = AllDevices.SingleOrDefault(d => d.Type == DeviceType.DB)?.IPAddress.ToString()
-                ?? ConfigurationManager.Settings["ipaddress", "dbserver"]?.ToString();
-            var pgPath = ConfigurationManager.Settings["pgpath", "dbserver"]?.ToString();
-            var pgPort = UInt16.Parse(ConfigurationManager.Settings["pgport", "dbserver"]?.ToString() ?? "5432");
+            var credential = ConfigurationManager.Settings.GetSettings("dbcredential", "DbServer")?
+                .Cast<Credential>().FirstOrDefault(c => c.HasPermission(Permissions.READ));
+
+            var credentialSsh = ConfigurationManager.Settings.GetSettings("sshcredential", "DbServer")?.FirstOrDefault() as Credential;
+
+            var dbName = ConfigurationManager.Settings["dbname", "DbServer"]?.ToString();
+
+            var ipAddress = AllDevices.FirstOrDefault(d => d.Type == DeviceType.DB)?.IPAddress.ToString()
+                ?? ConfigurationManager.Settings["ipaddress", "DbServer"]?.ToString();
+
+            var pgPath = ConfigurationManager.Settings["pgpath", "DbServer"]?.ToString();
+
+            var pgPort = UInt16.Parse(ConfigurationManager.Settings["pgport", "DbServer"]?.ToString() ?? "5432");
 
             if (query.ToUpper().Contains("UPDATE")
                 || query.ToUpper().Contains("DELETE")
@@ -144,11 +167,26 @@ namespace Opera.Acabus.Core.DataAccess
         }
 
         /// <summary>
-        ///
+        /// Processa una petición y devuelve una respuesta a la misma.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
+        /// <param name="request">Petición realizada por un cliente remoto.</param>
+        /// <returns>Una respuesta a la petición realizada.</returns>
         public static Message ProcessingRequest(Message request)
+        {
+            Message response = request;
+
+            if (!Authenticate(response.GetField(61).ToString(), response.GetField(62).ToString()))
+                response.AddField(60, MessagesError.NO_AUTHENTICATED);
+        
+            return response;
+        }
+        /// <summary>
+        /// Autentica un usuario para poder realizar la petición.
+        /// </summary>
+        /// <param name="username">Nombre de usuario.</param>
+        /// <param name="password">Clave del usuario.</param>
+        /// <returns>Un true en caso de ser un usuario válido.</returns>
+        private static bool Authenticate(string username, string password)
         {
             throw new NotImplementedException();
         }
@@ -167,28 +205,28 @@ namespace Opera.Acabus.Core.DataAccess
             _itStaff = Session.GetObjects<ITStaff>()
                                 .OrderBy(tiStaff => tiStaff.Name);
 
-            _cc = AllStations.FirstOrDefault(station => station.Name.Contains("CENTRO DE CONTROL"));
+            _cc = AllStations.FirstOrDefault(station => station.Name.Contains(ConfigurationManager.Settings["name", "CCO"].ToString()));
         }
 
         /// <summary>
         /// Define la configuración básica de la base de datos local.
         /// </summary>
-        private class SQLiteConfiguration : IDbConfiguration
+        private class DbConfiguration : IDbConfiguration
         {
             /// <summary>
             /// Obtiene la cadena de conexión a la base de datos local.
             /// </summary>
-            public string ConnectionString => ConfigurationManager.Settings["connectionString", "localdb"]?.ToString();
+            public string ConnectionString => ConfigurationManager.Settings["connectionString", "LocalDb"]?.ToString();
 
             /// <summary>
             /// Obtiene el nombre de la función para obtener el último insertado.
             /// </summary>
-            public string LastInsertFunctionName => ConfigurationManager.Settings["lastInsertFunction", "localdb"]?.ToString();
+            public string LastInsertFunctionName => ConfigurationManager.Settings["lastInsertFunction", "LocalDb"]?.ToString();
 
             /// <summary>
             /// Obtiene el número de transacciones por conexión.
             /// </summary>
-            public int TransactionPerConnection => Int32.Parse(ConfigurationManager.Settings["transactionPerConnection", "localdb"]?.ToString() ?? "1");
+            public int TransactionPerConnection => Int32.Parse(ConfigurationManager.Settings["transactionPerConnection", "LocalDb"]?.ToString() ?? "1");
         }
     }
 }

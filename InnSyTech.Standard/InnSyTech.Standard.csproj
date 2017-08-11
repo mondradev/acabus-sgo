@@ -61,6 +61,7 @@
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\SettingCollection.cs" />
     <Compile Include="Database\DbAttribute.cs" />
+    <Compile Include="Database\DbCrud.cs" />
     <Compile Include="Database\DbFilter.cs" />
     <Compile Include="Database\Utils\DbEnumConverter.cs" />
     <Compile Include="Database\IDbConverter.cs" />

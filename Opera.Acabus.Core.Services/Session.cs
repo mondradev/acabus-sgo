@@ -78,7 +78,7 @@ namespace Opera.Acabus.Core.Services
         public void SendMessage(Message message)
         {
             var stream = _client.GetStream();
-            byte[] bytes = message.GetBytes();
+            byte[] bytes = message.ToBytes();
             stream.Write(bytes, 0, bytes.Length);
         }
 
