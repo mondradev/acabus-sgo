@@ -50,6 +50,7 @@ namespace InnSyTech.Standard.Database
         /// Crea una nueva instancia de un campo enlazado a una propiedad.
         /// </summary>
         /// <param name="name">Nombre del campo.</param>
+        /// <param name="propertyInfo">Información de la propiedad.</param>
         /// <param name="isPrimaryKey">Si es llave primaria.</param>
         /// <param name="converter">Convertidor de datos para el enlace.</param>
         public DbField(String name, PropertyInfo propertyInfo, Boolean isPrimaryKey = false, Type converter = null)
@@ -98,6 +99,11 @@ namespace InnSyTech.Standard.Database
         /// Obtiene el tipo de la propiedad enlazada al campo.
         /// </summary>
         public Type PropertyType => _propertyInfo.PropertyType;
+
+        /// <summary>
+        /// Obtiene la información de la propiedad de la instancia.
+        /// </summary>
+        public PropertyInfo PropertyInfo => _propertyInfo;
 
         /// <summary>
         /// Obtiene todo los campos especificados de un tipo de dato.

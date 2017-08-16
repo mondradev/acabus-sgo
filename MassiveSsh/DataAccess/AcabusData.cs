@@ -166,7 +166,7 @@ namespace Acabus.DataAccess
         /// </summary>
         static AcabusData()
         {
-            Session = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
+            Session = DbFactory.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
             InitAcabusData();
         }
 

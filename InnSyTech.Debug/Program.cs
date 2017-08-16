@@ -1,29 +1,40 @@
-﻿using Acabus.Modules.CctvReports.Models;
-using InnSyTech.Standard.Database;
+﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Structures.Trees;
+using Opera.Acabus.Core.Models;
+using Opera.Acabus.Mantto.Models;
 using System;
-using System.Text;
+using System.Data.SQLite;
+using System.Linq;
 
 namespace InnSyTech.Debug
 {
     class Program
     {
-        private static Tree<Tuple<Type, string>> tree;
+
+        private class SQLiteConfiguration : IDbConfiguration
+        {
+            public string ConnectionString => "Data Source=Resources/acabus_data.dat;Password=acabus*data*dat";
+
+            public string LastInsertFunctionName => "last_insert_rowid";
+
+            public int TransactionPerConnection => 1;
+        }
 
         static void Main(string[] args)
         {
 
-            // var r = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration()).GetObjects<Incidence>();
-            StringBuilder tables = new StringBuilder();
-            String statement = DbReadData.CreateStatement(typeof(Incidence), ref tree, tables);
 
-            foreach (var item in tree)
-                Console.WriteLine(item.Value.Item1 + ":" + item.Value.Item2);
-            Console.WriteLine();
-            foreach (var item in tree)
-                Console.WriteLine(item);
-
-            Console.WriteLine(String.Format("\nSELECT {0} FROM {1}", statement, tables));
+            var conf = new SQLiteConfiguration();
+            var con = new SQLiteConnection(conf.ConnectionString);
+            var crud = new DbCrud(con) { Configuration = conf };
+            var init = DateTime.Now;
+            var results = crud.Read<Station>(null, true);
+            foreach (var incidence in results)
+            {
+            }
+            Console.WriteLine("Total: " + results.Count());
+            Console.WriteLine("Tiempo total: " + (DateTime.Now - init));
+            Console.ReadKey();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace InnSyTech.Standard.Database
     /// <summary>
     /// Define una estrutura para realizar operaciones a una base de datos.
     /// </summary>
-    public static class DbManager
+    public static class DbFactory
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Session'.

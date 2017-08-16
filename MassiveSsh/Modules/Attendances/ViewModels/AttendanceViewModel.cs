@@ -139,7 +139,7 @@ namespace Acabus.Modules.Attendances.ViewModels
         /// <summary>
         /// Obtiene la asistencia para la asignación de la incidencia.
         /// </summary>
-        public Attendance GetTechnicianAssigned(Device device, DateTime startTime, DeviceFault fault = null)
+        public Attendance GetTechnicianAssigned(Device device, DateTime startTime, DeviceFault fault)
         {
             if (DateTime.Now.GetWorkShift() != WorkShift.NIGHT_SHIFT
                && device.Type == DeviceType.CONT)
@@ -151,20 +151,16 @@ namespace Acabus.Modules.Attendances.ViewModels
             var attendances = Attendances.Where(attendance => attendance.InWorkShift());
             var attendancesPrevious = attendances;
 
-            if (fault != null)
-            {
-                /// Asignación por area
-                attendances = attendances.Where(attendance
-                   => Enum.GetName(typeof(AreaAssignable), fault?.Assignable)
-                   .Contains(Enum.GetName(typeof(AreaAssignable), attendance.Technician?.Area)));
+            /// Asignación por area
+            attendances = attendances.Where(attendance
+               => fault.Assignable <= attendance.Technician.Area);
 
-                if (attendances.Count() == 1)
-                    return attendances.First();
-                else if (attendances.Count() < 1)
-                    attendances = attendancesPrevious;
-                else
-                    attendancesPrevious = attendances;
-            }
+            if (attendances.Count() == 1)
+                return attendances.First();
+            else if (attendances.Count() < 1)
+                attendances = attendancesPrevious;
+            else
+                attendancesPrevious = attendances;
 
             /// Asignación cuando al menos hay un tecnico en turno.
             WorkShift currenteWorkShift = DateTime.Now.GetWorkShift();
