@@ -99,6 +99,7 @@
     <Compile Include="Models\Device.cs" />
     <Compile Include="Models\IAssignableSection.cs" />
     <Compile Include="Models\ILocation.cs" />
+    <Compile Include="Models\Priority.cs" />
     <Compile Include="Models\Route.cs" />
     <Compile Include="Models\Station.cs" />
     <Compile Include="Models\TIStaff.cs" />

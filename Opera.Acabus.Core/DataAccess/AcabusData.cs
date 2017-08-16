@@ -115,7 +115,7 @@ namespace Opera.Acabus.Core.DataAccess
             FillList(ref _queries, SettingToQuery, "SqlSentences", "Tuple");
             FillList(ref _modulesNames, SettingToModuleName, "ModulesNames", "Tuple");
 
-            _session = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
+            _session = DbFactory.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
             LoadFromDatabase();
         }
 
