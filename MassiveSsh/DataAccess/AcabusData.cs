@@ -575,7 +575,7 @@ namespace Acabus.DataAccess
 
 
 
-        private class SQLiteConfiguration : IDbConfiguration
+        private class SQLiteConfiguration : IDbDialect
         {
             public string ConnectionString => "Data Source=Resources/acabus_data.dat;Password=acabus*data*dat";
 

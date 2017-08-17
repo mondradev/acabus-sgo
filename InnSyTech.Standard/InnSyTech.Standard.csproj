@@ -61,8 +61,14 @@
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\SettingCollection.cs" />
     <Compile Include="Database\DbAttribute.cs" />
-    <Compile Include="Database\DbCrud.cs" />
     <Compile Include="Database\DbFilter.cs" />
+    <Compile Include="Database\DbSqlFactory.cs" />
+    <Compile Include="Database\DbSqlSession.cs" />
+    <Compile Include="Database\IDbSqlSession.cs" />
+    <Compile Include="Database\Linq\DbSqlReader.cs" />
+    <Compile Include="Database\Linq\DbSqlQuery.cs" />
+    <Compile Include="Database\Linq\SqlExpressionVisitor.cs" />
+    <Compile Include="Database\Linq\DbSqlProvider.cs" />
     <Compile Include="Database\Utils\DbEnumConverter.cs" />
     <Compile Include="Database\IDbConverter.cs" />
     <Compile Include="Database\DbField.cs" />
@@ -70,6 +76,7 @@
     <Compile Include="Database\DbSession.cs" />
     <Compile Include="Database\IDbConfiguration.cs" />
     <Compile Include="Database\Utils\SQLiteDateTimeConverter.cs" />
+    <Compile Include="Database\Utils\TypeSystem.cs" />
     <Compile Include="Mvvm\Command.cs" />
     <Compile Include="Mvvm\Converters\TranslateEnumConverter.cs" />
     <Compile Include="Mvvm\NotifyPropertyChanged.cs" />
@@ -92,5 +99,6 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -211,7 +211,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Define la configuración básica de la base de datos local.
         /// </summary>
-        private class DbConfiguration : IDbConfiguration
+        private class DbConfiguration : IDbDialect
         {
             /// <summary>
             /// Obtiene la cadena de conexión a la base de datos local.

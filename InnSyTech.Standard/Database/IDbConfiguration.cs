@@ -6,7 +6,7 @@ namespace InnSyTech.Standard.Database
     /// Define la estrutura que tiene que tener una instancia de configuración para la comunicación
     /// con un tipo de base de datos.
     /// </summary>
-    public interface IDbConfiguration
+    public interface IDbDialect
     {
         /// <summary>
         /// Obtiene la cadena de conexión a la base de datos.
