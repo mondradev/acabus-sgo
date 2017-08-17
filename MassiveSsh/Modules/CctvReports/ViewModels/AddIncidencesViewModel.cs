@@ -533,7 +533,7 @@ namespace Acabus.Modules.CctvReports
             {
                 if (incidence.Status == IncidenceStatus.CLOSE) continue;
 
-                if (exists = (incidence.Description?.Category?.ID == SelectedDescription?.Category?.ID
+                if (exists = (incidence.Description?.ID == SelectedDescription?.ID
                     && incidence.Device == SelectedDevice)) break;
             }
             if (exists)

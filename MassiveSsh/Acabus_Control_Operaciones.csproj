@@ -182,6 +182,7 @@
     <Compile Include="Modules\CctvReports\Models\ReportQuery.cs" />
     <Compile Include="Modules\CctvReports\ViewModels\IncidencesHistoryViewModel.cs" />
     <Compile Include="Modules\CctvReports\ViewModels\MultiCloseIncidencesViewModel.cs" />
+    <Compile Include="Modules\CctvReports\ViewModels\MultiIncidenceViewModel.cs" />
     <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
       <DependentUpon>AddIncidencesView.xaml</DependentUpon>
     </Compile>
@@ -212,6 +213,9 @@
     <Compile Include="Modules\CctvReports\Services\CctvServices.cs" />
     <Compile Include="Modules\CctvReports\Views\MultiCloseIncidencesView.xaml.cs">
       <DependentUpon>MultiCloseIncidencesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\CctvReports\Views\MultiIncidenceView.xaml.cs">
+      <DependentUpon>MultiIncidenceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Configurations\AcabusData.cs" />
     <Compile Include="Modules\Configurations\Configuration.xaml.cs">
@@ -330,6 +334,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\CctvReports\Views\MultiCloseIncidencesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\CctvReports\Views\MultiIncidenceView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

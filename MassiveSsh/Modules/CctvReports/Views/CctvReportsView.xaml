@@ -182,6 +182,10 @@
                 <Button ToolTip="Cerrar incidencia"  Command="{Binding CloseIncidenceDialogCommand}" BorderBrush="White" Background="White">
                     <materialDesign:PackIcon Kind="CloseBox" Width="24" Height="24" />
                 </Button>
+                <!-- Multi-incidencias -->
+                <Button ToolTip="Abrir incidencias por estación"  Command="{Binding OpenStationIncidencesDialogCommand}" BorderBrush="White" Background="White">
+                    <materialDesign:PackIcon Kind="NotePlusOutline" Width="24" Height="24" />
+                </Button>
             </StackPanel>
         </materialDesign:PopupBox>
     </Grid>

@@ -153,6 +153,11 @@ namespace Acabus.Modules.CctvReports
                 AcabusControlCenterViewModel.ShowDialog(new AddIncidencesView() { DataContext = new AddIncidencesViewModel() { IsNewIncidences = true } });
             });
 
+            OpenStationIncidencesDialogCommand = new CommandBase((parameter) =>
+            {
+                AcabusControlCenterViewModel.ShowDialog(new MultiIncidenceView());
+            });
+
             RefundCashDialogCommand = new CommandBase((parameter) =>
             {
                 AcabusControlCenterViewModel.ShowDialog(new AddIncidencesView() { DataContext = new AddIncidencesViewModel() { IsNewIncidences = false } });
@@ -452,6 +457,8 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         public ICollection<Incidence> SelectedIncidences
             => _selectedIncidences ?? (_selectedIncidences = new ObservableCollection<Incidence>());
+
+        public ICommand OpenStationIncidencesDialogCommand { get; }
 
         public void ReloadData()
         {
