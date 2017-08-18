@@ -33,12 +33,11 @@ namespace Opera.Acabus.Server.Debug
 
             var db = DbSqlFactory.CreateSession<SQLiteConnection>(new DbDialect());
 
-            var folio = "F-13000";
 
             var query = db.Read<Incidence>()
-                .LoadReference(3)
-                .Execute()
-                .Where(i => i.Folio == folio && i.StartDate > DateTime.Now.AddDays(-20).AddMonths(-3))
+                //.LoadReference(3)
+                //.Execute()
+                .Where(i => i.Device.NumeSeri == "KVR020201")
                 .OrderBy(i => i.Folio)
               ;
 
