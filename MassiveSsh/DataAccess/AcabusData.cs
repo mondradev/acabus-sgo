@@ -582,6 +582,8 @@ namespace Acabus.DataAccess
             public string LastInsertFunctionName => "last_insert_rowid";
 
             public int TransactionPerConnection => 1;
+
+            public IDbConverter DateTimeConverter => null;
         }
 
         #region BasicOperations

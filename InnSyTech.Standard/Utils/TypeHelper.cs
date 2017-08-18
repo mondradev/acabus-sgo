@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace InnSyTech.Standard.Database.Utils
+namespace InnSyTech.Standard.Utils
 {
 
-    public static class TypeSystem
+    public static class TypeHelper
     {
         public static Type GetElementType(Type seqType)
         {

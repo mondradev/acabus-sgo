@@ -76,6 +76,10 @@
       <Project>{f74fee3d-d536-44df-9e2c-53540ce78173}</Project>
       <Name>InnSyTech.Standard</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MassiveSsh\Acabus_Control_Operaciones.csproj">
+      <Project>{E196B435-1093-4704-8F4D-FC430842FFCD}</Project>
+      <Name>Acabus_Control_Operaciones</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Opera.Acabus.Core.Services\Opera.Acabus.Core.Services.csproj">
       <Project>{5adb847e-ea0b-40e1-b784-cd3a310f483e}</Project>
       <Name>Opera.Acabus.Core.Services</Name>

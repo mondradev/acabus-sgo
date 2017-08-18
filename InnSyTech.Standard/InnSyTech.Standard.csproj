@@ -65,9 +65,11 @@
     <Compile Include="Database\DbSqlFactory.cs" />
     <Compile Include="Database\DbSqlSession.cs" />
     <Compile Include="Database\IDbSqlSession.cs" />
+    <Compile Include="Database\Linq\EvaluatorExpression.cs" />
+    <Compile Include="Database\Linq\DbQueryable.cs" />
     <Compile Include="Database\Linq\DbSqlReader.cs" />
     <Compile Include="Database\Linq\DbSqlQuery.cs" />
-    <Compile Include="Database\Linq\SqlExpressionVisitor.cs" />
+    <Compile Include="Database\Linq\ExpressionVisitor.cs" />
     <Compile Include="Database\Linq\DbSqlProvider.cs" />
     <Compile Include="Database\Utils\DbEnumConverter.cs" />
     <Compile Include="Database\IDbConverter.cs" />
@@ -75,8 +77,9 @@
     <Compile Include="Database\DbManager.cs" />
     <Compile Include="Database\DbSession.cs" />
     <Compile Include="Database\IDbConfiguration.cs" />
+    <Compile Include="Database\Utils\DbHelper.cs" />
     <Compile Include="Database\Utils\SQLiteDateTimeConverter.cs" />
-    <Compile Include="Database\Utils\TypeSystem.cs" />
+    <Compile Include="Utils\TypeHelper.cs" />
     <Compile Include="Mvvm\Command.cs" />
     <Compile Include="Mvvm\Converters\TranslateEnumConverter.cs" />
     <Compile Include="Mvvm\NotifyPropertyChanged.cs" />

@@ -1,34 +1,27 @@
-﻿using InnSyTech.Standard.Database;
+﻿using Acabus.Modules.CctvReports.Models;
+using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Linq;
-using InnSyTech.Standard.Net.Messenger.Iso8583;
-using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Models;
-using Opera.Acabus.Core.Services;
+using InnSyTech.Standard.Database.Utils;
 using System;
 using System.Data.SQLite;
-using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Net;
-using System.Threading;
-using System.Xml;
 
 namespace Opera.Acabus.Server.Debug
 {
-    class DbDialect : IDbDialect
+    internal class DbDialect : IDbDialect
     {
-        public string ConnectionString => @"Data Source=C:\Users\javi_\Documents\projects\ACABUS-Control de operacion\Opera.Acabus.Sgo\bin\Release\Resources\acabus_data.dat ; Password=acabus*data*dat";
+        public string ConnectionString => @"Data Source=C:\Users\javi_\Documents\projects\ACABUS-Control de operacion\MassiveSsh\Resources\acabus_data.dat ; Password=acabus*data*dat";
 
+        public IDbConverter DateTimeConverter => new SQLiteDateTimeConverter();
         public string LastInsertFunctionName => "";
 
         public int TransactionPerConnection => 1;
     }
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-
             //Message.SetTemplate(Path.Combine(Environment.CurrentDirectory, "acabus.config"));
 
             //Device d = new Device("KVR022901", DeviceType.KVR);
@@ -40,13 +33,18 @@ namespace Opera.Acabus.Server.Debug
 
             var db = DbSqlFactory.CreateSession<SQLiteConnection>(new DbDialect());
 
-            var query = from s in db.Read<Station>()
-                        where s.Name == "RENACIMIENTO"
-                        select s;
+            var folio = "F-13000";
+
+            var query = db.Read<Incidence>()
+                .LoadReference(3)
+                .Execute()
+                .Where(i => i.Folio == folio && i.StartDate > DateTime.Now.AddDays(-20).AddMonths(-3))
+                .OrderBy(i => i.Folio)
+              ;
 
             foreach (var s in query)
             {
-                Console.WriteLine(s);
+                Console.WriteLine(s.Folio + " " + s.Device);
             }
         }
     }

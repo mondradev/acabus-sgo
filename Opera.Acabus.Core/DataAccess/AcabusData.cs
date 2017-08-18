@@ -227,6 +227,11 @@ namespace Opera.Acabus.Core.DataAccess
             /// Obtiene el número de transacciones por conexión.
             /// </summary>
             public int TransactionPerConnection => Int32.Parse(ConfigurationManager.Settings["transactionPerConnection", "LocalDb"]?.ToString() ?? "1");
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public IDbConverter DateTimeConverter => null;
         }
     }
 }

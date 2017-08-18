@@ -14,6 +14,12 @@ namespace InnSyTech.Standard.Database
         String ConnectionString { get; }
 
         /// <summary>
+        /// Obtiene el convertidor de fecha y hora utilizado para leer y escribir fecha/hora en la
+        /// base de datos. Si es null, se utilizará <see cref="DateTime.ToString()" /> para guardar la fecha/hora.
+        /// </summary>
+        IDbConverter DateTimeConverter { get; }
+
+        /// <summary>
         /// Obtiene la función del último insertado según el motor de base de datos utilizado.
         /// </summary>
         String LastInsertFunctionName { get; }
