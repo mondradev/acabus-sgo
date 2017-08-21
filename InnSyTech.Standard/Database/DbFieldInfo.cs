@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace InnSyTech.Standard.Database
@@ -9,7 +7,7 @@ namespace InnSyTech.Standard.Database
     /// Define una estructura que permite establecer como se manejan los datos correspondientes a un
     /// campo dentro de la base de datos.
     /// </summary>
-    internal class DbField : IComparable<DbField>
+    internal class DbFieldInfo : IComparable<DbFieldInfo>
     {
         /// <summary>
         /// Campo que provee a la propiedad 'Converter'.
@@ -50,15 +48,20 @@ namespace InnSyTech.Standard.Database
         /// Crea una nueva instancia de un campo enlazado a una propiedad.
         /// </summary>
         /// <param name="name">Nombre del campo.</param>
+        /// <param name="propertyInfo">La información de la propiedad del campo a enlazar.</param>
         /// <param name="isPrimaryKey">Si es llave primaria.</param>
         /// <param name="converter">Convertidor de datos para el enlace.</param>
-        public DbField(String name, PropertyInfo propertyInfo, Boolean isPrimaryKey = false, Type converter = null)
+        /// <param name="isAutonumerical">Si el campo es autonumerico.</param>
+        /// <param name="isForeignKey">Si el campo es llave primaría.</param>
+        /// <param name="foreignKeyName">El nombre de la llave foranea referente.</param>
+        public DbFieldInfo(String name, PropertyInfo propertyInfo, Boolean isPrimaryKey = false, Type converter = null, Boolean isAutonumerical = false, Boolean isForeignKey = false, String foreignKeyName = null)
         {
             _name = name;
             _isPrimaryKey = isPrimaryKey;
             _propertyInfo = propertyInfo;
-            _isAutonumerical = false;
-            _isForeignKey = false;
+            _isAutonumerical = isAutonumerical;
+            _isForeignKey = isForeignKey;
+            _foreignKeyName = foreignKeyName;
 
             if (converter != null)
                 _converter = (IDbConverter)Activator.CreateInstance(converter);
@@ -95,68 +98,22 @@ namespace InnSyTech.Standard.Database
         public String Name => _name;
 
         /// <summary>
+        /// Obtiene la información de la propiedad enlazada al campo.
+        /// </summary>
+        public PropertyInfo PropertyInfo => _propertyInfo;
+
+        /// <summary>
         /// Obtiene el tipo de la propiedad enlazada al campo.
         /// </summary>
         public Type PropertyType => _propertyInfo.PropertyType;
 
         /// <summary>
-        /// Obtiene todo los campos especificados de un tipo de dato.
-        /// </summary>
-        /// <param name="typeOfInstance">Tipo de dato que contiene los campos.</param>
-        /// <returns>Una enumaración de campos.</returns>
-        public static IEnumerable<DbField> GetFields(Type typeOfInstance)
-        {
-            foreach (PropertyInfo property in typeOfInstance.GetProperties())
-            {
-                if (property.GetCustomAttributes().Count() > 0)
-                {
-                    foreach (Attribute attribute in property.GetCustomAttributes())
-                        if (attribute is ColumnAttribute)
-                        {
-                            ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
-
-                            if (columnAttribute.IsIgnored) continue;
-
-                            String name = columnAttribute.Name;
-                            name = String.IsNullOrEmpty(name) ? property.Name : name;
-
-                            yield return new DbField(name, property, columnAttribute.IsPrimaryKey, columnAttribute.Converter)
-                            {
-                                _isForeignKey = columnAttribute.IsForeignKey,
-                                _isAutonumerical = columnAttribute.IsAutonumerical,
-                                _foreignKeyName = columnAttribute.ForeignKeyName
-                            };
-                        }
-                }
-                else
-                    yield return new DbField(property.Name, property);
-            }
-        }
-
-        /// <summary>
-        /// Obtiene el campo de una llave primaria especificada en un tipo de dato.
-        /// </summary>
-        /// <param name="typeOfInstance">Tipo de dato que contiene una llave primaria.</param>
-        /// <returns>El campo con llave primaria.</returns>
-        public static DbField GetPrimaryKey(Type typeOfInstance)
-        {
-            try
-            {
-                return GetFields(typeOfInstance).First(field => field.IsPrimaryKey);
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new InvalidOperationException($"La estructura de la instancia {typeOfInstance.FullName} no contiene llave primaria.", ex);
-            }
-        }
-
-        /// <summary>
         /// Compara la instnacia actual con otra y determina en que posición con relación a la otra.
         /// Devuelve un valor 1 si debe ir delante, 0 si son iguales y -1 si va atras.
         /// </summary>
-        /// <param name="other">Una instancia de <see cref="DbField"/> a comparar.</param>
+        /// <param name="other">Una instancia de <see cref="DbFieldInfo"/> a comparar.</param>
         /// <returns></returns>
-        public int CompareTo(DbField other)
+        public int CompareTo(DbFieldInfo other)
         {
             if (other.IsPrimaryKey && !IsPrimaryKey)
                 return -1;
@@ -175,10 +132,12 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="instance">Instancia que contiene la propiedad.</param>
         /// <returns>El valor de la propiedad de la instancia.</returns>
+        /// <exception cref="ArgumentNullException">Si la instancia es nula.</exception>
         public Object GetValue(Object instance)
         {
             if (instance is null)
-                throw new ArgumentNullException("La instancia no puede ser nula");
+                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula");
+
             if (Converter is null)
                 return _propertyInfo.GetValue(instance);
 
@@ -190,10 +149,11 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="instance">Instancia que contiene la propiedad.</param>
         /// <param name="value">Valor nuevo de la propiedad.</param>
+        /// <exception cref="ArgumentNullException">Si la instancia es nula.</exception>
         public void SetValue(Object instance, Object value)
         {
             if (instance is null)
-                throw new ArgumentNullException("La instancia no puede ser nula");
+                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula");
             try
             {
                 if (Converter is null)
@@ -210,8 +170,12 @@ namespace InnSyTech.Standard.Database
             }
         }
 
+        /// <summary>
+        /// Obtiene una cadena que representa el objeto actual.
+        /// </summary>
+        /// <returns>Una cadena que representa al campo.</returns>
         public override string ToString()
-            => String.Format("{0}:[IsPrimaryKey:{1}, IsAutonumerical:{2}, IsForeingKey:{3}, ForeignKeyName:{4}, HasConverter: {5}]",
+            => String.Format("{0}: [IsPrimaryKey: {1}, IsAutonumerical: {2}, IsForeingKey: {3}, ForeignKeyName: {4}, HasConverter: {5}]",
                 Name, IsPrimaryKey, IsAutonumerical, IsForeignKey, ForeignKeyName, Converter != null);
     }
 }

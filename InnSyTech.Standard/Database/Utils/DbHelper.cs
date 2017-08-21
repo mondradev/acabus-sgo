@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Reflection;
@@ -6,7 +7,7 @@ using System.Reflection;
 namespace InnSyTech.Standard.Database.Utils
 {
     /// <summary>
-    /// Define funciones utilizadas por <see cref="DbCrud"/>.
+    /// Define funciones auxiliares utilizadas por las clases definidas en <see cref="Database"/>.
     /// </summary>
     internal static class DbHelper
     {
@@ -29,6 +30,60 @@ namespace InnSyTech.Standard.Database.Utils
         }
 
         /// <summary>
+        /// Obtiene todo los campos especificados de un tipo de dato.
+        /// </summary>
+        /// <param name="instanceType">Tipo de dato que contiene los campos.</param>
+        /// <returns>Una enumaración de campos.</returns>
+        public static IEnumerable<DbFieldInfo> GetFields(Type instanceType)
+        {
+            foreach (PropertyInfo property in instanceType.GetProperties())
+            {
+                if (property.GetCustomAttributes().Count() > 0)
+                {
+                    foreach (Attribute attribute in property.GetCustomAttributes())
+                        if (attribute is ColumnAttribute)
+                        {
+                            ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+
+                            if (columnAttribute.IsIgnored) continue;
+
+                            String name = columnAttribute.Name;
+                            name = String.IsNullOrEmpty(name) ? property.Name : name;
+
+                            yield return new DbFieldInfo(
+                                name,
+                                property,
+                                columnAttribute.IsPrimaryKey,
+                                columnAttribute.Converter,
+                                columnAttribute.IsAutonumerical,
+                                columnAttribute.IsForeignKey,
+                                columnAttribute.ForeignKeyName);
+                        }
+                }
+                else
+                    yield return new DbFieldInfo(property.Name, property);
+            }
+        }
+
+        /// <summary>
+        /// Obtiene el campo de una llave primaria especificada en un tipo de dato.
+        /// </summary>
+        /// <param name="instanceType">Tipo de dato que contiene una llave primaria.</param>
+        /// <returns>El campo con llave primaria.</returns>
+        /// <exception cref="InvalidOperationException">El tipo no tiene llave primaria.</exception>
+        public static DbFieldInfo GetPrimaryKey(Type instanceType)
+        {
+            try
+            {
+                return GetFields(instanceType).First(field => field.IsPrimaryKey);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"El tipo de la instancia {instanceType.FullName} no contiene llave primaria.", ex);
+            }
+        }
+
+        /// <summary>
         /// Indica si la instancia es una entidad de base de datos.
         /// </summary>
         /// <param name="typeOfInstance">Tipo de la instancia a evaluar.</param>
@@ -48,10 +103,10 @@ namespace InnSyTech.Standard.Database.Utils
         /// <param name="instaceType">Tipo de la instancia.</typeparam>
         /// <param name="reader">Lector de la base de datos.</param>
         /// <returns>Una instancia con la informacion persistida.</returns>
-        public static Object ToInstance(Type instanceType, DbDataReader reader)
+        public static object ToInstance(Type instanceType, DbDataReader reader)
         {
-            var primaryKey = DbField.GetPrimaryKey(instanceType);
-            var dbFields = DbField.GetFields(instanceType).SkipWhile(field => field.IsPrimaryKey);
+            var primaryKey = GetPrimaryKey(instanceType);
+            var dbFields = GetFields(instanceType).SkipWhile(field => field.IsPrimaryKey);
 
             var instance = Activator.CreateInstance(instanceType);
 
@@ -80,7 +135,10 @@ namespace InnSyTech.Standard.Database.Utils
         /// <param name="reader">Lector de la base de datos.</param>
         /// <param name="fieldName">Nombre del campo de la base de datos.</param>
         /// <returns>Un valor <see cref="true"/> en caso de establecer el valor correctamente.</returns>
-        private static bool TrySetDbValue(DbField dbField, Object instance, DbDataReader reader, String fieldName)
+        /// <exception cref="IndexOutOfRangeException">
+        /// El resultado de la base de datos no tiene el campo especificado.
+        /// </exception>
+        private static bool TrySetDbValue(DbFieldInfo dbField, Object instance, DbDataReader reader, String fieldName)
         {
             try
             {

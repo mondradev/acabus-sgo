@@ -1,7 +1,6 @@
 ﻿using Acabus.Modules.CctvReports.Models;
 using InnSyTech.Standard.Database;
-using InnSyTech.Standard.Database.Linq;
-using InnSyTech.Standard.Database.Utils;
+using InnSyTech.Standard.Database.Sqlite;
 using System;
 using System.Data.SQLite;
 using System.Linq;
@@ -12,7 +11,8 @@ namespace Opera.Acabus.Server.Debug
     {
         public string ConnectionString => @"Data Source=C:\Users\javi_\Documents\projects\ACABUS-Control de operacion\MassiveSsh\Resources\acabus_data.dat ; Password=acabus*data*dat";
 
-        public IDbConverter DateTimeConverter => new SQLiteDateTimeConverter();
+        public IDbConverter DateTimeConverter => new DbDateTimeConverter();
+
         public string LastInsertFunctionName => "";
 
         public int TransactionPerConnection => 1;
@@ -32,7 +32,6 @@ namespace Opera.Acabus.Server.Debug
             //var d2 = ModelsExtension.GetDevice(msj.GetBytes(20));
 
             var db = DbSqlFactory.CreateSession<SQLiteConnection>(new DbDialect());
-
 
             var query = db.Read<Incidence>()
                 //.LoadReference(3)

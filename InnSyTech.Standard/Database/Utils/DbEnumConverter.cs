@@ -16,7 +16,7 @@ namespace InnSyTech.Standard.Database.Utils
         public object ConverterFromDb(object data)
         {
             if (data.GetType() != typeof(Int16) && data.GetType() != typeof(Int32) && data.GetType() != typeof(Int64))
-                throw new ArgumentException("El tipo de dato extraido de la base de datos debe ser Enteros (Int16, Int32 o Int64).");
+                throw new ArgumentOutOfRangeException("El tipo de dato extraido de la base de datos debe ser Enteros (Int16, Int32 o Int64).");
 
             return (T)Convert.ChangeType(data, typeof(Int32));
         }
@@ -29,7 +29,7 @@ namespace InnSyTech.Standard.Database.Utils
         public object ConverterToDbData(object property)
         {
             if (property.GetType() != typeof(T))
-                throw new ArgumentException("El tipo de dato de la propiedad debe ser igual al definido por T.");
+                throw new ArgumentOutOfRangeException("El tipo de dato de la propiedad debe ser igual al definido por T.");
 
             return (Int32)property;
         }
