@@ -4,6 +4,7 @@ using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
+using InnSyTech.Standard.Utils;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,13 @@ namespace Acabus.Modules.CctvReports.ViewModels
         private ObservableCollection<MultiIncidenceItem> _selectedDevices;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="SelectedDeviceType" />.
+        /// </summary>
+        private DeviceType? _selectedDeviceType;
+
+        private ObservableCollection<DeviceType> _selectedDeviceTypes;
+
+        /// <summary>
         /// Campo que provee a la propiedad <see cref="SelectedPriority" />.
         /// </summary>
         private Priority _selectedPriority;
@@ -41,6 +49,8 @@ namespace Acabus.Modules.CctvReports.ViewModels
         /// Campo que provee a la propiedad <see cref="SelectedStation" />.
         /// </summary>
         private Station _selectedStation;
+
+        private ObservableCollection<Station> _selectedStations;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="SelectedWhoReporting" />.
@@ -62,9 +72,54 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 OnPropertyChanged(nameof(SelectedDevices));
                 OnPropertyChanged(nameof(DeviceFaults));
             });
+
+            DiscardStationCommand = new CommandBase(parameter =>
+            {
+                if (!(parameter is Station)) return;
+
+                _selectedStations.Remove(parameter as Station);
+
+                UpdateDeviceList();
+
+                OnPropertyChanged(nameof(AllStations));
+            });
+
+            DiscardTypeCommand = new CommandBase(parameter =>
+            {
+                if (!(parameter is DeviceType)) return;
+
+                _selectedDeviceTypes.Remove((DeviceType)parameter);
+
+                UpdateDeviceList();
+
+                OnPropertyChanged(nameof(AllDeviceTypes));
+            });
         }
 
         public CommandBase AddCommand { get; private set; }
+
+        public IEnumerable<DeviceType> AllDeviceTypes
+            => Enum.GetValues(typeof(DeviceType)).Cast<DeviceType>()
+            .Where(dt => !SelectedDeviceTypes.Contains(dt)
+                && !new[] {
+                    DeviceType.TS,
+                    DeviceType.TSI,
+                    DeviceType.TD,
+                    DeviceType.APP,
+                    DeviceType.CONT,
+                    DeviceType.DB,
+                    DeviceType.DSPB,
+                    DeviceType.MON,
+                    DeviceType.MRV,
+                    DeviceType.PCA,
+                    DeviceType.PDE,
+                    DeviceType.TA,
+                    DeviceType.NONE
+                }.Contains(dt));
+
+        public IEnumerable<Station> AllStations => Core.DataAccess.AcabusData.AllStations
+            .Where(s => !SelectedStations.Contains(s));
+
         public IEnumerable<String> Business => DataAccess.AcabusData.Companies;
 
         public ICommand CloseCommand { get; }
@@ -76,6 +131,8 @@ namespace Acabus.Modules.CctvReports.ViewModels
                             .Select(g => g.FirstOrDefault().Description);
 
         public ICommand DiscardCommand { get; }
+        public ICommand DiscardStationCommand { get; }
+        public ICommand DiscardTypeCommand { get; }
 
         /// <summary>
         /// Obtiene o establece las observaciones globales de la incidencia.
@@ -91,7 +148,8 @@ namespace Acabus.Modules.CctvReports.ViewModels
             }
         }
 
-        public IEnumerable<Priority> Priorities => Enum.GetValues(typeof(Priority)).Cast<Priority>();
+        public IEnumerable<Priority> Priorities
+            => Enum.GetValues(typeof(Priority)).Cast<Priority>();
 
         /// <summary>
         /// Obtiene o establece la descripción de la incidencia.
@@ -109,6 +167,29 @@ namespace Acabus.Modules.CctvReports.ViewModels
         /// </summary>
         public ObservableCollection<MultiIncidenceItem> SelectedDevices
             => _selectedDevices ?? (_selectedDevices = new ObservableCollection<MultiIncidenceItem>());
+
+        /// <summary>
+        /// Obtiene o establece el tipo de equipo seleccionado.
+        /// </summary>
+        public DeviceType? SelectedDeviceType {
+            get => _selectedDeviceType;
+            set {
+                _selectedDeviceType = value;
+                OnPropertyChanged(nameof(SelectedDeviceType));
+
+                if (value != null && value != DeviceType.NONE && !SelectedDeviceTypes.Contains(value.Value))
+                {
+                    SelectedDeviceTypes.Add(value.Value);
+
+                    UpdateDeviceList();
+
+                    OnPropertyChanged(nameof(AllDeviceTypes));
+                }
+            }
+        }
+
+        public ObservableCollection<DeviceType> SelectedDeviceTypes
+                    => _selectedDeviceTypes ?? (_selectedDeviceTypes = new ObservableCollection<DeviceType>());
 
         /// <summary>
         /// Obtiene o establece la prioridad de las incidencias.
@@ -129,16 +210,20 @@ namespace Acabus.Modules.CctvReports.ViewModels
             set {
                 _selectedStation = value;
                 OnPropertyChanged(nameof(SelectedStation));
-                _selectedDevices.Clear();
 
                 if (value != null)
-                    foreach (var item in _selectedStation.Devices)
-                        _selectedDevices.Add(new MultiIncidenceItem() { SelectedDevice = item, Observations = "" });
+                {
+                    SelectedStations.Add(value);
 
-                OnPropertyChanged(nameof(SelectedDevices));
-                OnPropertyChanged(nameof(DeviceFaults));
+                    UpdateDeviceList();
+
+                    OnPropertyChanged(nameof(AllStations));
+                }
             }
         }
+
+        public ObservableCollection<Station> SelectedStations
+            => _selectedStations ?? (_selectedStations = new ObservableCollection<Station>());
 
         /// <summary>
         /// Obtiene o establece quien reporta las incidencias.
@@ -159,17 +244,25 @@ namespace Acabus.Modules.CctvReports.ViewModels
             {
                 case "SelectedWhoReporting":
                     if (String.IsNullOrEmpty(SelectedWhoReporting))
-                        AddError("SelectedWhoReporting", "Falta ingresar quién reporta");
+                        AddError("SelectedWhoReporting", "Falta ingresar quién reporta.");
                     break;
 
                 case "SelectedDescription":
                     if (String.IsNullOrEmpty(SelectedDescription))
-                        AddError("SelectedDescription", "Falta ingresar la descripción de la incidencia.");
+                        if (SelectedDevices.Count == 0)
+                            AddError("SelectedDescription", "Falta seleccionar los equipos a reportar.");
+                        else
+                            AddError("SelectedDescription", "Falta ingresar la descripción de la incidencia.");
                     break;
 
-                case "SelectedStation":
-                    if (String.IsNullOrEmpty(SelectedStation?.ToString()))
-                        AddError("SelectedStation", "Falta seleccionar la estación");
+                case "SelectedStations":
+                    if (SelectedStations.Count == 0)
+                        AddError("SelectedStations", "Falta seleccionar alguna estación.");
+                    break;
+
+                case "SelectedDeviceTypes":
+                    if (SelectedDeviceTypes.Count == 0)
+                        AddError("SelectedDeviceTypes", "Falta seleccionar al menos un tipo de equipo.");
                     break;
 
                 case "SelectedDevices":
@@ -192,7 +285,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
             incidences = incidences.Where(i => SelectedDevices.Where(d => d.SelectedDevice == i.Device).Count() > 0 && i.Description.Description == SelectedDescription);
 
             if (incidences.Count() > 0)
-                AddError("SelectedDescription", $"Ya existe una incidencia abierta igual para: {incidences.First().Folio}");
+                AddError("SelectedDescription", $"Ya existe una incidencia abierta igual para: {incidences.First().Folio}.");
 
             return incidences.Count() == 0;
         }
@@ -251,11 +344,27 @@ namespace Acabus.Modules.CctvReports.ViewModels
         private IEnumerable<DeviceType> GetDevicesTypes()
                                             => SelectedDevices.Select(m => m.SelectedDevice.Type).Distinct();
 
+        private void UpdateDeviceList()
+        {
+            SelectedDevices.Clear();
+
+            if (SelectedDeviceTypes.Count == 0) return;
+            if (SelectedStations.Count == 0) return;
+
+            foreach (var item in _selectedStations.Select(s => s.Devices).Merge()
+                .Where(d => SelectedDeviceTypes.Contains(d.Type) || (SelectedDeviceTypes.Contains(DeviceType.TOR) && new[] { DeviceType.TD, DeviceType.TS, DeviceType.TSI }.Contains(d.Type))))
+                SelectedDevices.Add(new MultiIncidenceItem() { SelectedDevice = item, Observations = "" });
+            OnPropertyChanged(nameof(SelectedDevices));
+            OnPropertyChanged(nameof(DeviceFaults));
+        }
+
         private Boolean Validate()
         {
             ValidateProperty("SelectedWhoReporting");
             ValidateProperty("SelectedDescription");
             ValidateProperty("SelectedStation");
+            ValidateProperty("SelectedStations");
+            ValidateProperty("SelectedDeviceTypes");
             ValidateProperty("SelectedDevices");
             ValidateProperty("SelectedPriority");
 
