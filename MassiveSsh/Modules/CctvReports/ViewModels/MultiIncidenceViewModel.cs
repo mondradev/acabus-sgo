@@ -93,6 +93,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 UpdateDeviceList();
 
                 OnPropertyChanged(nameof(AllDeviceTypes));
+                OnPropertyChanged(nameof(SelectedDeviceTypes));
             });
         }
 
@@ -114,13 +115,15 @@ namespace Acabus.Modules.CctvReports.ViewModels
                     DeviceType.PCA,
                     DeviceType.PDE,
                     DeviceType.TA,
-                    DeviceType.NONE
-                }.Contains(dt));
+                    DeviceType.UNKNOWN
+                }.Contains(dt))
+            .OrderBy(dt => dt.Translate());
 
         public IEnumerable<Station> AllStations => Core.DataAccess.AcabusData.AllStations
-            .Where(s => !SelectedStations.Contains(s));
+            .Where(s => !SelectedStations.Contains(s))
+            .OrderBy(s => s.StationNumber);
 
-        public IEnumerable<String> Business => DataAccess.AcabusData.Companies;
+        public IEnumerable<String> Business => DataAccess.AcabusData.Companies.OrderBy(c => c);
 
         public ICommand CloseCommand { get; }
 
@@ -128,7 +131,8 @@ namespace Acabus.Modules.CctvReports.ViewModels
                             => Core.DataAccess.AcabusData.AllFaults.Where(f => GetDevicesTypes().Contains(f.Category.DeviceType))
                             .GroupBy(f => f.Description)
                             .Where(g => g.Count() == GetDevicesTypes().Count())
-                            .Select(g => g.FirstOrDefault().Description);
+                            .Select(g => g.FirstOrDefault().Description)
+                            .OrderBy(d => d);
 
         public ICommand DiscardCommand { get; }
         public ICommand DiscardStationCommand { get; }
@@ -165,8 +169,9 @@ namespace Acabus.Modules.CctvReports.ViewModels
         /// <summary>
         /// Obtiene una lista de los equipos a aplicar la falla descrita.
         /// </summary>
-        public ObservableCollection<MultiIncidenceItem> SelectedDevices
-            => _selectedDevices ?? (_selectedDevices = new ObservableCollection<MultiIncidenceItem>());
+        public IEnumerable<MultiIncidenceItem> SelectedDevices
+            => (_selectedDevices ?? (_selectedDevices = new ObservableCollection<MultiIncidenceItem>()))
+            .OrderBy(m => m.SelectedDevice.Type.Translate());
 
         /// <summary>
         /// Obtiene o establece el tipo de equipo seleccionado.
@@ -177,19 +182,21 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 _selectedDeviceType = value;
                 OnPropertyChanged(nameof(SelectedDeviceType));
 
-                if (value != null && value != DeviceType.NONE && !SelectedDeviceTypes.Contains(value.Value))
+                if (value != null && value != DeviceType.UNKNOWN && !SelectedDeviceTypes.Contains(value.Value))
                 {
-                    SelectedDeviceTypes.Add(value.Value);
+                    (_selectedDeviceTypes as ObservableCollection<DeviceType>).Add(value.Value);
 
                     UpdateDeviceList();
 
                     OnPropertyChanged(nameof(AllDeviceTypes));
+                    OnPropertyChanged(nameof(SelectedDeviceTypes));
                 }
             }
         }
 
-        public ObservableCollection<DeviceType> SelectedDeviceTypes
-                    => _selectedDeviceTypes ?? (_selectedDeviceTypes = new ObservableCollection<DeviceType>());
+        public IEnumerable<DeviceType> SelectedDeviceTypes
+                    => (_selectedDeviceTypes ?? (_selectedDeviceTypes = new ObservableCollection<DeviceType>()))
+            .OrderBy(dt => dt.Translate());
 
         /// <summary>
         /// Obtiene o establece la prioridad de las incidencias.
@@ -249,7 +256,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
 
                 case "SelectedDescription":
                     if (String.IsNullOrEmpty(SelectedDescription))
-                        if (SelectedDevices.Count == 0)
+                        if (_selectedDevices.Count == 0)
                             AddError("SelectedDescription", "Falta seleccionar los equipos a reportar.");
                         else
                             AddError("SelectedDescription", "Falta ingresar la descripción de la incidencia.");
@@ -261,12 +268,12 @@ namespace Acabus.Modules.CctvReports.ViewModels
                     break;
 
                 case "SelectedDeviceTypes":
-                    if (SelectedDeviceTypes.Count == 0)
+                    if (_selectedDeviceTypes.Count == 0)
                         AddError("SelectedDeviceTypes", "Falta seleccionar al menos un tipo de equipo.");
                     break;
 
                 case "SelectedDevices":
-                    if (SelectedDevices.Count == 0)
+                    if (_selectedDevices.Count == 0)
                         AddError("SelectedDevices", "No hay equipos agregados.");
                     break;
 
@@ -309,29 +316,8 @@ namespace Acabus.Modules.CctvReports.ViewModels
                     incidence.Observations = device.Observations;
                     registeredIncidence.Add(incidence);
                 }
-                try
-                {
-                    StringBuilder openedIncidence = new StringBuilder();
-                    foreach (var group in registeredIncidence.GroupBy(i => i.AssignedAttendance))
-                    {
-                        foreach (Incidence incidence in group)
-                            openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]
-                                + (String.IsNullOrEmpty(incidence.Observations) ? String.Empty : String.Format("\n*OBSERVACIONES:* {0}", incidence.Observations)));
-                        if (group.Key?.Technician != null)
-                            openedIncidence.AppendFormat("*ASIGNADO:* {0}", group.Key.Technician);
-                        openedIncidence.AppendLine();
-                        openedIncidence.AppendLine();
-                    }
-
-                    try
-                    {
-                        System.Windows.Forms.Clipboard.Clear();
-                        System.Windows.Forms.Clipboard.SetDataObject(openedIncidence.ToString());
-                    }
-                    catch { }
-                    AcabusControlCenterViewModel.ShowDialog("Incidencias agregadas y copiada al portapapeles.");
-                }
-                catch { }
+                CctvService.ToClipboard(registeredIncidence);
+                AcabusControlCenterViewModel.ShowDialog("Incidencias agregadas y copiada al portapapeles.");
             });
 
             ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
@@ -346,16 +332,23 @@ namespace Acabus.Modules.CctvReports.ViewModels
 
         private void UpdateDeviceList()
         {
-            SelectedDevices.Clear();
+            try
+            {
+                _selectedDevices.Clear();
 
-            if (SelectedDeviceTypes.Count == 0) return;
-            if (SelectedStations.Count == 0) return;
+                if (_selectedDeviceTypes.Count == 0) return;
+                if (SelectedStations.Count == 0) return;
 
-            foreach (var item in _selectedStations.Select(s => s.Devices).Merge()
-                .Where(d => SelectedDeviceTypes.Contains(d.Type) || (SelectedDeviceTypes.Contains(DeviceType.TOR) && new[] { DeviceType.TD, DeviceType.TS, DeviceType.TSI }.Contains(d.Type))))
-                SelectedDevices.Add(new MultiIncidenceItem() { SelectedDevice = item, Observations = "" });
-            OnPropertyChanged(nameof(SelectedDevices));
-            OnPropertyChanged(nameof(DeviceFaults));
+                foreach (var item in _selectedStations.Select(s => s.Devices).Merge()
+                    .Where(d => SelectedDeviceTypes.Contains(d.Type) || (SelectedDeviceTypes.Contains(DeviceType.TOR) && new[] { DeviceType.TD, DeviceType.TS, DeviceType.TSI }.Contains(d.Type))))
+                    _selectedDevices.Add(new MultiIncidenceItem() { SelectedDevice = item, Observations = "" });
+            }
+            finally
+            {
+
+                OnPropertyChanged(nameof(SelectedDevices));
+                OnPropertyChanged(nameof(DeviceFaults));
+            }
         }
 
         private Boolean Validate()

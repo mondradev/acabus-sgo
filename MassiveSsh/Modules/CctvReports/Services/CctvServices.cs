@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -476,5 +477,36 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean Update(this Incidence incidence)
                                             => AcabusData.Session.Update(ref incidence);
+
+        public static void ToClipboard(IEnumerable<Incidence> incidences)
+        {
+            if (incidences.Count() == 0) return;
+
+            StringBuilder openedIncidence = new StringBuilder();
+            foreach (var group in incidences.GroupBy(i => i?.AssignedAttendance))
+            {
+                foreach (Incidence incidence in group)
+                    openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]
+                        + (String.IsNullOrEmpty(incidence.Observations) ? String.Empty : String.Format("\n*OBSERVACIONES:* {0}", incidence.Observations)));
+                if (group.Key?.Technician != null)
+                    openedIncidence.AppendFormat("*ASIGNADO:* {0}", group.Key.Technician);
+                openedIncidence.AppendLine();
+                openedIncidence.AppendLine();
+            }
+
+            try
+            {
+                System.Windows.Forms.Clipboard.Clear();
+                System.Windows.Forms.Clipboard.SetDataObject(openedIncidence.ToString());
+            }
+            catch { }
+        }
+
+        public static void ToClipboard(Incidence incidence)
+        {
+            if (incidence != null)
+                ToClipboard(new[] { incidence });
+        }
+
     }
 }

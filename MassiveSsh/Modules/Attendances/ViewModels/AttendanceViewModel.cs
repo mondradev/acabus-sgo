@@ -59,18 +59,8 @@ namespace Acabus.Modules.Attendances.ViewModels
                     AcabusControlCenterViewModel.ShowDialog("No hay incidencias asignadas.");
                     return;
                 }
-                StringBuilder openedIncidence = new StringBuilder();
-                foreach (Incidence incidence in SelectedAttendance.OpenedIncidences)
-                    openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]
-                        + (String.IsNullOrEmpty(incidence.Observations) ? String.Empty : String.Format("\n*OBSERVACIONES:* {0}", incidence.Observations)));
-                openedIncidence.AppendFormat("*ASIGNADO:* {0}", SelectedAttendance.Technician);
 
-                try
-                {
-                    System.Windows.Forms.Clipboard.Clear();
-                    System.Windows.Forms.Clipboard.SetDataObject(openedIncidence.ToString());
-                }
-                catch { }
+                CctvService.ToClipboard(SelectedAttendance.OpenedIncidences);
             });
         }
 

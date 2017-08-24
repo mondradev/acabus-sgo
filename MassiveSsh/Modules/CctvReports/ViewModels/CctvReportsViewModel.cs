@@ -105,20 +105,7 @@ namespace Acabus.Modules.CctvReports
                 AcabusControlCenterViewModel.ShowDialog("Reasignación completada.");
             });
 
-            CopyingRowClipboardHandlerCommand = new CommandBase((parameter) =>
-            {
-                String incidenceData = SelectedIncidence?.ToReportString();
-
-                if (!String.IsNullOrWhiteSpace(incidenceData))
-                {
-                    try
-                    {
-                        System.Windows.Forms.Clipboard.Clear();
-                        System.Windows.Forms.Clipboard.SetDataObject(incidenceData.ToUpper());
-                    }
-                    catch { }
-                }
-            });
+            CopyingRowClipboardHandlerCommand = new CommandBase(parameter => CctvService.ToClipboard(parameter as Incidence));
 
             UpdateDataCommand = new CommandBase(parameter =>
             {
@@ -137,6 +124,9 @@ namespace Acabus.Modules.CctvReports
 
                 foreach (Incidence item in selection)
                     SelectedIncidences.Add(item);
+
+                CctvService.ToClipboard(SelectedIncidences);
+
             });
 
             CloseIncidenceDialogCommand = new CommandBase((parameter) =>
