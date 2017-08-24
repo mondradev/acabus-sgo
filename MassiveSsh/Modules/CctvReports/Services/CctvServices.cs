@@ -115,7 +115,7 @@ namespace Acabus.Modules.CctvReports.Services
         public static Incidence CreateIncidence(this IList<Incidence> incidences, DeviceFault description, Device device, DateTime startTime,
                             Priority priority, String whoReporting, String observations = null)
         => CreateIncidence(incidences, description, device, startTime, priority, whoReporting, observations, IncidenceStatus.OPEN, ViewModelService.GetViewModel<AttendanceViewModel>()?
-                                .GetTechnicianAssigned(device, startTime, description), null, null);
+                                .GetTechnicianAssigned(new Incidence() { Device = device, StartDate = startTime, Description = description }), null, null);
 
         public static Incidence CreateIncidence(this IList<Incidence> incidences, DeviceFault description, Device device, DateTime startTime,
                             Priority priority, string whoReporting, String observations, IncidenceStatus status, Attendance attendance, Technician technicianThatFix,

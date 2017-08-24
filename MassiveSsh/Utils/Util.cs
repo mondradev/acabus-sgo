@@ -53,6 +53,9 @@ namespace Acabus.Utils
             return toComparer >= value1 && toComparer <= value2;
         }
 
+        public static Boolean Between(this DayOfWeek toCompare, DayOfWeek day, DayOfWeek anotherDay)
+            => toCompare >= day && toCompare <= anotherDay;
+
         /// <summary>
         /// 
         /// </summary>
