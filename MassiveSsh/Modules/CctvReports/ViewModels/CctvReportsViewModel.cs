@@ -690,7 +690,8 @@ namespace Acabus.Modules.CctvReports
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
         }
 
-        bool connected = false;
+        bool searching = false;
+        bool nightSearching = false;
 
         private void InitNightTasks()
         {
@@ -698,7 +699,7 @@ namespace Acabus.Modules.CctvReports
 
             _nightTasks = new Timer(delegate
             {
-                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(22), new TimeSpan(23, 59, 59)))
+                if (!nightSearching && DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(22), new TimeSpan(23, 59, 59)))
                 {
 
                     try
@@ -711,20 +712,21 @@ namespace Acabus.Modules.CctvReports
                             if (lastUpdate.Date.Equals(DateTime.Now.Date))
                                 return;
                         }
-                        Trace.WriteLine("Buscando contadores en mal estado", "NOTIFY");
+                        nightSearching = true;
+                        Trace.WriteLine("BUSCANDO VERIFICANDO ESTADO DE CONTADORES", "NOTIFY");
                         Alarms.SearchCountersFailing();
-                        Trace.WriteLine("Buscando backups faltantes", "NOTIFY");
+                        Trace.WriteLine("BUSCANDO BACKUPS FALTANTES", "NOTIFY");
                         Alarms.SearchMissingBackups();
                         File.WriteAllText(TEMP_NIGHT_TASKS, DateTime.Now.ToString());
+                        nightSearching = false;
                     }
                     catch (IOException)
                     {
                         File.Delete(TEMP_NIGHT_TASKS);
                     }
                 }
-                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(2), TimeSpan.FromHours(3)))
+                if (!searching && DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(2), TimeSpan.FromHours(3)))
                 {
-                    if (connected) return;
                     try
                     {
                         if (File.Exists(TEMP_NIGHT_TASKS_KVR))
@@ -735,13 +737,13 @@ namespace Acabus.Modules.CctvReports
                             if (lastUpdate.Date.Equals(DateTime.Now.Date))
                                 return;
                         }
-                        connected = true;
-                        Trace.WriteLine("Buscando recaudos", "NOTIFY");
+                        searching = true;
+                        Trace.WriteLine("BUSCANDO RECAUDOS", "NOTIFY");
                         Alarms.SearchPickUpMoney();
-                        Trace.WriteLine("Buscando suministros", "NOTIFY");
+                        Trace.WriteLine("BUSCANDO SUMINISTROS", "NOTIFY");
                         Alarms.SearchFillStock();
                         File.WriteAllText(TEMP_NIGHT_TASKS_KVR, DateTime.Now.ToString());
-                        connected = false;
+                        searching = false;
                     }
                     catch (IOException)
                     {

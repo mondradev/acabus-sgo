@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
 using static Acabus.Modules.Attendances.Models.Attendance;
 
@@ -165,10 +164,8 @@ namespace Acabus.Modules.Attendances.ViewModels
             else
                 attendancesPrevious = attendances;
 
-
             if (AttendanceService.GetWorkShift(DateTime.Now) != WorkShift.NIGHT_SHIFT)
             {
-
                 /// Asignación cuando al menos hay un tecnico en turno.
                 WorkShift currenteWorkShift = DateTime.Now.GetWorkShift();
                 attendances = attendances
@@ -229,7 +226,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                     attendances = attendances.Where(attendance
                        => attendance.DateTimeDeparture is null
                            && attendance.Section.Contains("PATIO"));
-                else if (device?.Vehicle?.BusType == VehicleType.CONVENTIONAL)
+                else if (device?.Vehicle?.BusType == VehicleType.CONVENTIONAL || device.Station.Name.Contains("RENACIMIENTO"))
                     attendances = attendances.Where(attendance
                        => attendance.DateTimeDeparture is null
                            && attendance.Section.Contains("TERMINAL DE TRANSFERENCIA"));
