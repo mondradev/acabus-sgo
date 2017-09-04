@@ -16,7 +16,7 @@ namespace InnSyTech.Standard.Database.Linq
         /// Crea una instancia nueva de <see cref="DbSqlQuery{TData}"/>.
         /// </summary>
         /// <param name="provider">Proveedor que se utiliza para acceder a los datos.</param>
-        public DbSqlQuery(DbSqlProvider provider)
+        public DbSqlQuery(DbProvider provider)
         {
             if (provider is null)
                 throw new ArgumentNullException("El proveedor de datos no puede ser nulo.");
@@ -30,7 +30,7 @@ namespace InnSyTech.Standard.Database.Linq
         /// </summary>
         /// <param name="provider">Proveedor que se utiliza para acceder a los datos.</param>
         /// <param name="expression">Expresión de la consulta.</param>
-        public DbSqlQuery(DbSqlProvider provider, Expression expression)
+        public DbSqlQuery(DbProvider provider, Expression expression)
         {
             if (provider is null)
                 throw new ArgumentNullException("El proveedor de datos no puede ser nulo.");

@@ -34,12 +34,17 @@ namespace Opera.Acabus.Server.Debug
 
             //var d2 = ModelsExtension.GetDevice(msj.GetBytes(20));
 
-            var db = DbSqlFactory.CreateSession<SQLiteConnection>(new DbDialect());
+            var db = DbFactory.CreateSession<SQLiteConnection>(new DbDialect());
 
-            var query = db.Read<Device>()
-                //.LoadReference(3)
+            var query = db.Read<Incidence>()
+                .LoadReference(3)
                 //.Execute()
-                .Where(d => d.Type == DeviceType.KVR && d.Station.StationNumber == 1)
+                .Where(i => i.Description.Description == "AYUDA" 
+                    && i.Description.ID == 1 
+                    && i.Device.Station.Name == "M" 
+                    && i.Device.Vehicle.ID == 2 
+                    && i.Device.Station.StationNumber == 5 
+                    && i.AssignedAttendance.Technician.Name == "MM")
               ;
 
             foreach (var l in query)
