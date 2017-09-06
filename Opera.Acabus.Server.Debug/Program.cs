@@ -36,15 +36,10 @@ namespace Opera.Acabus.Server.Debug
 
             var db = DbFactory.CreateSession<SQLiteConnection>(new DbDialect());
 
-            var query = db.Read<Incidence>()
+            var query = db.Read<Link>()
                 .LoadReference(3)
                 //.Execute()
-                .Where(i => i.Description.Description == "AYUDA" 
-                    && i.Description.ID == 1 
-                    && i.Device.Station.Name == "M" 
-                    && i.Device.Vehicle.ID == 2 
-                    && i.Device.Station.StationNumber == 5 
-                    && i.AssignedAttendance.Technician.Name == "MM")
+                .Where(l => l.StationA.Name == "CENTRO DE CONTROL")
               ;
 
             foreach (var l in query)

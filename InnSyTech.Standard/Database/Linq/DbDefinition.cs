@@ -1,9 +1,11 @@
-﻿using InnSyTech.Standard.Utils;
+﻿using InnSyTech.Standard.Database.Utils;
+using InnSyTech.Standard.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace InnSyTech.Standard.Database.Linq
 {
@@ -16,10 +18,15 @@ namespace InnSyTech.Standard.Database.Linq
         }
 
         public String Alias { get; set; }
+
         public DbEntityDefinition DependencyEntity { get; set; }
+
         public DbFieldDefinition DependencyMember { get; set; }
+
         public List<DbEntityDefinition> DependentsEntities { get; }
-        public Type Entity { get; set; }
+
+        public Type EntityType { get; set; }
+
         public List<DbFieldDefinition> Members { get; }
 
         public DbEntityDefinition CreateDependencyEntity(MemberInfo member)
@@ -51,6 +58,9 @@ namespace InnSyTech.Standard.Database.Linq
             return entity;
         }
 
+        public DbFieldDefinition CreateMember(MemberInfo member)
+            => new DbFieldDefinition(member, this);
+
         public DbEntityDefinition GetRoot()
         {
             var entity = DependencyEntity ?? this;
@@ -61,8 +71,22 @@ namespace InnSyTech.Standard.Database.Linq
             return entity;
         }
 
-        public DbFieldDefinition CreateMember(MemberInfo member)
-            => new DbFieldDefinition(member, this);
+        public override string ToString()
+        {
+            StringBuilder format = new StringBuilder();
+
+            format.AppendFormat("Type: {0}, ", EntityType?.Name ?? "null");
+
+            if (!String.IsNullOrEmpty(Alias))
+                format.AppendFormat("Alias: {0}, ", Alias);
+
+            if (DependencyEntity != null)
+                format.AppendFormat("Dependency: {{ Entity: {{{0}}}, Member: {1}}}, ", DependencyEntity, DependencyMember.ToString() ?? "null");
+
+            format.AppendFormat("Dependents: {0}, Member: {1}", DependentsEntities.Count, Members.Count);
+
+            return format.ToString();
+        }
     }
 
     internal sealed class DbFieldDefinition
@@ -76,6 +100,12 @@ namespace InnSyTech.Standard.Database.Linq
 
         public DbEntityDefinition Entity { get; set; }
         public MemberInfo Member { get; set; }
+
+        public override string ToString()
+            => String.Format("{0}", DbHelper.GetFieldName(Member, Entity?.EntityType));
+
+        public String GetFieldName()
+            => DbHelper.GetFieldName(Member, Entity.EntityType);
     }
 
     internal sealed class DbStatementDefinition : IEnumerable<DbStatementDefinition>
@@ -105,10 +135,10 @@ namespace InnSyTech.Standard.Database.Linq
             }
 
             foreach (var entityAdded in Entities)
-                if (entityAdded.Entity == rootEntity.Entity)
+                if (entityAdded.EntityType == rootEntity.EntityType)
                     return;
 
-            Entities.Add(entity);
+            Entities.Add(rootEntity);
         }
 
         public DbStatementDefinition ConvertToSubStatement()
@@ -129,7 +159,7 @@ namespace InnSyTech.Standard.Database.Linq
         {
             result = null;
 
-            if (entity.Entity != anotherEntity.Entity)
+            if (entity.EntityType != anotherEntity.EntityType)
                 return false;
 
             result = MergeDependents(entity, anotherEntity);
@@ -145,7 +175,7 @@ namespace InnSyTech.Standard.Database.Linq
                 anotherEntity.DependentsEntities
             }
             .Merge()
-            .GroupBy(e => e.Entity);
+            .GroupBy(e => e.EntityType);
 
             var members = new[]
             {
@@ -161,7 +191,7 @@ namespace InnSyTech.Standard.Database.Linq
 
             var entityMerge = new DbEntityDefinition()
             {
-                Entity = entity.Entity,
+                EntityType = entity.EntityType,
                 DependencyEntity = entity.DependencyEntity,
                 DependencyMember = entity.DependencyMember,
                 Alias = entity.Alias

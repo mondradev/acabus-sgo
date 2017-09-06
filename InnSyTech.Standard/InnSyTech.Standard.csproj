@@ -65,7 +65,6 @@
     <Compile Include="Database\DbFactory.cs" />
     <Compile Include="Database\DbSqlSession.cs" />
     <Compile Include="Database\IDbSession.cs" />
-    <Compile Include="Database\Linq\ChainHelper.cs" />
     <Compile Include="Database\Linq\DbDefinition.cs" />
     <Compile Include="Database\Linq\EvaluatorExpression.cs" />
     <Compile Include="Database\Linq\DbQueryable.cs" />
