@@ -16,7 +16,7 @@ namespace InnSyTech.Standard.Database.Linq
     internal class DbExpressionVisitor : ExpressionVisitor
     {
         private IDbDialect _dialect;
-        private List<Tuple<String, DbFieldDefinition>> _fieldLabels 
+        private List<Tuple<String, DbFieldDefinition>> _fieldLabels
             = new List<Tuple<string, DbFieldDefinition>>();
         private List<DbFieldDefinition> _selectedList;
         private StringBuilder _statement;
@@ -286,7 +286,7 @@ namespace InnSyTech.Standard.Database.Linq
 
             entity.Alias = String.Format("T{0}", count++);
 
-            foreach (var dbFields in DbHelper.GetFields(entity.EntityType))
+            foreach (var dbFields in DbHelper.GetFields(entity.EntityType).Where(f => String.IsNullOrEmpty(f.ForeignKeyName)))
                 fieldsString.AppendFormat("{1}.{0} {1}_{0}, ", dbFields.Name, entity.Alias);
 
             _statement.Replace("{{fields}}", String.Format("{0}{1}", fieldsString.ToString(), "{{fields}}"));
