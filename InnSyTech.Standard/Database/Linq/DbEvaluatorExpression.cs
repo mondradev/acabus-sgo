@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace InnSyTech.Standard.Database.Linq
 {
-    internal static class EvaluatorExpression
+    internal static class DbEvaluatorExpression
     {
         /// <summary>
         /// Performs evaluation & replacement of independent sub-trees
@@ -14,9 +14,8 @@ namespace InnSyTech.Standard.Database.Linq
         /// <param name="fnCanBeEvaluated">A function that decides whether a given expression node can be part of the local function.</param>
         /// <returns>A new tree with sub-trees evaluated and replaced.</returns>
         public static Expression PartialEval(Expression expression, Func<Expression, bool> fnCanBeEvaluated)
-        {
-            return new SubtreeEvaluator(new Nominator(fnCanBeEvaluated).Nominate(expression)).Eval(expression);
-        }
+            =>new SubtreeEvaluator(new Nominator(fnCanBeEvaluated).Nominate(expression)).Eval(expression);
+        
 
         /// <summary>
         /// Performs evaluation & replacement of independent sub-trees
@@ -24,14 +23,15 @@ namespace InnSyTech.Standard.Database.Linq
         /// <param name="expression">The root of the expression tree.</param>
         /// <returns>A new tree with sub-trees evaluated and replaced.</returns>
         public static Expression PartialEval(Expression expression)
-        {
-            return PartialEval(expression, CanBeEvaluatedLocally);
-        }
+            => PartialEval(expression, CanBeEvaluatedLocally);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         private static bool CanBeEvaluatedLocally(Expression expression)
-        {
-            return !new[] { ExpressionType.Parameter, ExpressionType.Constant }.Contains(expression.NodeType);
-        }
+            => !new[] { ExpressionType.Parameter, ExpressionType.Constant }.Contains(expression.NodeType);
 
         /// <summary>
         /// Evaluates & replaces sub-trees when first candidate is reached (top-down)

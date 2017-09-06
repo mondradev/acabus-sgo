@@ -84,7 +84,7 @@ namespace InnSyTech.Standard.Database.Linq
             DbCommand command = _connection.CreateCommand();
             command.CommandText = GetQueryText(expression);
 
-            Trace.WriteLine($"Execute: {command.CommandText}");
+            Trace.WriteLine($"Execute: {command.CommandText}", "DEBUG");
 
             DbDataReader reader = command.ExecuteReader();
 
@@ -105,7 +105,7 @@ namespace InnSyTech.Standard.Database.Linq
         /// <param name="expression">Expresión raíz donde comienza la consulta.</param>
         /// <returns>Un enunciado SQL que se utilizará para el SQL.</returns>
         public string GetQueryText(Expression expression)
-            => new ExpressionVisitor()
-            .Translate(EvaluatorExpression.PartialEval(expression), _dialect);
+            => new DbExpressionVisitor()
+            .Translate(DbEvaluatorExpression.PartialEval(expression), _dialect);
     }
 }
