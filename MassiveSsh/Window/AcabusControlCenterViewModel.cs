@@ -3,6 +3,7 @@ using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -39,6 +40,8 @@ namespace Acabus.Window
             public override void WriteLine(string message)
             {
                 if (Instance == null) return;
+
+                File.AppendAllText("acabus.log", DateTime.Now + "\t" + message + "\n\r");
 
                 String[] messageData = message.Split(new Char[] { ':' }, 2);
                 if (messageData.Length > 0 && messageData[0] == "NOTIFY" && !Instance.messageSkiped.Contains(messageData[1]))
