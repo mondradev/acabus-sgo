@@ -1,4 +1,5 @@
-﻿using InnSyTech.Standard.Database.Utils;
+﻿using InnSyTech.Standard.Database.Linq.DbDefinitions;
+using InnSyTech.Standard.Database.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,8 +25,9 @@ namespace InnSyTech.Standard.Database.Linq
         /// <param name="reader">Lector de datos.</param>
         /// <param name="command">Comando utilizado.</param>
         /// <param name="connection">Conexión a la base de datos.</param>
-        internal DbSqlReader(DbDataReader reader, DbCommand command, DbConnection connection)
-            => _enumerator = new DbSqlEnumerator(reader, command, connection);
+        /// <param name="definition">Estructura de definición de la sentencia SQL utilizada para la lectura.</param>
+        internal DbSqlReader(DbDataReader reader, DbCommand command, DbConnection connection, DbStatementDefinition definition)
+            => _enumerator = new DbSqlEnumerator(reader, command, connection, definition);
 
         /// <summary>
         /// Obtiene el enumerador genéricode la lectura de datos, solo puede ser enumerado una vez.
@@ -78,6 +80,12 @@ namespace InnSyTech.Standard.Database.Linq
             private DbDataReader _dbReader;
 
             /// <summary>
+            /// Estructura de definición de la sentencia utilizada para realizar la lectura a la base
+            /// de datos.
+            /// </summary>
+            private DbStatementDefinition _definition;
+
+            /// <summary>
             /// Campos de la instancia.
             /// </summary>
             private DbFieldInfo[] _fields;
@@ -93,11 +101,15 @@ namespace InnSyTech.Standard.Database.Linq
             /// <param name="reader">Lector de datos.</param>
             /// <param name="command">Comando utilizado para la lectura.</param>
             /// <param name="connection">Conexión a la base de datos.</param>
-            internal DbSqlEnumerator(DbDataReader reader, DbCommand command, DbConnection connection)
+            /// <param name="definition">
+            /// Estructura que define la sentencia utilizada para la lectura de la base de datos.
+            /// </param>
+            internal DbSqlEnumerator(DbDataReader reader, DbCommand command, DbConnection connection, DbStatementDefinition definition)
             {
                 _dbReader = reader;
                 _command = command;
                 _connection = connection;
+                _definition = definition;
 
                 _fields = DbHelper.GetFields(typeof(TData)).Where(f => !f.IsPrimaryKey).ToArray();
                 _primaryKey = DbHelper.GetPrimaryKey(typeof(TData));
@@ -127,7 +139,7 @@ namespace InnSyTech.Standard.Database.Linq
             {
                 if (_dbReader.Read())
                 {
-                    TData instance = (TData)DbHelper.ToInstance(typeof(TData), _dbReader);
+                    TData instance = (TData)DbHelper.ToInstance(typeof(TData), _dbReader, _definition.Entities.First(), _definition.ReferenceDepth);
 
                     _current = instance;
 

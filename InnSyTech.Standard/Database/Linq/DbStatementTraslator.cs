@@ -13,7 +13,7 @@ namespace InnSyTech.Standard.Database.Linq
     /// <summary>
     /// 
     /// </summary>
-    internal class DbExpressionVisitor : ExpressionVisitor
+    internal class DbStatementTraslator : ExpressionVisitor
     {
         private IDbDialect _dialect;
         private List<object[]> _fieldLabels = new List<object[]>();
@@ -22,7 +22,7 @@ namespace InnSyTech.Standard.Database.Linq
         private DbStatementDefinition _statementDefinition
             = new DbStatementDefinition();
 
-        public string Translate(Expression expression, IDbDialect dialect)
+        public string Translate(Expression expression, IDbDialect dialect, out DbStatementDefinition definition)
         {
             _dialect = dialect;
             _statement = new StringBuilder();
@@ -30,6 +30,8 @@ namespace InnSyTech.Standard.Database.Linq
             Visit(expression);
 
             ProcessDefinition();
+
+            definition = _statementDefinition;
 
             return _statement.ToString();
         }
@@ -194,6 +196,7 @@ namespace InnSyTech.Standard.Database.Linq
 
                 case "LoadReference":
                     var depth = (int)(m.Arguments[1] as ConstantExpression).Value;
+                    _statementDefinition.ReferenceDepth = depth;
                     LoadReference(TypeHelper.GetElementType((m.Arguments[0] as ConstantExpression).Type), depth);
                     Visit(m.Arguments[0]);
                     break;
