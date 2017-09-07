@@ -73,6 +73,7 @@ namespace Acabus.Models
                 { DeviceType.PDE, "SERVIDOR PATIO DE ENCIERRO" },
                 { DeviceType.PGE, "PLANTA ELECTRÓGENA" },
                 { DeviceType.RACK, "RACK DE ESTACIÓN" },
+                { DeviceType.LIGHT, "LUMINARIAS" },
                 { DeviceType.UNKNOWN, "(TIPO DESCONOCIDO)" }
             })
             {

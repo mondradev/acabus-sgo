@@ -141,6 +141,10 @@ namespace Acabus.Modules.Attendances.ViewModels
                && device.Type == DeviceType.CONT)
                 return null;
 
+            if (DateTime.Now.GetWorkShift() != WorkShift.NIGHT_SHIFT
+               && device.Type == DeviceType.MRV)
+                return null;
+
             if (device.Type == DeviceType.PCA && DateTime.Now.GetWorkShift() != WorkShift.NIGHT_SHIFT
                 && fault.ID == Core.DataAccess.AcabusData.AllFaults
                     .FirstOrDefault(f => f.Description.Contains("INFORMACIÓN") && f.Category?.DeviceType == DeviceType.PCA)?.ID

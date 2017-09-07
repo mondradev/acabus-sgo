@@ -190,8 +190,6 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void GetAlarms(this ObservableCollection<Alarm> alarms)
         {
-            if (DateTime.Now.TimeOfDay > TimeSpan.FromHours(23)
-               || DateTime.Now.TimeOfDay < TimeSpan.FromHours(6)) return;
 
             alarms.Clear();
             var response = AcabusData.ExecuteQueryInServerDB(String.Format(AcabusData.TrunkAlertQuery, DateTime.Now.AddMinutes(-30)));
@@ -225,9 +223,6 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void GetBusDisconnectedAlarms(this ObservableCollection<BusDisconnectedAlarm> busAlarms)
         {
-            if (DateTime.Now.TimeOfDay > TimeSpan.FromHours(21)
-                || DateTime.Now.TimeOfDay < TimeSpan.FromHours(3)) return;
-
             busAlarms.Clear();
             Vehicle[] vehicles = new Vehicle[Core.DataAccess.AcabusData.OffDutyVehicles.Count];
             Core.DataAccess.AcabusData.OffDutyVehicles.CopyTo(vehicles, 0);
@@ -253,7 +248,7 @@ namespace Acabus.Modules.CctvReports.Services
         {
             var filter = new DbFilter();
             filter.AddWhere(new DbFilterExpression(nameof(Incidence.Status), (Int16)IncidenceStatus.CLOSE, WhereOperator.EQUALS), WhereType.AND);
-            filter.AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), DateTime.Now.AddDays(-10), WhereOperator.GREAT_THAT), WhereType.AND);
+            filter.AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), DateTime.Now.AddDays(-5), WhereOperator.GREAT_THAT), WhereType.AND);
 
             ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>(new DbFilter(new List<DbFilterValue>() {
                 new DbFilterValue(new DbFilterExpression(nameof(Incidence.Status), (Int16)IncidenceStatus.CLOSE, WhereOperator.NO_EQUALS), WhereType.AND)
@@ -326,40 +321,47 @@ namespace Acabus.Modules.CctvReports.Services
             {
                 var task = Task.Run(() =>
                 {
-                    if (!ConnectionTCP.IsAvaibleIP(device.IP)) return;
-
-                    SshPostgreSQL psql = SshPostgreSQL.CreateConnection("/opt/PostgreSQL/9.3/bin", device.IP, 5432, "postgres", "4c4t3k", "SITM", "teknei", "4c4t3k");
-                    var response = psql.ExecuteQuery(SEARCH_FILL_STOCK);
-                    foreach (var row in response)
+                    try
                     {
-                        if (row[0] == "fch_oper")
-                            continue;
-                        if (row.Length < 2)
-                            continue;
+                        if (!ConnectionTCP.IsAvaibleIP(device.IP)) return;
 
-                        var operationDate = DateTime.Parse(row[0]);
-                        var uid = row[1];
-                        var totalStock = Int32.Parse(row[2]);
+                        SshPostgreSQL psql = SshPostgreSQL.CreateConnection("/opt/PostgreSQL/9.3/bin", device.IP, 5432, "postgres", "4c4t3k", "SITM", "teknei", "4c4t3k");
+                        var response = psql.ExecuteQuery(SEARCH_FILL_STOCK);
+                        foreach (var row in response)
+                        {
+                            if (row[0] == "fch_oper")
+                                continue;
+                            if (row.Length < 2)
+                                continue;
 
-                        bool exist = false;
-                        foreach (var alert in alarms.Where(alarm => alarm.Device == device))
-                            if (alert.Description == "SUMINISTRO DE TARJETAS" && alert.DateTime.Date.Equals(operationDate))
-                            {
-                                exist = true;
-                                break;
-                            }
+                            var operationDate = DateTime.Parse(row[0]);
+                            var uid = row[1];
+                            var totalStock = Int32.Parse(row[2]);
 
-                        if (!exist)
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                alarms.Add(Alarm.CreateAlarm(0,
-                                    device.NumeSeri,
-                                    "SUMINISTRO DE TARJETAS",
-                                    operationDate,
-                                    Priority.NONE,
-                                    String.Format("TOTAL SUMINISTRADAS: {0}, UID MANTTO: {1}", totalStock, uid),
-                                    true));
-                            });
+                            bool exist = false;
+                            foreach (var alert in alarms.Where(alarm => alarm.Device == device))
+                                if (alert.Description == "SUMINISTRO DE TARJETAS" && alert.DateTime.Date.Equals(operationDate))
+                                {
+                                    exist = true;
+                                    break;
+                                }
+
+                            if (!exist)
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    alarms.Add(Alarm.CreateAlarm(0,
+                                        device.NumeSeri,
+                                        "SUMINISTRO DE TARJETAS",
+                                        operationDate,
+                                        Priority.NONE,
+                                        String.Format("TOTAL SUMINISTRADAS: {0}, UID MANTTO: {1}", totalStock, uid),
+                                        true));
+                                });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(ex.StackTrace, "ERROR");
                     }
                 });
                 tasks.Add(task);
@@ -376,43 +378,50 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void SearchMissingBackups(this ObservableCollection<Alarm> alarms)
         {
-            var response = AcabusData.ExecuteQueryInServerDB(AcabusData.MissingBackupsQuery);
-            foreach (var row in response)
+            try
             {
-                if (row[0] == "no_econ")
-                    continue;
-
-                if (row.Length < 1) break;
-                var serie = row[0];
-                var exists = false;
-                foreach (var alert in alarms.Where(alarm => alarm.Device != null
-                                                && (alarm.Device.NumeSeri == serie || (alarm.Device.Vehicle != null
-                                                && alarm.Device.Vehicle.EconomicNumber == serie))))
-                    if (alert.Description == NEED_BACKUP)
-                        exists = true;
-                if (!exists)
+                var response = AcabusData.ExecuteQueryInServerDB(AcabusData.MissingBackupsQuery);
+                foreach (var row in response)
                 {
-                    Device alarmDevice = Core.DataAccess.AcabusData.AllDevices.FirstOrDefault(device
-                                                      => (device.Type == DeviceType.PCA
-                                                              && device.Vehicle != null
-                                                              && device.Vehicle.EconomicNumber == serie)
-                                                          || (device.Type == DeviceType.KVR
-                                                              && device.NumeSeri == serie));
-                    if (alarmDevice == null)
-                    {
-                        Trace.WriteLine($"ALARMA [{NEED_BACKUP}] DE EQUIPO DESCONOCIDO ({serie}) FUE IGNORADA", "NOTIFY");
+                    if (row[0] == "no_econ")
                         continue;
-                    }
 
-                    Application.Current.Dispatcher.Invoke(()
-                        => alarms.Add(new Alarm(0)
+                    if (row.Length < 1) break;
+                    var serie = row[0];
+                    var exists = false;
+                    foreach (var alert in alarms.Where(alarm => alarm.Device != null
+                                                    && (alarm.Device.NumeSeri == serie || (alarm.Device.Vehicle != null
+                                                    && alarm.Device.Vehicle.EconomicNumber == serie))))
+                        if (alert.Description == NEED_BACKUP)
+                            exists = true;
+                    if (!exists)
+                    {
+                        Device alarmDevice = Core.DataAccess.AcabusData.AllDevices.FirstOrDefault(device
+                                                          => (device.Type == DeviceType.PCA
+                                                                  && device.Vehicle != null
+                                                                  && device.Vehicle.EconomicNumber == serie)
+                                                              || (device.Type == DeviceType.KVR
+                                                                  && device.NumeSeri == serie));
+                        if (alarmDevice == null)
                         {
-                            DateTime = DateTime.Now,
-                            Description = NEED_BACKUP,
-                            Device = alarmDevice,
-                            Priority = Priority.HIGH
-                        }));
+                            Trace.WriteLine($"ALARMA [{NEED_BACKUP}] DE EQUIPO DESCONOCIDO ({serie}) FUE IGNORADA", "NOTIFY");
+                            continue;
+                        }
+
+                        Application.Current.Dispatcher.Invoke(()
+                            => alarms.Add(new Alarm(0)
+                            {
+                                DateTime = DateTime.Now,
+                                Description = NEED_BACKUP,
+                                Device = alarmDevice,
+                                Priority = Priority.HIGH
+                            }));
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.StackTrace, "ERROR");
             }
         }
 
@@ -428,39 +437,46 @@ namespace Acabus.Modules.CctvReports.Services
             {
                 var task = Task.Run(() =>
                   {
-                      if (!ConnectionTCP.IsAvaibleIP(device.IP)) return;
-
-                      SshPostgreSQL psql = SshPostgreSQL.CreateConnection("/opt/PostgreSQL/9.3", device.IP, 5432, "postgres", "4c4t3k", "SITM", "teknei", "4c4t3k");
-                      var response = psql.ExecuteQuery(SEARCH_PICKUP_MONEY);
-                      foreach (var row in response)
+                      try
                       {
-                          if (row[0] == "fch_oper")
-                              continue;
-                          if (row.Length < 2)
-                              continue;
+                          if (!ConnectionTCP.IsAvaibleIP(device.IP)) return;
 
-                          var operationDate = DateTime.Parse(row[0]);
-                          var uid = row[1];
+                          SshPostgreSQL psql = SshPostgreSQL.CreateConnection("/opt/PostgreSQL/9.3", device.IP, 5432, "postgres", "4c4t3k", "SITM", "teknei", "4c4t3k");
+                          var response = psql.ExecuteQuery(SEARCH_PICKUP_MONEY);
+                          foreach (var row in response)
+                          {
+                              if (row[0] == "fch_oper")
+                                  continue;
+                              if (row.Length < 2)
+                                  continue;
 
-                          bool exist = false;
-                          foreach (var alert in alarms.Where(alarm => alarm.Device == device))
-                              if (alert.Description == "RECAUDO DE VALORES" && alert.DateTime.Date.Equals(operationDate))
-                              {
-                                  exist = true;
-                                  break;
-                              }
+                              var operationDate = DateTime.Parse(row[0]);
+                              var uid = row[1];
 
-                          if (!exist)
-                              Application.Current.Dispatcher.Invoke(() =>
-                              {
-                                  alarms.Add(Alarm.CreateAlarm(0,
-                                      device.NumeSeri,
-                                      "RECAUDO DE VALORES",
-                                      operationDate,
-                                      Priority.NONE,
-                                      String.Format("UID RECAUDADOR: {0}", uid),
-                                      true));
-                              });
+                              bool exist = false;
+                              foreach (var alert in alarms.Where(alarm => alarm.Device == device))
+                                  if (alert.Description == "RECAUDO DE VALORES" && alert.DateTime.Date.Equals(operationDate))
+                                  {
+                                      exist = true;
+                                      break;
+                                  }
+
+                              if (!exist)
+                                  Application.Current.Dispatcher.Invoke(() =>
+                                  {
+                                      alarms.Add(Alarm.CreateAlarm(0,
+                                          device.NumeSeri,
+                                          "RECAUDO DE VALORES",
+                                          operationDate,
+                                          Priority.NONE,
+                                          String.Format("UID RECAUDADOR: {0}", uid),
+                                          true));
+                                  });
+                          }
+                      }
+                      catch (Exception ex)
+                      {
+                          Trace.WriteLine(ex.StackTrace, "ERROR");
                       }
                   });
                 tasks.Add(task);
@@ -480,26 +496,27 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void ToClipboard(IEnumerable<Incidence> incidences)
         {
-            if (incidences.Count() == 0) return;
-
-            StringBuilder openedIncidence = new StringBuilder();
-            foreach (var group in incidences.GroupBy(i => i?.AssignedAttendance))
-            {
-                foreach (Incidence incidence in group)
-                    openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]
-                        + (String.IsNullOrEmpty(incidence.Observations) ? String.Empty : String.Format("\n*OBSERVACIONES:* {0}", incidence.Observations)));
-                if (group.Key?.Technician != null)
-                    openedIncidence.AppendFormat("*ASIGNADO:* {0}", group.Key.Technician);
-                openedIncidence.AppendLine();
-                openedIncidence.AppendLine();
-            }
-
             try
             {
+                if (incidences.Count() == 0) return;
+
+                StringBuilder openedIncidence = new StringBuilder();
+                foreach (var group in incidences.GroupBy(i => i?.AssignedAttendance))
+                {
+                    foreach (Incidence incidence in group)
+                        openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]
+                            + (String.IsNullOrEmpty(incidence.Observations) ? String.Empty : String.Format("\n*OBSERVACIONES:* {0}", incidence.Observations)));
+                    if (group.Key?.Technician != null)
+                        openedIncidence.AppendFormat("*ASIGNADO:* {0}", group.Key.Technician);
+                    openedIncidence.AppendLine();
+                    openedIncidence.AppendLine();
+                }
+
+
                 System.Windows.Forms.Clipboard.Clear();
                 System.Windows.Forms.Clipboard.SetDataObject(openedIncidence.ToString());
             }
-            catch { }
+            catch (Exception ex) { Trace.WriteLine(ex.StackTrace, "ERROR"); }
         }
 
         public static void ToClipboard(Incidence incidence)

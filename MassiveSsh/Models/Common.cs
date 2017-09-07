@@ -168,7 +168,12 @@ namespace Acabus.Models
         /// <summary>
         /// Rack de estación.
         /// </summary>
-        RACK
+        RACK,
+
+        /// <summary>
+        /// Luminarias
+        /// </summary>
+        LIGHT
     }
 
     /// <summary>

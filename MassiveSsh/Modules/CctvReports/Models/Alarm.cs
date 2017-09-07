@@ -134,7 +134,7 @@ namespace Acabus.Modules.CctvReports.Models
         public static Alarm CreateAlarm(UInt32 id, String numeSeri, String description, DateTime dateTime, Priority priority, String comments = null, Boolean isHistorial = false)
         {
             var device = Core.DataAccess.AcabusData.AllDevices.FirstOrDefault((dev)
-                            => dev.NumeSeri.Equals(numeSeri));
+                            => dev?.NumeSeri == numeSeri);
             if (device is null)
                 throw new InvalidOperationException($"No existe el equipo {numeSeri}");
             return new Alarm(id)
