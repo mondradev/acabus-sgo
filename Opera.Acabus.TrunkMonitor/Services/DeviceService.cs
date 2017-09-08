@@ -1,4 +1,4 @@
-﻿using InnSyTech.Standard.Utils;
+﻿using InnSyTech.Standard.Net;
 using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Models;
 using Opera.Acabus.TrunkMonitor.Utils;
@@ -32,13 +32,12 @@ namespace Opera.Acabus.TrunkMonitor.Service
                 device.Station.GetMaximunAcceptablePing());
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="device"></param>
         /// <returns></returns>
         public static Int16 DoPing(this Device device)
         {
-
             var ping = ConnectionTCP.SendToPing(device.IPAddress.ToString(), 3);
             lock (_devicePing)
                 if (!_devicePing.ContainsKey(device))
@@ -54,9 +53,7 @@ namespace Opera.Acabus.TrunkMonitor.Service
                 else
                     _deviceLinkState[device] = linkState;
 
-
             return device.GetPing();
-
         }
 
         /// <summary>

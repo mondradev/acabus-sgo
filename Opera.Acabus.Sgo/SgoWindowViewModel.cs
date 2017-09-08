@@ -1,6 +1,7 @@
-﻿using InnSyTech.Standard.Mvvm;
+﻿using InnSyTech.Standard.Configuration;
+using InnSyTech.Standard.Mvvm;
 using MaterialDesignThemes.Wpf;
-using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.Gui;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
+using static Opera.Acabus.Core.Gui.Dispatcher;
 
 namespace Opera.Acabus.Sgo
 {
@@ -33,11 +35,6 @@ namespace Opera.Acabus.Sgo
         private SgoWindowView _view;
 
         /// <summary>
-        /// Contiene los mensajes de error omitidos en la aplicación.
-        /// </summary>
-        private List<String> messageSkiped = new List<string>();
-
-        /// <summary>
         /// Agrega un escucha al Trace para poder capturar los mensajes y mostrar los de error en la Snackbar
         /// de la ventana.
         /// </summary>
@@ -55,12 +52,12 @@ namespace Opera.Acabus.Sgo
             _view = view;
             _instance = this;
 
-            AcabusData.RequestingShowContent += arg =>
+            Dispatcher.RequestingShowContent += arg =>
              {
                  Instance?._view.ShowContent(arg.Content);
              };
 
-            AcabusData.RequestingShowDialog += async arg =>
+            Dispatcher.RequestingShowDialog += async arg =>
             {
                 DialogHost.CloseDialogCommand.Execute(null, null);
 
@@ -70,7 +67,7 @@ namespace Opera.Acabus.Sgo
                 arg.Callback?.Invoke(response);
             };
 
-            AcabusData.RequestingSendMessageOrNotify += async arg =>
+            Dispatcher.RequestingSendMessageOrNotify += async arg =>
             {
                 switch (arg.SendType)
                 {
@@ -118,7 +115,7 @@ namespace Opera.Acabus.Sgo
                 IsLoaded = false,
                 IsSecundary = secundaryModule,
                 Name = moduleName,
-                Type = moduleClass
+                ViewType = moduleClass
             };
 
             if (Modules.Where(module => module.Name == moduleInfo.Name).Count() < 1)
@@ -130,13 +127,16 @@ namespace Opera.Acabus.Sgo
         /// </summary>
         private static void LoadModule()
         {
-            foreach (var moduleName in AcabusData.ModulesNames)
+            foreach (ModuleInfo moduleName in ConfigurationManager.Settings.GetSettings("module", "modules"))
             {
                 try
                 {
-                    Trace.WriteLine($"Cargando el módulo: '{moduleName.Item1}'...", "DEBUG");
-                    Assembly assembly = Assembly.LoadFrom(moduleName.Item3);
-                    var type = assembly.GetType(moduleName.Item2);
+                    Assembly assembly = Assembly.LoadFrom(moduleName.AssemblyFilename);
+                    var type = assembly.GetType(moduleName.TypeName);
+
+                    if (type is null)
+                        throw new Exception($"Libería no contiene módulo especificado ---> {moduleName.TypeName}");
+
                     var moduleInfo = Activator.CreateInstance(type);
 
                     var viewType = type.GetProperty("View");
@@ -155,13 +155,17 @@ namespace Opera.Acabus.Sgo
 
                     var moduleLoaded = type.GetMethod("LoadModule")?.Invoke(moduleInfo, null);
                     if (moduleLoaded is Boolean && (Boolean)moduleLoaded)
-                        AcabusData.SendNotify($"Módulo '{moduleName.Item1}' cargado");
+                        Dispatcher.SendNotify($"Módulo '{moduleName.Name}' cargado");
                     else
-                        AcabusData.SendNotify($"No se logró cargar el módulo '{moduleName.Item1}'");
+                        Dispatcher.SendNotify($"No se logró cargar el módulo '{moduleName.Name}'");
                 }
                 catch (FileNotFoundException)
                 {
-                    AcabusData.SendNotify($"No se encontró el módulo '{moduleName.Item1}'");
+                    Dispatcher.SendNotify($"No se encontró el módulo '{moduleName.Name}'");
+                }
+                catch (Exception)
+                {
+                    Dispatcher.SendNotify($"No se encontró módulo '{moduleName.Name}' en libería '{moduleName.AssemblyFilename}'");
                 }
             }
 
@@ -172,7 +176,7 @@ namespace Opera.Acabus.Sgo
                  {
                      if (!moduleInfo.IsLoaded)
                      {
-                         moduleView = (UserControl)Activator.CreateInstance(moduleInfo.Type);
+                         moduleView = (UserControl)Activator.CreateInstance(moduleInfo.ViewType);
                          moduleInfo.IsLoaded = true;
                      }
 
@@ -186,6 +190,11 @@ namespace Opera.Acabus.Sgo
         /// </summary>
         private sealed class ModuleInfo : IModuleInfo
         {
+            /// <summary>
+            /// Obtiene el nombre del ensamblado.
+            /// </summary>
+            public String AssemblyFilename { get; set; }
+
             /// <summary>
             /// Obtiene o establece icono del módulo.
             /// </summary>
@@ -209,7 +218,12 @@ namespace Opera.Acabus.Sgo
             /// <summary>
             /// Obtiene o establece clase de la vista principal del módulo.
             /// </summary>
-            public Type Type { get; set; }
+            public Type ViewType { get; set; }
+
+            /// <summary>
+            /// Obtiene el nombre del tipo.
+            /// </summary>
+            public String TypeName { get; set; }
         }
 
         /// <summary>
@@ -234,11 +248,8 @@ namespace Opera.Acabus.Sgo
                 if (Instance == null) return;
 
                 String[] messageData = message.Split(new Char[] { ':' }, 2);
-                if (messageData.Length > 0 && messageData[0] == "NOTIFY" && !Instance.messageSkiped.Contains(messageData[1].ToUpper()))
-                    Instance._view.AddMessage(
-                        messageData[1].ToUpper(),
-                        () => Instance.messageSkiped.Add(messageData[1].ToUpper()),
-                        "OMITIR");
+                if (messageData.Length > 0 && messageData[0] == "NOTIFY")
+                    Instance._view.AddMessage(messageData[1].ToUpper());
             }
         }
     }

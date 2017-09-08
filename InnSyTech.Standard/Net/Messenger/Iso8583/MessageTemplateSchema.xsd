@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="MessageTemplateSchema"
+    targetNamespace="http://innsytech.com/MessageTemplateSchema.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://innsytech.com/MessageTemplateSchema.xsd"
+    xmlns:mstns="http://innsytech.com/MessageTemplateSchema.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="Template">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Fields">
+          <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="64">
+              <xs:element name="Field">
+                <xs:complexType>
+                  <xs:attribute name="ID" use="required">
+                    <xs:simpleType>
+                      <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="1"></xs:minInclusive>
+                        <xs:maxInclusive value="64"></xs:maxInclusive>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                  <xs:attribute name="Type" use="required">
+                    <xs:simpleType>
+                      <xs:restriction base="xs:string">
+                        <xs:enumeration value="ALPHANUMERIC"></xs:enumeration>
+                        <xs:enumeration value="NUMERIC"></xs:enumeration>
+                        <xs:enumeration value="LVAR"></xs:enumeration>
+                        <xs:enumeration value="LLVAR"></xs:enumeration>
+                        <xs:enumeration value="LLLVAR"></xs:enumeration>
+                        <xs:enumeration value="LVBINARY"></xs:enumeration>
+                        <xs:enumeration value="LLVBINARY"></xs:enumeration>
+                        <xs:enumeration value="LLLVBINARY"></xs:enumeration>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                  <xs:attribute name="Length" type="xs:integer" use="optional"></xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

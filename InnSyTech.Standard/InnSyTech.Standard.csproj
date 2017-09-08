@@ -29,6 +29,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Security">
       <HintPath>..\MassiveSsh\Libraries\Mono.Security.dll</HintPath>
@@ -51,32 +58,53 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ConfigurationManager.cs" />
+    <Compile Include="Configuration\SettingCollection.cs" />
     <Compile Include="Database\DbAttribute.cs" />
-    <Compile Include="Database\DbCrud.cs" />
-    <Compile Include="Database\DbFilter.cs" />
-    <Compile Include="Database\DbUtils.cs" />
+    <Compile Include="Database\DbFactory.cs" />
+    <Compile Include="Database\DbSession.cs" />
+    <Compile Include="Database\IDbSession.cs" />
+    <Compile Include="Database\Linq\DbDefinitions\DbEntityDefinition.cs" />
+    <Compile Include="Database\Linq\DbDefinitions\DbFieldDefinition.cs" />
+    <Compile Include="Database\Linq\DbDefinitions\DbStatementDefinition.cs" />
+    <Compile Include="Database\Linq\DbDefinitions\DbStatementDefinitionEnumerator.cs" />
+    <Compile Include="Database\Linq\DbEvaluatorExpression.cs" />
+    <Compile Include="Database\Linq\DbQueryable.cs" />
+    <Compile Include="Database\Linq\DbReader.cs" />
+    <Compile Include="Database\Linq\DbQuery.cs" />
+    <Compile Include="Database\Linq\DbProvider.cs" />
+    <Compile Include="Database\Linq\DbStatementTraslator.cs" />
     <Compile Include="Database\Utils\DbEnumConverter.cs" />
     <Compile Include="Database\IDbConverter.cs" />
-    <Compile Include="Database\DbField.cs" />
-    <Compile Include="Database\DbFactory_temp.cs" />
-    <Compile Include="Database\DbSession.cs" />
-    <Compile Include="Database\IDbConfiguration.cs" />
-    <Compile Include="Database\Utils\SQLiteDateTimeConverter.cs" />
+    <Compile Include="Database\DbFieldInfo.cs" />
+    <Compile Include="Database\IDbDialect.cs" />
+    <Compile Include="Database\Utils\DbHelper.cs" />
+    <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />
+    <Compile Include="Utils\TypeHelper.cs" />
     <Compile Include="Mvvm\Command.cs" />
     <Compile Include="Mvvm\Converters\TranslateEnumConverter.cs" />
     <Compile Include="Mvvm\NotifyPropertyChanged.cs" />
     <Compile Include="Mvvm\ViewModelBase.cs" />
     <Compile Include="Mvvm\ViewModelService.cs" />
+    <Compile Include="Net\Messenger\Iso8583\Message.cs" />
     <Compile Include="PostgreSQL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SecureShell\Scp.cs" />
     <Compile Include="SecureShell\Ssh.cs" />
     <Compile Include="SecureShell\SshPsql.cs" />
     <Compile Include="Structures\Trees\Tree.cs" />
-    <Compile Include="Utils\ConnectionTCP.cs" />
+    <Compile Include="Net\ConnectionTCP.cs" />
     <Compile Include="Utils\Credential.cs" />
     <Compile Include="Utils\EnumTranslate.cs" />
     <Compile Include="Utils\Extension.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Net\Messenger\Iso8583\MessageTemplateSchema.xsd">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Database\PostgreSql\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

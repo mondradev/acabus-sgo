@@ -74,6 +74,10 @@ namespace Opera.Acabus.Sgo
             _content.Children.Clear();
             _content.Children.Add(content);
         }
+        /// <summary>
+        /// Contiene los mensajes de error omitidos en la aplicación.
+        /// </summary>
+        private List<String> messageSkiped = new List<string>();
 
         /// <summary>
         /// Agrega un mensaje a la cola de notificaciones en la aplicación.
@@ -84,6 +88,8 @@ namespace Opera.Acabus.Sgo
         internal void AddMessage(String message, Action action = null, String actionName = "OCULTAR")
         {
             if (_messages.Contains(message.ToUpper())) return;
+            if (messageSkiped.Contains(message.ToUpper())) return;
+            action = action ?? (() => messageSkiped.Add(message.ToUpper()));
 
             Application.Current?.Invoke(() =>
             {
