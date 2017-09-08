@@ -181,56 +181,6 @@ namespace InnSyTech.Standard.Database
                 Provider.CloseConnection();
             }
         }
-        /// <summary>
-        /// Permite actualizar los valores de una instancia persistida, en caso de que alguna referencia no exista, esta será creada.
-        /// </summary>
-        /// <typeparam name="TData">Tipo de la instancia a actualizar.</typeparam>
-        /// <param name="instance">Instancia a actualizar.</param>
-        /// <param name="referenceDepth">Nivel de profundidad de las referencias a actualizar.</param>
-        /// <param name="command">Comando utilizado para la ejecución de consultas.</param>
-        private void UpdateInternal<TData>(TData instance, int referenceDepth, DbCommand command)
-        {
-            IEnumerable<DbFieldInfo> fields = DbHelper.GetFields(instance.GetType()).Where(f => String.IsNullOrEmpty(f.ForeignKeyName));
-            var primaryKey = fields.FirstOrDefault(f => f.IsPrimaryKey);
-
-            if (referenceDepth > 0)
-                foreach (var foreignKey in fields.Where(f => f.IsForeignKey))
-                    UpdateInternal(foreignKey.GetValue(instance), referenceDepth - 1, command);
-
-            if (primaryKey.IsAutonumerical && primaryKey.GetValue(instance)?.ToString() == "0")
-                CreateInternal(instance, 0, command);
-
-            if (primaryKey.GetValue(instance) == null)
-                throw new ArgumentNullException(nameof(instance), "La instancia actual no tiene llave primaria establecida con un valor, no puede ser actualizada.");
-
-            StringBuilder statement = new StringBuilder();
-
-            statement.AppendFormat("UPDATE {0} SET {1} WHERE {2}=@{2}",
-                DbHelper.GetEntityName(instance.GetType()),
-                "{{parametersAndFields}}",
-                primaryKey.Name);
-
-            command.Parameters.Clear();
-
-            foreach (var field in fields)
-            {
-                var parameter = command.CreateParameter();
-
-                parameter.ParameterName = $"@{field.Name}";
-                parameter.Value = field.IsForeignKey ? field.GetForeignValue(instance) : field.GetValue(instance);
-
-                command.Parameters.Add(parameter);
-                statement.Replace("{{parametersAndFields}}", String.Format("{0} = @{0}, {1}", field.Name, "{{parametersAndFields}}"));
-            }
-
-            statement.Replace(", {{parametersAndFields}}", String.Empty);
-
-            command.CommandText = statement.ToString();
-
-            Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
-
-            command.ExecuteNonQuery();
-        }
 
         /// <summary>
         /// Permite persistir una instancia y sus referencias de manera recursiva.
@@ -300,6 +250,57 @@ namespace InnSyTech.Standard.Database
 
             var idGenereted = command.ExecuteScalar();
             primaryKey.SetValue(instance, idGenereted);
+        }
+
+        /// <summary>
+        /// Permite actualizar los valores de una instancia persistida, en caso de que alguna referencia no exista, esta será creada.
+        /// </summary>
+        /// <typeparam name="TData">Tipo de la instancia a actualizar.</typeparam>
+        /// <param name="instance">Instancia a actualizar.</param>
+        /// <param name="referenceDepth">Nivel de profundidad de las referencias a actualizar.</param>
+        /// <param name="command">Comando utilizado para la ejecución de consultas.</param>
+        private void UpdateInternal<TData>(TData instance, int referenceDepth, DbCommand command)
+        {
+            IEnumerable<DbFieldInfo> fields = DbHelper.GetFields(instance.GetType()).Where(f => String.IsNullOrEmpty(f.ForeignKeyName));
+            var primaryKey = fields.FirstOrDefault(f => f.IsPrimaryKey);
+
+            if (referenceDepth > 0)
+                foreach (var foreignKey in fields.Where(f => f.IsForeignKey))
+                    UpdateInternal(foreignKey.GetValue(instance), referenceDepth - 1, command);
+
+            if (primaryKey.IsAutonumerical && primaryKey.GetValue(instance)?.ToString() == "0")
+                CreateInternal(instance, 0, command);
+
+            if (primaryKey.GetValue(instance) == null)
+                throw new ArgumentNullException(nameof(instance), "La instancia actual no tiene llave primaria establecida con un valor, no puede ser actualizada.");
+
+            StringBuilder statement = new StringBuilder();
+
+            statement.AppendFormat("UPDATE {0} SET {1} WHERE {2}=@{2}",
+                DbHelper.GetEntityName(instance.GetType()),
+                "{{parametersAndFields}}",
+                primaryKey.Name);
+
+            command.Parameters.Clear();
+
+            foreach (var field in fields)
+            {
+                var parameter = command.CreateParameter();
+
+                parameter.ParameterName = $"@{field.Name}";
+                parameter.Value = field.IsForeignKey ? field.GetForeignValue(instance) : field.GetValue(instance);
+
+                command.Parameters.Add(parameter);
+                statement.Replace("{{parametersAndFields}}", String.Format("{0} = @{0}, {1}", field.Name, "{{parametersAndFields}}"));
+            }
+
+            statement.Replace(", {{parametersAndFields}}", String.Empty);
+
+            command.CommandText = statement.ToString();
+
+            Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+
+            command.ExecuteNonQuery();
         }
     }
 }

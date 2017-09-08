@@ -7,7 +7,8 @@ using System.Reflection;
 namespace InnSyTech.Standard.Database.Linq
 {
     /// <summary>
-    /// Añade métodos que permiten extender la funcionalidad de Linq para la extracción de tipos complejos de la base de datos.
+    /// Añade métodos que permiten extender la funcionalidad de Linq para la extracción de tipos
+    /// complejos de la base de datos.
     /// </summary>
     public static class DbQueryable
     {
@@ -39,7 +40,8 @@ namespace InnSyTech.Standard.Database.Linq
                 throw new ArgumentNullException(nameof(source), "La colección origen no puede ser nula.");
 
             if (depth < 0)
-                throw new ArgumentOutOfRangeException(nameof(depth), "El nivel de profundidad de la carga de referencia no puede ser un número negativo.");
+                throw new ArgumentOutOfRangeException(nameof(depth), 
+                    "El nivel de profundidad de la carga de referencia no puede ser un número negativo.");
 
             MethodInfo loadReferenceMethod = typeof(DbQueryable)
                 .GetMethods().Single(m => m.Name.Equals(nameof(LoadReference)) && m.IsGenericMethod)
