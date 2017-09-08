@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace InnSyTech.Standard.Utils
 {
@@ -25,6 +26,14 @@ namespace InnSyTech.Standard.Utils
 
             return partsStr.ToArray();
         }
+
+        /// <summary>
+        /// Elimina los saltos de linea en un texto.
+        /// </summary>
+        /// <param name="str">Texto a unificar lineas.</param>
+        /// <returns>Una cadena de una sola linea.</returns>
+        public static String JoinLines(this String str)
+            => Regex.Replace(str, "[\r\n\r]+", " ");
 
         /// <summary>
         /// Fusiona una instancia <see cref="IEnumerable{T}"/> de <see cref="IEnumerable{T}"/>

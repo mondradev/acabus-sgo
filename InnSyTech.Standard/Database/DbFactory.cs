@@ -31,7 +31,7 @@ namespace InnSyTech.Standard.Database
             if (!typeof(DbConnection).IsAssignableFrom(connectionType))
                 throw new ArgumentOutOfRangeException(nameof(connectionType), "El tipo de conexión no hereda de System.Data.Common.DbConnection");
 
-            return new DbSqlSession((DbConnection)Activator.CreateInstance(connectionType, dialect.ConnectionString), dialect);
+            return new DbSession((DbConnection)Activator.CreateInstance(connectionType, dialect.ConnectionString), dialect);
         }
     }
 }
