@@ -151,7 +151,82 @@ namespace InnSyTech.Standard.Database
         /// </returns>
         public bool Update<TData>(TData instance, int referenceDepth = 0)
         {
-            throw new NotImplementedException();
+            DbTransaction transaction = Provider.BeginTransaction();
+            DbCommand command = Provider.CreateCommand(transaction);
+
+            try
+            {
+                UpdateInternal(instance, referenceDepth, command);
+
+                transaction.Commit();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+
+                Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+
+                return false;
+            }
+            finally
+            {
+                if (transaction != null)
+                    Provider.EndTransaction(transaction);
+
+                if (command != null)
+                    command.Dispose();
+
+                Provider.CloseConnection();
+            }
+        }
+        /// <summary>
+        /// Permite actualizar los valores de una instancia persistida, en caso de que alguna referencia no exista, esta será creada.
+        /// </summary>
+        /// <typeparam name="TData">Tipo de la instancia a actualizar.</typeparam>
+        /// <param name="instance">Instancia a actualizar.</param>
+        /// <param name="referenceDepth">Nivel de profundidad de las referencias a actualizar.</param>
+        /// <param name="command">Comando utilizado para la ejecución de consultas.</param>
+        private void UpdateInternal<TData>(TData instance, int referenceDepth, DbCommand command)
+        {
+            IEnumerable<DbFieldInfo> fields = DbHelper.GetFields(instance.GetType()).Where(f => String.IsNullOrEmpty(f.ForeignKeyName));
+            var primaryKey = fields.FirstOrDefault(f => f.IsPrimaryKey);
+
+            if (referenceDepth > 0)
+                foreach (var foreignKey in fields.Where(f => f.IsForeignKey))
+                    UpdateInternal(foreignKey.GetValue(instance), referenceDepth - 1, command);
+
+            if (primaryKey.IsAutonumerical && primaryKey.GetValue(instance)?.ToString() == "0")
+                CreateInternal(instance, 0, command);
+
+            StringBuilder statement = new StringBuilder();
+
+            statement.AppendFormat("UPDATE {0} SET {1} WHERE {2}=@{2}",
+                DbHelper.GetEntityName(instance.GetType()),
+                "{{parametersAndFields}}",
+                primaryKey.Name);
+
+            command.Parameters.Clear();
+
+            foreach (var field in fields)
+            {
+                var parameter = command.CreateParameter();
+
+                parameter.ParameterName = $"@{field.Name}";
+                parameter.Value = field.IsForeignKey ? field.GetForeignValue(instance) : field.GetValue(instance);
+
+                command.Parameters.Add(parameter);
+                statement.Replace("{{parametersAndFields}}", String.Format("{0} = @{0}, {1}", field.Name, "{{parametersAndFields}}"));
+            }
+
+            statement.Replace(", {{parametersAndFields}}", String.Empty);
+
+            command.CommandText = statement.ToString();
+
+            Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+
+            command.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -196,7 +271,7 @@ namespace InnSyTech.Standard.Database
                 var parameter = command.CreateParameter();
 
                 parameter.ParameterName = $"@{field.Name}";
-                parameter.Value = field.GetValue(instance);
+                parameter.Value = field.IsForeignKey ? field.GetForeignValue(instance) : field.GetValue(instance);
 
                 command.Parameters.Add(parameter);
 
@@ -214,6 +289,14 @@ namespace InnSyTech.Standard.Database
             Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
 
             command.ExecuteNonQuery();
+
+            if (!primaryKey.IsAutonumerical)
+                return;
+
+            command.CommandText = String.Format("SELECT {0}()", Provider.Dialect.LastInsertFunctionName);
+
+            var idGenereted = command.ExecuteScalar();
+            primaryKey.SetValue(instance, idGenereted);
         }
     }
 }
