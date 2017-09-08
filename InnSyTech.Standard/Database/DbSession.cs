@@ -200,6 +200,9 @@ namespace InnSyTech.Standard.Database
             if (primaryKey.IsAutonumerical && primaryKey.GetValue(instance)?.ToString() == "0")
                 CreateInternal(instance, 0, command);
 
+            if (primaryKey.GetValue(instance) == null)
+                throw new ArgumentNullException(nameof(instance), "La instancia actual no tiene llave primaria establecida con un valor, no puede ser actualizada.");
+
             StringBuilder statement = new StringBuilder();
 
             statement.AppendFormat("UPDATE {0} SET {1} WHERE {2}=@{2}",
