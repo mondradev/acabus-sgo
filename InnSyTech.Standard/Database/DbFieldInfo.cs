@@ -138,14 +138,19 @@ namespace InnSyTech.Standard.Database
         public object GetForeignValue(Object instance)
         {
             if (instance is null)
-                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula");
+                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula -->");
 
             if (!IsForeignKey)
                 throw new InvalidOperationException("El campo actual no es una referencia.");
 
             var primaryKey = DbHelper.GetPrimaryKey(PropertyType);
 
-            return primaryKey.GetValue(GetValue(instance));
+            object foreignValue = GetValue(instance);
+
+            if (foreignValue == null)
+                return null;
+
+            return primaryKey.GetValue(foreignValue);
         }
 
         /// <summary>
@@ -157,7 +162,7 @@ namespace InnSyTech.Standard.Database
         public Object GetValue(Object instance)
         {
             if (instance is null)
-                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula");
+                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula -->");
 
             if (Converter is null)
                 return _propertyInfo.GetValue(instance);
@@ -174,9 +179,12 @@ namespace InnSyTech.Standard.Database
         public void SetValue(Object instance, Object value)
         {
             if (instance is null)
-                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula");
+                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula -->");
             try
             {
+                if (value == null)
+                    _propertyInfo.SetValue(instance, value);
+
                 if (Converter is null)
                     if (Nullable.GetUnderlyingType(PropertyType) is null)
                         _propertyInfo.SetValue(instance, Convert.ChangeType(value, PropertyType));

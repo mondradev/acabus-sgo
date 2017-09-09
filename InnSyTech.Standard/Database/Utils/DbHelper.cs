@@ -227,7 +227,8 @@ namespace InnSyTech.Standard.Database.Utils
             catch
             {
                 object dbValue = dbField.PropertyType.IsValueType ? Activator.CreateInstance(dbField.PropertyType) : null;
-                dbField.SetValue(instance, dbValue);
+                if (dbField.PropertyInfo.SetMethod != null)
+                    dbField.PropertyInfo.SetValue(instance, dbValue);
                 return false;
             }
         }

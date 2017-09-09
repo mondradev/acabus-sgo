@@ -39,34 +39,38 @@ namespace InnSyTech.Standard.Database
         /// <returns>Un true en caso que la instancia sea persistida correctamente.</returns>
         public bool Create<TData>(TData instance, int referenceDepth = 0)
         {
-            DbTransaction transaction = Provider.BeginTransaction();
-            DbCommand command = Provider.CreateCommand(transaction);
-
-            try
+            lock (Provider)
             {
-                CreateInternal(instance, referenceDepth, command);
+                DbTransaction transaction = Provider.BeginTransaction();
+                DbCommand command = Provider.CreateCommand(transaction);
 
-                transaction.Commit();
+                try
+                {
+                    CreateInternal(instance, referenceDepth, command);
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
+                    transaction.Commit();
 
-                Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    if (transaction != null)
+                        transaction.Rollback();
 
-                return false;
-            }
-            finally
-            {
-                if (transaction != null)
-                    Provider.EndTransaction(transaction);
+                    Trace.WriteLine((ex.Message + ex.StackTrace).JoinLines(), "ERROR");
 
-                if (command != null)
-                    command.Dispose();
+                    return false;
+                }
+                finally
+                {
+                    if (transaction != null)
+                        Provider.EndTransaction(transaction);
 
-                Provider.CloseConnection();
+                    if (command != null)
+                        command.Dispose();
+
+                    Provider.CloseConnection();
+                }
             }
         }
 
@@ -80,48 +84,52 @@ namespace InnSyTech.Standard.Database
         /// <returns>Un true si la instancia fue borrada así como sus referencias de ser necesario.</returns>
         public bool Delete<TData>(TData instance)
         {
-            DbTransaction transaction = Provider.BeginTransaction();
-            DbCommand command = Provider.CreateCommand(transaction);
-
-            try
+            lock (Provider)
             {
-                var tablename = DbHelper.GetEntityName(instance.GetType());
-                var primaryKey = DbHelper.GetPrimaryKey(instance.GetType());
+                DbTransaction transaction = Provider.BeginTransaction();
+                DbCommand command = Provider.CreateCommand(transaction);
 
-                var parameter = command.CreateParameter();
+                try
+                {
+                    var tablename = DbHelper.GetEntityName(instance.GetType());
+                    var primaryKey = DbHelper.GetPrimaryKey(instance.GetType());
 
-                command.CommandText = String.Format("DELETE FROM {0} WHERE {1} = @key", tablename, primaryKey.Name);
+                    var parameter = command.CreateParameter();
 
-                parameter.ParameterName = "@key";
-                parameter.Value = primaryKey.GetValue(instance);
+                    command.CommandText = String.Format("DELETE FROM {0} WHERE {1} = @key", tablename, primaryKey.Name);
 
-                command.Parameters.Add(parameter);
+                    parameter.ParameterName = "@key";
+                    parameter.Value = primaryKey.GetValue(instance);
 
-                Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+                    command.Parameters.Add(parameter);
 
-                command.ExecuteNonQuery();
+                    Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
 
-                transaction.Commit();
+                    command.ExecuteNonQuery();
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
+                    transaction.Commit();
 
-                Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    if (transaction != null)
+                        transaction.Rollback();
 
-                return false;
-            }
-            finally
-            {
-                if (transaction != null)
-                    Provider.EndTransaction(transaction);
+                    Trace.WriteLine((ex.Message + ex.StackTrace).JoinLines(), "ERROR");
 
-                if (command != null)
-                    command.Dispose();
+                    return false;
+                }
+                finally
+                {
+                    if (transaction != null)
+                        Provider.EndTransaction(transaction);
 
-                Provider.CloseConnection();
+                    if (command != null)
+                        command.Dispose();
+
+                    Provider.CloseConnection();
+                }
             }
         }
 
@@ -134,7 +142,7 @@ namespace InnSyTech.Standard.Database
         /// <typeparam name="TResult">El tipo de dato de la lectura.</typeparam>
         /// <returns>Una consulta que extrae datos de la base de datos relacional.</returns>
         public IQueryable<TResult> Read<TResult>()
-            => new DbSqlQuery<TResult>(Provider);
+            => new DbQuery<TResult>(Provider);
 
         /// <summary>
         /// Actualiza los atributosde la instancia persistida en la base de datos. Esto equivale a un
@@ -151,34 +159,38 @@ namespace InnSyTech.Standard.Database
         /// </returns>
         public bool Update<TData>(TData instance, int referenceDepth = 0)
         {
-            DbTransaction transaction = Provider.BeginTransaction();
-            DbCommand command = Provider.CreateCommand(transaction);
-
-            try
+            lock (Provider)
             {
-                UpdateInternal(instance, referenceDepth, command);
+                DbTransaction transaction = Provider.BeginTransaction();
+                DbCommand command = Provider.CreateCommand(transaction);
 
-                transaction.Commit();
+                try
+                {
+                    UpdateInternal(instance, referenceDepth, command);
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
+                    transaction.Commit();
 
-                Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    if (transaction != null)
+                        transaction.Rollback();
 
-                return false;
-            }
-            finally
-            {
-                if (transaction != null)
-                    Provider.EndTransaction(transaction);
+                    Trace.WriteLine((ex.Message + ex.StackTrace).JoinLines(), "ERROR");
 
-                if (command != null)
-                    command.Dispose();
+                    return false;
+                }
+                finally
+                {
+                    if (transaction != null)
+                        Provider.EndTransaction(transaction);
 
-                Provider.CloseConnection();
+                    if (command != null)
+                        command.Dispose();
+
+                    Provider.CloseConnection();
+                }
             }
         }
 
