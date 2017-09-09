@@ -29,8 +29,8 @@ namespace Acabus.Modules.Attendances.Services
 
         public static void LoadFromDataBase(this ICollection<Attendance> attendances)
         {
-            foreach (var attendancesData in AcabusData.Session.GetObjects<Attendance>()
-                .Where(attendance => (attendance as Attendance).DateTimeDeparture is null))
+            foreach (var attendancesData in AcabusData.Session.Read<Attendance>()
+                .Where(attendance => attendance.DateTimeDeparture == null))
                 attendances.Add(attendancesData as Attendance);
         }
 
@@ -38,12 +38,12 @@ namespace Acabus.Modules.Attendances.Services
         /// Persiste los datos de una nueva instancia <see cref="Attendance"/> en una base de datos.
         /// </summary>
         public static bool Save(this Attendance attendance)
-            => AcabusData.Session.Save(ref attendance);
+            => AcabusData.Session.Create(attendance);
 
         /// <summary>
         /// Persiste los datos de una instancia <see cref="Attendance"/> que han cambiado sus propiedades.
         /// </summary>
         public static Boolean Update(this Attendance attendance)
-            => AcabusData.Session.Update(ref attendance);
+            => AcabusData.Session.Update(attendance);
     }
 }

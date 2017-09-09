@@ -200,11 +200,11 @@ namespace Acabus.Modules.Core.Config.ViewModels
                         var deviceReassign = Devices.FirstOrDefault(deviceTemp => device.ID == deviceTemp.ID);
                         deviceReassign.Station = station;
                         deviceReassign.Vehicle = vehicle;
-                        AcabusData.Session.Update(ref device);
+                        AcabusData.Session.Update(device);
                         continue;
                     }
                     App.Current.Dispatcher.Invoke(() => Devices.Add(device));
-                    AcabusData.Session.Save(ref device);
+                    AcabusData.Session.Create(device);
                 }
                 return true;
             }
@@ -232,7 +232,7 @@ namespace Acabus.Modules.Core.Config.ViewModels
                     if (Routes.Contains(route)) continue;
 
                     App.Current.Dispatcher.Invoke(() => Routes.Add(route));
-                    AcabusData.Session.Save(ref route);
+                    AcabusData.Session.Create(route);
                 }
                 return true;
             }
@@ -269,11 +269,11 @@ namespace Acabus.Modules.Core.Config.ViewModels
                     {
                         var stationReassign = Stations.FirstOrDefault(stationTemp => stationTemp.ID == station.ID);
                         stationReassign.Route = station.Route;
-                        AcabusData.Session.Update(ref stationReassign);
+                        AcabusData.Session.Update(stationReassign);
                         continue;
                     }
                     App.Current.Dispatcher.Invoke(() => Stations.Add(station));
-                    AcabusData.Session.Save(ref station);
+                    AcabusData.Session.Create(station);
                 }
                 return true;
             }
@@ -307,11 +307,11 @@ namespace Acabus.Modules.Core.Config.ViewModels
                     {
                         var vehicleReassign = Vehicles.FirstOrDefault(vehicleTemp => vehicleTemp.ID == vehicle.ID);
                         vehicleReassign.Route = vehicle.Route;
-                        AcabusData.Session.Update(ref vehicleReassign);
+                        AcabusData.Session.Update(vehicleReassign);
                         continue;
                     }
                     App.Current.Dispatcher.Invoke(() => Vehicles.Add(vehicle));
-                    AcabusData.Session.Save(ref vehicle);
+                    AcabusData.Session.Create(vehicle);
                 }
                 return true;
             }

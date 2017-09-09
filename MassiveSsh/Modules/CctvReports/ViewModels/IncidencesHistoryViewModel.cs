@@ -1,8 +1,10 @@
-﻿using Acabus.Models;
+﻿using Acabus.DataAccess;
+using Acabus.Models;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -351,44 +353,44 @@ namespace Acabus.Modules.CctvReports.ViewModels
         {
             IsEnabled = false;
 
-            var filter = new DbFilter();
+            var query = AcabusData.Session.Read<Incidence>();
 
             if (!String.IsNullOrEmpty(Folio))
-                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Folio), String.Format("%{0}%", Folio), WhereOperator.LIKE));
+                query.Where(i => i.Folio == Folio);
 
             if (SelectedLocation != null && SelectedLocation is Station)
-                filter.AddWhere(new DbFilterExpression("T4.ID", (SelectedLocation as Station).ID, WhereOperator.EQUALS));
+                query.Where(i => i.Device.Station.ID == (SelectedLocation as Station).ID);
 
             if (IsBusIncidences && SelectedVehicle != null)
-                filter.AddWhere(new DbFilterExpression("T6.ID", SelectedVehicle.ID, WhereOperator.EQUALS));
+                query.Where(i => i.Device.Vehicle.ID == SelectedVehicle.ID);
 
             if (IsStartDate && (StartDate != null && FinishDate != null))
-                filter.AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), String.Format("{0:yyyy-MM-dd}", StartDate), WhereOperator.GREAT_AND_EQUALS))
-                    .AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), String.Format("{0:yyyy-MM-dd}", FinishDate), WhereOperator.LESS_AND_EQUALS));
+                query.Where(i => i.StartDate >= StartDate && i.StartDate <= FinishDate);
             else if (!IsStartDate && (StartDate != null && FinishDate != null))
-                filter.AddWhere(new DbFilterExpression(nameof(Incidence.FinishDate), String.Format("{0:yyyy-MM-dd}", StartDate), WhereOperator.GREAT_AND_EQUALS))
-                    .AddWhere(new DbFilterExpression(nameof(Incidence.FinishDate), String.Format("{0:yyyy-MM-dd}", FinishDate), WhereOperator.LESS_AND_EQUALS));
+                query.Where(i => i.FinishDate >= StartDate && i.FinishDate <= FinishDate);
 
             if (SelectedDevice != null)
-                filter.AddWhere(new DbFilterExpression("T3.ID", SelectedDevice.ID, WhereOperator.EQUALS));
+                query.Where(i => i.Device.ID == SelectedDevice.ID);
 
             if (SelectedTechnician != null)
-                filter.AddWhere(new DbFilterExpression("T10.ID", SelectedTechnician, WhereOperator.EQUALS));
+                query.Where(i => i.Technician.ID == SelectedTechnician.ID);
 
             if (SelectedDescription != null)
-                filter.AddWhere(new DbFilterExpression("T8.Description", String.Format("%{0}%", SelectedDescription.Description), WhereOperator.LIKE));
+                query.Where(i => i.Description.Description == SelectedDescription.Description);
 
             if (SelectedStatus != null)
-                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Status), (int)SelectedStatus, WhereOperator.EQUALS));
+                query.Where(i => i.Status == SelectedStatus);
 
             if (!String.IsNullOrEmpty(SelectedWhoReporting))
-                filter.AddWhere(new DbFilterExpression(nameof(Incidence.WhoReporting), SelectedWhoReporting, WhereOperator.EQUALS));
+                query.Where(i => i.WhoReporting == SelectedWhoReporting);
 
-            if (HasRefundOfMoney)
-                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Folio), "(SELECT Fk_Folio FROM RefundOfMoney)", WhereOperator.IN));
+            // TODO: Implementar referencias externas.
+            //if (HasRefundOfMoney)
+            //    filter.AddWhere(new DbFilterExpression(nameof(Incidence.Folio), "(SELECT Fk_Folio FROM RefundOfMoney)", WhereOperator.IN));
+
             Task.Run(() =>
             {
-                _result = DataAccess.AcabusData.Session.GetObjects<Incidence>(filter);
+                _result = query;
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {

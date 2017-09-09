@@ -76,22 +76,22 @@ namespace Acabus.Modules.CctvReports
 
             String query = String.Format(SelectedReport.Query,
                                      StartDateTime, FinishDateTime);
+            // TODO: AGREGAR FUNCION EXECUTEQUERY
+            //var response = AcabusData.Session.ExecuteQuery(query, out String[] header);
 
-            var response = AcabusData.Session.ExecuteQuery(query, out String[] header);
+            //if (response.Length <= 1 || response[0].Length < 1)
+            //{
+            //    AcabusControlCenterViewModel.ShowDialog("El periodo no obtuvo ningún resultado.");
+            //    return;
+            //}
 
-            if (response.Length <= 1 || response[0].Length < 1)
-            {
-                AcabusControlCenterViewModel.ShowDialog("El periodo no obtuvo ningún resultado.");
-                return;
-            }
+            //Csv.Export(response.Select((item)
+            //    => item.Select((subitem)
+            //        => subitem.ToString()).ToArray()).ToArray(),
+            //    header,
+            //    String.Format(FileName, SelectedReport.Description));
 
-            Csv.Export(response.Select((item)
-                => item.Select((subitem)
-                    => subitem.ToString()).ToArray()).ToArray(),
-                header,
-                String.Format(FileName, SelectedReport.Description));
-
-            AcabusControlCenterViewModel.ShowDialog("Información fue exportada correctamente.");
+            //AcabusControlCenterViewModel.ShowDialog("Información fue exportada correctamente.");
         }
     }
 }

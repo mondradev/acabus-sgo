@@ -238,7 +238,7 @@ namespace Acabus.Modules.Core.Config.ViewModels
                 Vehicle = SelectedVehicle,
                 IP = IP
             };
-            if (AcabusData.Session.Save(ref device))
+            if (AcabusData.Session.Create(device))
                 AcabusControlCenterViewModel.ShowDialog($"Equipo: {device} agregado correctamente.");
             else
                 AcabusControlCenterViewModel.ShowDialog("No se pudo guardar el equipo nuevo.");

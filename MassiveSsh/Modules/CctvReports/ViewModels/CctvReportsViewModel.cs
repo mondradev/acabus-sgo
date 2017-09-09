@@ -576,6 +576,7 @@ namespace Acabus.Modules.CctvReports
             {
                 foreach (Incidence item in e.NewItems)
                 {
+                    if (item == null) continue;
                     if (item.Status == IncidenceStatus.OPEN && !_inLoad)
                         AcabusControlCenterViewModel.AddNotify(String.Format("{0:dd/MM/yyyy HH:mm:ss} {1} - {2}",
                             item.StartDate,

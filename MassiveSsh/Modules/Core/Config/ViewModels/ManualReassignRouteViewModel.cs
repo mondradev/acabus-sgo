@@ -121,7 +121,7 @@ namespace Acabus.Modules.Core.Config.ViewModels
             {
                 Vehicle vehi = Vehicles.FirstOrDefault(vehicle => vehicle.EconomicNumber == item.ToString());
                 vehi.Route = SelectedRoute;
-                if (!AcabusData.Session.Update(ref vehi))
+                if (!AcabusData.Session.Update(vehi))
                 {
                     AcabusControlCenterViewModel.ShowDialog($"Error al reasignar la unidad {vehi}");
                     return;

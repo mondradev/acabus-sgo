@@ -7,6 +7,7 @@ using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using Acabus.Utils.SecureShell;
 using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,15 +27,17 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static Boolean CommitRefund(this Incidence incidence, DateTime refundDateTime)
         {
-            var refund = AcabusData.Session.GetObjects<RefundOfMoney>(new DbFilter()
-                .AddWhere(new DbFilterExpression("Fk_Folio", incidence.Folio, WhereOperator.EQUALS))).FirstOrDefault();
+            var refund = AcabusData.Session.Read<RefundOfMoney>()
+                .Where(r => r.Incidence.Folio == incidence.Folio)
+                .FirstOrDefault();
 
             refund.RefundDate = refundDateTime;
             refund.Status = RefundOfMoneyStatus.COMMIT;
-            if (refund.Incidence.FinishDate is null)
+
+            if (refund.Incidence.FinishDate == null)
                 refund.Incidence.FinishDate = refundDateTime;
 
-            return AcabusData.Session.Update(ref refund);
+            return AcabusData.Session.Update(refund);
         }
 
         public static DeviceFault CreateDeviceFault(Alarm alarm)
@@ -246,27 +249,19 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void LoadFromDataBase(this IList<Incidence> incidences)
         {
-            var filter = new DbFilter();
-            filter.AddWhere(new DbFilterExpression(nameof(Incidence.Status), (Int16)IncidenceStatus.CLOSE, WhereOperator.EQUALS), WhereType.AND);
-            filter.AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), DateTime.Now.AddDays(-5), WhereOperator.GREAT_THAT), WhereType.AND);
-
-            ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>(new DbFilter(new List<DbFilterValue>() {
-                new DbFilterValue(new DbFilterExpression(nameof(Incidence.Status), (Int16)IncidenceStatus.CLOSE, WhereOperator.NO_EQUALS), WhereType.AND)
-            }));
-
-            foreach (var incidenceData in incidencesFromDb)
+            foreach (var incidenceData in AcabusData.Session.Read<Incidence>().LoadReference(3).Where(i => i.Status != IncidenceStatus.CLOSE))
                 incidences.Add(incidenceData as Incidence);
 
-            ICollection<Incidence> history = AcabusData.Session.GetObjects<Incidence>(filter);
-            foreach (var incidenceData in history)
+            foreach (var incidenceData in AcabusData.Session.Read<Incidence>().LoadReference(3)
+                .Where(i => i.Status == IncidenceStatus.CLOSE && i.FinishDate > DateTime.Now.AddDays(-5)))
                 incidences.Add(incidenceData as Incidence);
         }
 
         public static Boolean Save(this Incidence incidence)
-            => AcabusData.Session.Save(ref incidence);
+            => AcabusData.Session.Create(incidence);
 
         public static Boolean Save(this RefundOfMoney refundOfMoney)
-            => AcabusData.Session.Save(ref refundOfMoney);
+            => AcabusData.Session.Create(refundOfMoney);
 
         public static void SearchCountersFailing(this ObservableCollection<Alarm> alarms)
         {
@@ -492,7 +487,7 @@ namespace Acabus.Modules.CctvReports.Services
         }
 
         public static Boolean Update(this Incidence incidence)
-                                            => AcabusData.Session.Update(ref incidence);
+                                            => AcabusData.Session.Update(incidence);
 
         public static void ToClipboard(IEnumerable<Incidence> incidences)
         {
