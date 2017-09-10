@@ -5,10 +5,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ViewModels="clr-namespace:Opera.Acabus.Configurations.Config.ViewModels"
-    xmlns:converters="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
+    xmlns:ViewModels="clr-namespace:Opera.Acabus.Core.Config.ViewModels"
+    xmlns:converters="clr-namespace:Opera.Acabus.Core.Converters"
     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-    x:Class="Opera.Acabus.Configurations.Config.Views.CoreConfigView"
+    x:Class="Opera.Acabus.Core.Config.Views.CoreConfigView"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="279.2">
     <UserControl.Resources>
         <converters:BusStatusSpanishConverter x:Key="BusStatusSpanishConverter" />

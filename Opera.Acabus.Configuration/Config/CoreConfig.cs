@@ -1,14 +1,14 @@
 ﻿using InnSyTech.Standard.Mvvm;
-using Opera.Acabus.Configurations.Config.ViewModels;
-using Opera.Acabus.Configurations.Config.Views;
+using Opera.Acabus.Core.Config.ViewModels;
+using Opera.Acabus.Core.Config.Views;
 using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Gui;
+using Opera.Acabus.Core.Modules.Configurations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 
-namespace Opera.Acabus.Configurations.Config
+namespace Opera.Acabus.Core.Config
 {
     /// <summary>
     /// Define la configuración del nucleo del SGO.
@@ -60,7 +60,7 @@ namespace Opera.Acabus.Configurations.Config
                         _viewModel = _view.DataContext as CoreConfigViewModel;
                         _isLoaded=true;
                     }
-                    Dispatcher.RequestShowContent(_view);
+                    AcabusData.RequestShowContent(_view);
                 }))
             };
 

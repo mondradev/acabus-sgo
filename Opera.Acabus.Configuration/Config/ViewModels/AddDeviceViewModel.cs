@@ -1,6 +1,5 @@
 ﻿using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Windows.Input;
 
-namespace Opera.Acabus.Configurations.Config.ViewModels
+namespace Opera.Acabus.Core.Config.ViewModels
 {
     /// <summary>
     /// Define la estructura del modelo de la vista <see cref="Opera.Acabus.Core.Config.Views.AddDeviceView"/>.
@@ -191,9 +190,9 @@ namespace Opera.Acabus.Configurations.Config.ViewModels
                 IPAddress = IPAddress.Parse(IPString)
             };
             if (AcabusData.Session.Save(ref device))
-                Dispatcher.SendMessageToGUI($"Equipo: {device} agregado correctamente.");
+                AcabusData.SendMessageToGUI($"Equipo: {device} agregado correctamente.");
             else
-                Dispatcher.SendMessageToGUI("No se pudo guardar el equipo nuevo.");
+                AcabusData.SendMessageToGUI("No se pudo guardar el equipo nuevo.");
         }
     }
 }

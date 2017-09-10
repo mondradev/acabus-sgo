@@ -41,13 +41,6 @@
   <PropertyGroup>
     <ApplicationIcon>acabus_icon.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Dragablz, Version=0.0.3.190, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dragablz.0.0.3.190\lib\net45\Dragablz.dll</HintPath>
@@ -164,21 +157,9 @@
       <Project>{f74fee3d-d536-44df-9e2c-53540ce78173}</Project>
       <Name>InnSyTech.Standard</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Opera.Acabus.Configuration\Opera.Acabus.Configurations.csproj">
-      <Project>{27094508-334f-45f2-a773-e7c5912b27a1}</Project>
-      <Name>Opera.Acabus.Configurations</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Opera.Acabus.Core.Gui\Opera.Acabus.Core.Gui.csproj">
-      <Project>{5af35be9-b74b-4f44-84e3-1010cce72c5e}</Project>
-      <Name>Opera.Acabus.Core.Gui</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Opera.Acabus.Core\Opera.Acabus.Core.csproj">
       <Project>{5870b3e0-a665-4014-94d1-4ed21ceb442f}</Project>
       <Name>Opera.Acabus.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Opera.Acabus.TrunkMonitor\Opera.Acabus.TrunkMonitor.csproj">
-      <Project>{2ca72c78-d881-48c2-9cc1-3bb0bb3f3c6c}</Project>
-      <Name>Opera.Acabus.TrunkMonitor</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Opera.Acabus.Configurations.Config.Views
+namespace Opera.Acabus.Core.Config.Views
 {
     /// <summary>
     /// Define la lógica de la vista <see cref="CoreConfigView"/>.

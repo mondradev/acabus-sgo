@@ -29,13 +29,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Security">
       <HintPath>..\MassiveSsh\Libraries\Mono.Security.dll</HintPath>
@@ -83,11 +76,6 @@
     <Compile Include="Utils\Credential.cs" />
     <Compile Include="Utils\EnumTranslate.cs" />
     <Compile Include="Utils\Extension.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Net\Messenger\Iso8583\MessageTemplateSchema.xsd">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

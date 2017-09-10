@@ -1,6 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Gui.Modules;
+using Opera.Acabus.Core.Modules;
 using Opera.Acabus.TrunkMonitor.Models;
 using Opera.Acabus.TrunkMonitor.Views;
 using System;
