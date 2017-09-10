@@ -40,7 +40,6 @@ namespace Opera.Acabus.Server.Debug
                 .LoadReference(3)
                 //.Execute()
                 .Where(l => l.StationA.Name == "CENTRO DE CONTROL")
-                .OrderBy(l => l.ID)
               ;
 
             foreach (var l in query)
