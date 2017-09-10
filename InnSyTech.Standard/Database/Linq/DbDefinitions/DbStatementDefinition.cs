@@ -1,5 +1,4 @@
 ﻿using InnSyTech.Standard.Utils;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +47,11 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+
         public bool TryMerge(DbEntityDefinition entity, DbEntityDefinition anotherEntity, out DbEntityDefinition result)
         {
             result = null;
@@ -68,12 +72,12 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
                 anotherEntity.DependentsEntities
             }
             .Merge()
-            .GroupBy(e => String.Format("{0}:{1}", e.EntityType.FullName, e.DependencyField.GetFieldName()));
+            .GroupBy(e => e.EntityType);
 
             var members = new[]
             {
-                entity.Fields,
-                anotherEntity.Fields
+                entity.Members,
+                anotherEntity.Members
             }
             .Merge()
             .GroupBy(m => m.Member)
@@ -82,25 +86,32 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
             var uniques = dependents.Where(g => g.Count() == 1);
             var toMerge = dependents.Where(g => g.Count() > 1);
 
-            var entityMerge = new DbEntityDefinition(entity.DependencyEntity, entity.DependencyField)
+            var entityMerge = new DbEntityDefinition()
             {
                 EntityType = entity.EntityType,
+                DependencyEntity = entity.DependencyEntity,
+                DependencyMember = entity.DependencyMember,
                 Alias = entity.Alias
             };
 
             foreach (var m in members)
-                m.SetEntityOwner(entityMerge);
+            {
+                m.Entity = entityMerge;
+                entityMerge.Members.Add(m);
+            }
 
             foreach (var g in uniques)
             {
                 var dependentsEntity = g.First();
-                dependentsEntity.SetDependency(entityMerge);
+                dependentsEntity.DependencyEntity = entityMerge;
+                entityMerge.DependentsEntities.Add(dependentsEntity);
             }
 
             foreach (var g in toMerge)
             {
                 var dependentsEntity = MergeDependents(g.First(), g.Last());
-                dependentsEntity.SetDependency(entityMerge);
+                dependentsEntity.DependencyEntity = entityMerge;
+                entityMerge.DependentsEntities.Add(dependentsEntity);
             }
 
             return entityMerge;
