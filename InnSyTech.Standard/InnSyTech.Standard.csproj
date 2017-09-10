@@ -73,8 +73,8 @@
     <Compile Include="Database\Linq\DbQueryable.cs" />
     <Compile Include="Database\Linq\DbReader.cs" />
     <Compile Include="Database\Linq\DbQuery.cs" />
+    <Compile Include="Database\Linq\DbExpressionVisitor.cs" />
     <Compile Include="Database\Linq\DbProvider.cs" />
-    <Compile Include="Database\Linq\DbStatementTraslator.cs" />
     <Compile Include="Database\Utils\DbEnumConverter.cs" />
     <Compile Include="Database\IDbConverter.cs" />
     <Compile Include="Database\DbFieldInfo.cs" />

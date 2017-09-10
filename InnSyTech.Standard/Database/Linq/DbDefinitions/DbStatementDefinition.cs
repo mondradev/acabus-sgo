@@ -6,19 +6,10 @@ using System.Linq;
 
 namespace InnSyTech.Standard.Database.Linq.DbDefinitions
 {
-    /// <summary>
-    /// Representa una estructura que ayuda a definir una sentencia SQL utilizada para la lectura de datos.
-    /// </summary>
     internal sealed class DbStatementDefinition : IEnumerable<DbStatementDefinition>
     {
-        /// <summary>
-        /// Enumerador de la definición.
-        /// </summary>
         public DbStatementDefinitionEnumerator _enumerator;
 
-        /// <summary>
-        /// Crea una nueva instancia de <see cref="DbStatementDefinition"/>.
-        /// </summary>
         public DbStatementDefinition()
         {
             Entities = new List<DbEntityDefinition>();
@@ -26,35 +17,11 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
             Orders = new List<DbFieldDefinition>();
         }
 
-        /// <summary>
-        /// Obtiene un listado de todas las entidades involucradas en la sentencia.
-        /// </summary>
         public List<DbEntityDefinition> Entities { get; }
-
-        /// <summary>
-        /// Obtiene un listado de todos los campos utilizados para filtrar la sentencia.
-        /// </summary>
         public List<DbFieldDefinition> Filters { get; }
-
-        /// <summary>
-        /// Obtiene un listado de todos los campos utilizados para realizar el ordenamiento.
-        /// </summary>
         public List<DbFieldDefinition> Orders { get; }
-
-        /// <summary>
-        /// Nivel de profundidad de la referencia.
-        /// </summary>
-        public int ReferenceDepth { get; set; }
-
-        /// <summary>
-        /// Obtiene la sentencia secundaría.
-        /// </summary>
         public DbStatementDefinition SubStatementDefinition { get; set; }
 
-        /// <summary>
-        /// Agrega una entidad nueva fusionandola con su igual.
-        /// </summary>
-        /// <param name="entity">Entidad a agregar.</param>
         public void AddEntity(DbEntityDefinition entity)
         {
             DbEntityDefinition rootEntity = entity.GetRoot();
@@ -72,34 +39,15 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
             Entities.Add(rootEntity);
         }
 
-        /// <summary>
-        /// Convierte en una sentencia secundaria la sentencia actual.
-        /// </summary>
-        /// <returns>La sentencia primaria.</returns>
         public DbStatementDefinition ConvertToSubStatement()
                     => new DbStatementDefinition() { SubStatementDefinition = this };
 
-        /// <summary>
-        /// Obtiene el enumerador genérico de la sentencia.
-        /// </summary>
-        /// <returns>El enumerador de la sentencia.</returns>
         public IEnumerator<DbStatementDefinition> GetEnumerator()
             => _enumerator ?? (_enumerator = new DbStatementDefinitionEnumerator(this));
 
-        /// <summary>
-        /// Obtiene el enumerador de la sentencia.
-        /// </summary>
-        /// <returns>El enumerador de la sentencia.</returns>
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        /// <summary>
-        /// Intenta fusionar dos entidades obteniendo como resultado la nueva con sus atributos unidos.
-        /// </summary>
-        /// <param name="entity">Una entidad a fusionar.</param>
-        /// <param name="anotherEntity">Otra entidad a fusionar.</param>
-        /// <param name="result">La entidad resultado de la fusión.</param>
-        /// <returns>Un valor de true en caso de fusionar correctamente.</returns>
         public bool TryMerge(DbEntityDefinition entity, DbEntityDefinition anotherEntity, out DbEntityDefinition result)
         {
             result = null;
@@ -112,12 +60,6 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
             return true;
         }
 
-        /// <summary>
-        /// Fusiona las dependientes de dos entidades y devuelve la entidad resultante.
-        /// </summary>
-        /// <param name="entity">Una entidad a fusionar.</param>
-        /// <param name="anotherEntity">Otra entidad a fusionar.</param>
-        /// <returns>Una entidad que presenta ambos conjuntos de dependientes.</returns>
         private DbEntityDefinition MergeDependents(DbEntityDefinition entity, DbEntityDefinition anotherEntity)
         {
             var dependents = new[]
@@ -145,11 +87,6 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
                 EntityType = entity.EntityType,
                 Alias = entity.Alias
             };
-
-            new[] { entity.Fields, anotherEntity.Fields }
-            .Merge()
-            .ToList()
-            .ForEach(m => m.SetEntityOwner(entityMerge));
 
             foreach (var m in members)
                 m.SetEntityOwner(entityMerge);

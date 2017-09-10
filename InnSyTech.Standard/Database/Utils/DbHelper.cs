@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Database.Linq.DbDefinitions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -158,17 +157,14 @@ namespace InnSyTech.Standard.Database.Utils
         /// <param name="instaceType">Tipo de la instancia.</typeparam>
         /// <param name="reader">Lector de la base de datos.</param>
         /// <returns>Una instancia con la informacion persistida.</returns>
-        public static object ToInstance(Type instanceType, DbDataReader reader, DbEntityDefinition definition, int depth)
+        public static object ToInstance(Type instanceType, DbDataReader reader)
         {
-            if (depth < 0)
-                return null;
-
             var primaryKey = GetPrimaryKey(instanceType);
             var dbFields = GetFields(instanceType).SkipWhile(field => field.IsPrimaryKey);
 
             var instance = Activator.CreateInstance(instanceType);
 
-            if (!TrySetDbValue(primaryKey, instance, reader, String.Format("{0}_{1}", definition.Alias, primaryKey.Name)))
+            if (!TrySetDbValue(primaryKey, instance, reader, primaryKey.Name))
                 return null;
 
             foreach (var dbField in dbFields.OrderBy(field => field))
@@ -179,18 +175,8 @@ namespace InnSyTech.Standard.Database.Utils
                 if (IsEntity(dbField.PropertyType))
                     continue;
 
-                TrySetDbValue(dbField, instance, reader, String.Format("{0}_{1}", definition.Alias, dbField.Name));
+                TrySetDbValue(dbField, instance, reader, dbField.Name);
             }
-            if (depth > 0)
-                foreach (var foreignKey in dbFields.Where(f => f.IsForeignKey))
-                    TrySetReferenceValue(
-                        foreignKey,
-                        instance,
-                        reader,
-                        definition.DependentsEntities
-                            .Single(e => e.DependencyField.GetFieldName().Equals(foreignKey.Name) && e.EntityType == foreignKey.PropertyType),
-                        depth - 1
-                    );
 
             return instance;
         }
@@ -199,7 +185,7 @@ namespace InnSyTech.Standard.Database.Utils
         /// Intenta establece el valor obtenido de la base de datos en la propiedad de la instancia.
         /// </summary>
         /// <param name="dbField">Campo a settear desde la base de datos.</param>
-        /// <param name="instance">Instancia a setear la propiedad.</param>
+        /// <param name="instance">Instancia a settear la propiedad.</param>
         /// <param name="reader">Lector de la base de datos.</param>
         /// <param name="fieldName">Nombre del campo de la base de datos.</param>
         /// <returns>Un valor <see cref="true"/> en caso de establecer el valor correctamente.</returns>
@@ -230,20 +216,6 @@ namespace InnSyTech.Standard.Database.Utils
                 dbField.SetValue(instance, dbValue);
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Intenta establecer el valor de la propiedad de referencia.
-        /// </summary>
-        /// <param name="foreignField">Campo de la llave foranea.</param>
-        /// <param name="instance">Instancia a setear la propiedad.</param>
-        /// <param name="reader">Lector de la base de datos.</param>
-        /// <param name="definition">Definición de la entidad.</param>
-        /// <param name="depth">Profundidad de las referencias a cargar.</param>
-        private static void TrySetReferenceValue(DbFieldInfo foreignField, object instance, DbDataReader reader, DbEntityDefinition definition, int depth)
-        {
-            object reference = ToInstance(foreignField.PropertyType, reader, definition, depth);
-            foreignField.SetValue(instance, reference);
         }
     }
 }

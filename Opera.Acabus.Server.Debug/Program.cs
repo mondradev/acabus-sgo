@@ -1,11 +1,9 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Database.Sqlite;
-using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Models;
 using System;
 using System.Data.SQLite;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Opera.Acabus.Server.Debug
@@ -36,18 +34,17 @@ namespace Opera.Acabus.Server.Debug
 
             var db = DbFactory.CreateSession<SQLiteConnection>(new DbDialect());
 
-            var query =
-               //db.Read<Device>()
-               db.Read<Link>()
-                .LoadReference(1)
+            var query = db.Read<Link>()
+                .LoadReference(3)
                 //.Execute()
-               // .Where(l => l.StationA.Name == "CENTRO DE CONTROL" || l.StationA.Name == "MICHOACÁN")
-                //.Where(d => d.Type == DeviceType.KVR)
+                .Where(l => l.StationA.Name == "CENTRO DE CONTROL" && l.StationA.Name == "MICHOACÁN")
                 .OrderBy(l => l.ID)
               ;
 
             foreach (var l in query)
-                Trace.WriteLine(l);
+            {
+                Console.WriteLine(l);
+            }
         }
     }
 }
