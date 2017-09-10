@@ -12,7 +12,7 @@ namespace InnSyTech.Standard.Database.Linq
     /// <summary>
     /// Define un proveedor de consultas SQL a Objetos a través de la framework que ofrece <see cref="System.Linq.IQueryable"/>. Permite realizar consultas a la base de datos a travéz de métodos de <see cref="IQueryable"/> sin necesidad de escribir código SQL.
     /// </summary>
-    internal sealed class DbSqlProvider : IQueryProvider
+    internal sealed class DbProvider : IQueryProvider
     {
         /// <summary>
         /// Conexión a la base de datos.
@@ -25,11 +25,11 @@ namespace InnSyTech.Standard.Database.Linq
         private IDbDialect _dialect;
 
         /// <summary>
-        /// Crea una instancia nueva de <see cref="DbSqlProvider"/>.
+        /// Crea una instancia nueva de <see cref="DbProvider"/>.
         /// </summary>
         /// <param name="connection">Conexión la basde de datos.</param>
         /// <param name="dialect">Dialecto que utilizará el proveedor para comunicarse la base de datos.</param>
-        public DbSqlProvider(DbConnection connection, IDbDialect dialect)
+        public DbProvider(DbConnection connection, IDbDialect dialect)
         {
             _connection = connection;
             _dialect = dialect;

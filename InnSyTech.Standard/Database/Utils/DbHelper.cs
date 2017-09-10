@@ -30,6 +30,40 @@ namespace InnSyTech.Standard.Database.Utils
         }
 
         /// <summary>
+        /// Obtiene el nombre que maneja la base de datos para el miembro de la entidad especificada.
+        /// </summary>
+        /// <param name="member">Miembro a obtener el nombre.</param>
+        /// <param name="entity">Entidad a la que se relaciona el miembro.</param>
+        /// <returns>El nombre del miembro en la base de datos.</returns>
+        public static string GetFieldName(MemberInfo member, Type entity = null)
+        {
+            bool isNotEntityMember = !IsEntity(member.ReflectedType);
+            bool isNotEntity = (entity != null && !DbHelper.IsEntity(entity));
+            if (isNotEntityMember && isNotEntity)
+                throw new ArgumentException("El miembro especificado no pertenece a una entidad.");
+
+            if (!isNotEntityMember)
+                foreach (Attribute attribute in member.GetCustomAttributes())
+                    if (attribute is ColumnAttribute)
+                    {
+                        ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+
+                        if (columnAttribute.IsIgnored)
+                            throw new InvalidOperationException("El atributo está señalado como ignorado.");
+
+                        return String.IsNullOrEmpty(columnAttribute.Name)
+                            ? member.Name
+                            : columnAttribute.Name;
+                    }
+
+            if (entity != null && !isNotEntity)
+                return GetFields(entity).SingleOrDefault(f => (f.PropertyInfo as MemberInfo).Name == member.Name)
+                    ?.Name;
+
+            return member.Name;
+        }
+
+        /// <summary>
         /// Obtiene todo los campos especificados de un tipo de dato.
         /// </summary>
         /// <param name="instanceType">Tipo de dato que contiene los campos.</param>
@@ -94,6 +128,26 @@ namespace InnSyTech.Standard.Database.Utils
                 if (item is EntityAttribute)
                     return true;
 
+            return false;
+        }
+
+        /// <summary>
+        /// Indica si el campo es una llave foreanea de una entidad.
+        /// </summary>
+        /// <param name="member">Miembro a revisar.</param>
+        /// <returns>Un true si es llave foranea.</returns>
+        public static bool IsForeignKey(MemberInfo member)
+        {
+            foreach (Attribute attribute in member.GetCustomAttributes())
+                if (attribute is ColumnAttribute)
+                {
+                    ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+
+                    if (columnAttribute.IsIgnored)
+                        throw new InvalidOperationException("El atributo está señalado como ignorado.");
+
+                    return columnAttribute.IsForeignKey;
+                }
             return false;
         }
 

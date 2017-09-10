@@ -131,7 +131,7 @@ namespace Acabus.Models
         /// </summary>
         public Device()
         {
-            _type = DeviceType.NONE;
+            _type = DeviceType.UNKNOWN;
             _station = null;
         }
 

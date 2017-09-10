@@ -4,6 +4,7 @@ using Acabus.Modules.Attendances.Services;
 using Acabus.Modules.Attendances.Views;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Modules.CctvReports.Services;
+using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using Acabus.Window;
 using MaterialDesignThemes.Wpf;
@@ -11,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
 using static Acabus.Modules.Attendances.Models.Attendance;
 
@@ -59,17 +59,8 @@ namespace Acabus.Modules.Attendances.ViewModels
                     AcabusControlCenterViewModel.ShowDialog("No hay incidencias asignadas.");
                     return;
                 }
-                StringBuilder openedIncidence = new StringBuilder();
-                foreach (Incidence incidence in SelectedAttendance.OpenedIncidences)
-                    openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]);
-                openedIncidence.AppendFormat("*ASIGNADO:* {0}", SelectedAttendance.Technician);
 
-                try
-                {
-                    System.Windows.Forms.Clipboard.Clear();
-                    System.Windows.Forms.Clipboard.SetDataObject(openedIncidence.ToString());
-                }
-                catch { }
+                CctvService.ToClipboard(SelectedAttendance.OpenedIncidences);
             });
         }
 
@@ -129,7 +120,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                     != AttendanceService.GetWorkShift(DateTime.Now) && incidence.AssignedAttendance.Turn != WorkShift.OPERATION_SHIT) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                    .GetTechnicianAssigned(incidence.Device, incidence.StartDate, incidence.Description);
+                    .GetTechnicianAssigned(incidence);
                 incidence.Update();
             }
             UpdateCounters();
@@ -138,10 +129,26 @@ namespace Acabus.Modules.Attendances.ViewModels
         /// <summary>
         /// Obtiene la asistencia para la asignación de la incidencia.
         /// </summary>
-        public Attendance GetTechnicianAssigned(Device device, DateTime startTime, DeviceFault fault = null)
+        public Attendance GetTechnicianAssigned(Incidence incidence)
         {
+            if (incidence == null) return null;
+
+            var device = incidence.Device;
+            var fault = incidence.Description;
+            var startTime = incidence.StartDate;
+
             if (DateTime.Now.GetWorkShift() != WorkShift.NIGHT_SHIFT
                && device.Type == DeviceType.CONT)
+                return null;
+
+            if (DateTime.Now.GetWorkShift() != WorkShift.NIGHT_SHIFT
+               && device.Type == DeviceType.MRV)
+                return null;
+
+            if (device.Type == DeviceType.PCA && DateTime.Now.GetWorkShift() != WorkShift.NIGHT_SHIFT
+                && fault.ID == Core.DataAccess.AcabusData.AllFaults
+                    .FirstOrDefault(f => f.Description.Contains("INFORMACIÓN") && f.Category?.DeviceType == DeviceType.PCA)?.ID
+                && DateTime.Now.DayOfWeek.Between(DayOfWeek.Monday, DayOfWeek.Friday))
                 return null;
 
             AssignableSection location = (AssignableSection)device?.Station
@@ -150,36 +157,31 @@ namespace Acabus.Modules.Attendances.ViewModels
             var attendances = Attendances.Where(attendance => attendance.InWorkShift());
             var attendancesPrevious = attendances;
 
-            if (fault != null)
-            {
-                /// Asignación por area
-                attendances = attendances.Where(attendance
-                   => Enum.GetName(typeof(AreaAssignable), fault?.Assignable)
-                   .Contains(Enum.GetName(typeof(AreaAssignable), attendance.Technician?.Area)));
-
-                if (attendances.Count() == 1)
-                    return attendances.First();
-                else if (attendances.Count() < 1)
-                    attendances = attendancesPrevious;
-                else
-                    attendancesPrevious = attendances;
-            }
-
-            /// Asignación cuando al menos hay un tecnico en turno.
-            WorkShift currenteWorkShift = DateTime.Now.GetWorkShift();
-            attendances = attendances
-                .Where(attendance => currenteWorkShift == attendance.Turn
-                || (DateTime.Now.IsOperationWorkShift() && attendance.Turn == WorkShift.OPERATION_SHIT));
+            /// Asignación por area
+            attendances = attendances.Where(attendance
+               => fault.Assignable <= attendance.Technician.Area);
 
             if (attendances.Count() == 1)
                 return attendances.First();
             else if (attendances.Count() < 1)
-                return null;
+                attendances = attendancesPrevious;
             else
                 attendancesPrevious = attendances;
 
             if (AttendanceService.GetWorkShift(DateTime.Now) != WorkShift.NIGHT_SHIFT)
             {
+                /// Asignación cuando al menos hay un tecnico en turno.
+                WorkShift currenteWorkShift = DateTime.Now.GetWorkShift();
+                attendances = attendances
+                    .Where(attendance => currenteWorkShift == attendance.Turn
+                    || (DateTime.Now.IsOperationWorkShift() && attendance.Turn == WorkShift.OPERATION_SHIT));
+
+                if (attendances.Count() == 1)
+                    return attendances.First();
+                else if (attendances.Count() < 1)
+                    return null;
+                else
+                    attendancesPrevious = attendances;
                 /// Asignación por tramo.
                 attendances = attendances.Where(attendance
                    => attendance.DateTimeDeparture is null
@@ -228,7 +230,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                     attendances = attendances.Where(attendance
                        => attendance.DateTimeDeparture is null
                            && attendance.Section.Contains("PATIO"));
-                else if (device?.Vehicle?.BusType == VehicleType.CONVENTIONAL)
+                else if (device?.Vehicle?.BusType == VehicleType.CONVENTIONAL || device.Station.Name.Contains("RENACIMIENTO"))
                     attendances = attendances.Where(attendance
                        => attendance.DateTimeDeparture is null
                            && attendance.Section.Contains("TERMINAL DE TRANSFERENCIA"));
@@ -236,7 +238,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                 if (attendances.Count() == 1)
                     return attendances.First();
                 else if (attendances.Count() < 1)
-                    attendances = attendancesPrevious;
+                    return null;
                 else
                     attendancesPrevious = attendances;
             }
@@ -265,7 +267,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                 if (incidence.Status != IncidenceStatus.OPEN) continue;
 
                 incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                    .GetTechnicianAssigned(incidence.Device, incidence.StartDate, incidence.Description);
+                    .GetTechnicianAssigned(incidence);
                 incidence.Update();
             }
             UpdateCounters();

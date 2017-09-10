@@ -9,6 +9,8 @@ using Acabus.Utils.Mvvm;
 using Acabus.Window;
 using MaterialDesignThemes.Wpf;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -23,6 +25,7 @@ namespace Acabus.Modules.CctvReports
     public sealed class CctvReportsViewModel : ViewModelBase
     {
         private const string TEMP_NIGHT_TASKS = "~$tmp_counterfailings.dat";
+        private const string TEMP_NIGHT_TASKS_KVR = "~$tmp_task_kvr.dat";
 
         /// <summary>
         /// Campo que provee a la propiedad 'Alarms'.
@@ -74,6 +77,11 @@ namespace Acabus.Modules.CctvReports
         private Incidence _selectedIncidence;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="SelectedIncidences" />.
+        /// </summary>
+        private ICollection<Incidence> _selectedIncidences;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'ToSearchClosed'.
         /// </summary>
         private String _toSearchClosed;
@@ -82,6 +90,10 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         private Timer _updatePriority;
+
+        private bool nightSearching = false;
+
+        private bool searching = false;
 
         /// <summary>
         ///
@@ -102,20 +114,7 @@ namespace Acabus.Modules.CctvReports
                 AcabusControlCenterViewModel.ShowDialog("Reasignación completada.");
             });
 
-            CopyingRowClipboardHandlerCommand = new CommandBase((parameter) =>
-            {
-                String incidenceData = SelectedIncidence?.ToReportString();
-
-                if (!String.IsNullOrWhiteSpace(incidenceData))
-                {
-                    try
-                    {
-                        System.Windows.Forms.Clipboard.Clear();
-                        System.Windows.Forms.Clipboard.SetDataObject(incidenceData.ToUpper());
-                    }
-                    catch { }
-                }
-            });
+            CopyingRowClipboardHandlerCommand = new CommandBase(parameter => CctvService.ToClipboard(parameter as Incidence));
 
             UpdateDataCommand = new CommandBase(parameter =>
             {
@@ -123,16 +122,38 @@ namespace Acabus.Modules.CctvReports
                 UpdateData();
             });
 
+            UpdateSelectionCommand = new CommandBase(parameter =>
+            {
+                if (parameter is null || !(parameter is IList))
+                    return;
+
+                SelectedIncidences.Clear();
+
+                var selection = parameter as IList;
+
+                foreach (Incidence item in selection)
+                    SelectedIncidences.Add(item);
+
+                CctvService.ToClipboard(SelectedIncidences);
+            });
+
             CloseIncidenceDialogCommand = new CommandBase((parameter) =>
             {
                 if (SelectedIncidence is null) return;
-
-                AcabusControlCenterViewModel.ShowDialog(new CloseIncidenceView());
+                if (SelectedIncidences.Count > 1)
+                    AcabusControlCenterViewModel.ShowDialog(new MultiCloseIncidencesView());
+                else
+                    AcabusControlCenterViewModel.ShowDialog(new CloseIncidenceView());
             });
 
             AddIncidenceCommand = new CommandBase((parameter) =>
             {
                 AcabusControlCenterViewModel.ShowDialog(new AddIncidencesView() { DataContext = new AddIncidencesViewModel() { IsNewIncidences = true } });
+            });
+
+            OpenStationIncidencesDialogCommand = new CommandBase((parameter) =>
+            {
+                AcabusControlCenterViewModel.ShowDialog(new MultiIncidenceView());
             });
 
             RefundCashDialogCommand = new CommandBase((parameter) =>
@@ -377,8 +398,8 @@ namespace Acabus.Modules.CctvReports
         /// </summary>
         public ICommand OpenOffDutyVehiclesDialog { get; }
 
+        public ICommand OpenStationIncidencesDialogCommand { get; }
         public ICommand ReassignTechnician { get; }
-
         public ICommand RefreshIncidences { get; }
 
         /// <summary>
@@ -405,6 +426,12 @@ namespace Acabus.Modules.CctvReports
         }
 
         /// <summary>
+        /// Obtiene una lista de las incidencias seleccionadas en la vista.
+        /// </summary>
+        public ICollection<Incidence> SelectedIncidences
+            => _selectedIncidences ?? (_selectedIncidences = new ObservableCollection<Incidence>());
+
+        /// <summary>
         /// Obtiene o establece el criterio de busqueda la incidencia cerrada.
         /// </summary>
         public String ToSearchClosed {
@@ -420,6 +447,8 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         public ICommand UpdateDataCommand { get; }
+
+        public ICommand UpdateSelectionCommand { get; }
 
         public void ReloadData()
         {
@@ -446,27 +475,62 @@ namespace Acabus.Modules.CctvReports
             {
                 foreach (Alarm alarm in e.NewItems)
                 {
-                    Boolean exists = false;
-                    foreach (var incidence in Incidences)
-                        if (exists = CctvService.Equals(alarm, incidence)) break;
-                    if (alarm.Device.Type == DeviceType.CONT)
-                        foreach (var incidence in Incidences.Where(incidenceTemp
-                            => incidenceTemp.Status == IncidenceStatus.CLOSE
-                            && incidenceTemp.Device.Type == DeviceType.CONT
-                            && alarm.Device.Vehicle == incidenceTemp.Device.Vehicle
-                            && (DateTime.Now - incidenceTemp.FinishDate) < TimeSpan.FromDays(2)))
+                    try
+                    {
+                        if (alarm is null) continue;
+                        if (alarm.Device is null) continue;
+
+                        Boolean exists = false;
+                        var incidences = Incidences.Where(incidence => incidence.Device == alarm.Device);
+                        if (incidences.Count() > 0)
+                            foreach (var incidence in incidences)
+                                if (exists = CctvService.Equals(alarm, incidence)) break;
+                        if (alarm.Device.Type == DeviceType.CONT)
                         {
-                            exists = true;
-                            break;
+                            incidences = Incidences.Where(incidenceTemp
+                                  => incidenceTemp.Status == IncidenceStatus.CLOSE
+                                  && incidenceTemp.Device.Type == DeviceType.CONT
+                                  && alarm.Device.Vehicle == incidenceTemp.Device.Vehicle
+                                  && (DateTime.Now - incidenceTemp.FinishDate) < TimeSpan.FromDays(2));
+                            if (incidences.Count() > 0)
+                                exists = true;
                         }
-                    if (!exists)
-                        Incidences.CreateIncidence(
-                           CctvService.CreateDeviceFault(alarm),
-                            alarm.Device,
-                            alarm.DateTime,
-                            alarm.Priority,
-                            "SISTEMA"
-                        );
+                        if (!exists)
+                        {
+                            DeviceFault deviceFault = CctvService.CreateDeviceFault(alarm);
+                            if (deviceFault is null)
+                                continue;
+
+                            if (alarm.IsHistorial)
+                                Incidences.CreateIncidence(
+                                deviceFault,
+                                alarm.Device,
+                                alarm.DateTime,
+                                alarm.Priority,
+                                "SISTEMA",
+                                alarm.Comments,
+                                IncidenceStatus.CLOSE,
+                                null,
+                                Core.DataAccess.AcabusData.AllTechnicians
+                                                    .FirstOrDefault(technician => technician.Name == "SISTEMA"),
+                                alarm.DateTime
+                                );
+                            else
+                                Incidences.CreateIncidence(
+                                    deviceFault,
+                                    alarm.Device,
+                                    alarm.DateTime,
+                                    alarm.Priority,
+                                    "SISTEMA",
+                                    alarm.Comments
+                                    );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(ex.Message, "ERROR");
+                        continue;
+                    }
                 }
             }
         }
@@ -538,8 +602,12 @@ namespace Acabus.Modules.CctvReports
 
             _alarmsMonitor = new Timer(delegate
             {
-                Trace.WriteLine("Actualizando alarmas", "DEBUG");
-                Alarms.GetAlarms();
+                if (DateTime.Now.TimeOfDay.Between(TimeSpan.Parse(AcabusData.GetProperty("MinAlarms", "CCTV_Setting") ?? "06:00:00"),
+                       TimeSpan.Parse(AcabusData.GetProperty("MaxAlarms", "CCTV_Setting") ?? "22:00:00")))
+                {
+                    Trace.WriteLine("Actualizando alarmas", "DEBUG");
+                    Alarms.GetAlarms();
+                }
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(0.2));
 
             if (_busAlarmsMonitor == null && AcabusData.OffDutyVehicles.Count == 0) return;
@@ -558,8 +626,8 @@ namespace Acabus.Modules.CctvReports
             {
                 if (_busUpdating) return;
                 _busUpdating = true;
-
-                if (DateTime.Now.TimeOfDay > new TimeSpan(3, 0, 0))
+                if (DateTime.Now.TimeOfDay.Between(TimeSpan.Parse(AcabusData.GetProperty("MinBusDisconnect", "CCTV_Setting") ?? "03:00:00"),
+                    TimeSpan.Parse(AcabusData.GetProperty("MaxBusDisconnect", "CCTV_Setting") ?? "21:00:00")))
                 {
                     Trace.WriteLine("Actualizando autobuses sin conexión", "DEBUG");
                     BusDisconnectedAlarms.GetBusDisconnectedAlarms();
@@ -581,10 +649,10 @@ namespace Acabus.Modules.CctvReports
                                 .FirstOrDefault(fault => (fault as DeviceFault).Description.Contains("UNIDAD DESCONECTADA")))
                         && incidence.Device.Vehicle != null)
                             /// A pasado el tiempo para cerrar automáticamente ? 10 MIN
-                            if ((DateTime.Now - incidence.FinishDate) > TimeSpan.FromMinutes(10))
+                            if ((DateTime.Now - incidence.FinishDate) > TimeSpan.Parse(AcabusData.GetProperty("CloseByReconnection", "CCTV_Setting") ?? "10:00"))
                             {
                                 incidence.Status = IncidenceStatus.CLOSE;
-                                if (AcabusData.OffDutyVehicles.Where(vehicle
+                                if (Core.DataAccess.AcabusData.OffDutyVehicles.Where(vehicle
                                     => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count() > 0)
                                     incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
                                 else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMÁTICAMENTE";
@@ -632,30 +700,62 @@ namespace Acabus.Modules.CctvReports
 
             _nightTasks = new Timer(delegate
             {
-                if (DateTime.Now.TimeOfDay.Between(TimeSpan.FromHours(22), new TimeSpan(23, 59, 59)))
+                try
                 {
-
-                    try
+                    if (!nightSearching && DateTime.Now.TimeOfDay.Between(TimeSpan.Parse(AcabusData.GetProperty("MinNightTask", "CCTV_Setting") ?? "22:00:00"),
+                        TimeSpan.Parse(AcabusData.GetProperty("MaxNightTask", "CCTV_Setting") ?? "23:59:59")))
                     {
-                        if (File.Exists(TEMP_NIGHT_TASKS))
+                        try
                         {
-                            String date = File.ReadAllText(TEMP_NIGHT_TASKS);
-                            DateTime lastUpdate = DateTime.Parse(date);
+                            if (File.Exists(TEMP_NIGHT_TASKS))
+                            {
+                                String date = File.ReadAllText(TEMP_NIGHT_TASKS);
+                                DateTime lastUpdate = DateTime.Parse(date);
 
-                            if (lastUpdate.Date.Equals(DateTime.Now.Date))
-                                return;
+                                if (lastUpdate.Date.Equals(DateTime.Now.Date))
+                                    return;
+                            }
+                            nightSearching = true;
+                            Trace.WriteLine("BUSCANDO VERIFICANDO ESTADO DE CONTADORES", "NOTIFY");
+                            Alarms.SearchCountersFailing();
+                            Trace.WriteLine("BUSCANDO BACKUPS FALTANTES", "NOTIFY");
+                            Alarms.SearchMissingBackups();
+                            File.WriteAllText(TEMP_NIGHT_TASKS, DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
+                            nightSearching = false;
                         }
-                        Trace.WriteLine("Buscando contadores en mal estado", "DEBUG");
-                        Alarms.SearchCountersFailing();
-                        Trace.WriteLine("Buscando backups faltantes", "DEBUG");
-                        Alarms.SearchMissingBackups();
-                        File.WriteAllText(TEMP_NIGHT_TASKS, DateTime.Now.ToString());
+                        catch (IOException)
+                        {
+                            File.Delete(TEMP_NIGHT_TASKS);
+                        }
                     }
-                    catch (IOException)
+                    if (!searching && DateTime.Now.TimeOfDay.Between(TimeSpan.Parse(AcabusData.GetProperty("MinSearchingTask", "CCTV_Setting") ?? "02:00:00"),
+                        TimeSpan.Parse(AcabusData.GetProperty("MaxSearchingTask", "CCTV_Setting") ?? "03:00:00")))
                     {
-                        File.Delete(TEMP_NIGHT_TASKS);
+                        try
+                        {
+                            if (File.Exists(TEMP_NIGHT_TASKS_KVR))
+                            {
+                                String date = File.ReadAllText(TEMP_NIGHT_TASKS_KVR);
+                                DateTime lastUpdate = DateTime.Parse(date);
+
+                                if (lastUpdate.Date.Equals(DateTime.Now.Date))
+                                    return;
+                            }
+                            searching = true;
+                            Trace.WriteLine("BUSCANDO RECAUDOS", "NOTIFY");
+                            Alarms.SearchPickUpMoney();
+                            Trace.WriteLine("BUSCANDO SUMINISTROS", "NOTIFY");
+                            Alarms.SearchFillStock();
+                            File.WriteAllText(TEMP_NIGHT_TASKS_KVR, DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
+                            searching = false;
+                        }
+                        catch (IOException)
+                        {
+                            File.Delete(TEMP_NIGHT_TASKS);
+                        }
                     }
                 }
+                catch (Exception ex) { Trace.WriteLine(ex.StackTrace, "ERROR"); }
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
         }
 

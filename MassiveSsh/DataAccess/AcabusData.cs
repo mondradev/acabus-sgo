@@ -8,9 +8,7 @@ using System.Collections.ObjectModel;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Xml;
-using Acabus.Modules.Configurations;
 
 namespace Acabus.DataAccess
 {
@@ -40,8 +38,6 @@ namespace Acabus.DataAccess
         /// </summary>
         private static String _busDisconnectedQuery;
 
-
-
         /// <summary>
         /// Campo que provee a la propiedad 'CmdCreateBackup'.
         /// </summary>
@@ -53,6 +49,11 @@ namespace Acabus.DataAccess
         private static ObservableCollection<String> _companies;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'CountersFailingQuery'
+        /// </summary>
+        private static string _countersFailingQuery;
+
+        /// <summary>
         /// Campo que provee a la propiedad 'DevicesQuery'.
         /// </summary>
         private static String _devicesQuery;
@@ -61,7 +62,6 @@ namespace Acabus.DataAccess
         /// Campo que provee a la propiedad 'FirstFolio'.
         /// </summary>
         private static UInt64 _firstFolio;
-
 
         /// <summary>
         /// Indica si la información ya fue cargada.
@@ -92,7 +92,6 @@ namespace Acabus.DataAccess
         /// Campo que provee a la propiedad 'PGPort'.
         /// </summary>
         private static UInt16 _pgPort;
-
 
         /// <summary>
         /// Campo que provee a la propiedad 'RoutesQuery'.
@@ -144,8 +143,6 @@ namespace Acabus.DataAccess
         /// </summary>
         private static String _trunkAlertQuery;
 
-
-
         /// <summary>
         /// Campo que provee a la propiedad 'VehiclesQuery'.
         /// </summary>
@@ -157,16 +154,11 @@ namespace Acabus.DataAccess
         private static XmlDocument _xmlConfig = null;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'CountersFailingQuery'
-        /// </summary>
-        private static string _countersFailingQuery;
-
-        /// <summary>
         /// Crea una instancia de 'AcabusData' y realiza la carga del archivo de configuración.
         /// </summary>
         static AcabusData()
         {
-            Session = DbManager.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
+            Session = DbFactory_temp.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
             InitAcabusData();
         }
 
@@ -174,8 +166,6 @@ namespace Acabus.DataAccess
         /// Obtiene la sentencia SQL para consultar los vehículos sin conexión.
         /// </summary>
         public static String BusDisconnectedQuery => _busDisconnectedQuery;
-
-
 
         /// <summary>
         /// Obtiene un comando bash para generar un respaldo de base de datos en PostgreSQL 9.3
@@ -192,6 +182,11 @@ namespace Acabus.DataAccess
                 return _companies;
             }
         }
+
+        /// <summary>
+        /// Obtiene la sentencia SQL utilizada para la revisión de contadores.
+        /// </summary>
+        public static string CountersFailingQuery => _countersFailingQuery;
 
         /// <summary>
         /// Obtiene la sentencia SQL utilizada para la descarga de los datos de los equipos en operación.
@@ -239,7 +234,6 @@ namespace Acabus.DataAccess
         /// Obtiene el puerto utilizado para la conexión al motor de PostgreSQL.
         /// </summary>
         public static UInt16 PGPort => _pgPort;
-
 
         /// <summary>
         /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las rutas.
@@ -305,11 +299,6 @@ namespace Acabus.DataAccess
         public static String VehiclesQuery => _vehiclesQuery;
 
         /// <summary>
-        /// Obtiene la sentencia SQL utilizada para la revisión de contadores.
-        /// </summary>
-        public static string CountersFailingQuery => _countersFailingQuery;
-
-        /// <summary>
         /// Ejecuta una consulta en el servidor de base de datos.
         /// </summary>
         /// <param name="query">Consulta a ejecutar.</param>
@@ -340,8 +329,6 @@ namespace Acabus.DataAccess
             return response;
         }
 
-
-
         /// <summary>
         /// Ejecuta una función por cada ruta que exista dentro de la lista.
         /// </summary>
@@ -358,7 +345,12 @@ namespace Acabus.DataAccess
         /// </summary>
         public static Credential GetCredential(String alias, String type, Boolean isRoot = false)
         {
-            foreach (XmlNode credentialXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Credentials").SelectNodes("Credential"))
+            XmlNodeList xmlNodeList = _xmlConfig?.SelectSingleNode("Acabus")?.SelectSingleNode("Credentials")?.SelectNodes("Credential");
+
+            if (xmlNodeList == null)
+                return null;
+
+            foreach (XmlNode credentialXmlNode in xmlNodeList)
             {
                 if (XmlUtils.GetAttribute(credentialXmlNode, "Alias").Equals(alias)
                     && XmlUtils.GetAttribute(credentialXmlNode, "Type").Equals(type)
@@ -376,7 +368,13 @@ namespace Acabus.DataAccess
         /// <returns>Valor de la propiedad.</returns>
         public static String GetProperty(String name, String type)
         {
-            foreach (var item in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Settings").SelectNodes("Property"))
+            LoadXmlConfig();
+            XmlNodeList property = _xmlConfig?.SelectSingleNode("Acabus")?.SelectSingleNode("Settings")?.SelectNodes("Property");
+
+            if (property == null)
+                return null;
+
+            foreach (var item in property)
             {
                 String nameAttr = XmlUtils.GetAttribute(item as XmlNode, "Name");
                 String typeAttr = XmlUtils.GetAttribute(item as XmlNode, "Type");
@@ -391,7 +389,6 @@ namespace Acabus.DataAccess
         /// </summary>
         public static void LoadOffDutyVehiclesSettings()
         {
-
         }
 
         /// <summary>
@@ -406,7 +403,6 @@ namespace Acabus.DataAccess
             _trunkAlertQuery = GetProperty("TrunkAlert", "Command-Sql");
             _busDisconnectedQuery = GetProperty("BusDisconnected", "Command-Sql");
             _countersFailingQuery = GetProperty("CountersFailing", "Command-Sql");
-
 
             _stationsQuery = GetProperty("Stations", "Command-Sql");
             _devicesQuery = GetProperty("Devices", "Command-Sql");
@@ -423,8 +419,6 @@ namespace Acabus.DataAccess
             _timeMaxLowPriorityIncidenceBus = TimeSpan.Parse(GetProperty("TimeMaxLowPriorityIncidenceBus", "Setting"));
             _timeMaxMediumPriorityIncidenceBus = TimeSpan.Parse(GetProperty("TimeMaxMediumPriorityIncidenceBus", "Setting"));
         }
-
-
 
         /// <summary>
         /// Guarda toda la información de los vehículos en fuera de servicio.
@@ -508,12 +502,13 @@ namespace Acabus.DataAccess
             if (_loadedData) return;
             try
             {
-                _xmlConfig = new XmlDocument();
-                _xmlConfig.Load(CONFIG_FILENAME);
+                LoadXmlConfig();
 
                 LoadSettings();
                 LoadTechniciansSettings();
                 LoadCompaniesSettings();
+
+                Acabus.Modules.Core.DataAccess.AcabusData.ReloadData();
 
                 LoadModuleSettings();
 
@@ -526,7 +521,6 @@ namespace Acabus.DataAccess
             }
         }
 
-
         /// <summary>
         /// Carga los nombres de las empresas involucradas en la operación.
         /// </summary>
@@ -536,6 +530,7 @@ namespace Acabus.DataAccess
             foreach (XmlNode companyXmlNode in _xmlConfig.SelectSingleNode("Acabus").SelectSingleNode("Companies")?.SelectNodes("Company"))
                 Companies.Add(XmlUtils.GetAttribute(companyXmlNode, "Name"));
         }
+
         /// <summary>
         /// Carga los nombres de los modulos disponibles en la aplicación.
         /// </summary>
@@ -546,7 +541,6 @@ namespace Acabus.DataAccess
                 Modules.Add(XmlUtils.GetAttribute(moduleXmlNode, "Class"));
         }
 
-
         /// <summary>
         /// Carga una lista de los técnicos.
         /// </summary>
@@ -556,7 +550,17 @@ namespace Acabus.DataAccess
                 Technicians.Add(XmlUtils.GetAttribute(technicianXmlNode, "Name"));
         }
 
-
+        private static void LoadXmlConfig()
+        {
+            try
+            {
+                _xmlConfig = new XmlDocument();
+                _xmlConfig.Load(CONFIG_FILENAME);
+            } catch(Exception ex)
+            {
+                Trace.WriteLine(ex.StackTrace, "ERROR");
+            }
+        }
 
         /// <summary>
         /// Convierte un nodo XML que representa una credencial en una instancia de Credencial.
@@ -573,17 +577,13 @@ namespace Acabus.DataAccess
             return new Credential(username, password, type, isRoot);
         }
 
-
-
-        private class SQLiteConfiguration : IDbDialect
+        private class SQLiteConfiguration : IDbConfiguration
         {
             public string ConnectionString => "Data Source=Resources/acabus_data.dat;Password=acabus*data*dat";
 
             public string LastInsertFunctionName => "last_insert_rowid";
 
             public int TransactionPerConnection => 1;
-
-            public IDbConverter DateTimeConverter => null;
         }
 
         #region BasicOperations

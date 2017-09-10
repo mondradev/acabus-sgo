@@ -59,6 +59,22 @@ namespace Acabus.Models
         }
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="Enabled" />.
+        /// </summary>
+        private Boolean _enabled;
+
+        /// <summary>
+        /// Obtiene o establece si el técnico está disponible.
+        /// </summary>
+        public Boolean Enabled {
+            get => _enabled;
+            set {
+                _enabled = value;
+                OnPropertyChanged(nameof(Enabled));
+            }
+        }
+
+        /// <summary>
         /// Representa la instancia de Personal en una cadena.
         /// </summary>
         /// <returns>El nombre del personal actual.</returns>

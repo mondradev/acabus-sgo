@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace InnSyTech.Standard.Database.Linq
@@ -24,12 +25,12 @@ namespace InnSyTech.Standard.Database.Linq
         /// <returns>A new tree with sub-trees evaluated and replaced.</returns>
         public static Expression PartialEval(Expression expression)
         {
-            return PartialEval(expression, EvaluatorExpression.CanBeEvaluatedLocally);
+            return PartialEval(expression, CanBeEvaluatedLocally);
         }
 
         private static bool CanBeEvaluatedLocally(Expression expression)
         {
-            return expression.NodeType != ExpressionType.Parameter;
+            return !new[] { ExpressionType.Parameter, ExpressionType.Constant }.Contains(expression.NodeType);
         }
 
         /// <summary>

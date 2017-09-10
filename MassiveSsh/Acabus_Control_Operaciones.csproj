@@ -181,6 +181,8 @@
     <Compile Include="Modules\CctvReports\Models\RefundOfMoney.cs" />
     <Compile Include="Modules\CctvReports\Models\ReportQuery.cs" />
     <Compile Include="Modules\CctvReports\ViewModels\IncidencesHistoryViewModel.cs" />
+    <Compile Include="Modules\CctvReports\ViewModels\MultiCloseIncidencesViewModel.cs" />
+    <Compile Include="Modules\CctvReports\ViewModels\MultiIncidenceViewModel.cs" />
     <Compile Include="Modules\CctvReports\Views\AddIncidencesView.xaml.cs">
       <DependentUpon>AddIncidencesView.xaml</DependentUpon>
     </Compile>
@@ -209,6 +211,12 @@
       <DependentUpon>ModifyIncidenceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\CctvReports\Services\CctvServices.cs" />
+    <Compile Include="Modules\CctvReports\Views\MultiCloseIncidencesView.xaml.cs">
+      <DependentUpon>MultiCloseIncidencesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\CctvReports\Views\MultiIncidenceView.xaml.cs">
+      <DependentUpon>MultiIncidenceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\Configurations\AcabusData.cs" />
     <Compile Include="Modules\Configurations\Configuration.xaml.cs">
       <DependentUpon>Configuration.xaml</DependentUpon>
@@ -241,7 +249,6 @@
     <Compile Include="DataAccess\AcabusData.cs" />
     <Compile Include="Models\Common.cs" />
     <Compile Include="Models\Device.cs" />
-    <Compile Include="Models\Kvr.cs" />
     <Compile Include="Models\Link.cs" />
     <Compile Include="Models\Station.cs" />
     <Compile Include="Models\Vehicle.cs" />
@@ -323,6 +330,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\CctvReports\Views\ModifyIncidenceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\CctvReports\Views\MultiCloseIncidencesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\CctvReports\Views\MultiIncidenceView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

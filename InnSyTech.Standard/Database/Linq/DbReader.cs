@@ -8,7 +8,7 @@ using System.Linq;
 namespace InnSyTech.Standard.Database.Linq
 {
     /// <summary>
-    /// Proporciona un lector de datos obtenidos a través del proveedor <see cref="DbSqlProvider"/> que utiliza las consultas <see cref="DbSqlQuery{TData}"/>.
+    /// Proporciona un lector de datos obtenidos a través del proveedor <see cref="DbProvider"/> que utiliza las consultas <see cref="DbSqlQuery{TData}"/>.
     /// </summary>
     /// <typeparam name="TData">Tipo de dato del elemento a leer.</typeparam>
     internal class DbSqlReader<TData> : IEnumerable<TData>, IEnumerable where TData : class, new()
@@ -70,7 +70,7 @@ namespace InnSyTech.Standard.Database.Linq
             /// <summary>
             /// Elemento actual de la enumeración.
             /// </summary>
-            private TData _currrent;
+            private TData _current;
 
             /// <summary>
             /// Lector de datos-
@@ -106,12 +106,12 @@ namespace InnSyTech.Standard.Database.Linq
             /// <summary>
             /// Obtiene el elemento actual de la enumeración.
             /// </summary>
-            public TData Current => _currrent;
+            public TData Current => _current;
 
             /// <summary>
             /// Obtiene el elemento actual de la enumeración.
             /// </summary>
-            object IEnumerator.Current => _currrent;
+            object IEnumerator.Current => _current;
 
             /// <summary>
             /// Desecha el enumerador actual, desechando también el lector de datos.
@@ -129,7 +129,7 @@ namespace InnSyTech.Standard.Database.Linq
                 {
                     TData instance = (TData)DbHelper.ToInstance(typeof(TData), _dbReader);
 
-                    _currrent = instance;
+                    _current = instance;
 
                     return true;
                 }

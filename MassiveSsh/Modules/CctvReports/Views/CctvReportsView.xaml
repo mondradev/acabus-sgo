@@ -60,7 +60,7 @@
                 <TextBlock Text="{Binding IncidencesOpened.Count, Mode=OneWay, StringFormat=Incidencias abiertas: \{0\}}" Grid.Column="2" Padding="16"/>
             </Grid>
             <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource OpenedIncidencesCollection}}" IsReadOnly="True"
-                SelectedItem="{Binding SelectedIncidence}" SelectionMode="Single" CanUserResizeRows="False" Grid.Row="1" FrozenColumnCount="1">
+                SelectedItem="{Binding SelectedIncidence}" SelectionMode="Extended" CanUserResizeRows="False" Grid.Row="1" FrozenColumnCount="1">
                 <DataGrid.CommandBindings>
                     <CommandBinding Command="{x:Static ApplicationCommands.Copy}" Executed="CommandBindingExecuted" />
                     <CommandBinding Command="{x:Static ApplicationCommands.Cut}" Executed="CommandBindingExecuted" />
@@ -74,6 +74,9 @@
                     </i:EventTrigger>
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction Command="{Binding ModifyIncidenceDialogCommand}"  CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:CctvReportsView}}}" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding UpdateSelectionCommand}" CommandParameter="{Binding SelectedItems, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
                 <DataGrid.Columns>
@@ -178,6 +181,10 @@
                 <!-- Cerrar incidencias -->
                 <Button ToolTip="Cerrar incidencia"  Command="{Binding CloseIncidenceDialogCommand}" BorderBrush="White" Background="White">
                     <materialDesign:PackIcon Kind="CloseBox" Width="24" Height="24" />
+                </Button>
+                <!-- Multi-incidencias -->
+                <Button ToolTip="Abrir incidencias por estación"  Command="{Binding OpenStationIncidencesDialogCommand}" BorderBrush="White" Background="White">
+                    <materialDesign:PackIcon Kind="NotePlusOutline" Width="24" Height="24" />
                 </Button>
             </StackPanel>
         </materialDesign:PopupBox>

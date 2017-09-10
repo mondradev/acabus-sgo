@@ -58,7 +58,7 @@ namespace Acabus.Models
         /// <summary>
         /// Sin tipo definido.
         /// </summary>
-        NONE,
+        UNKNOWN,
 
         /// <summary>
         /// Kiosko de venta y recarga.
@@ -81,12 +81,12 @@ namespace Acabus.Models
         TS,
 
         /// <summary>
-        /// Torniquete Simple de E/S.
+        /// Torniquete de Salida.
         /// </summary>
         TSI,
 
         /// <summary>
-        /// Puerta para personas de movilidad reducida.
+        /// Paso de movilidad reducida.
         /// </summary>
         PMR,
 
@@ -158,7 +158,22 @@ namespace Acabus.Models
         /// <summary>
         /// PC Abordo.
         /// </summary>
-        PCA
+        PCA,
+
+        /// <summary>
+        /// Planta electrógena de estación.
+        /// </summary>
+        PGE,
+
+        /// <summary>
+        /// Rack de estación.
+        /// </summary>
+        RACK,
+
+        /// <summary>
+        /// Luminarias
+        /// </summary>
+        LIGHT
     }
 
     /// <summary>
@@ -258,7 +273,7 @@ namespace Acabus.Models
         /// <summary>
         /// Sin tipo.
         /// </summary>
-        NONE,
+        UNKNOWN,
 
         /// <summary>
         /// Autobús convencional.

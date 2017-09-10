@@ -47,6 +47,12 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Attendance.cs" />
+    <Compile Include="Models\CashDestiny.cs" />
+    <Compile Include="Models\DeviceFault.cs" />
+    <Compile Include="Models\DeviceFaultCategory.cs" />
+    <Compile Include="Models\Incidence.cs" />
+    <Compile Include="Models\RefundOfMoney.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -69,8 +75,16 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Models\" />
+    <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">
+      <Project>{F74FEE3D-D536-44DF-9E2C-53540CE78173}</Project>
+      <Name>InnSyTech.Standard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Opera.Acabus.Core\Opera.Acabus.Core.csproj">
+      <Project>{5870B3E0-A665-4014-94D1-4ED21CEB442F}</Project>
+      <Name>Opera.Acabus.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,0 +1,86 @@
+﻿<UserControl
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:materialDesignMahApps="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Converters="clr-namespace:Acabus.Converters"
+    xmlns:Converters1="clr-namespace:Acabus.Modules.CctvReports.Converters"
+    xmlns:viewModel="clr-namespace:Acabus.Modules.CctvReports.ViewModels"
+    x:Class="Acabus.Modules.CctvReports.Views.MultiCloseIncidencesView"
+             mc:Ignorable="d" DataContext="{DynamicResource ViewModel}">
+    <UserControl.Resources>
+        <Converters:DateTimeConverter x:Key="DateTimeConverter" />
+        <Converters1:IncidenceStatusConverter x:Key="IncidenceStatusConverter" />
+        <viewModel:MultiCloseIncidencesViewModel x:Key="ViewModel" />
+    </UserControl.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger>
+            <i:InvokeCommandAction Command="{Binding LoadCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid Margin="0" MinWidth="1000" Height="500">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="8" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Margin="16,24,16,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock TextWrapping="Wrap" Text="Cerrar incidencias" FontSize="20"  Grid.Row="0"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+            <ComboBox materialDesignMahApps:HintAssist.Hint="Técnico que resolvió" IsEditable="True"
+                        Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Technicians}" SelectedItem="{Binding SelectedTechnician, NotifyOnValidationError=True}" />
+            <DatePicker materialDesignMahApps:HintAssist.Hint="Fecha de solución" Grid.Row="4"
+                        HorizontalAlignment="Stretch" Margin="0,12,0,0" SelectedDate="{Binding FinishDate, NotifyOnValidationError=True}" />
+            <materialDesignMahApps:TimePicker  materialDesignMahApps:HintAssist.Hint="Hora de solución"
+                        Grid.Row="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,12,0,0"
+                        SelectedTime="{Binding FinishTime, Converter={StaticResource DateTimeConverter}, NotifyOnValidationError=True, StringFormat=\{0:HH:mm\}}" Is24Hours="True" />
+            <DataGrid FrozenColumnCount="2" Grid.Row="8" ItemsSource="{Binding SelectedIncidences}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" CanUserResizeRows="False">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                        Command="{Binding DiscardIncidenceCommand, Source={StaticResource ViewModel}}"
+                                        CommandParameter="{Binding Mode=OneWay}"
+                                        Margin="0" Padding="0" Height="Auto">
+                                    <materialDesignMahApps:PackIcon Kind="Delete" Width="24" Height="24" />
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Folio" Binding="{Binding Folio}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Descripción" Binding="{Binding Description}"  MaxWidth="250" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Equipo" Binding="{Binding Device}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Estación/Vehículo" Binding="{Binding Device.Location}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Fecha/Hora" Binding="{Binding StartDate, StringFormat=\{0:dd MMM yyyy hh:mm tt\}}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Reporta" Binding="{Binding WhoReporting}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Observaciones" Binding="{Binding Observations}" />
+                    <DataGridTextColumn Binding="{Binding Status, Converter={StaticResource IncidenceStatusConverter}}" Header="Estado" IsReadOnly="True" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+        <StackPanel Margin="0" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
+            <Button Margin="8 8 8 8" ToolTip="Descartar" Command="{x:Static materialDesignMahApps:DialogHost.CloseDialogCommand}"
+                    Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True" MinHeight="36">
+                <materialDesignMahApps:PackIcon Kind="Delete" Width="24" Height="24" />
+            </Button>
+            <Button Margin="0 8 8 8" ToolTip="Cerrar incidencias" Style="{StaticResource MaterialDesignFlatButton}" MinHeight="36"
+                    Command="{Binding CloseIncidenceCommand}">
+                <materialDesignMahApps:PackIcon Kind="CloseBoxOutline" Width="24" Height="24" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

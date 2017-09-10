@@ -117,7 +117,7 @@ namespace Acabus.Modules.Attendances.ViewModels
         }
 
         public IEnumerable<Technician> Technicians
-            => Core.DataAccess.AcabusData.AllTechnicians.Where(technicia => technicia.Name != "SISTEMA");
+            => Core.DataAccess.AcabusData.AllTechnicians.Where(technicia => technicia.Name != "SISTEMA" && technicia.Enabled);
 
         /// <summary>
         /// Obtiene o establece la hora de entrada del técnico.

@@ -29,7 +29,7 @@ namespace Acabus.Models
             { VehicleType.ARTICULATED, "ARTICULADO" },
             { VehicleType.STANDARD, "PADRÓN" },
             { VehicleType.CONVENTIONAL, "CONVENCIONAL" },
-            { VehicleType.NONE, "NINGUNO" }
+            { VehicleType.UNKNOWN, "(TIPO DESCONOCIDO)" }
         })
         {
         }
@@ -62,16 +62,19 @@ namespace Acabus.Models
                 { DeviceType.DSPL, "DISPLAY ESTACIÓN" },
                 { DeviceType.KVR, "KIOSKO DE VENTA Y RECARGA" },
                 { DeviceType.NVR, "GRABADOR DE VIDEO EN RED" },
-                { DeviceType.PMR, "PUERTA DE MOVILIDAD REDUCIDA" },
+                { DeviceType.PMR, "PASO DE MOVILIDAD REDUCIDA" },
                 { DeviceType.SW, "SWITCH DE ESTACIÓN" },
                 { DeviceType.TD, "TORNIQUETE DOBLE E/S" },
-                { DeviceType.TS, "TORNIQUETE SIMPLE E/S" },
+                { DeviceType.TS, "TORNIQUETE DE SALIDA" },
                 { DeviceType.TSI, "TORNIQUETE SIMPLE E/S" },
                 { DeviceType.TOR, "TORNIQUETE E/S" },
                 { DeviceType.APP, "SERVIDOR DE APLICACIÓN" },
                 { DeviceType.DB, "SERVIDOR BASE DE DATOS" },
                 { DeviceType.PDE, "SERVIDOR PATIO DE ENCIERRO" },
-                { DeviceType.NONE, "NINGUNO" }
+                { DeviceType.PGE, "PLANTA ELECTRÓGENA" },
+                { DeviceType.RACK, "RACK DE ESTACIÓN" },
+                { DeviceType.LIGHT, "LUMINARIAS" },
+                { DeviceType.UNKNOWN, "(TIPO DESCONOCIDO)" }
             })
             {
             }

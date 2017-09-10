@@ -117,7 +117,7 @@ namespace Acabus.Modules.Attendances.ViewModels
                 foreach (Incidence incidence in openedIncidences)
                 {
                     incidence.AssignedAttendance = ViewModelService.GetViewModel<AttendanceViewModel>()?
-                        .GetTechnicianAssigned(incidence.Device, incidence.StartDate, incidence.Description);
+                        .GetTechnicianAssigned(incidence);
                     incidence.Update();
                 }
 

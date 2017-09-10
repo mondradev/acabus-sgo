@@ -433,7 +433,7 @@ namespace Acabus.Modules.CctvReports
         /// Obtiene una lista de los técnicos seleccionables.
         /// </summary>
         public IEnumerable<Technician> Technicians => Core.DataAccess.AcabusData.AllTechnicians
-            .Where(technicia => technicia.Name != "SISTEMA");
+            .Where(technicia => technicia.Name != "SISTEMA" && technicia.Enabled);
 
         /// <summary>
         /// Obtiene el titulo del cuadro de dialogo
@@ -533,7 +533,7 @@ namespace Acabus.Modules.CctvReports
             {
                 if (incidence.Status == IncidenceStatus.CLOSE) continue;
 
-                if (exists = (incidence.Description?.Category?.ID == SelectedDescription?.Category?.ID
+                if (exists = (incidence.Description?.ID == SelectedDescription?.ID
                     && incidence.Device == SelectedDevice)) break;
             }
             if (exists)

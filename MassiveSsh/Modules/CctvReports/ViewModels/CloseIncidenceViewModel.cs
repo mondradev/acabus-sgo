@@ -232,7 +232,7 @@ namespace Acabus.Modules.CctvReports
         /// Obtiene una lista de los técnicos seleccionables.
         /// </summary>
         public IEnumerable<Technician> Technicians => Core.DataAccess.AcabusData.AllTechnicians
-            .Where(technicia => technicia.Name != "SISTEMA");
+            .Where(technicia => technicia.Name != "SISTEMA" && technicia.Enabled);
 
         /// <summary>
         ///
@@ -307,7 +307,7 @@ namespace Acabus.Modules.CctvReports
             SelectedIncidence.Observations = Observations;
             if (SelectedIncidence.Status != IncidenceStatus.UNCOMMIT)
                 SelectedIncidence.FinishDate = FinishDate.AddTicks(FinishTime.Ticks);
-            else if (SelectedIncidence.Device is Kvr)
+            else if (SelectedIncidence.Device.Type == DeviceType.KVR)
                 if (!SelectedIncidence.CommitRefund(FinishDate.AddTicks(FinishTime.Ticks)))
                 {
                     AcabusControlCenterViewModel.ShowDialog("No se confirmó la incidencia con devolución");

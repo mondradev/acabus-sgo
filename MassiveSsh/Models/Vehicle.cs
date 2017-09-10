@@ -54,7 +54,7 @@ namespace Acabus.Models
         public Vehicle()
         {
             _status = VehicleStatus.UNKNOWN;
-            BusType = VehicleType.NONE;
+            BusType = VehicleType.UNKNOWN;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Acabus.Models
         /// <param name="id">Identificador de vehículo.</param>
         /// <param name="economicNumber">Número Económico de la unidad.</param>
         /// <param name="type">Tipo de la unidad.</param>
-        public Vehicle(UInt16 id, String economicNumber, VehicleType type = VehicleType.NONE)
+        public Vehicle(UInt16 id, String economicNumber, VehicleType type = VehicleType.UNKNOWN)
         {
             this._id = id;
             this._economicNumber = economicNumber;

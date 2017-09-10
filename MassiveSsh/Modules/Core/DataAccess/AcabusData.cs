@@ -47,10 +47,10 @@ namespace Acabus.Modules.Core.DataAccess
         /// </summary>
         private static ObservableCollection<Vehicle> _offDutyVehicles;
 
-        static AcabusData()
-        {
-            LoadFromDatabase();
-        }
+        //static AcabusData()
+        //{
+        //    LoadFromDatabase();
+        //}
 
         /// <summary>
         /// Obtiene el valor de esta propiedad.
