@@ -34,7 +34,7 @@ namespace InnSyTech.Standard.Database
             _transactions = new List<DbTransaction>();
         }
 
-        public IDbDialect Configuration { get; set; }
+        public IDbConfiguration Configuration { get; set; }
 
         #region CommonFunctions
 

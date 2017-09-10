@@ -19,7 +19,7 @@ namespace InnSyTech.Standard.Database
         /// <param name="dbType">Tipo de la base de datos a conectar.</param>
         /// <param name="configuration">Configuración utilizada para la conexión.</param>
         /// <returns>Una instancia de administrador de base de datos.</returns>
-        public static DbSession CreateSession(Type dbType, IDbDialect configuration)
+        public static DbSession CreateSession(Type dbType, IDbConfiguration configuration)
         {
             return _session = new DbSession((DbConnection)Activator.CreateInstance(dbType, new object[] { configuration.ConnectionString }))
             {
