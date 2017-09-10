@@ -197,7 +197,7 @@ namespace InnSyTech.Standard.Database.Linq
                 case "LoadReference":
                     var depth = (int)(m.Arguments[1] as ConstantExpression).Value;
                     _statementDefinition.ReferenceDepth = depth;
-                    LoadReference(TypeHelper.GetElementType(m.Arguments[0].Type), depth);
+                    LoadReference(TypeHelper.GetElementType((m.Arguments[0] as ConstantExpression).Type), depth);
                     Visit(m.Arguments[0]);
                     break;
 

@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Database.Utils;
-using System;
+﻿using System;
 using System.Reflection;
 
 namespace InnSyTech.Standard.Database
@@ -126,25 +125,6 @@ namespace InnSyTech.Standard.Database
                 return 1;
 
             return Name.CompareTo(other.Name);
-        }
-
-        /// <summary>
-        /// Obtiene el valor de la llave foranea de la instancia especificada por el campo actual.
-        /// </summary>
-        /// <param name="instance">Instancia que contiene la propiedad.</param>
-        /// <returns>El valor de la propiedad de la instancia.</returns>
-        /// <exception cref="ArgumentNullException">Si la instancia es nula.</exception>
-        public object GetForeignValue(Object instance)
-        {
-            if (instance is null)
-                throw new ArgumentNullException(nameof(instance), "La instancia no puede ser nula");
-
-            if (!IsForeignKey)
-                throw new InvalidOperationException("El campo actual no es una referencia.");
-
-            var primaryKey = DbHelper.GetPrimaryKey(PropertyType);
-
-            return primaryKey.GetValue(GetValue(instance));
         }
 
         /// <summary>

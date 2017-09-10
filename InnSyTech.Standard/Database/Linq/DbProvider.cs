@@ -44,11 +44,6 @@ namespace InnSyTech.Standard.Database.Linq
         }
 
         /// <summary>
-        /// Obtiene el dialecto utilizado para comunicarse con la base de datos.
-        /// </summary>
-        public IDbDialect Dialect => _dialect;
-
-        /// <summary>
         /// Comienza una consulta transaccional en la base de datos.
         /// </summary>
         /// <returns>Una instancia de <see cref="DbTransaction"/>.</returns>
@@ -74,12 +69,6 @@ namespace InnSyTech.Standard.Database.Linq
         }
 
         /// <summary>
-        /// Cierra la conexión actual de la base de datos, pero no la desecha.
-        /// </summary>
-        public void CloseConnection()
-            => _connection.Close();
-
-        /// <summary>
         /// Crea un comando para ejecutar una sentencia Sql.
         /// </summary>
         /// <param name="transaction">La transacción en la cual se ejecutará el comando.</param>
@@ -97,6 +86,22 @@ namespace InnSyTech.Standard.Database.Linq
             command.Transaction = transaction;
 
             return command;
+        }
+
+        /// <summary>
+        /// Libera los recursos de la transacción.
+        /// </summary>
+        /// <param name="transaction">La transacción a liberar.</param>
+        public void EndTransaction(DbTransaction transaction)
+        {
+            lock (_transactions)
+            {
+                _transactions.Remove(transaction);
+
+                transaction.Dispose();
+
+                Monitor.Pulse(_transactions);
+            }
         }
 
         /// <summary>
@@ -118,6 +123,12 @@ namespace InnSyTech.Standard.Database.Linq
         }
 
         /// <summary>
+        /// Cierra la conexión actual de la base de datos, pero no la desecha.
+        /// </summary>
+        public void CloseConnection()
+            => _connection.Close();
+
+        /// <summary>
         /// Crea una consulta genérica que pueder traducida a SQL.
         /// </summary>
         /// <typeparam name="TElement">Tipo de datos de los elementos de la consulta.</typeparam>
@@ -125,22 +136,6 @@ namespace InnSyTech.Standard.Database.Linq
         /// <returns>Una consulta de elementos.</returns>
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
             => new DbSqlQuery<TElement>(this, expression);
-
-        /// <summary>
-        /// Libera los recursos de la transacción.
-        /// </summary>
-        /// <param name="transaction">La transacción a liberar.</param>
-        public void EndTransaction(DbTransaction transaction)
-        {
-            lock (_transactions)
-            {
-                _transactions.Remove(transaction);
-
-                transaction.Dispose();
-
-                Monitor.Pulse(_transactions);
-            }
-        }
 
         /// <summary>
         /// Ejecuta la consulta traduciendo primero a código SQL.
