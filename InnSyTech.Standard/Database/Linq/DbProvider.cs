@@ -1,14 +1,12 @@
 ﻿using InnSyTech.Standard.Database.Linq.DbDefinitions;
 using InnSyTech.Standard.Utils;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading;
 
 namespace InnSyTech.Standard.Database.Linq
 {
@@ -28,11 +26,6 @@ namespace InnSyTech.Standard.Database.Linq
         private IDbDialect _dialect;
 
         /// <summary>
-        /// Transacciones actualmente en ejecución.
-        /// </summary>
-        private List<DbTransaction> _transactions = new List<DbTransaction>();
-
-        /// <summary>
         /// Crea una instancia nueva de <see cref="DbProvider"/>.
         /// </summary>
         /// <param name="connection">Conexión la basde de datos.</param>
@@ -41,67 +34,6 @@ namespace InnSyTech.Standard.Database.Linq
         {
             _connection = connection;
             _dialect = dialect;
-        }
-
-        /// <summary>
-        /// Comienza una consulta transaccional en la base de datos.
-        /// </summary>
-        /// <returns>Una instancia de <see cref="DbTransaction"/>.</returns>
-        public DbTransaction BeginTransaction()
-        {
-            if (_connection is null)
-                throw new InvalidOperationException("La conexión a la base de datos es nula.");
-
-            if (_connection.State == ConnectionState.Closed)
-                _connection.Open();
-
-            lock (_transactions)
-            {
-                if (_transactions.Count > _dialect.TransactionPerConnection)
-                    Monitor.Wait(_transactions);
-
-                var transaction = _connection.BeginTransaction();
-
-                _transactions.Add(transaction);
-
-                return transaction;
-            }
-        }
-
-        /// <summary>
-        /// Crea un comando para ejecutar una sentencia Sql.
-        /// </summary>
-        /// <param name="transaction">La transacción en la cual se ejecutará el comando.</param>
-        /// <returns>Una instancia de <see cref="DbCommand"/>.</returns>
-        public DbCommand CreateCommand(DbTransaction transaction)
-        {
-            if (_connection is null)
-                throw new InvalidOperationException("La conexión a la base de datos es nula.");
-
-            if (_connection.State == ConnectionState.Closed)
-                _connection.Open();
-
-            var command = _connection.CreateCommand();
-
-            command.Transaction = transaction;
-
-            return command;
-        }
-
-        /// <summary>
-        /// Libera los recursos de la transacción.
-        /// </summary>
-        /// <param name="transaction">La transacción a liberar.</param>
-        public void EndTransaction(DbTransaction transaction)
-        {
-            lock (_transactions)
-            {
-                _transactions.Remove(transaction);
-
-                transaction.Dispose();
-
-                Monitor.Pulse(_transactions);
-            }
         }
 
         /// <summary>
@@ -121,12 +53,6 @@ namespace InnSyTech.Standard.Database.Linq
                 throw ex.InnerException;
             }
         }
-
-        /// <summary>
-        /// Cierra la conexión actual de la base de datos, pero no la desecha.
-        /// </summary>
-        public void CloseConnection()
-            => _connection.Close();
 
         /// <summary>
         /// Crea una consulta genérica que pueder traducida a SQL.
@@ -159,7 +85,7 @@ namespace InnSyTech.Standard.Database.Linq
             DbCommand command = _connection.CreateCommand();
             command.CommandText = GetQueryText(expression, out DbStatementDefinition definition);
 
-            Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+            Trace.WriteLine($"Execute: {command.CommandText}", "DEBUG");
 
             DbDataReader reader = command.ExecuteReader();
 
