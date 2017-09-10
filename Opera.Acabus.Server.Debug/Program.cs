@@ -14,7 +14,7 @@ namespace Opera.Acabus.Server.Debug
     {
         public string ConnectionString => @"Data Source=C:\Users\javi_\Documents\projects\ACABUS-Control de operacion\Opera.Acabus.Sgo\bin\Release\Resources\acabus_data.dat ; Password=acabus*data*dat";
 
-        public IDbConverter DateTimeConverter => new SQLiteDateTimeConverter();
+        public IDbConverter DateTimeConverter => new DbDateTimeConverter();
 
         public string LastInsertFunctionName => "";
 

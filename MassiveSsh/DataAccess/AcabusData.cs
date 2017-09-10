@@ -2,7 +2,6 @@
 using Acabus.Utils;
 using Acabus.Utils.SecureShell;
 using InnSyTech.Standard.Database;
-using InnSyTech.Standard.Database.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -159,7 +158,7 @@ namespace Acabus.DataAccess
         /// </summary>
         static AcabusData()
         {
-            Session = DbFactory.CreateSession<SQLiteConnection>(new SQLiteConfiguration());
+            Session = DbFactory_temp.CreateSession(typeof(SQLiteConnection), new SQLiteConfiguration());
             InitAcabusData();
         }
 
@@ -241,7 +240,7 @@ namespace Acabus.DataAccess
         /// </summary>
         public static String RoutesQuery => _routesQuery;
 
-        public static IDbSession Session { get; set; }
+        public static DbSession Session { get; set; }
 
         /// <summary>
         /// Obtiene la sentencia SQL utilizada para la descarga de los datos de las estaciones.
@@ -578,15 +577,13 @@ namespace Acabus.DataAccess
             return new Credential(username, password, type, isRoot);
         }
 
-        private class SQLiteConfiguration : IDbDialect
+        private class SQLiteConfiguration : IDbConfiguration
         {
             public string ConnectionString => "Data Source=Resources/acabus_data.dat;Password=acabus*data*dat";
 
             public string LastInsertFunctionName => "last_insert_rowid";
 
             public int TransactionPerConnection => 1;
-
-            public IDbConverter DateTimeConverter => new SQLiteDateTimeConverter();
         }
 
         #region BasicOperations

@@ -1,7 +1,6 @@
 ﻿using Acabus.Models;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils;
-using InnSyTech.Standard.Database.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -48,11 +47,10 @@ namespace Acabus.Modules.Core.DataAccess
         /// </summary>
         private static ObservableCollection<Vehicle> _offDutyVehicles;
 
-        private static IEnumerable<Device> _allDevices;
-
-        private static IEnumerable<Vehicle> _allVehicles;
-
-        private static IEnumerable<Station> _allStations;
+        //static AcabusData()
+        //{
+        //    LoadFromDatabase();
+        //}
 
         /// <summary>
         /// Obtiene el valor de esta propiedad.
@@ -62,7 +60,11 @@ namespace Acabus.Modules.Core.DataAccess
         /// <summary>
         /// Obtiene una lista de todos los dispositivos registrados en la base de datos.
         /// </summary>
-        public static IEnumerable<Device> AllDevices => _allDevices;
+        public static IEnumerable<Device> AllDevices => Util.Combine(new[]
+        {
+            AllStations.Select(station=> station.Devices).Combine(),
+            AllVehicles.Select(vehicle=>vehicle.Devices).Combine()
+        });
 
         /// <summary>
         /// Obtiene una lista de las fallas para los diferentes equipos.
@@ -77,7 +79,7 @@ namespace Acabus.Modules.Core.DataAccess
         /// <summary>
         /// Obtiene una lista de todos las estaciones registrados en la base de datos.
         /// </summary>
-        public static IEnumerable<Station> AllStations => _allStations;
+        public static IEnumerable<Station> AllStations => AllRoutes.Select(route => route.Stations).Combine();
 
         /// <summary>
         /// Obtiene la lista de todos los técnicos registrados.
@@ -87,7 +89,8 @@ namespace Acabus.Modules.Core.DataAccess
         /// <summary>
         /// Obtiene una lista de todos los vehículos registrados en la base de datos.
         /// </summary>
-        public static IEnumerable<Vehicle> AllVehicles => _allVehicles;
+        public static IEnumerable<Vehicle> AllVehicles => AllRoutes.Select(route => route.Vehicles)
+            .Combine().OrderBy(vehicle => vehicle.EconomicNumber);
 
         /// <summary>
         /// Obtiene o establece una instancia de estación que representa al centro de control.
@@ -165,18 +168,10 @@ namespace Acabus.Modules.Core.DataAccess
         /// </summary>
         private static void LoadFromDatabase()
         {
-            _allRoutes = Acabus.DataAccess.AcabusData.Session.Read<Route>()
-               .OrderBy(r => r.RouteNumber);
-            _allDevices = Acabus.DataAccess.AcabusData.Session.Read<Device>()
-                .OrderBy(d => d.NumeSeri);
-            _allStations = Acabus.DataAccess.AcabusData.Session.Read<Station>()
-                .OrderBy(s => s.StationNumber);
-            _allVehicles = Acabus.DataAccess.AcabusData.Session.Read<Vehicle>()
-                .OrderBy(v => v.EconomicNumber);
-            _allFaults = Acabus.DataAccess.AcabusData.Session.Read<DeviceFault>()
-                .LoadReference(1).OrderBy(f => f.Description);
-            _allCashDestinies = Acabus.DataAccess.AcabusData.Session.Read<CashDestiny>();
-            _allTechnicians = Acabus.DataAccess.AcabusData.Session.Read<Technician>()
+            _allRoutes = Acabus.DataAccess.AcabusData.Session.GetObjects<Route>();
+            _allFaults = Acabus.DataAccess.AcabusData.Session.GetObjects<DeviceFault>();
+            _allCashDestinies = Acabus.DataAccess.AcabusData.Session.GetObjects<CashDestiny>();
+            _allTechnicians = Acabus.DataAccess.AcabusData.Session.GetObjects<Technician>()
                                 .OrderBy(technician => technician.Name);
 
             _cc = AllStations.FirstOrDefault(station => station.Name.Contains("CENTRO DE CONTROL"));
