@@ -1,8 +1,6 @@
 ﻿using Acabus.Modules.CctvReports.Models;
 using InnSyTech.Standard.Database;
-using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Database.Sqlite;
-using Opera.Acabus.TrunkMonitor.Models;
 using System;
 using System.Data.SQLite;
 using System.Linq;
@@ -11,7 +9,7 @@ namespace Opera.Acabus.Server.Debug
 {
     internal class DbDialect : IDbDialect
     {
-        public string ConnectionString => @"Data Source=C:\Users\javi_\Documents\projects\ACABUS-Control de operacion\Opera.Acabus.Sgo\bin\Release\Resources\acabus_sgo.cnf ; Password=acabus*data*dat";
+        public string ConnectionString => @"Data Source=C:\Users\javi_\Documents\projects\ACABUS-Control de operacion\MassiveSsh\Resources\acabus_data.dat ; Password=acabus*data*dat";
 
         public IDbConverter DateTimeConverter => new DbDateTimeConverter();
 
@@ -35,15 +33,16 @@ namespace Opera.Acabus.Server.Debug
 
             var db = DbSqlFactory.CreateSession<SQLiteConnection>(new DbDialect());
 
-            var query = db.Read<Link>()
-                .LoadReference(3)
+            var query = db.Read<Incidence>()
+                //.LoadReference(3)
                 //.Execute()
-                .Where(l => l.StationA.Name == "MICHOACÁN")
+                .Where(i => i.Device.NumeSeri == "KVR020201")
+                .OrderBy(i => i.Folio)
               ;
 
-            foreach (var l in query)
+            foreach (var s in query)
             {
-                Console.WriteLine(l);
+                Console.WriteLine(s.Folio + " " + s.Device);
             }
         }
     }

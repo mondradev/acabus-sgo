@@ -1,6 +1,5 @@
 ﻿using InnSyTech.Standard.Database.Utils;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -9,7 +8,6 @@ namespace InnSyTech.Standard.Database.Linq
 {
     internal class ExpressionVisitor : System.Linq.Expressions.ExpressionVisitor
     {
-        private Dictionary<String, String> _aliases;
         private IDbDialect _dialect;
         private StringBuilder _statement;
 
@@ -17,7 +15,6 @@ namespace InnSyTech.Standard.Database.Linq
         {
             _dialect = dialect;
             _statement = new StringBuilder();
-            _aliases = new Dictionary<string, string>();
 
             Visit(expression);
 
@@ -80,15 +77,8 @@ namespace InnSyTech.Standard.Database.Linq
         protected override Expression VisitConstant(ConstantExpression c)
         {
             if (c.Value is IQueryable q)
-            {
-                string entityName = DbHelper.GetEntityName(q.ElementType) ?? q.ElementType.Name;
-
                 _statement.Append("SELECT * FROM ")
-                    .Append(entityName)
-                    .AppendFormat("T{0}", _aliases.Count);
-
-                _aliases.Add(entityName, string.Format("T{0}", _aliases.Count));
-            }
+                    .Append(DbHelper.GetEntityName(q.ElementType) ?? q.ElementType.Name);
             else if (c.Value == null)
                 _statement.Append("NULL");
             else
@@ -180,9 +170,6 @@ namespace InnSyTech.Standard.Database.Linq
                     break;
 
                 case ExpressionType.Quote:
-                    Visit(u.Operand);
-                    break;
-                case ExpressionType.Convert:
                     Visit(u.Operand);
                     break;
 
