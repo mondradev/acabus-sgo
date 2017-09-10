@@ -28,9 +28,6 @@ namespace InnSyTech.Standard.Database
         /// <returns>Una sesión de conexión a la base de datos.</returns>
         public static IDbSession CreateSession(Type connectionType, IDbDialect dialect)
         {
-            if (dialect == null)
-                throw new ArgumentNullException(nameof(dialect));
-
             if (!typeof(DbConnection).IsAssignableFrom(connectionType))
                 throw new ArgumentOutOfRangeException(nameof(connectionType), "El tipo de conexión no hereda de System.Data.Common.DbConnection");
 
