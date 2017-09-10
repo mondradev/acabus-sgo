@@ -2,11 +2,9 @@
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Utils;
 using System;
-using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace InnSyTech.Standard.Database
 {
@@ -39,35 +37,7 @@ namespace InnSyTech.Standard.Database
         /// <returns>Un true en caso que la instancia sea persistida correctamente.</returns>
         public bool Create<TData>(TData instance, int referenceDepth = 0)
         {
-            DbTransaction transaction = Provider.BeginTransaction();
-            DbCommand command = Provider.CreateCommand(transaction);
-
-            try
-            {
-                CreateInternal(instance, referenceDepth, command);
-
-                transaction.Commit();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-
-                Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
-
-                return false;
-            }
-            finally
-            {
-                if (transaction != null)
-                    Provider.EndTransaction(transaction);
-
-                if (command != null)
-                    command.Dispose();
-
-                Provider.CloseConnection();
-            }
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -109,7 +79,7 @@ namespace InnSyTech.Standard.Database
             {
                 transaction.Rollback();
 
-                Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                Trace.WriteLine( ex.Message.JoinLines(), "ERROR");
 
                 return false;
             }
@@ -154,66 +124,6 @@ namespace InnSyTech.Standard.Database
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Permite persistir una instancia y sus referencias de manera recursiva.
-        /// </summary>
-        /// <typeparam name="TData">Tipo de la instancia a persistir</typeparam>
-        /// <param name="instance">Instancia a persistir.</param>
-        /// <param name="referenceDepth">profundidad de las referencias.</param>
-        /// <param name="command">Comando utilizado para ejecución de consultas.</param>
-        private void CreateInternal<TData>(TData instance, int referenceDepth, DbCommand command)
-        {
-            IEnumerable<DbFieldInfo> fields = DbHelper.GetFields(instance.GetType()).Where(f => String.IsNullOrEmpty(f.ForeignKeyName));
-            var primaryKey = fields.FirstOrDefault(f => f.IsPrimaryKey);
 
-            if (referenceDepth > 0)
-                foreach (var foreignKey in fields.Where(f => f.IsForeignKey))
-                    CreateInternal(foreignKey.GetValue(instance), referenceDepth - 1, command);
-
-            if (primaryKey.IsAutonumerical && primaryKey.GetValue(instance)?.ToString() != "0")
-                return;
-
-            StringBuilder statement = new StringBuilder();
-
-            if (!primaryKey.IsAutonumerical)
-                statement.AppendFormat("INSERT INTO {0} ({1}) SELECT * FROM (SELECT {2}) WHERE @{3} NOT IN (SELECT {3} FROM {0})",
-                    DbHelper.GetEntityName(instance.GetType()),
-                    "{{fields}}",
-                    "{{parametersAndFields}}",
-                    primaryKey.Name);
-            else
-                statement.Append("INSERT INTO ")
-                .Append(DbHelper.GetEntityName(instance.GetType()))
-                .Append(" ({{fields}}) VALUES ({{parameters}})");
-
-            command.Parameters.Clear();
-
-            foreach (var field in fields)
-            {
-                if (field.IsAutonumerical && field.IsPrimaryKey)
-                    continue;
-
-                var parameter = command.CreateParameter();
-
-                parameter.ParameterName = $"@{field.Name}";
-                parameter.Value = field.GetValue(instance);
-
-                command.Parameters.Add(parameter);
-
-                statement.Replace("{{parameters}}", String.Format("{0}, {1}", parameter.ParameterName, "{{parameters}}"));
-                statement.Replace("{{fields}}", String.Format("{0}, {1}", field.Name, "{{fields}}"));
-                statement.Replace("{{parametersAndFields}}", String.Format("@{0} AS {0}, {1}", field.Name, "{{parametersAndFields}}"));
-            }
-
-            statement.Replace(", {{fields}}", String.Empty);
-            statement.Replace(", {{parameters}}", String.Empty);
-            statement.Replace(", {{parametersAndFields}}", String.Empty);
-
-            command.CommandText = statement.ToString();
-
-            Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
-
-            command.ExecuteNonQuery();
-        }
     }
 }
