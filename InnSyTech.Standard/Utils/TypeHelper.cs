@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace InnSyTech.Standard.Utils
 {
@@ -49,34 +48,6 @@ namespace InnSyTech.Standard.Utils
                 return FindIEnumerable(seqType.BaseType);
             }
 
-            return null;
-        }
-
-        internal static Type GetMemberType(MemberInfo member)
-        {
-            switch (member.MemberType)
-            {
-                case MemberTypes.Constructor:
-                    break;
-                case MemberTypes.Event:
-                    break;
-                case MemberTypes.Field:
-                    return (member as FieldInfo).FieldType;
-                case MemberTypes.Method:
-                    break;
-                case MemberTypes.Property:
-                    return (member as PropertyInfo).PropertyType;
-                case MemberTypes.TypeInfo:
-                    break;
-                case MemberTypes.Custom:
-                    break;
-                case MemberTypes.NestedType:
-                    break;
-                case MemberTypes.All:
-                    break;
-                default:
-                    break;
-            }
             return null;
         }
     }

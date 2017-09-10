@@ -36,7 +36,7 @@ namespace InnSyTech.Standard.Database.Linq
         public static IQueryable<TSource> LoadReference<TSource>(this IQueryable<TSource> source, int depth)
         {
             if (source == null)
-                throw new ArgumentNullException(nameof(source), "La colección origen no puede ser nula.");
+                throw new ArgumentNullException("La colección origen no puede ser nula.");
 
             if (depth < 0)
                 throw new ArgumentOutOfRangeException(nameof(depth), "El nivel de profundidad de la carga de referencia no puede ser un número negativo.");

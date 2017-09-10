@@ -128,24 +128,6 @@ namespace InnSyTech.Standard.Database.Utils
         }
 
         /// <summary>
-        /// Indica si el campo es una llave foreanea de una entidad.
-        /// </summary>
-        /// <param name="member">Miembro a revisar.</param>
-        /// <returns>Un true si es llave foranea.</returns>
-        public static bool IsForeignKey(MemberInfo member)
-        {
-            foreach (Attribute attribute in member.GetCustomAttributes())
-                if (attribute is ColumnAttribute)
-                {
-                    ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
-
-                    if (columnAttribute.IsIgnored) continue;
-                    return columnAttribute.IsForeignKey;
-                }
-            return false;
-        }
-
-        /// <summary>
         /// Intenta establece el valor obtenido de la base de datos en la propiedad de la instancia.
         /// </summary>
         /// <param name="dbField">Campo a settear desde la base de datos.</param>

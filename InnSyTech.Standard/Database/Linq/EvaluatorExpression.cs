@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace InnSyTech.Standard.Database.Linq
@@ -25,12 +24,12 @@ namespace InnSyTech.Standard.Database.Linq
         /// <returns>A new tree with sub-trees evaluated and replaced.</returns>
         public static Expression PartialEval(Expression expression)
         {
-            return PartialEval(expression, CanBeEvaluatedLocally);
+            return PartialEval(expression, EvaluatorExpression.CanBeEvaluatedLocally);
         }
 
         private static bool CanBeEvaluatedLocally(Expression expression)
         {
-            return !new[] { ExpressionType.Parameter, ExpressionType.Constant }.Contains(expression.NodeType);
+            return expression.NodeType != ExpressionType.Parameter;
         }
 
         /// <summary>
@@ -45,6 +44,17 @@ namespace InnSyTech.Standard.Database.Linq
             internal Nominator(Func<Expression, bool> fnCanBeEvaluated)
             {
                 this.fnCanBeEvaluated = fnCanBeEvaluated;
+            }
+
+            protected override Expression VisitMethodCall(MethodCallExpression node)
+            {
+                if (node.Method.ReflectedType == typeof(DbQueryable))
+                {
+                    base.Visit(node.Arguments[0]);
+
+                    return base.Visit(node.Arguments[1]);
+                }
+                return base.VisitMethodCall(node);
             }
 
             public override Expression Visit(Expression expression)
