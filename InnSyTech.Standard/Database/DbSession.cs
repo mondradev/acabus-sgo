@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Structures.Trees;
+﻿using InnSyTech.Standard.Structures.Trees;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -83,7 +82,7 @@ namespace InnSyTech.Standard.Database
             var matches = Regex.Matches(command.CommandText, "@[0-9a-zA-Z_]*");
             foreach (Match match in matches)
             {
-                var dbField = DbHelper.GetFields(instance.GetType()).FirstOrDefault(field => field.Name == match.Value.Replace("@", ""));
+                var dbField = DbFieldInfo.GetFields(instance.GetType()).FirstOrDefault(field => field.Name == match.Value.Replace("@", ""));
                 if (dbField.IsForeignKey) continue;
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = match.Value;
@@ -104,7 +103,7 @@ namespace InnSyTech.Standard.Database
             DbCommand command = null;
             try
             {
-                DbFieldInfo primaryKey = DbHelper.GetPrimaryKey(instance.GetType());
+                DbFieldInfo primaryKey = DbFieldInfo.GetPrimaryKey(instance.GetType());
                 command = _connection.CreateCommand();
                 command.Transaction = transaction;
 
@@ -151,7 +150,7 @@ namespace InnSyTech.Standard.Database
         /// <returns>Un valor <see cref="true"/> si la instancia depende de otra.</returns>
         private bool HasParentEntity(Type type)
         {
-            var fields = DbHelper.GetFields(type).Where(field => field.IsForeignKey);
+            var fields = DbFieldInfo.GetFields(type).Where(field => field.IsForeignKey);
             return fields.Count() > 0;
         }
 
@@ -256,7 +255,7 @@ namespace InnSyTech.Standard.Database
             StringBuilder statement = new StringBuilder();
             StringBuilder parameters = new StringBuilder();
 
-            foreach (DbFieldInfo field in DbHelper.GetFields(typeOfInstance))
+            foreach (DbFieldInfo field in DbFieldInfo.GetFields(typeOfInstance))
             {
                 if (!String.IsNullOrEmpty(field.ForeignKeyName))
                     continue;
@@ -305,26 +304,26 @@ namespace InnSyTech.Standard.Database
             try
             {
                 if (ExistsInstance(instance, transaction))
-                    return DbHelper.GetPrimaryKey(instance.GetType()).GetValue(instance);
+                    return DbFieldInfo.GetPrimaryKey(instance.GetType()).GetValue(instance);
 
                 command = _connection.CreateCommand();
                 command.Transaction = transaction;
                 command.CommandText = CreateSaveStatement(instance, instance.GetType());
                 if (HasParentEntity(instance.GetType()))
-                    foreach (var item in DbHelper.GetFields(instance.GetType()).Where(field => field.IsForeignKey))
+                    foreach (var item in DbFieldInfo.GetFields(instance.GetType()).Where(field => field.IsForeignKey))
                         CreateParameter(command, item.Name, SaveInstance(item.GetValue(instance), transaction, instance));
                 CreateParameters(command, instance);
                 Trace.WriteLine($"Ejecutando SQL: {command.CommandText}", "DEBUG");
 
                 int rows = command.ExecuteNonQuery();
-                if (!DbHelper.GetPrimaryKey(instance.GetType()).IsAutonumerical)
-                    return DbHelper.GetPrimaryKey(instance.GetType()).GetValue(instance);
+                if (!DbFieldInfo.GetPrimaryKey(instance.GetType()).IsAutonumerical)
+                    return DbFieldInfo.GetPrimaryKey(instance.GetType()).GetValue(instance);
                 command.Parameters.Clear();
                 command.CommandText = String.Format("SELECT {0}()", Configuration.LastInsertFunctionName);
                 Trace.WriteLine($"Ejecutando SQL: {command.CommandText}", "DEBUG");
 
-                DbHelper.GetPrimaryKey(instance.GetType()).SetValue(instance, command.ExecuteScalar());
-                return DbHelper.GetPrimaryKey(instance.GetType()).GetValue(instance);
+                DbFieldInfo.GetPrimaryKey(instance.GetType()).SetValue(instance, command.ExecuteScalar());
+                return DbFieldInfo.GetPrimaryKey(instance.GetType()).GetValue(instance);
             }
             catch (Exception ex)
             {
@@ -400,7 +399,7 @@ namespace InnSyTech.Standard.Database
         {
             StringBuilder parameters = new StringBuilder();
 
-            foreach (DbFieldInfo field in DbHelper.GetFields(typeOfInstance))
+            foreach (DbFieldInfo field in DbFieldInfo.GetFields(typeOfInstance))
             {
                 if (!String.IsNullOrEmpty(field.ForeignKeyName))
                     continue;
@@ -410,7 +409,7 @@ namespace InnSyTech.Standard.Database
 
             parameters.Remove(parameters.Length - 1, 1);
 
-            String saveStatement = String.Format("UPDATE {0} SET {1} WHERE {2}=@{2}", GetTableName(typeOfInstance), parameters, DbHelper.GetPrimaryKey(typeOfInstance).Name);
+            String saveStatement = String.Format("UPDATE {0} SET {1} WHERE {2}=@{2}", GetTableName(typeOfInstance), parameters, DbFieldInfo.GetPrimaryKey(typeOfInstance).Name);
 
             parameters.Clear();
 
@@ -441,7 +440,7 @@ namespace InnSyTech.Standard.Database
 
                 command.CommandText = CreateUpdateStatement(instance.GetType());
                 if (HasParentEntity(instance.GetType()))
-                    foreach (var item in DbHelper.GetFields(instance.GetType()).Where(field => field.IsForeignKey))
+                    foreach (var item in DbFieldInfo.GetFields(instance.GetType()).Where(field => field.IsForeignKey))
                         CreateParameter(command, item.Name, UpdateInstance(item.GetValue(instance), transaction, instance));
                 CreateParameters(command, instance);
 
@@ -451,7 +450,7 @@ namespace InnSyTech.Standard.Database
                 if (rows == 0)
                     return SaveInstance(instance, transaction, childInstance);
 
-                return DbHelper.GetPrimaryKey(instance.GetType()).GetValue(instance);
+                return DbFieldInfo.GetPrimaryKey(instance.GetType()).GetValue(instance);
             }
             catch (Exception ex)
             {
@@ -531,7 +530,7 @@ namespace InnSyTech.Standard.Database
 
             try
             {
-                DbFieldInfo primaryKey = DbHelper.GetPrimaryKey(instance.GetType());
+                DbFieldInfo primaryKey = DbFieldInfo.GetPrimaryKey(instance.GetType());
 
                 if (primaryKey is null)
                     throw new ArgumentException("La estructura de la instancia requiere una campo de llave primaria.");
@@ -544,7 +543,7 @@ namespace InnSyTech.Standard.Database
                 CreateParameter(command, primaryKey.Name, primaryKey.GetValue(instance));
 
                 if (HasParentEntity(instance.GetType()))
-                    foreach (var item in DbHelper.GetFields(instance.GetType()).Where(field => field.IsForeignKey))
+                    foreach (var item in DbFieldInfo.GetFields(instance.GetType()).Where(field => field.IsForeignKey))
                         DeleteInstance(item.GetValue(instance), transaction, instance);
 
                 return command.ExecuteNonQuery() > 0;
@@ -575,7 +574,7 @@ namespace InnSyTech.Standard.Database
             if (_cache.ContainsKey(typeof(TResult)))
             {
                 var instance = default(TResult);
-                var primaryKey = DbHelper.GetPrimaryKey(typeof(TResult));
+                var primaryKey = DbFieldInfo.GetPrimaryKey(typeof(TResult));
                 Boolean exists = false;
                 foreach (var item in _cache[typeof(TResult)])
 
@@ -758,7 +757,7 @@ namespace InnSyTech.Standard.Database
         /// <returns>Una instancia del tipo especificado.</returns>
         private TResult ReadData<TResult>(Type typeOfInstance, object idKey, DbTransaction transaction, Object dependenceInstance = null, String foreignKeyName = "")
         {
-            DbFieldInfo primaryKeyField = DbHelper.GetPrimaryKey(typeOfInstance);
+            DbFieldInfo primaryKeyField = DbFieldInfo.GetPrimaryKey(typeOfInstance);
 
             if (_cache.ContainsKey(typeOfInstance) && dependenceInstance is null)
                 if ((_cache[typeOfInstance] as List<TResult>).FirstOrDefault(item
@@ -766,7 +765,7 @@ namespace InnSyTech.Standard.Database
                     return (_cache[typeOfInstance] as List<TResult>).FirstOrDefault(item
                         => primaryKeyField.GetValue(item).Equals(idKey));
 
-            DbFieldInfo dependencePrimaryKeyField = dependenceInstance is null ? null : DbHelper.GetPrimaryKey(dependenceInstance.GetType());
+            DbFieldInfo dependencePrimaryKeyField = dependenceInstance is null ? null : DbFieldInfo.GetPrimaryKey(dependenceInstance.GetType());
             DbCommand command = _connection.CreateCommand();
 
             command.Transaction = transaction;
@@ -783,7 +782,7 @@ namespace InnSyTech.Standard.Database
 
             CreateParameter(command, "Key", idKey);
 
-            IEnumerable<DbFieldInfo> fields = DbHelper.GetFields(typeOfInstance);
+            IEnumerable<DbFieldInfo> fields = DbFieldInfo.GetFields(typeOfInstance);
             DbDataReader reader = null;
             try
             {
@@ -813,7 +812,7 @@ namespace InnSyTech.Standard.Database
         /// <param name="dependenceInstance"></param>
         private void ReadList<T>(Type typeOfInstance, IList objects, DbTransaction transaction, DbFilter filter, Object dependenceInstance = null, String foreignKeyName = "")
         {
-            DbFieldInfo dependencePrimaryKeyField = dependenceInstance is null ? null : DbHelper.GetPrimaryKey(dependenceInstance.GetType());
+            DbFieldInfo dependencePrimaryKeyField = dependenceInstance is null ? null : DbFieldInfo.GetPrimaryKey(dependenceInstance.GetType());
 
             DbCommand command = _connection.CreateCommand();
 
@@ -846,7 +845,7 @@ namespace InnSyTech.Standard.Database
                 reader = command.ExecuteReader();
 
                 T data = default(T);
-                IEnumerable<DbFieldInfo> fields = DbHelper.GetFields(typeOfInstance);
+                IEnumerable<DbFieldInfo> fields = DbFieldInfo.GetFields(typeOfInstance);
 
                 while (reader.Read())
                 {
@@ -882,8 +881,8 @@ namespace InnSyTech.Standard.Database
         /// <returns>Una instancia con la informacion persistida.</returns>
         internal T ToInstance<T>(Type type, DbDataReader reader, Tree<Tuple<Type, String, ParsedInstance>> parent, DbTransaction transaction = null)
         {
-            var primaryKey = DbHelper.GetPrimaryKey(type);
-            var dbFields = DbHelper.GetFields(type).SkipWhile(field => field.IsPrimaryKey);
+            var primaryKey = DbFieldInfo.GetPrimaryKey(type);
+            var dbFields = DbFieldInfo.GetFields(type).SkipWhile(field => field.IsPrimaryKey);
 
             var instance = Activator.CreateInstance(type);
             var alias = parent.Value.Item2;
@@ -920,7 +919,7 @@ namespace InnSyTech.Standard.Database
                     var initT = DateTime.Now;
                     if (_cache.ContainsKey(typeChildren))
                     {
-                        var foreignField = DbHelper.GetFields(typeChildren).FirstOrDefault(field => field.Name.Equals(dbField.ForeignKeyName));
+                        var foreignField = DbFieldInfo.GetFields(typeChildren).FirstOrDefault(field => field.Name.Equals(dbField.ForeignKeyName));
                         if (foreignField != null)
                         {
                             List<object> source = (_cache[typeChildren] as List<Object>);
@@ -985,7 +984,7 @@ namespace InnSyTech.Standard.Database
                 parent.Add(tree);
             }
 
-            var dbFields = DbHelper.GetFields(type);
+            var dbFields = DbFieldInfo.GetFields(type);
             StringBuilder fields = new StringBuilder();
             tables = tables ?? new StringBuilder();
             string alias = tree.First(child => child.Value.Item1 == type).Value.Item2;
@@ -1001,7 +1000,7 @@ namespace InnSyTech.Standard.Database
                     fields.AppendFormat("{0}, ", CreateStatement(dbField.PropertyType, ref tree, out String childAlias, childtable));
                     tables.AppendFormat("LEFT OUTER JOIN {0} {2} ON {2}.{1}={3}.{4} ",
                         GetTableName(dbField.PropertyType),
-                        DbHelper.GetPrimaryKey(dbField.PropertyType).Name,
+                        DbFieldInfo.GetPrimaryKey(dbField.PropertyType).Name,
                         childAlias,
                         alias,
                         dbField.Name

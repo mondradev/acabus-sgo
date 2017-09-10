@@ -99,8 +99,8 @@ namespace InnSyTech.Standard.Database.Linq
                 _command = command;
                 _connection = connection;
 
-                _fields = DbHelper.GetFields(typeof(TData)).Where(f => !f.IsPrimaryKey).ToArray();
-                _primaryKey = DbHelper.GetPrimaryKey(typeof(TData));
+                _fields = DbFieldInfo.GetFields(typeof(TData)).Where(f => !f.IsPrimaryKey).ToArray();
+                _primaryKey = DbFieldInfo.GetPrimaryKey(typeof(TData));
             }
 
             /// <summary>
