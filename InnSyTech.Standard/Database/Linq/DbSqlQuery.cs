@@ -41,6 +41,5 @@ namespace InnSyTech.Standard.Database.Linq
 
         IEnumerator IEnumerable.GetEnumerator()
             => Provider.Execute<IEnumerable>(Expression).GetEnumerator();
-       
     }
 }

@@ -1,19 +1,16 @@
-﻿using InnSyTech.Standard.Database.Utils;
-using System;
+﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
 namespace InnSyTech.Standard.Database.Linq
 {
-    internal class ExpressionVisitor : System.Linq.Expressions.ExpressionVisitor
+    internal class SqlExpressionVisitor : ExpressionVisitor
     {
         private StringBuilder _statement;
-        private IDbDialect _dialect;
 
         internal string Translate(Expression expression, IDbDialect dialect)
         {
-            _dialect = dialect;
             _statement = new StringBuilder();
 
             Visit(expression);
@@ -30,14 +27,12 @@ namespace InnSyTech.Standard.Database.Linq
             switch (b.NodeType)
             {
                 case ExpressionType.And:
-                case ExpressionType.AndAlso:
 
                     _statement.Append(" AND ");
 
                     break;
 
                 case ExpressionType.Or:
-                case ExpressionType.OrElse:
 
                     _statement.Append(" OR");
 
@@ -99,7 +94,7 @@ namespace InnSyTech.Standard.Database.Linq
 
                 _statement.Append("SELECT * FROM ");
 
-                _statement.Append(DbHelper.GetEntityName(q.ElementType) ?? q.ElementType.Name);
+                _statement.Append(q.ElementType.Name);
             }
             else if (c.Value == null)
             {
@@ -125,16 +120,6 @@ namespace InnSyTech.Standard.Database.Linq
 
                         break;
 
-                    case TypeCode.DateTime:
-
-                        _statement.Append("'");
-
-                        _statement.Append(_dialect.DateTimeConverter?.ConverterToDbData(c.Value) ?? c.Value);
-
-                        _statement.Append("'");
-
-                        break;
-
                     case TypeCode.Object:
 
                         throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
@@ -154,13 +139,7 @@ namespace InnSyTech.Standard.Database.Linq
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                String fieldName = null;
-
-                if (DbHelper.IsEntity(m.Member.ReflectedType))
-                    fieldName = DbField.GetFields(m.Member.ReflectedType)
-                        .FirstOrDefault(f => f.Name == m.Member.Name).Name;
-
-                _statement.Append(fieldName ?? m.Member.Name);
+                _statement.Append(m.Member.Name);
 
                 return m;
             }
@@ -185,23 +164,6 @@ namespace InnSyTech.Standard.Database.Linq
                 return m;
             }
 
-            if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "OrderBy")
-            {
-                Visit(m.Arguments[0]);
-
-                _statement.Append("ORDER BY ");
-
-                Visit(m.Arguments[1]);
-
-                return m;
-            }
-
-            if (m.Method.DeclaringType == typeof(DbQueryable) && m.Method.Name == nameof(DbQueryable.LoadReference))
-            {
-                Visit(m.Arguments[0]);
-                return m;
-            }
-
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
@@ -214,12 +176,6 @@ namespace InnSyTech.Standard.Database.Linq
                     _statement.Append(" NOT ");
 
                     this.Visit(u.Operand);
-
-                    break;
-
-                case ExpressionType.Quote:
-
-                    Visit(u.Operand);
 
                     break;
 
