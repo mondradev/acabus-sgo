@@ -9,8 +9,7 @@ using System.Linq;
 namespace InnSyTech.Standard.Database.Linq
 {
     /// <summary>
-    /// Proporciona un lector de datos obtenidos a través del proveedor <see cref="DbProvider"/> que
-    /// utiliza las consultas <see cref="DbSqlQuery{TData}"/>.
+    /// Proporciona un lector de datos obtenidos a través del proveedor <see cref="DbProvider"/> que utiliza las consultas <see cref="DbSqlQuery{TData}"/>.
     /// </summary>
     /// <typeparam name="TData">Tipo de dato del elemento a leer.</typeparam>
     internal class DbSqlReader<TData> : IEnumerable<TData>, IEnumerable where TData : class, new()
@@ -21,15 +20,12 @@ namespace InnSyTech.Standard.Database.Linq
         private DbSqlEnumerator _enumerator;
 
         /// <summary>
-        /// Crea una instancia nueva de <see cref="DbSqlReader{TData}"/>, especificando el lector de
-        /// datos, el comando usado y la conexión a la base de datos actual.
+        /// Crea una instancia nueva de <see cref="DbSqlReader{TData}"/>, especificando el lector de datos, el comando usado y la conexión a la base de datos actual.
         /// </summary>
         /// <param name="reader">Lector de datos.</param>
         /// <param name="command">Comando utilizado.</param>
         /// <param name="connection">Conexión a la base de datos.</param>
-        /// <param name="definition">
-        /// Estructura de definición de la sentencia SQL utilizada para la lectura.
-        /// </param>
+        /// <param name="definition">Estructura de definición de la sentencia SQL utilizada para la lectura.</param>
         internal DbSqlReader(DbDataReader reader, DbCommand command, DbConnection connection, DbStatementDefinition definition)
             => _enumerator = new DbSqlEnumerator(reader, command, connection, definition);
 
@@ -59,8 +55,7 @@ namespace InnSyTech.Standard.Database.Linq
             => GetEnumerator();
 
         /// <summary>
-        /// Define el enumerador de la lectura de datos, obteniendo cada registro en cuanto avanza el
-        /// cursor del enumerador.
+        /// Define el enumerador de la lectura de datos, obteniendo cada registro en cuanto avanza el cursor del enumerador.
         /// </summary>
         private class DbSqlEnumerator : IEnumerator<TData>, IEnumerator, IDisposable
         {

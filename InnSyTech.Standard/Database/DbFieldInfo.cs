@@ -55,8 +55,7 @@ namespace InnSyTech.Standard.Database
         /// <param name="isAutonumerical">Si el campo es autonumerico.</param>
         /// <param name="isForeignKey">Si el campo es llave primaría.</param>
         /// <param name="foreignKeyName">El nombre de la llave foranea referente.</param>
-        public DbFieldInfo(String name, PropertyInfo propertyInfo, Boolean isPrimaryKey = false, Type converter = null,
-            Boolean isAutonumerical = false, Boolean isForeignKey = false, String foreignKeyName = null)
+        public DbFieldInfo(String name, PropertyInfo propertyInfo, Boolean isPrimaryKey = false, Type converter = null, Boolean isAutonumerical = false, Boolean isForeignKey = false, String foreignKeyName = null)
         {
             _name = name;
             _isPrimaryKey = isPrimaryKey;
