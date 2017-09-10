@@ -7,6 +7,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading;
 
 namespace InnSyTech.Standard.Database.Linq
@@ -61,15 +62,17 @@ namespace InnSyTech.Standard.Database.Linq
             if (_connection.State == ConnectionState.Closed)
                 _connection.Open();
 
-            if (_transactions.Count > _dialect.TransactionPerConnection)
-                Monitor.Wait(this);
+            lock (_transactions)
+            {
+                if (_transactions.Count > _dialect.TransactionPerConnection)
+                    Monitor.Wait(_transactions);
 
-            var transaction = _connection.BeginTransaction();
+                var transaction = _connection.BeginTransaction();
 
-            _transactions.Add(transaction);
+                _transactions.Add(transaction);
 
-            return transaction;
-
+                return transaction;
+            }
         }
 
         /// <summary>
@@ -107,7 +110,7 @@ namespace InnSyTech.Standard.Database.Linq
         {
             try
             {
-                return (IQueryable)Activator.CreateInstance(typeof(DbQuery<>)
+                return (IQueryable)Activator.CreateInstance(typeof(DbSqlQuery<>)
                     .MakeGenericType(TypeHelper.GetElementType(expression.Type)), new object[] { this, expression });
             }
             catch (Exception ex)
@@ -123,7 +126,7 @@ namespace InnSyTech.Standard.Database.Linq
         /// <param name="expression">Expresión raíz de la consulta.</param>
         /// <returns>Una consulta de elementos.</returns>
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
-            => new DbQuery<TElement>(this, expression);
+            => new DbSqlQuery<TElement>(this, expression);
 
         /// <summary>
         /// Libera los recursos de la transacción.
@@ -131,11 +134,14 @@ namespace InnSyTech.Standard.Database.Linq
         /// <param name="transaction">La transacción a liberar.</param>
         public void EndTransaction(DbTransaction transaction)
         {
-            _transactions.Remove(transaction);
+            lock (_transactions)
+            {
+                _transactions.Remove(transaction);
 
-            transaction.Dispose();
+                transaction.Dispose();
 
-            Monitor.Pulse(this);
+                Monitor.Pulse(_transactions);
+            }
         }
 
         /// <summary>
@@ -154,43 +160,25 @@ namespace InnSyTech.Standard.Database.Linq
         /// <returns>El resultado de la consulta ejecutada.</returns>
         public object Execute(Expression expression)
         {
-            lock (this)
-            {
-                DbTransaction transaction = BeginTransaction();
-                DbCommand command = CreateCommand(transaction);
+            if (_connection.State != ConnectionState.Open)
+                _connection.Open();
 
-                try
-                {
-                    command.CommandText = GetQueryText(expression, out DbStatementDefinition definition);
+            DbCommand command = _connection.CreateCommand();
+            command.CommandText = GetQueryText(expression, out DbStatementDefinition definition);
 
-                    Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+            Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
 
-                    DbDataReader reader = command.ExecuteReader();
+            DbDataReader reader = command.ExecuteReader();
 
-                    Type elementType = TypeHelper.GetElementType(expression.Type);
-                    
-                    return DbReader.Process(elementType, reader, definition);
-                }
-                catch (Exception ex)
-                {
-                    if (transaction != null)
-                        transaction.Rollback();
+            Type elementType = TypeHelper.GetElementType(expression.Type);
 
-                    Trace.WriteLine((ex.Message + ex.StackTrace).JoinLines(), "ERROR");
-
-                    return null;
-                }
-                finally
-                {
-                    if (transaction != null)
-                        EndTransaction(transaction);
-
-                    if (command != null)
-                        command.Dispose();
-
-                    CloseConnection();
-                }
-            }
+            return Activator.CreateInstance(
+                typeof(DbSqlReader<>).MakeGenericType(elementType),
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new object[] { reader, command, _connection, definition },
+                null
+            );
         }
 
         /// <summary>

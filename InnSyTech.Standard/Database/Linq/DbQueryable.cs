@@ -12,6 +12,14 @@ namespace InnSyTech.Standard.Database.Linq
     /// </summary>
     public static class DbQueryable
     {
+        /// <summary>
+        /// Ejecuta la consulta y devuelve la colección resultante.
+        /// </summary>
+        /// <typeparam name="TSource">Tipo de dato de la colección.</typeparam>
+        /// <param name="source">Consulta que se ejecutará.</param>
+        /// <returns>Una colección de elementos resultantes de la consulta.</returns>
+        public static IEnumerable<TSource> Execute<TSource>(this IQueryable<TSource> source)
+           => source.Provider.Execute<IEnumerable<TSource>>(source.Expression);
 
         /// <summary>
         /// Carga todas las referencias según el nivel de profundidad que se desea avanzar. Si el
