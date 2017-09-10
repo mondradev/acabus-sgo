@@ -67,7 +67,7 @@ namespace InnSyTech.Standard.Utils
                 case MemberTypes.Property:
                     return (member as PropertyInfo).PropertyType;
                 case MemberTypes.TypeInfo:
-                    return (member as Type);
+                    break;
                 case MemberTypes.Custom:
                     break;
                 case MemberTypes.NestedType:
