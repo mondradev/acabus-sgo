@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Configuration;
-using InnSyTech.Standard.Net.Messenger.Iso8583;
+﻿using InnSyTech.Standard.Net.Messenger.Iso8583;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,7 +20,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Define el puerto TCP utilizado por el servidor para escuchar peticiones.
         /// </summary>
-        private static readonly Int32 DEFAULT_PORT = int.Parse(ConfigurationManager.Settings["port", "Server"].ToString());
+        private const Int32 DEFAULT_PORT = 9000;
 
         /// <summary>
         /// Es la dirección IP del servidor.
@@ -48,7 +47,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         static Server()
         {
-            _ipAddress = Dns.GetHostEntry(ConfigurationManager.Settings["hostname","Server"].ToString()).AddressList[0];
+            _ipAddress = Dns.GetHostEntry("localhost").AddressList[0];
             _tokenSource = new CancellationTokenSource();
             _sessions = new List<Session>();
         }

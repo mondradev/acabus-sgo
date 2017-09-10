@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Configuration;
-using InnSyTech.Standard.Mvvm;
+﻿using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Configurations.Config.Views;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
@@ -161,11 +160,9 @@ namespace Opera.Acabus.Configurations.Config.ViewModels
         {
             try
             {
-                string busQuery = ConfigurationManager.Settings["busQuery", "Queries"]?.ToString();
+                if (String.IsNullOrEmpty(AcabusData.BusQuery)) return false;
 
-                if (string.IsNullOrEmpty(busQuery)) return false;
-
-                var resultSet = AcabusData.ExecuteQueryInServerDB(busQuery);
+                var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.BusQuery);
 
                 foreach (var row in resultSet)
                 {
@@ -209,11 +206,9 @@ namespace Opera.Acabus.Configurations.Config.ViewModels
         {
             try
             {
-                var deviceQuery = ConfigurationManager.Settings["deviceQuery", "Queries"]?.ToString();
+                if (String.IsNullOrEmpty(AcabusData.DeviceQuery)) return false;
 
-                if (String.IsNullOrEmpty(deviceQuery)) return false;
-
-                var resultSet = AcabusData.ExecuteQueryInServerDB(deviceQuery);
+                var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.DeviceQuery);
 
                 foreach (var row in resultSet)
                 {
@@ -267,10 +262,9 @@ namespace Opera.Acabus.Configurations.Config.ViewModels
         {
             try
             {
-                var routeQuery = ConfigurationManager.Settings["routeQuery", "Queries"]?.ToString();
-                if (String.IsNullOrEmpty(routeQuery)) return false;
+                if (String.IsNullOrEmpty(AcabusData.RouteQuery)) return false;
 
-                var resultSet = AcabusData.ExecuteQueryInServerDB(routeQuery);
+                var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.RouteQuery);
 
                 foreach (var row in resultSet)
                 {
@@ -300,10 +294,9 @@ namespace Opera.Acabus.Configurations.Config.ViewModels
         {
             try
             {
-                var stationQuery = ConfigurationManager.Settings["stationQuery", "Queries"]?.ToString();
-                if (String.IsNullOrEmpty(stationQuery)) return false;
+                if (String.IsNullOrEmpty(AcabusData.StationQuery)) return false;
 
-                var resultSet = AcabusData.ExecuteQueryInServerDB(stationQuery);
+                var resultSet = AcabusData.ExecuteQueryInServerDB(AcabusData.StationQuery);
 
                 foreach (var row in resultSet)
                 {

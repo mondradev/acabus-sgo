@@ -65,7 +65,7 @@ namespace Opera.Acabus.Core.Gui
             /// <summary>
             /// Obtiene clase de la vista principal del módulo.
             /// </summary>
-            Type ViewType { get; }
+            Type Type { get; }
         }
 
         /// <summary>
