@@ -61,8 +61,9 @@
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\SettingCollection.cs" />
     <Compile Include="Database\DbAttribute.cs" />
+    <Compile Include="Database\DbFilter.cs" />
     <Compile Include="Database\DbFactory.cs" />
-    <Compile Include="Database\DbSession.cs" />
+    <Compile Include="Database\DbSqlSession.cs" />
     <Compile Include="Database\IDbSession.cs" />
     <Compile Include="Database\Linq\DbDefinitions\DbEntityDefinition.cs" />
     <Compile Include="Database\Linq\DbDefinitions\DbFieldDefinition.cs" />
@@ -77,6 +78,8 @@
     <Compile Include="Database\Utils\DbEnumConverter.cs" />
     <Compile Include="Database\IDbConverter.cs" />
     <Compile Include="Database\DbFieldInfo.cs" />
+    <Compile Include="Database\DbManager.cs" />
+    <Compile Include="Database\DbSession.cs" />
     <Compile Include="Database\IDbDialect.cs" />
     <Compile Include="Database\Utils\DbHelper.cs" />
     <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />

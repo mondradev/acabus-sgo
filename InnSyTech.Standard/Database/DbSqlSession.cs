@@ -1,12 +1,28 @@
-﻿using System.Linq;
+﻿using InnSyTech.Standard.Database.Linq;
+using System;
+using System.Data.Common;
+using System.Linq;
 
 namespace InnSyTech.Standard.Database
 {
     /// <summary>
-    /// Define la estructura básica de la sessión Sql a una base de datos relacional.
+    /// Implementa <see cref="IDbSession"/> para proporcionar el acceso a la base de datos a través de las funciones de crear, leer, actualizar y eliminar.
     /// </summary>
-    public interface IDbSession
+    internal sealed class DbSqlSession : IDbSession
     {
+        /// <summary>
+        /// Crea una nueva instancia de <see cref="DbSqlSession"/>.
+        /// </summary>
+        /// <param name="dbConnection">La conexión a la base de datos.</param>
+        /// <param name="dialect">El dialecto de comunicación de la base de datos.</param>
+        public DbSqlSession(DbConnection dbConnection, IDbDialect dialect)
+            => Provider = new DbProvider(dbConnection, dialect);
+
+        /// <summary>
+        /// Obtiene el proveedor de consultas para la base de datos.
+        /// </summary>
+        public DbProvider Provider { get; }
+
         /// <summary>
         /// Crea una instancia persistente a partir de un tipo definido que corresponde a una tabla
         /// en la base de datos. Esto equivale a un INSERT INTO de Sql.
@@ -14,7 +30,10 @@ namespace InnSyTech.Standard.Database
         /// <typeparam name="TData">Tipo de dato de la instancia a persistir.</typeparam>
         /// <param name="instance">Instancia que se desea persistir.</param>
         /// <returns>Un true en caso que la instancia sea persistida correctamente.</returns>
-        bool Create<TData>(TData instance);
+        public bool Create<TData>(TData instance)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Elimina una instancia persistida en la base de datos, si esta cuenta con campo de estado
@@ -26,14 +45,18 @@ namespace InnSyTech.Standard.Database
         /// <param name="instance">Instancia a eliminar.</param>
         /// <param name="cascade">Indica si se elimina en cascada todas sus referencias.</param>
         /// <returns>Un true si la instancia fue borrada así como sus referencias de ser necesario.</returns>
-        bool Delete<TData>(TData instance, bool cascade = false);
+        public bool Delete<TData>(TData instance, bool cascade = false)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Realiza una lectura de elementos del tipo especificado que corresponde a una tabla en la base de datos, gracias a la estructura <see cref="IQueryable{T}"/> se puede aplicar filtros y ordernamiento como otros métodos que se encuentren disponibles. Esto equivale a un SELECT FROM.
         /// </summary>
         /// <typeparam name="TResult">El tipo de dato de la lectura.</typeparam>
         /// <returns>Una consulta que extrae datos de la base de datos relacional.</returns>
-        IQueryable<TResult> Read<TResult>();
+        public IQueryable<TResult> Read<TResult>()
+            => new DbSqlQuery<TResult>(Provider);
 
         /// <summary>
         /// Actualiza los atributosde la instancia persistida en la base de datos. Esto equivale a un
@@ -49,6 +72,9 @@ namespace InnSyTech.Standard.Database
         /// <returns>
         /// Un true si la instancia fue correctamente actualizada así como sus referencias de ser necesario.
         /// </returns>
-        bool Update<TData>(TData instance, bool cascade = false);
+        public bool Update<TData>(TData instance, bool cascade = false)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
