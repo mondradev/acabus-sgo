@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Database.Linq.DbDefinitions;
-using InnSyTech.Standard.Utils;
+﻿using InnSyTech.Standard.Utils;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -83,7 +82,7 @@ namespace InnSyTech.Standard.Database.Linq
                 _connection.Open();
 
             DbCommand command = _connection.CreateCommand();
-            command.CommandText = GetQueryText(expression, out DbStatementDefinition definition);
+            command.CommandText = GetQueryText(expression);
 
             Trace.WriteLine($"Execute: {command.CommandText}", "DEBUG");
 
@@ -95,7 +94,7 @@ namespace InnSyTech.Standard.Database.Linq
                 typeof(DbSqlReader<>).MakeGenericType(elementType),
                 BindingFlags.Instance | BindingFlags.NonPublic,
                 null,
-                new object[] { reader, command, _connection, definition },
+                new object[] { reader, command, _connection },
                 null
             );
         }
@@ -104,12 +103,9 @@ namespace InnSyTech.Standard.Database.Linq
         /// Obtiene el texto de la sentencia SQL que se utilizará para obtener los elementos deseados.
         /// </summary>
         /// <param name="expression">Expresión raíz donde comienza la consulta.</param>
-        /// <param name="definition">
-        /// Definición del enunciado que espefica la construcción de la sentencia SQL.
-        /// </param>
         /// <returns>Un enunciado SQL que se utilizará para el SQL.</returns>
-        public string GetQueryText(Expression expression, out DbStatementDefinition definition)
-            => new DbStatementTraslator()
-                .Translate(DbEvaluatorExpression.PartialEval(expression), _dialect, out definition);
+        public string GetQueryText(Expression expression)
+            => new DbExpressionVisitor()
+            .Translate(DbEvaluatorExpression.PartialEval(expression), _dialect);
     }
 }
