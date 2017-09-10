@@ -5,7 +5,7 @@ namespace InnSyTech.Standard.Database
     /// <summary>
     /// Define la estructura básica de la sessión Sql a una base de datos relacional.
     /// </summary>
-    public interface IDbSession
+    public interface IDbSqlSession
     {
         /// <summary>
         /// Crea una instancia persistente a partir de un tipo definido que corresponde a una tabla

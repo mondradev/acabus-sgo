@@ -33,32 +33,24 @@ namespace InnSyTech.Standard.Database.Utils
         /// Obtiene el nombre que maneja la base de datos para el miembro de la entidad especificada.
         /// </summary>
         /// <param name="member">Miembro a obtener el nombre.</param>
-        /// <param name="entity">Entidad a la que se relaciona el miembro.</param>
         /// <returns>El nombre del miembro en la base de datos.</returns>
-        public static string GetFieldName(MemberInfo member, Type entity = null)
+        public static string GetFieldName(MemberInfo member)
         {
-            bool isNotEntityMember = !IsEntity(member.ReflectedType);
-            bool isNotEntity = (entity != null && !DbHelper.IsEntity(entity));
-            if (isNotEntityMember && isNotEntity)
+            if (!DbHelper.IsEntity(member.ReflectedType))
                 throw new ArgumentException("El miembro especificado no pertenece a una entidad.");
 
-            if (!isNotEntityMember)
-                foreach (Attribute attribute in member.GetCustomAttributes())
-                    if (attribute is ColumnAttribute)
-                    {
-                        ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+            foreach (Attribute attribute in member.GetCustomAttributes())
+                if (attribute is ColumnAttribute)
+                {
+                    ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
 
-                        if (columnAttribute.IsIgnored)
-                            throw new InvalidOperationException("El atributo está señalado como ignorado.");
+                    if (columnAttribute.IsIgnored)
+                        throw new InvalidOperationException("El atributo está señalado como ignorado.");
 
-                        return String.IsNullOrEmpty(columnAttribute.Name)
-                            ? member.Name
-                            : columnAttribute.Name;
-                    }
-
-            if (entity != null && !isNotEntity)
-                return GetFields(entity).SingleOrDefault(f => (f.PropertyInfo as MemberInfo).Name == member.Name)
-                    ?.Name;
+                    return String.IsNullOrEmpty(columnAttribute.Name)
+                        ? member.Name
+                        : columnAttribute.Name;
+                }
 
             return member.Name;
         }

@@ -6,9 +6,9 @@ using System.Linq;
 namespace InnSyTech.Standard.Database
 {
     /// <summary>
-    /// Implementa <see cref="IDbSession"/> para proporcionar el acceso a la base de datos a través de las funciones de crear, leer, actualizar y eliminar.
+    /// Implementa <see cref="IDbSqlSession"/> para proporcionar el acceso a la base de datos a través de las funciones de crear, leer, actualizar y eliminar.
     /// </summary>
-    internal sealed class DbSqlSession : IDbSession
+    internal sealed class DbSqlSession : IDbSqlSession
     {
         /// <summary>
         /// Crea una nueva instancia de <see cref="DbSqlSession"/>.
@@ -16,12 +16,12 @@ namespace InnSyTech.Standard.Database
         /// <param name="dbConnection">La conexión a la base de datos.</param>
         /// <param name="dialect">El dialecto de comunicación de la base de datos.</param>
         public DbSqlSession(DbConnection dbConnection, IDbDialect dialect)
-            => Provider = new DbProvider(dbConnection, dialect);
+            => Provider = new DbSqlProvider(dbConnection, dialect);
 
         /// <summary>
         /// Obtiene el proveedor de consultas para la base de datos.
         /// </summary>
-        public DbProvider Provider { get; }
+        public DbSqlProvider Provider { get; }
 
         /// <summary>
         /// Crea una instancia persistente a partir de un tipo definido que corresponde a una tabla

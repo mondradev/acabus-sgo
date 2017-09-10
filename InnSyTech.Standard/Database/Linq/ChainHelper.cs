@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace InnSyTech.Standard.Database.Linq
@@ -16,11 +17,8 @@ namespace InnSyTech.Standard.Database.Linq
         public void Add(MemberInfo member)
                             => _nodes.Insert(0, new ChainNode(member));
 
-        public void Add(IEnumerable<ChainNode> chain)
+        public void AddRange(IEnumerable<ChainNode> chain)
             => _nodes.AddRange(chain);
-
-        public void AddLast(MemberInfo member)
-                    => _nodes.Add(new ChainNode(member));
 
         IEnumerator IEnumerable.GetEnumerator()
         => _nodes.GetEnumerator();
@@ -44,6 +42,7 @@ namespace InnSyTech.Standard.Database.Linq
             }
             return new ChainHelper() { _nodes = members };
         }
+      
     }
 
     internal sealed class ChainNode
@@ -56,40 +55,5 @@ namespace InnSyTech.Standard.Database.Linq
         public String Alias { get; set; }
 
         public MemberInfo Member => _member;
-
-        public static bool operator !=(ChainNode node, ChainNode anotherNode)
-        {
-            if (node is null && anotherNode is null)
-                return false;
-
-            if (node is null || anotherNode is null)
-                return true;
-
-            return node.Alias != anotherNode.Alias || node.Member != anotherNode.Member;
-        }
-
-        public static bool operator ==(ChainNode node, ChainNode anotherNode)
-        {
-            if (node is null && anotherNode is null)
-                return true;
-
-            if (node is null || anotherNode is null)
-                return false;
-
-            return node.Alias == anotherNode.Alias && node.Member == anotherNode.Member;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is null) return false;
-
-            if (!(obj is ChainNode))
-                return false;
-
-            return this == (obj as ChainNode);
-        }
-
-        public override int GetHashCode()
-            => base.GetHashCode();
     }
 }
