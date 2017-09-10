@@ -13,9 +13,7 @@ using System.Threading;
 namespace InnSyTech.Standard.Database.Linq
 {
     /// <summary>
-    /// Define un proveedor de consultas SQL a Objetos a través de la framework que ofrece <see
-    /// cref="System.Linq.IQueryable"/>. Permite realizar consultas a la base de datos a travéz de
-    /// métodos de <see cref="IQueryable"/> sin necesidad de escribir código SQL.
+    /// Define un proveedor de consultas SQL a Objetos a través de la framework que ofrece <see cref="System.Linq.IQueryable"/>. Permite realizar consultas a la base de datos a travéz de métodos de <see cref="IQueryable"/> sin necesidad de escribir código SQL.
     /// </summary>
     internal sealed class DbProvider : IQueryProvider
     {
