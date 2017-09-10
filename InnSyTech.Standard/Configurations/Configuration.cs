@@ -1,4 +1,6 @@
-﻿using System;
+﻿using InnSyTech.Standard.Utils;
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Xml;
 
@@ -63,9 +65,49 @@ namespace InnSyTech.Standard.Configuration
         /// <summary>
         /// Crea una configuración en el archivo, indicando su nombre y su valor de configuración.
         /// </summary>
-        public void Create(String name, ISetting setting)
+        /// <param name="name">Nombre de la configuración a crear.</param>
+        /// <param name="setting">Instancia de configuración a crear.</param>
+        /// <returns>Un valor true si se agrego la configuración correctamente.</returns>
+        public bool Create(String name, ISetting setting)
         {
-            throw new NotImplementedException();
+            lock (this)
+            {
+                try
+                {
+                    if (_state != ConfigState.DONE)
+                        Monitor.Wait(this);
+
+                    _state = ConfigState.IN_WRITE;
+
+                    LoadFile();
+
+                    var node = SearchNode(name);
+
+                    if (node != null)
+                        throw new ArgumentException($"Ya existe una configuración con el mismo nombre '{name}'", nameof(name));
+
+                    node = ToNode(setting);
+
+                    node = _xmlDoc?.SelectSingleNode("configuration").AppendChild(node);
+
+                    if (node == null)
+                        throw new InvalidOperationException($"No se puede agregar la configuración debido a un problema con el archivo: {Filename}");
+
+                    LoadFile();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                    return false;
+                }
+                finally
+                {
+                    _state = ConfigState.DONE;
+                    Monitor.Pulse(this);
+                }
+            }
         }
 
         /// <summary>
@@ -73,7 +115,26 @@ namespace InnSyTech.Standard.Configuration
         /// </summary>
         public void Delete(String name)
         {
-            throw new NotImplementedException();
+            lock (this)
+            {
+                if (_state != ConfigState.DONE)
+                    Monitor.Wait(this);
+
+                _state = ConfigState.IN_WRITE;
+
+                LoadFile();
+
+                var node = SearchNode(name);
+
+                _xmlDoc.RemoveChild(node);
+                _xmlDoc.Save(Filename);
+
+                LoadFile();
+
+                _state = ConfigState.DONE;
+
+                Monitor.Pulse(this);
+            }
         }
 
         /// <summary>
@@ -95,6 +156,8 @@ namespace InnSyTech.Standard.Configuration
         /// <summary>
         /// Lee una configuración del archivo de configuración según el nombre especificado.
         /// </summary>
+        /// <param name="name">El nombre de la configuración a leer.</param>
+        /// <returns>La configuración a leida del archivo.</returns>
         public ISetting Read(String name)
         {
             lock (this)
@@ -120,16 +183,59 @@ namespace InnSyTech.Standard.Configuration
         /// <summary>
         /// Busca el nodo que contiene el nombre especificado.
         /// </summary>
+        /// <param name="name">Nombre del nodo a buscar.</param>
+        /// <returns>Nodo que coincide con el nombre especificado.</returns>
         public XmlNode SearchNode(String name)
             => _xmlDoc?.SelectSingleNode("configuration")?.SelectSingleNode(name);
-
 
         /// <summary>
         /// Actualiza los valores de una configuración en el archivo.
         /// </summary>
-        public void Update(String name, ISetting setting)
+        /// <param name="name">Nombre de la configuración.</param>
+        /// <param name="setting">Configuración a actualizar en el archivo.</param>
+        /// <returns>Un valor true si la configuración fue actualizada.</returns>
+        public bool Update(String name, ISetting setting)
         {
-            throw new NotImplementedException();
+            lock (this)
+            {
+                try
+                {
+                    if (_state != ConfigState.DONE)
+                        Monitor.Wait(this);
+
+                    _state = ConfigState.IN_WRITE;
+
+                    LoadFile();
+
+                    var node = SearchNode(name);
+
+                    if (node == null)
+                        throw new ArgumentException($"No existe una configuración con el mismo nombre '{name}'", nameof(name));
+
+                    node = _xmlDoc?.SelectSingleNode("configuration").RemoveChild(node);
+
+                    if (node == null)
+                        throw new InvalidOperationException($"No se puede actualizar la configuración debido a un problema con el archivo: {Filename}");
+
+                    node = ToNode(setting);
+
+                    node = _xmlDoc?.SelectSingleNode("configuration").AppendChild(node);
+                    
+                    LoadFile();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                    return false;
+                }
+                finally
+                {
+                    _state = ConfigState.DONE;
+                    Monitor.Pulse(this);
+                }
+            }
         }
 
         /// <summary>
@@ -139,11 +245,21 @@ namespace InnSyTech.Standard.Configuration
         private static XmlDocument CreateConfBase()
         {
             var doc = new XmlDocument();
-            doc.LoadXml(@"<?xml version=""1.0"" encoding=""utf - 8""?>
+            doc.LoadXml(@"<?xml version=""1.0"" encoding=""utf-8""?>
                             <configuration>
                             </configuration>
             ");
             return doc;
+        }
+
+        /// <summary>
+        /// Convierte una instancia de <see cref="ISetting"/> en un nodo Xml.
+        /// </summary>
+        /// <param name="setting">Configuración a convertir en nodo Xml.</param>
+        /// <returns>El nodo que representa la configuración.</returns>
+        private XmlNode ToNode(ISetting setting)
+        {
+            throw new NotImplementedException();
         }
     }
 }
