@@ -306,36 +306,28 @@ namespace Acabus.DataAccess
         /// <returns>Un arreglo bidimensional que contiene el resultado de la consulta realizada.</returns>
         public static String[][] ExecuteQueryInServerDB(String query)
         {
-            try
-            {
-                var credentialDBServer = GetCredential("Server", "DataBase");
-                var credentialSshServer = GetCredential("Server", "Ssh");
+            var credentialDBServer = GetCredential("Server", "DataBase");
+            var credentialSshServer = GetCredential("Server", "Ssh");
 
-                if (query.ToUpper().Contains("UPDATE")
-                    || query.ToUpper().Contains("DELETE")
-                    || query.ToUpper().Contains("TRUNCATE")
-                    || query.ToUpper().Contains("DROP")
-                    || query.ToUpper().Contains("CREATE")
-                    || query.ToUpper().Contains("ALTER")) return null;
+            if (query.ToUpper().Contains("UPDATE")
+                || query.ToUpper().Contains("DELETE")
+                || query.ToUpper().Contains("TRUNCATE")
+                || query.ToUpper().Contains("DROP")
+                || query.ToUpper().Contains("CREATE")
+                || query.ToUpper().Contains("ALTER")) return null;
 
-                SshPostgreSQL psql = SshPostgreSQL.CreateConnection(
-                    PGPathPlus,
-                    "172.17.0.121",
-                    PGPort,
-                    credentialDBServer.Username,
-                    credentialDBServer.Password,
-                    PGDatabaseName,
-                    credentialSshServer.Username,
-                    credentialSshServer.Password);
+            SshPostgreSQL psql = SshPostgreSQL.CreateConnection(
+                PGPathPlus,
+                "172.17.0.121",
+                PGPort,
+                credentialDBServer.Username,
+                credentialDBServer.Password,
+                PGDatabaseName,
+                credentialSshServer.Username,
+                credentialSshServer.Password);
 
-                var response = psql.ExecuteQuery(query);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message, "ERROR");
-            }
-            return new string[][] { new string[] { "" } };
+            var response = psql.ExecuteQuery(query);
+            return response;
         }
 
         /// <summary>
@@ -511,8 +503,6 @@ namespace Acabus.DataAccess
             if (_loadedData) return;
             try
             {
-                _xmlConfig = new XmlDocument();
-
                 LoadXmlConfig();
 
                 LoadSettings();
@@ -565,9 +555,9 @@ namespace Acabus.DataAccess
         {
             try
             {
+                _xmlConfig = new XmlDocument();
                 _xmlConfig.Load(CONFIG_FILENAME);
-            }
-            catch (Exception ex)
+            } catch(Exception ex)
             {
                 Trace.WriteLine(ex.StackTrace, "ERROR");
             }
