@@ -689,10 +689,23 @@ namespace InnSyTech.Standard.Database
             var filters = filter.GetFilters();
             foreach (var f in filters)
             {
-                object value = f.Item1.Item2;
-                filtersSql.AppendFormat("{2} {3}.{0}{4}@{0} ", f.Item1.Item1, value, f.Item2, alias, OperatorToString(f.Item1.Item3));
+                object value = f.Expression.Value;
+                string parameterName = f.Expression.PropertyName.Replace('.', '_');
+                var count = Regex.Matches(filtersSql.ToString(), String.Format("@{0}", parameterName)).Count;
+                if (count > 0)
+                    parameterName += count;
+                filtersSql.AppendFormat("{2} {3}{0} {4} {1} ",
+                    f.Expression.PropertyName,
+                    f.Expression.Operator == WhereOperator.IN ? f.Expression.Value : "@" + parameterName,
+                    f.Type,
+                    f.Expression.PropertyName.Contains('.') ? string.Empty : alias + ".",
+                    OperatorToString(f.Expression.Operator));
             }
-            var lenght = filters[0].Item2.ToString().Length;
+
+            if (filters.Count < 1)
+                return "";
+
+            var lenght = filters[0].Type.ToString().Length;
             return filtersSql.ToString().Substring(lenght);
         }
 
@@ -741,7 +754,12 @@ namespace InnSyTech.Standard.Database
 
                 case WhereOperator.GREAT_AND_EQUALS:
                     return ">=";
-
+                case WhereOperator.LIKE:
+                    return "LIKE";
+                case WhereOperator.IS:
+                    return "IS";
+                case WhereOperator.IN:
+                    return "IN";
                 default:
                     return "=";
             }
@@ -825,7 +843,7 @@ namespace InnSyTech.Standard.Database
                 ? String.Format("WHERE {0}.{1}=@ForeignKey", treeControl.Value.Item2, foreignKeyName)
                 : String.Empty;
 
-            if (filter != null)
+            if (filter != null && filter.GetFilters().Count > 0)
                 if (String.IsNullOrEmpty(dependenceStatement))
                     dependenceStatement = String.Format("WHERE {0}", FilterToString(filter, treeControl.Value.Item2));
                 else
@@ -835,9 +853,19 @@ namespace InnSyTech.Standard.Database
                 dependenceStatement);
             if (dependencePrimaryKeyField != null)
                 CreateParameter(command, "ForeignKey", dependencePrimaryKeyField.GetValue(dependenceInstance));
-            if (filter != null)
+            if (filter != null && filter.GetFilters().Count > 0)
                 foreach (var item in filter.GetFilters())
-                    CreateParameter(command, item.Item1.Item1, item.Item1.Item2);
+                {
+                    if (item.Expression.Operator == WhereOperator.IN)
+                        continue;
+
+                    var parameterName = item.Expression.PropertyName.Replace('.', '_');
+                    int count = (command.Parameters as IEnumerable).Cast<DbParameter>()
+                        .Where(paramter => (paramter as DbParameter).ParameterName.Contains(String.Format("@{0}", parameterName))).Count();
+                    if (count > 0)
+                        parameterName += count;
+                    CreateParameter(command, parameterName, item.Expression.Value);
+                }
 
             DbDataReader reader = null;
             try
