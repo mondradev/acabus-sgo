@@ -10,7 +10,10 @@ namespace InnSyTech.Standard.Database
         EQUALS,
         NO_EQUALS,
         LESS_AND_EQUALS,
-        GREAT_AND_EQUALS
+        GREAT_AND_EQUALS,
+        LIKE,
+        IS,
+        IN
     }
 
     public enum WhereType
@@ -26,9 +29,10 @@ namespace InnSyTech.Standard.Database
         /// <summary>
         /// Agrega filtros de consulta.
         /// </summary>
-        public void AddWhere(DbFilterExpression field, WhereType type)
+        public DbFilter AddWhere(DbFilterExpression field, WhereType type = WhereType.AND)
         {
             fields.Add(new DbFilterValue(field, type));
+            return this;
         }
 
         internal List<DbFilterValue> GetFilters()
@@ -45,18 +49,39 @@ namespace InnSyTech.Standard.Database
         }
     }
 
-    public sealed class DbFilterExpression : Tuple<String, Object, WhereOperator>
+    public sealed class DbFilterExpression
     {
+        private string _propertyName;
+        private object _value;
+        private WhereOperator _operator;
 
-        public DbFilterExpression(string item1, object item2, WhereOperator item3) : base(item1, item2, item3)
+        public String PropertyName => _propertyName;
+        public Object Value => _value;
+        public WhereOperator Operator => _operator;
+
+        public DbFilterExpression(string propertyName, object value, WhereOperator @operator)
         {
+            _propertyName = propertyName;
+            _value = value;
+            _operator = @operator;
         }
     }
 
-    public sealed class DbFilterValue : Tuple<DbFilterExpression, WhereType>
+    public sealed class DbFilterValue
     {
-        public DbFilterValue(DbFilterExpression item1, WhereType item2) : base(item1, item2)
+        private DbFilterExpression _expression;
+
+        public DbFilterExpression Expression => _expression;
+
+        private WhereType _type;
+
+        public WhereType Type => _type;
+
+
+        public DbFilterValue(DbFilterExpression expression, WhereType type)
         {
+            _expression = expression;
+            _type = type;
         }
     }
 }
