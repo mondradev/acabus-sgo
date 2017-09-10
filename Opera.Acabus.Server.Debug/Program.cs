@@ -1,6 +1,8 @@
-﻿using InnSyTech.Standard.Database;
+﻿using Acabus.Modules.CctvReports.Models;
+using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Database.Sqlite;
+using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Models;
 using System;
 using System.Data.SQLite;
@@ -37,7 +39,7 @@ namespace Opera.Acabus.Server.Debug
             var query = db.Read<Link>()
                 .LoadReference(3)
                 //.Execute()
-                .Where(l => l.StationA.Name == "CENTRO DE CONTROL" && l.StationA.Name == "MICHOACÁN")
+                .Where(l => l.StationA.Name == "CENTRO DE CONTROL")
                 .OrderBy(l => l.ID)
               ;
 

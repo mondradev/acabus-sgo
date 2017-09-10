@@ -1,71 +1,25 @@
 ﻿using InnSyTech.Standard.Database.Utils;
 using System;
-using System.Linq;
 using System.Reflection;
 
 namespace InnSyTech.Standard.Database.Linq.DbDefinitions
 {
-    /// <summary>
-    /// Representa una estructura que ayuda a definir campos involucradas en una sentencia SQL para
-    /// la lectura de datos.
-    /// </summary>
     internal sealed class DbFieldDefinition
     {
-        /// <summary>
-        /// Entidad propietario del campo.
-        /// </summary>
-        private DbEntityDefinition _ownerEntity;
-
-        /// <summary>
-        /// Crea una nueva instancia de <see cref="DbFieldDefinition"/>.
-        /// </summary>
-        /// <param name="member">Miembro a representar.</param>
-        /// <param name="ownerEntity">Entidad propietaria del campo.</param>
-        public DbFieldDefinition(MemberInfo member, DbEntityDefinition ownerEntity)
+        public DbFieldDefinition(MemberInfo member, DbEntityDefinition entity)
         {
-            _ownerEntity = ownerEntity;
+            Entity = entity;
             Member = member;
-            OwnerEntity.Fields.Add(this);
+            Entity.Members.Add(this);
         }
 
-        /// <summary>
-        /// Obtiene la entidad propietaria del campo.
-        /// </summary>
-        public DbEntityDefinition OwnerEntity => _ownerEntity;
+        public DbEntityDefinition Entity { get; set; }
+        public MemberInfo Member { get; set; }
 
-        /// <summary>
-        /// Obtiene el miembro que representa el campo.
-        /// </summary>
-        public MemberInfo Member { get; }
-
-        /// <summary>
-        /// Obtiene el nombre del campo en la base de datos.
-        /// </summary>
-        /// <returns></returns>
-        public String GetFieldName()
-            => DbHelper.GetFieldName(Member, OwnerEntity.EntityType);
-
-        /// <summary>
-        /// Representa con una cadena la instancia actual.
-        /// </summary>
-        /// <returns>Una cadena que representa la instancia.</returns>
         public override string ToString()
-                    => String.Format("{0}", DbHelper.GetFieldName(Member, OwnerEntity?.EntityType));
+            => String.Format("{0}", DbHelper.GetFieldName(Member, Entity?.EntityType));
 
-        /// <summary>
-        /// Establece una nueva entidad como dueño.
-        /// </summary>
-        /// <param name="ownerEntity">Entidad dueño.</param>
-        public void SetEntityOwner(DbEntityDefinition ownerEntity)
-        {
-            var members = ownerEntity.Fields.Where(f => f.Member == Member);
-
-            if (members.Count() > 0)
-                ownerEntity.Fields.RemoveAll(f => f.Member == Member);
-
-            _ownerEntity = ownerEntity;
-
-            ownerEntity.Fields.Add(this);
-        }
+        public String GetFieldName()
+            => DbHelper.GetFieldName(Member, Entity.EntityType);
     }
 }

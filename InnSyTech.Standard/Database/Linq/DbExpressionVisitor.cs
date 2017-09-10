@@ -16,7 +16,8 @@ namespace InnSyTech.Standard.Database.Linq
     internal class DbExpressionVisitor : ExpressionVisitor
     {
         private IDbDialect _dialect;
-        private List<object[]> _fieldLabels = new List<object[]>();
+        private List<Tuple<String, DbFieldDefinition>> _fieldLabels
+            = new List<Tuple<string, DbFieldDefinition>>();
         private List<DbFieldDefinition> _selectedList;
         private StringBuilder _statement;
         private DbStatementDefinition _statementDefinition
@@ -135,19 +136,23 @@ namespace InnSyTech.Standard.Database.Linq
         protected override Expression VisitMember(MemberExpression m)
         {
             var expMember = m;
-            var entityReference = null as DbEntityDefinition;
+            var entityReference = new DbEntityDefinition();
             var entity = entityReference;
+
+            DbFieldDefinition fieldDef = entityReference.CreateMember(m.Member);
+            String label = String.Format("{{FL{0}}}", _fieldLabels.Count);
+
+            _selectedList?.Add(fieldDef);
+            _fieldLabels.Add(Tuple.Create(label, fieldDef));
+            _statement.AppendFormat("{0}.{1}", label, fieldDef.GetFieldName());
 
             while (expMember != null)
             {
                 if (DbHelper.IsEntity(expMember.Expression.Type))
                 {
-                    if (entityReference == null)
-                        entity = (entityReference = new DbEntityDefinition());
-                    else
-                        entity = entity.CreateDependencyEntity(expMember?.Member);
-
                     entity.EntityType = expMember.Expression.Type;
+                    if (entity.DependentsEntities.Count > 0)
+                        entity.DependentsEntities.First().DependencyMember = entity.CreateMember(expMember.Member);
                 }
                 else
                     throw new InvalidOperationException("Un de los tipos de los miembros involucrado no corresponde a una entidad.");
@@ -156,15 +161,10 @@ namespace InnSyTech.Standard.Database.Linq
                     break;
 
                 expMember = expMember.Expression as MemberExpression;
+
+                entity = entity.CreateDependencyEntity(expMember?.Member);
             }
 
-
-            DbFieldDefinition fieldDef = entityReference.CreateMember(m.Member);
-            String label = String.Format("{{FL{0}}}", _fieldLabels.Count);
-
-            _selectedList?.Add(fieldDef);
-            _fieldLabels.Add(new object[] { label, fieldDef });
-            _statement.AppendFormat("{0}.{1}", label, fieldDef.GetFieldName());
             _statementDefinition.AddEntity(entityReference);
 
             return m;
@@ -272,7 +272,7 @@ namespace InnSyTech.Standard.Database.Linq
                     count = ProcessEntity(count, entity);
 
             foreach (var label in _fieldLabels)
-                _statement.Replace(label.First().ToString(), (label.Last() as DbFieldDefinition).OwnerEntity.Alias);
+                _statement.Replace(label.Item1, label.Item2.Entity.Alias);
 
             _statement
                 .Replace(", {{fields}}", "")
@@ -300,7 +300,7 @@ namespace InnSyTech.Standard.Database.Linq
                     entity.Alias,
                     DbHelper.GetPrimaryKey(entity.EntityType).Name,
                     entity.DependencyEntity.Alias,
-                    entity.DependencyField.GetFieldName(),
+                    entity.DependencyMember.GetFieldName(),
                     "{{entities}}"
                 ));
 
