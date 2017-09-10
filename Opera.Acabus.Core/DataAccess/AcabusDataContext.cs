@@ -1,4 +1,5 @@
-﻿using InnSyTech.Standard.Database;
+﻿using InnSyTech.Standard.Configuration;
+using InnSyTech.Standard.Database;
 using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,11 @@ namespace Opera.Acabus.Core.DataAccess
         private static readonly string RESOURCES_DIRECTORY = Path.Combine(Environment.CurrentDirectory, "Resources");
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="ConfigContext" />.
+        /// </summary>
+        private static Configuration _configContext;
+
+        /// <summary>
         /// Campo que provee a la propiedad <see cref="DbContext" />.
         /// </summary>
         private static IDbSession _dbContext;
@@ -30,6 +36,11 @@ namespace Opera.Acabus.Core.DataAccess
         {
             if (!Directory.Exists(RESOURCES_DIRECTORY))
                 Directory.CreateDirectory(RESOURCES_DIRECTORY);
+
+            _configContext = new Configuration()
+            {
+                Filename = Path.Combine(RESOURCES_DIRECTORY, "app.conf")
+            };
         }
 
         /// <summary>
@@ -61,6 +72,11 @@ namespace Opera.Acabus.Core.DataAccess
         /// </summary>
         public static IEnumerable<Station> AllStations
             => DbContext.Read<Station>();
+
+        /// <summary>
+        /// Obtiene el controlador de las configuraciones.
+        /// </summary>
+        public static Configuration ConfigContext => _configContext;
 
         /// <summary>
         /// Obtiene la sesión a la base de datos.
