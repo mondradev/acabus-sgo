@@ -76,6 +76,6 @@ namespace InnSyTech.Standard.Utils
         /// <param name="permission">Permiso a verificar.</param>
         /// <returns>Un true si la credencial tiene el permiso.</returns>
         public bool HasPermission(Permissions permission)
-            => permission <= _permission;
+            => permission >= _permission;
     }
 }

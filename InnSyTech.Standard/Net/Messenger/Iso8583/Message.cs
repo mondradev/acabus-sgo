@@ -118,17 +118,6 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         }
 
         /// <summary>
-        /// Carga y establece la plantilla utilizada para la interpretación de los mensajes.
-        /// </summary>
-        /// <param name="path">Ruta de la plantilla.</param>
-        public static void SetTemplate(string path)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(path);
-            SetTemplate(doc);
-        }
-
-        /// <summary>
         /// Establece la plantilla que se usará en la aplicación.
         /// </summary>
         /// <param name="xmlDoc">Plantilla de campos para el mensaje.</param>
@@ -140,12 +129,11 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// </summary>
         /// <param name="id">Identificador del campo, solo se puede agregar una sola vez.</param>
         /// <param name="value">Valor del campo.</param>
-        /// <returns>La instancia del mensaje actual.</returns>
         /// <exception cref="ObjectDisposedException">Mensaje desechado.</exception>
         /// <exception cref="ArgumentException">
         /// Identificador no puede ser 0 o previamente agregado.
         /// </exception>
-        public Message AddField(UInt16 id, Object value)
+        public void AddField(UInt16 id, Object value)
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(Message).FullName);
@@ -157,8 +145,6 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
                 throw new ArgumentException($"El campo ya fue agregado al mensaje --> {id}");
 
             _fields.Add(new Field(id, value));
-
-            return this;
         }
 
         /// <summary>
@@ -175,64 +161,21 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         }
 
         /// <summary>
-        /// Obtiene el valor de un campo binario.
+        /// Obtiene un vector de bytes utilizados para el envío de información a travéz de sockets TCP/IP.
         /// </summary>
-        /// <param name="id">Identificador del campo.</param>
-        /// <returns>Los bytes del valor del campo.</returns>
-        public byte[] GetBytes(UInt16 id)
-        {
-            try
-            {
-                return (byte[])GetField(id);
-            }
-            catch (InvalidCastException ex)
-            {
-                throw new InvalidCastException("El campo no puede ser transformado a bytes, verifique que el tipo sea uno compatible.", ex);
-            }
-        }
-
-        /// <summary>
-        /// Obtiene el valor de un campo de tipo alfanumérico o longitud de variable con el formato de fecha y hora.
-        /// </summary>
-        /// <param name="id">Identificador del campo.</param>
-        /// <returns>El valor del campo especificado.</returns>
-        public DateTime GetDateTime(UInt16 id)
-        {
-            try
-            {
-                return DateTime.Parse(GetString(id));
-            }
-            catch (FormatException ex)
-            {
-                throw new InvalidCastException("El campo no puede ser transformado a enteros, verifique que el tipo sea uno compatible.", ex);
-            }
-        }
-
-        /// <summary>
-        /// Obtiene el valor de un campo de tipo numérico de punto flotante de precisión doble.
-        /// </summary>
-        /// <param name="id">Identificador del campo.</param>
-        /// <returns>El valor del campo especificado.</returns>
-        public Double GetDouble(UInt16 id)
-        {
-            try
-            {
-                return Double.Parse(GetString(id));
-            }
-            catch (FormatException ex)
-            {
-                throw new InvalidCastException("El campo no puede ser transformado a un númerod de punto flotante de presición doble, verifique que el tipo sea uno compatible.", ex);
-            }
-        }
+        /// <returns>Un vector de bytes.</returns>
+        public byte[] GetBytes()
+            => Encoding.UTF8.GetBytes(ToString());
 
         /// <summary>
         /// Obtiene el valor de un campo especificado del mensaje.
         /// </summary>
+        /// <typeparam name="TResult">El tipo de dato del campo.</typeparam>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo especificado.</returns>
         /// <exception cref="ObjectDisposedException">Mensaje ya ha sido desechado.</exception>
         /// <exception cref="ArgumentException">El identificador del campo es 0.</exception>
-        public Object GetField(UInt16 id)
+        public TResult GetField<TResult>(UInt16 id)
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(Message).FullName);
@@ -240,41 +183,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
             if (id == 0)
                 throw new ArgumentException("El identificador del campo no puede ser 0.");
 
-            return _fields.FirstOrDefault(field => field.ID == id).Value;
-        }
-
-        /// <summary>
-        /// Obtiene el valor de un campo de tipo numérico entero.
-        /// </summary>
-        /// <param name="id">Identificador del campo.</param>
-        /// <returns>El valor del campo especificado.</returns>
-        public Int64 GetInt64(UInt16 id)
-        {
-            try
-            {
-                return Int64.Parse(GetString(id));
-            }
-            catch (FormatException ex)
-            {
-                throw new InvalidCastException("El campo no puede ser transformado a enteros, verifique que el tipo sea uno compatible.", ex);
-            }
-        }
-
-        /// <summary>
-        /// Obtiene el valor de un campo de tipo alphanumerico o de longitud variable.
-        /// </summary>
-        /// <param name="id">Identificador del campo.</param>
-        /// <returns>El valor del campo especificado.</returns>
-        public String GetString(UInt16 id)
-        {
-            try
-            {
-                return GetField(id).ToString();
-            }
-            catch (InvalidCastException ex)
-            {
-                throw new InvalidCastException("El campo no puede ser transformado a cadena, verifique que el tipo sea uno compatible.", ex);
-            }
+            return (TResult)_fields.FirstOrDefault(field => field.ID == id).Value;
         }
 
         /// <summary>
@@ -298,13 +207,6 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
                 return _fields.Remove(fieldToRemove);
             return false;
         }
-
-        /// <summary>
-        /// Obtiene un vector de bytes utilizados para el envío de información a travéz de sockets TCP/IP.
-        /// </summary>
-        /// <returns>Un vector de bytes.</returns>
-        public byte[] ToBytes()
-            => Encoding.UTF8.GetBytes(ToString());
 
         /// <summary>
         /// Crea una cadena que representa el mensaje codificado en ISO8583.

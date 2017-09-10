@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace InnSyTech.Standard.Utils
 {
     /// <summary>
-    /// Esta clase permite la traducción de una enumeración a un texto que puede ser leido por un ser humano.
+    /// Esta clase permite la traducción de una enumeración a un texto que puede ser leido por una ser humano.
     /// </summary>
     /// <typeparam name="T">Tipo de la enumaración a traducir.</typeparam>
     public class EnumTranslator<T>

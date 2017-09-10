@@ -20,11 +20,11 @@ namespace InnSyTech.Standard.Configuration
 
         public Object GetSetting(string name, string category = null)
         {
-            var node = _xmlDoc.GetElementsByTagName("configuration")?[0] as XmlNode;
+            var node = null as XmlNode;
 
             if (!String.IsNullOrEmpty(category))
-                node = node.SelectSingleNode(category).Cast<XmlNode>().SingleOrDefault();
-            
+                node = _xmlDoc.GetElementsByTagName(category).Cast<XmlNode>().SingleOrDefault();
+
             node = node.SelectSingleNode(name);
             if (node.Attributes.Cast<XmlAttribute>().SingleOrDefault(a => a.Name == "type") != null)
                 return Parse(node);
