@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Template>
-  <Fields>
-    <Field ID="1" Type="LVAR" />
-    <Field ID="4" Type="ALPHANUMERIC" Length="15" />
-    <Field ID="6" Type="LLVAR" />
-  </Fields>
-</Template>
