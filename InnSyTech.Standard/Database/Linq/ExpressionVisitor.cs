@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Database.Linq.DbDefinitions;
-using InnSyTech.Standard.Database.Utils;
+﻿using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Utils;
 using System;
 using System.Collections.Generic;
@@ -10,29 +9,70 @@ using System.Text;
 
 namespace InnSyTech.Standard.Database.Linq
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class DbExpressionVisitor : ExpressionVisitor
+    internal class ExpressionVisitor : System.Linq.Expressions.ExpressionVisitor
     {
-        private IDbDialect _dialect;
-        private List<Tuple<String, DbFieldDefinition>> _fieldLabels 
-            = new List<Tuple<string, DbFieldDefinition>>();
-        private List<DbFieldDefinition> _selectedList;
-        private StringBuilder _statement;
-        private DbStatementDefinition _statementDefinition
-            = new DbStatementDefinition();
 
-        public string Translate(Expression expression, IDbDialect dialect)
+        private DbStatementDefinition _statementDefinition = new DbStatementDefinition();
+        private List<Tuple<String, DbFieldDefinition>> _fieldLabels = new List<Tuple<string, DbFieldDefinition>>();
+        private IDbDialect _dialect;
+        private StringBuilder _statement;
+
+        internal string Translate(Expression expression, IDbDialect dialect)
         {
             _dialect = dialect;
             _statement = new StringBuilder();
 
             Visit(expression);
 
-            ProcessDefinition();
+            ProcessDefinition(_statementDefinition);
 
             return _statement.ToString();
+        }
+
+        private void ProcessDefinition(DbStatementDefinition statementDefinition)
+        {
+            int count = 0;
+            foreach (var statement in _statementDefinition)
+                foreach (var entity in statement.Entities)
+                    count = ProcessEntity(count, entity);
+
+            foreach (var label in _fieldLabels)
+                _statement.Replace(label.Item1, label.Item2.Entity.Alias);
+
+            _statement
+                .Replace(", {{fields}}", "")
+                .Replace(" {{entities}}", "");
+        }
+
+        private int ProcessEntity(int count, DbEntityDefinition entity)
+        {
+            StringBuilder fieldsString = new StringBuilder();
+            String entityName = DbHelper.GetEntityName(entity.EntityType);
+
+            entity.Alias = String.Format("T{0}", count++);
+
+            foreach (var dbFields in DbHelper.GetFields(entity.EntityType))
+                fieldsString.AppendFormat("{1}.{0} {1}_{0}, ", dbFields.Name, entity.Alias);
+
+            _statement.Replace("{{fields}}", String.Format("{0}{1}", fieldsString.ToString(), "{{fields}}"));
+
+            if (entity.Alias.Equals("T0"))
+                _statement.Replace("{{entities}}", String.Format("{0} T0 {1}", entityName, "{{entities}}"));
+            else
+                _statement.Replace("{{entities}}", string.Format(
+                    "LEFT JOIN {0} {1} ON {1}.{2} = {3}.{4} {5}",
+                    entityName,
+                    entity.Alias,
+                    DbHelper.GetPrimaryKey(entity.EntityType).Name,
+                    entity.DependencyEntity.Alias,
+                    entity.DependencyMember.GetFieldName(),
+                    "{{entities}}"
+                ));
+
+            foreach (var subEntity in entity.DependentsEntities)
+                count = ProcessEntity(count, subEntity);
+
+            return count;
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
@@ -84,7 +124,7 @@ namespace InnSyTech.Standard.Database.Linq
                     break;
 
                 default:
-                    throw new NotSupportedException(string.Format("El operador binario '{0}' no es soportado", b.NodeType));
+                    throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
             }
 
             Visit(b.Right);
@@ -135,45 +175,50 @@ namespace InnSyTech.Standard.Database.Linq
 
         protected override Expression VisitMember(MemberExpression m)
         {
-            var expMember = m;
-            var entityReference = new DbEntityDefinition();
-            var entity = entityReference;
-
-            DbFieldDefinition fieldDef = entityReference.CreateMember(m.Member);
-            String label = String.Format("{{FL{0}}}", _fieldLabels.Count);
-
-            _selectedList?.Add(fieldDef);
-            _fieldLabels.Add(Tuple.Create(label, fieldDef));
-            _statement.AppendFormat("{0}.{1}", label, fieldDef.GetFieldName());
-
-            while (expMember != null)
+            if (m != null)
             {
-                if (DbHelper.IsEntity(expMember.Expression.Type))
+                var expMember = m;
+                var entityReference = new DbEntityDefinition();
+                var entity = entityReference;
+
+                DbFieldDefinition fieldDef = entityReference.CreateMember(m.Member);
+                String label = String.Format("{{FL{0}}}", _fieldLabels.Count);
+
+                _selectedList?.Add(fieldDef);
+                _fieldLabels.Add(Tuple.Create(label, fieldDef));
+                _statement.AppendFormat("{0}.{1}", label, fieldDef.GetFieldName());
+
+                while (expMember != null)
                 {
-                    entity.EntityType = expMember.Expression.Type;
-                    if (entity.DependentsEntities.Count > 0)
-                        entity.DependentsEntities.First().DependencyMember = entity.CreateMember(expMember.Member);
+                    if (DbHelper.IsEntity(expMember.Expression.Type))
+                    {
+                        entity.EntityType = expMember.Expression.Type;
+                        if (entity.DependentsEntities.Count > 0)
+                            entity.DependentsEntities.First().DependencyMember = entity.CreateMember(expMember.Member);
+                    }
+                    else
+                        throw new InvalidOperationException("Una de los tipos de los miembros involucrado no corresponde a una entidad.");
+
+                    if (expMember.Expression.NodeType == ExpressionType.Parameter)
+                        break;
+
+                    expMember = expMember.Expression as MemberExpression;
+
+                    entity = entity.CreateDependencyEntity(expMember?.Member);
                 }
-                else
-                    throw new InvalidOperationException("Un de los tipos de los miembros involucrado no corresponde a una entidad.");
 
-                if (expMember.Expression.NodeType == ExpressionType.Parameter)
-                    break;
-
-                expMember = expMember.Expression as MemberExpression;
-
-                entity = entity.CreateDependencyEntity(expMember?.Member);
+                _statementDefinition.AddEntity(entityReference);
+                return m;
             }
-
-            _statementDefinition.AddEntity(entityReference);
-
-            return m;
+            throw new ArgumentNullException(nameof(m));
         }
+
+        List<DbFieldDefinition> _selectedList;
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType != typeof(Queryable) && m.Method.DeclaringType != typeof(DbQueryable))
-                throw new NotSupportedException(String.Format("El método '{0}' no es soportado por la API", m.Method.Name));
+                throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
 
             switch (m.Method.Name)
             {
@@ -198,9 +243,6 @@ namespace InnSyTech.Standard.Database.Linq
                     Visit(m.Arguments[0]);
                     break;
 
-                case "Select":
-                    break;
-
                 default:
                     break;
             }
@@ -213,7 +255,7 @@ namespace InnSyTech.Standard.Database.Linq
             {
                 case ExpressionType.Not:
                     _statement.Append(" NOT ");
-                    Visit(u.Operand);
+                    this.Visit(u.Operand);
                     break;
 
                 case ExpressionType.Quote:
@@ -225,7 +267,7 @@ namespace InnSyTech.Standard.Database.Linq
                     break;
 
                 default:
-                    throw new NotSupportedException(string.Format("El operador unario '{0}' no es soportado", u.NodeType));
+                    throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", u.NodeType));
             }
 
             return u;
@@ -261,53 +303,7 @@ namespace InnSyTech.Standard.Database.Linq
 
             foreach (var reference in references)
                 LoadReference(reference.PropertyInfo as MemberInfo, depth - 1, entity);
-        }
 
-        private void ProcessDefinition()
-        {
-            int count = 0;
-
-            foreach (var statement in _statementDefinition)
-                foreach (var entity in statement.Entities)
-                    count = ProcessEntity(count, entity);
-
-            foreach (var label in _fieldLabels)
-                _statement.Replace(label.Item1, label.Item2.Entity.Alias);
-
-            _statement
-                .Replace(", {{fields}}", "")
-                .Replace(" {{entities}}", "");
-        }
-
-        private int ProcessEntity(int count, DbEntityDefinition entity)
-        {
-            StringBuilder fieldsString = new StringBuilder();
-            String entityName = DbHelper.GetEntityName(entity.EntityType);
-
-            entity.Alias = String.Format("T{0}", count++);
-
-            foreach (var dbFields in DbHelper.GetFields(entity.EntityType))
-                fieldsString.AppendFormat("{1}.{0} {1}_{0}, ", dbFields.Name, entity.Alias);
-
-            _statement.Replace("{{fields}}", String.Format("{0}{1}", fieldsString.ToString(), "{{fields}}"));
-
-            if (entity.Alias.Equals("T0"))
-                _statement.Replace("{{entities}}", String.Format("{0} T0 {1}", entityName, "{{entities}}"));
-            else
-                _statement.Replace("{{entities}}", string.Format(
-                    "LEFT JOIN {0} {1} ON {1}.{2} = {3}.{4} {5}",
-                    entityName,
-                    entity.Alias,
-                    DbHelper.GetPrimaryKey(entity.EntityType).Name,
-                    entity.DependencyEntity.Alias,
-                    entity.DependencyMember.GetFieldName(),
-                    "{{entities}}"
-                ));
-
-            foreach (var subEntity in entity.DependentsEntities)
-                count = ProcessEntity(count, subEntity);
-
-            return count;
         }
     }
 }
