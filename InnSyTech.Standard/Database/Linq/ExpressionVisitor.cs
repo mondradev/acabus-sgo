@@ -117,7 +117,7 @@ namespace InnSyTech.Standard.Database.Linq
                 String fieldName = null;
 
                 if (DbHelper.IsEntity(m.Member.ReflectedType))
-                    fieldName = DbHelper.GetFields(m.Member.ReflectedType)
+                    fieldName = DbField.GetFields(m.Member.ReflectedType)
                         .FirstOrDefault(f => f.Name == m.Member.Name).Name;
 
                 _statement.Append(fieldName ?? m.Member.Name);

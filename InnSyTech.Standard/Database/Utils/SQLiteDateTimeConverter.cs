@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace InnSyTech.Standard.Database.Sqlite
+namespace InnSyTech.Standard.Database.Utils
 {
     /// <summary>
     /// Esta clase transforma en una cadena de texto valido cualquier instancia de tipo <see cref="DateTime"/>.
     /// </summary>
-    public class DbDateTimeConverter : IDbConverter
+    public class SQLiteDateTimeConverter : IDbConverter
     {
         /// <summary>
         /// Obtiene una instancia <see cref="DateTime"/> de la cadena pasa como argumento.
