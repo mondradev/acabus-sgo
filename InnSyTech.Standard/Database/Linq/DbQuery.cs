@@ -10,13 +10,13 @@ namespace InnSyTech.Standard.Database.Linq
     /// Consulta SQL utilizada para obtener información desde una base de datos relacional.
     /// </summary>
     /// <typeparam name="TData">Tipo de dato que manejará la consulta.</typeparam>
-    internal class DbQuery<TData> : IOrderedQueryable<TData>
+    internal class DbSqlQuery<TData> : IOrderedQueryable<TData>
     {
         /// <summary>
-        /// Crea una instancia nueva de <see cref="DbQuery{TData}"/>.
+        /// Crea una instancia nueva de <see cref="DbSqlQuery{TData}"/>.
         /// </summary>
         /// <param name="provider">Proveedor que se utiliza para acceder a los datos.</param>
-        public DbQuery(DbProvider provider)
+        public DbSqlQuery(DbProvider provider)
         {
             if (provider is null)
                 throw new ArgumentNullException("El proveedor de datos no puede ser nulo.");
@@ -26,11 +26,11 @@ namespace InnSyTech.Standard.Database.Linq
         }
 
         /// <summary>
-        /// Crea una nueva instancia de <see cref="DbQuery{TData}"/>.
+        /// Crea una nueva instancia de <see cref="DbSqlQuery{TData}"/>.
         /// </summary>
         /// <param name="provider">Proveedor que se utiliza para acceder a los datos.</param>
         /// <param name="expression">Expresión de la consulta.</param>
-        public DbQuery(DbProvider provider, Expression expression)
+        public DbSqlQuery(DbProvider provider, Expression expression)
         {
             if (provider is null)
                 throw new ArgumentNullException("El proveedor de datos no puede ser nulo.");
