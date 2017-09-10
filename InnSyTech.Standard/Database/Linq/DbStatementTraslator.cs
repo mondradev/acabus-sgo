@@ -11,7 +11,7 @@ using System.Text;
 namespace InnSyTech.Standard.Database.Linq
 {
     /// <summary>
-    ///
+    /// 
     /// </summary>
     internal class DbStatementTraslator : ExpressionVisitor
     {
@@ -19,7 +19,6 @@ namespace InnSyTech.Standard.Database.Linq
         private List<object[]> _fieldLabels = new List<object[]>();
         private List<DbFieldDefinition> _selectedList;
         private StringBuilder _statement;
-
         private DbStatementDefinition _statementDefinition
             = new DbStatementDefinition();
 
@@ -161,6 +160,7 @@ namespace InnSyTech.Standard.Database.Linq
                 expMember = expMember.Expression as MemberExpression;
             }
 
+
             DbFieldDefinition fieldDef = entityReference.CreateMember(m.Member);
             String label = String.Format("{{FL{0}}}", _fieldLabels.Count);
 
@@ -182,10 +182,7 @@ namespace InnSyTech.Standard.Database.Linq
                 case "Where":
                     LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                     Visit(m.Arguments[0]);
-                    if (_statementDefinition.Filters.Count == 0)
-                        _statement.Append(" WHERE ");
-                    else
-                        _statement.Append(" AND ");
+                    _statement.Append(" WHERE ");
                     _selectedList = _statementDefinition.Filters;
                     Visit(lambda.Body);
                     break;
@@ -204,28 +201,7 @@ namespace InnSyTech.Standard.Database.Linq
                     Visit(m.Arguments[0]);
                     break;
 
-                case "Single":
-                    break;
-
-                case "SingleOrDefault":
-                    break;
-
-                case "First":
-                    break;
-
-                case "FirstOrDefault":
-                    break;
-
                 case "Select":
-                    break;
-
-                case "Contains":
-                    break;
-
-                case "GroupBy":
-                    break;
-
-                case "Any":
                     break;
 
                 default:
@@ -266,45 +242,6 @@ namespace InnSyTech.Standard.Database.Linq
             return e;
         }
 
-        /// <summary>
-        /// Obtiene el alias de la definición de la entidad. Si la entidad no tiene alias, se busca
-        /// entre las entidades que presente el mismo árbol de entidad.
-        /// </summary>
-        /// <param name="ownerEntity">Entidad a obtener el alias</param>
-        /// <returns>El alias de la entidad.</returns>
-        private string GetAlias(DbEntityDefinition ownerEntity)
-        {
-            if (ownerEntity == null)
-                throw new ArgumentNullException(nameof(ownerEntity), "La entidad no puede ser nula -->");
-
-            if (!String.IsNullOrEmpty(ownerEntity.Alias))
-                return ownerEntity.Alias;
-
-            foreach (var entity in _statementDefinition.Entities)
-            {
-                var currentEntity = entity;
-                var anotherEntity = ownerEntity.GetRoot();
-                var isSame = false;
-
-                while (currentEntity != null && anotherEntity != null)
-                {
-                    if (!(isSame = anotherEntity.EntityType == currentEntity.EntityType))
-                        break;
-
-                    if (currentEntity.EntityType == ownerEntity.EntityType)
-                        break;
-
-                    anotherEntity = anotherEntity.DependentsEntities.FirstOrDefault();
-                    currentEntity = currentEntity.DependentsEntities.FirstOrDefault(f => f.EntityType == anotherEntity.EntityType);
-                }
-
-                if (isSame)
-                    return currentEntity.Alias;
-            }
-
-            throw new InvalidOperationException("No se encontró una entidad similar");
-        }
-
         private void LoadReference(MemberInfo instance, int depth, DbEntityDefinition entity = null)
         {
             if (depth < 0)
@@ -338,7 +275,7 @@ namespace InnSyTech.Standard.Database.Linq
                     count = ProcessEntity(count, entity);
 
             foreach (var label in _fieldLabels)
-                _statement.Replace(label.First().ToString(), GetAlias((label.Last() as DbFieldDefinition).OwnerEntity));
+                _statement.Replace(label.First().ToString(), (label.Last() as DbFieldDefinition).OwnerEntity.Alias);
 
             _statement
                 .Replace(", {{fields}}", "")
