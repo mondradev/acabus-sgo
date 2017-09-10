@@ -1,10 +1,8 @@
-﻿using Acabus.DataAccess;
-using Acabus.Models;
+﻿using Acabus.Models;
 using Acabus.Modules.CctvReports.Models;
 using Acabus.Utils;
 using Acabus.Utils.Mvvm;
 using InnSyTech.Standard.Database;
-using InnSyTech.Standard.Database.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -353,44 +351,44 @@ namespace Acabus.Modules.CctvReports.ViewModels
         {
             IsEnabled = false;
 
-            var query = AcabusData.Session.Read<Incidence>();
+            var filter = new DbFilter();
 
             if (!String.IsNullOrEmpty(Folio))
-                query.Where(i => i.Folio == Folio);
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Folio), String.Format("%{0}%", Folio), WhereOperator.LIKE));
 
             if (SelectedLocation != null && SelectedLocation is Station)
-                query.Where(i => i.Device.Station.ID == (SelectedLocation as Station).ID);
+                filter.AddWhere(new DbFilterExpression("T4.ID", (SelectedLocation as Station).ID, WhereOperator.EQUALS));
 
             if (IsBusIncidences && SelectedVehicle != null)
-                query.Where(i => i.Device.Vehicle.ID == SelectedVehicle.ID);
+                filter.AddWhere(new DbFilterExpression("T6.ID", SelectedVehicle.ID, WhereOperator.EQUALS));
 
             if (IsStartDate && (StartDate != null && FinishDate != null))
-                query.Where(i => i.StartDate >= StartDate && i.StartDate <= FinishDate);
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), String.Format("{0:yyyy-MM-dd}", StartDate), WhereOperator.GREAT_AND_EQUALS))
+                    .AddWhere(new DbFilterExpression(nameof(Incidence.StartDate), String.Format("{0:yyyy-MM-dd}", FinishDate), WhereOperator.LESS_AND_EQUALS));
             else if (!IsStartDate && (StartDate != null && FinishDate != null))
-                query.Where(i => i.FinishDate >= StartDate && i.FinishDate <= FinishDate);
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.FinishDate), String.Format("{0:yyyy-MM-dd}", StartDate), WhereOperator.GREAT_AND_EQUALS))
+                    .AddWhere(new DbFilterExpression(nameof(Incidence.FinishDate), String.Format("{0:yyyy-MM-dd}", FinishDate), WhereOperator.LESS_AND_EQUALS));
 
             if (SelectedDevice != null)
-                query.Where(i => i.Device.ID == SelectedDevice.ID);
+                filter.AddWhere(new DbFilterExpression("T3.ID", SelectedDevice.ID, WhereOperator.EQUALS));
 
             if (SelectedTechnician != null)
-                query.Where(i => i.Technician.ID == SelectedTechnician.ID);
+                filter.AddWhere(new DbFilterExpression("T10.ID", SelectedTechnician, WhereOperator.EQUALS));
 
             if (SelectedDescription != null)
-                query.Where(i => i.Description.Description == SelectedDescription.Description);
+                filter.AddWhere(new DbFilterExpression("T8.Description", String.Format("%{0}%", SelectedDescription.Description), WhereOperator.LIKE));
 
             if (SelectedStatus != null)
-                query.Where(i => i.Status == SelectedStatus);
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Status), (int)SelectedStatus, WhereOperator.EQUALS));
 
             if (!String.IsNullOrEmpty(SelectedWhoReporting))
-                query.Where(i => i.WhoReporting == SelectedWhoReporting);
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.WhoReporting), SelectedWhoReporting, WhereOperator.EQUALS));
 
-            // TODO: Implementar referencias externas.
-            //if (HasRefundOfMoney)
-            //    filter.AddWhere(new DbFilterExpression(nameof(Incidence.Folio), "(SELECT Fk_Folio FROM RefundOfMoney)", WhereOperator.IN));
-
+            if (HasRefundOfMoney)
+                filter.AddWhere(new DbFilterExpression(nameof(Incidence.Folio), "(SELECT Fk_Folio FROM RefundOfMoney)", WhereOperator.IN));
             Task.Run(() =>
             {
-                _result = query;
+                _result = DataAccess.AcabusData.Session.GetObjects<Incidence>(filter);
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
