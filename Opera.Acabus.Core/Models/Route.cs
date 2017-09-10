@@ -15,17 +15,17 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Sin tipo de ruta (valor predeterminado).
         /// </summary>
-        NONE,
+        NONE = 0,
 
         /// <summary>
         /// Ruta tipo alimentador.
         /// </summary>
-        ALIM,
+        ALIM = 1,
 
         /// <summary>
         /// Ruta tipo troncal.
         /// </summary>
-        TRUNK
+        TRUNK = 2
     }
 
     /// <summary>

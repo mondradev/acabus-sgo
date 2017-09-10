@@ -8,7 +8,7 @@ namespace Opera.Acabus.Core.Models
     public interface IAssignableSection
     {
         /// <summary>
-        /// /// Obtiene o establece la sección de atención a esta ubicación.
+        /// Obtiene o establece la sección de atención a esta ubicación.
         /// </summary>
         String AssignedSection { get; set; }
     }

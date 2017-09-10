@@ -1,17 +1,22 @@
 ﻿using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.DataAccess
 {
-    public static class ModelsExtension
+    /// <summary>
+    /// Provee métodos auxiliares para la manipulación de los modelos utilizados en el <see cref="Core"/>.
+    /// </summary>
+    public static class ModelHelper
     {
-
+        /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Device"/>.
+        /// </summary>
+        /// <param name="device">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Device"/></returns>
         public static Byte[] GetBytes(this Device device)
         {
             var id = device.ID; // 8 bytes
@@ -30,6 +35,11 @@ namespace Opera.Acabus.Core.DataAccess
             return new[] { bid, bstation, bbus, bip, new byte[] { type }, bserial }.Merge().ToArray();
         }
 
+        /// <summary>
+        /// Obtiene una instancia <see cref="Device"/> desde un vector de bytes.
+        /// </summary>
+        /// <param name="bytes">Vector de bytes que contiene la instancia <see cref="Device"/>.</param>
+        /// <returns>Una instancia <see cref="Device"/>.</returns>
         public static Device GetDevice(Byte[] bytes)
         {
             var id = BitConverter.ToUInt64(bytes.Take(8).ToArray(), 0);
@@ -42,10 +52,9 @@ namespace Opera.Acabus.Core.DataAccess
             return new Device(id, serial, type)
             {
                 IPAddress = ip,
-                Bus = AcabusData.AllBuses?.FirstOrDefault(b => b.ID == bbus),
-                Station = AcabusData.AllStations?.FirstOrDefault(s => s.ID == bstation)
+                Bus = AcabusDataContext.AllBuses?.FirstOrDefault(b => b.ID == bbus),
+                Station = AcabusDataContext.AllStations?.FirstOrDefault(s => s.ID == bstation)
             };
         }
-
     }
 }

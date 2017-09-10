@@ -2,7 +2,7 @@
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
 using InnSyTech.Standard.Utils;
-using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.DataAccess.DbConverters;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -25,7 +25,7 @@ namespace Opera.Acabus.Core.Models
         KVR,
 
         /// <summary>
-        /// Torniquete genérico de E/S.
+        /// Torniquete de E/S.
         /// </summary>
         TOR,
 
@@ -35,7 +35,7 @@ namespace Opera.Acabus.Core.Models
         TD,
 
         /// <summary>
-        /// Torniquete Simple de E/S.
+        /// Torniquete de Salida
         /// </summary>
         TS,
 
@@ -45,7 +45,7 @@ namespace Opera.Acabus.Core.Models
         TSI,
 
         /// <summary>
-        /// Puerta para personas de movilidad reducida.
+        /// Paso de movilidad reducida.
         /// </summary>
         PMR,
 
@@ -117,7 +117,22 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// PC Abordo.
         /// </summary>
-        PCA
+        PCA,
+
+        /// <summary>
+        /// Planta electrógena de estación.
+        /// </summary>
+        PGE,
+
+        /// <summary>
+        /// Rack de estación.
+        /// </summary>
+        RACK,
+
+        /// <summary>
+        /// Luminarias
+        /// </summary>
+        LIGHT
     }
 
     /// <summary>
@@ -428,6 +443,9 @@ namespace Opera.Acabus.Core.Models
                 { DeviceType.APP, "SERVIDOR DE APLICACIÓN" },
                 { DeviceType.DB, "SERVIDOR BASE DE DATOS" },
                 { DeviceType.PDE, "SERVIDOR PATIO DE ENCIERRO" },
+                { DeviceType.PGE, "PLANTA ELECTRÓGENA" },
+                { DeviceType.RACK, "RACK DE ESTACIÓN" },
+                { DeviceType.LIGHT, "LUMINARIA DE ESTACIÓN" },
                 { DeviceType.NONE, "NINGUNO" }
             })
         {

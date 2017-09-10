@@ -6,23 +6,24 @@
     public enum Priority
     {
         /// <summary>
+        /// Sin prioridad.
+        /// </summary>
+        NONE = 0,
+
+        /// <summary>
         /// Prioridad baja.
         /// </summary>
-        LOW,
+        LOW = 1,
 
         /// <summary>
         /// Prioridad media.
         /// </summary>
-        MEDIUM,
+        MEDIUM = 2,
 
         /// <summary>
         /// Prioridad alta.
         /// </summary>
-        HIGH,
+        HIGH = 4,
 
-        /// <summary>
-        /// Sin prioridad.
-        /// </summary>
-        NONE
     }
 }
