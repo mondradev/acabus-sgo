@@ -1,4 +1,10 @@
-﻿namespace Opera.Acabus.Core.Services
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Opera.Acabus.Core.Services
 {
     /// <summary>
     /// Esta clase estática gestiona las conexiones al servidor de aplicación de todo el sistema.
