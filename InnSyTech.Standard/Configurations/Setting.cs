@@ -7,7 +7,7 @@ namespace InnSyTech.Standard.Configuration
     /// <summary>
     /// Implementación de <see cref="ISetting"/>.
     /// </summary>
-    public sealed class Setting : ISetting
+    internal sealed class Setting : ISetting
     {
         /// <summary>
         /// Conjunto de atributos.
@@ -22,7 +22,8 @@ namespace InnSyTech.Standard.Configuration
         {
             _attributes = new Dictionary<string, object>();
 
-            Process(this, node);
+            if (node != null)
+                Process(this, node);
         }
 
         /// <summary>
@@ -64,6 +65,20 @@ namespace InnSyTech.Standard.Configuration
 
             return attr;
         }
+
+        /// <summary>
+        /// Obtiene los valores de la configuración.
+        /// </summary>
+        /// <returns>Un diccionario con el contenido de la configuración.</returns>
+        public IReadOnlyDictionary<string, object> GetValues()
+            => _attributes;
+
+        /// <summary>
+        /// Obtiene los valores de la configuración.
+        /// </summary>
+        /// <returns>Un diccionario con el contenido de la configuración.</returns>
+        internal Dictionary<string, object> GetAttributes()
+            => _attributes;
 
         /// <summary>
         /// Procesa el nodo para extraer todos sus nodos y atributos.

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace InnSyTech.Standard.Configuration
 {
@@ -27,5 +28,11 @@ namespace InnSyTech.Standard.Configuration
         /// <param name="name">Nombre la configuración o atributo a obtener.</param>
         /// <returns>Obtiene el valor de una configuración o atributo.</returns>
         Object GetValue(String name);
+
+        /// <summary>
+        /// Obtiene todos los atributos de la configuración.
+        /// </summary>
+        /// <returns>Un diccionario con el contenido de la configuración.</returns>
+        IReadOnlyDictionary<String, Object> GetValues();
     }
 }

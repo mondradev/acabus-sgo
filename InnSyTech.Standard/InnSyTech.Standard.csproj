@@ -61,6 +61,7 @@
     <Compile Include="Configurations\Configuration.cs" />
     <Compile Include="Configurations\ISetting.cs" />
     <Compile Include="Configurations\Setting.cs" />
+    <Compile Include="Configurations\SettingBuilder.cs" />
     <Compile Include="Database\DbAttribute.cs" />
     <Compile Include="Database\DbFactory.cs" />
     <Compile Include="Database\DbSession.cs" />

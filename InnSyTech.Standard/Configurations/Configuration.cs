@@ -1,6 +1,7 @@
 ﻿using InnSyTech.Standard.Utils;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Xml;
 
@@ -15,6 +16,11 @@ namespace InnSyTech.Standard.Configuration
     /// </summary>
     public sealed class Configuration
     {
+        /// <summary>
+        /// Nombre por default del archivo de configuración.
+        /// </summary>
+        private readonly string FILENAME_DEFAULT = Path.Combine(Environment.CurrentDirectory, "app.conf");
+
         /// <summary>
         /// Especifica el estado de lectura del archivo de configuración.
         /// </summary>
@@ -57,12 +63,6 @@ namespace InnSyTech.Standard.Configuration
         public ISetting this[String name] => Read(name);
 
         /// <summary>
-        /// Convierte el nodo Xml en una instancia <see cref="ISetting"/>
-        /// </summary>
-        public ISetting Convert(XmlNode node)
-            => new Setting(node);
-
-        /// <summary>
         /// Crea una configuración en el archivo, indicando su nombre y su valor de configuración.
         /// </summary>
         /// <param name="name">Nombre de la configuración a crear.</param>
@@ -86,12 +86,15 @@ namespace InnSyTech.Standard.Configuration
                     if (node != null)
                         throw new ArgumentException($"Ya existe una configuración con el mismo nombre '{name}'", nameof(name));
 
-                    node = ToNode(setting);
+                    node = ToNode(setting, name);
 
                     node = _xmlDoc?.SelectSingleNode("configuration").AppendChild(node);
 
                     if (node == null)
                         throw new InvalidOperationException($"No se puede agregar la configuración debido a un problema con el archivo: {Filename}");
+
+
+                    _xmlDoc.Save(Filename);
 
                     LoadFile();
 
@@ -138,22 +141,6 @@ namespace InnSyTech.Standard.Configuration
         }
 
         /// <summary>
-        /// Carga el archivo xml según la ruta especificada.
-        /// </summary>
-        public void LoadFile()
-        {
-            try
-            {
-                var xmlDoc = new XmlDocument();
-
-                xmlDoc.Load(Filename);
-
-                _xmlDoc = xmlDoc;
-            }
-            catch { }
-        }
-
-        /// <summary>
         /// Lee una configuración del archivo de configuración según el nombre especificado.
         /// </summary>
         /// <param name="name">El nombre de la configuración a leer.</param>
@@ -179,14 +166,6 @@ namespace InnSyTech.Standard.Configuration
                 return setting;
             }
         }
-
-        /// <summary>
-        /// Busca el nodo que contiene el nombre especificado.
-        /// </summary>
-        /// <param name="name">Nombre del nodo a buscar.</param>
-        /// <returns>Nodo que coincide con el nombre especificado.</returns>
-        public XmlNode SearchNode(String name)
-            => _xmlDoc?.SelectSingleNode("configuration")?.SelectSingleNode(name);
 
         /// <summary>
         /// Actualiza los valores de una configuración en el archivo.
@@ -217,10 +196,12 @@ namespace InnSyTech.Standard.Configuration
                     if (node == null)
                         throw new InvalidOperationException($"No se puede actualizar la configuración debido a un problema con el archivo: {Filename}");
 
-                    node = ToNode(setting);
+                    node = ToNode(setting, name);
 
                     node = _xmlDoc?.SelectSingleNode("configuration").AppendChild(node);
-                    
+
+                    _xmlDoc.Save(Filename);
+
                     LoadFile();
 
                     return true;
@@ -239,27 +220,80 @@ namespace InnSyTech.Standard.Configuration
         }
 
         /// <summary>
+        /// Convierte el nodo Xml en una instancia <see cref="ISetting"/>
+        /// </summary>
+        private ISetting Convert(XmlNode node)
+            => new Setting(node);
+
+        /// <summary>
         /// Define la estructura básica del archivo de configuración.
         /// </summary>
         /// <returns>obtiene la instancia de documento Xml.</returns>
-        private static XmlDocument CreateConfBase()
+        private XmlDocument CreateConfBase()
         {
             var doc = new XmlDocument();
             doc.LoadXml(@"<?xml version=""1.0"" encoding=""utf-8""?>
                             <configuration>
                             </configuration>
             ");
+            doc.Save(Filename);
             return doc;
         }
+
+        /// <summary>
+        /// Carga el archivo xml según la ruta especificada.
+        /// </summary>
+        private void LoadFile()
+        {
+            try
+            {
+                var xmlDoc = new XmlDocument();
+
+                if (String.IsNullOrEmpty(Filename))
+                    Filename = FILENAME_DEFAULT;
+
+                if (!File.Exists(Filename))
+                    _xmlDoc = CreateConfBase();
+                else
+                    xmlDoc.Load(Filename);
+
+                _xmlDoc = xmlDoc;
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Busca el nodo que contiene el nombre especificado.
+        /// </summary>
+        /// <param name="name">Nombre del nodo a buscar.</param>
+        /// <returns>Nodo que coincide con el nombre especificado.</returns>
+        private XmlNode SearchNode(String name)
+            => _xmlDoc?.SelectSingleNode("configuration")?.SelectSingleNode(name);
 
         /// <summary>
         /// Convierte una instancia de <see cref="ISetting"/> en un nodo Xml.
         /// </summary>
         /// <param name="setting">Configuración a convertir en nodo Xml.</param>
+        /// <param name="name">Nombre de la configuración.</param>
         /// <returns>El nodo que representa la configuración.</returns>
-        private XmlNode ToNode(ISetting setting)
+        private XmlNode ToNode(ISetting setting, String name)
         {
-            throw new NotImplementedException();
+            var node = _xmlDoc.CreateElement(name);
+            foreach (var attr in setting.GetValues())
+            {
+                if (attr.Value is ISetting)
+                {
+                    var child = ToNode(attr.Value as ISetting, attr.Key);
+                    node.AppendChild(child);
+                }
+                else
+                {
+                    var attrXml = _xmlDoc.CreateAttribute(attr.Key);
+                    attrXml.Value = attr.Value.ToString();
+                    node.Attributes.Append(attrXml);
+                }
+            }
+            return node;
         }
     }
 }
