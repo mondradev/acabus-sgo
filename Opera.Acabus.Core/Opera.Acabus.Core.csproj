@@ -62,14 +62,6 @@
     <Compile Include="Services\Client.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="acabus.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">
       <Project>{f74fee3d-d536-44df-9e2c-53540ce78173}</Project>
       <Name>InnSyTech.Standard</Name>
