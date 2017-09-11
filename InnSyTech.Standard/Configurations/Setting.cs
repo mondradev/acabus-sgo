@@ -74,6 +74,22 @@ namespace InnSyTech.Standard.Configuration
             => _attributes;
 
         /// <summary>
+        /// Obtiene el entero de un atributo compatible.
+        /// </summary>
+        /// <param name="name">Nombre del atributo.</param>
+        /// <returns>El valor del entero.</returns>
+        public Int64 ToInteger(string name)
+            => Int64.Parse(GetValue(name)?.ToString() ?? "0");
+
+        /// <summary>
+        /// Obtiene la cadena que representa el valor del atributo.
+        /// </summary>
+        /// <param name="name">Nombre del atributo.</param>
+        /// <returns>Cadena del valor del atributo.</returns>
+        public string ToString(string name)
+            => GetValue(name)?.ToString();
+
+        /// <summary>
         /// Obtiene los valores de la configuración.
         /// </summary>
         /// <returns>Un diccionario con el contenido de la configuración.</returns>

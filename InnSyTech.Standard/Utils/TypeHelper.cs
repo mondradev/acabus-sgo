@@ -52,7 +52,7 @@ namespace InnSyTech.Standard.Utils
             return null;
         }
 
-        internal static Type GetMemberType(MemberInfo member)
+        public static Type GetMemberType(MemberInfo member)
         {
             switch (member.MemberType)
             {

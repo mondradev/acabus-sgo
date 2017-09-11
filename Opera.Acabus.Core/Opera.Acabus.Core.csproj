@@ -59,7 +59,7 @@
     <Compile Include="Models\Staff.cs" />
     <Compile Include="Models\Station.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\Client.cs" />
+    <Compile Include="Services\AppClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">

@@ -34,5 +34,19 @@ namespace InnSyTech.Standard.Configuration
         /// </summary>
         /// <returns>Un diccionario con el contenido de la configuración.</returns>
         IReadOnlyDictionary<String, Object> GetValues();
+
+        /// <summary>
+        /// Obtiene el entero de un atributo compatible.
+        /// </summary>
+        /// <param name="name">Nombre del atributo.</param>
+        /// <returns>El valor del entero.</returns>
+        long ToInteger(string name);
+
+        /// <summary>
+        /// Obtiene la cadena que representa el valor del atributo.
+        /// </summary>
+        /// <param name="name">Nombre del atributo.</param>
+        /// <returns>Cadena del valor del atributo.</returns>
+        string ToString(string name);
     }
 }

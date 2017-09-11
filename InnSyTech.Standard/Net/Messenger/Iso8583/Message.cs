@@ -82,6 +82,12 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         }
 
         /// <summary>
+        ///  Obtiene el mensaje a partir de un secuencia de bytes.
+        /// </summary>
+        public static Message GetMessage(byte[] bytes)
+            => Parse(Encoding.UTF8.GetString(bytes));
+
+        /// <summary>
         /// Convierte una cadena que representa un mensaje según la plantilla utilizada y devuelve una instancia <see cref="Message"/>.
         /// </summary>
         /// <param name="iso8583str">Cadena de un mensaje ISO8583.</param>

@@ -223,7 +223,7 @@ namespace InnSyTech.Standard.Configuration
         /// Convierte el nodo Xml en una instancia <see cref="ISetting"/>
         /// </summary>
         private ISetting Convert(XmlNode node)
-            => new Setting(node);
+            => node != null ? new Setting(node) : null;
 
         /// <summary>
         /// Define la estructura básica del archivo de configuración.

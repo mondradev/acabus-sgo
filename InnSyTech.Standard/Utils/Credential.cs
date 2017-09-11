@@ -7,10 +7,10 @@ namespace InnSyTech.Standard.Utils
     /// </summary>
     public enum Permissions
     {
-        NONE,
-        READ,
-        WRITE,
-        ROOT
+        NONE = 0,
+        READ = 1,
+        WRITE = 2,
+        ROOT = 4
     }
 
     /// <summary>
