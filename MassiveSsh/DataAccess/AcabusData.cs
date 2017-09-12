@@ -588,7 +588,7 @@ namespace Acabus.DataAccess
             return new Credential(username, password, type, isRoot);
         }
 
-        private class SQLiteConfiguration : IDbDialect
+        private class SQLiteConfiguration : DbDialectBase
         {
             public string ConnectionString => "Data Source=Resources/acabus_data.dat;Password=acabus*data*dat";
 

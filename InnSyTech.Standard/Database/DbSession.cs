@@ -21,7 +21,7 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         /// <param name="dbConnection">La conexión a la base de datos.</param>
         /// <param name="dialect">El dialecto de comunicación de la base de datos.</param>
-        public DbSession(DbConnection dbConnection, IDbDialect dialect)
+        public DbSession(DbConnection dbConnection, DbDialectBase dialect)
             => Provider = new DbProvider(dbConnection, dialect);
 
         /// <summary>

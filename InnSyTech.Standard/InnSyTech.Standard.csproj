@@ -63,6 +63,7 @@
     <Compile Include="Configurations\Setting.cs" />
     <Compile Include="Configurations\SettingBuilder.cs" />
     <Compile Include="Database\DbAttribute.cs" />
+    <Compile Include="Database\DbDialectBase.cs" />
     <Compile Include="Database\DbFactory.cs" />
     <Compile Include="Database\DbSession.cs" />
     <Compile Include="Database\IDbSession.cs" />
@@ -79,7 +80,6 @@
     <Compile Include="Database\Utils\DbEnumConverter.cs" />
     <Compile Include="Database\IDbConverter.cs" />
     <Compile Include="Database\DbFieldInfo.cs" />
-    <Compile Include="Database\IDbDialect.cs" />
     <Compile Include="Database\Utils\DbHelper.cs" />
     <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />
     <Compile Include="Net\Messenger\Iso8583\AppMessage.cs" />

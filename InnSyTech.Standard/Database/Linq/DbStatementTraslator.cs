@@ -15,7 +15,7 @@ namespace InnSyTech.Standard.Database.Linq
     /// </summary>
     internal class DbStatementTraslator : ExpressionVisitor
     {
-        private IDbDialect _dialect;
+        private DbDialectBase _dialect;
         private List<object[]> _fieldLabels = new List<object[]>();
         private List<DbFieldDefinition> _selectedList;
         private StringBuilder _statement;
@@ -23,7 +23,7 @@ namespace InnSyTech.Standard.Database.Linq
         private DbStatementDefinition _statementDefinition
             = new DbStatementDefinition();
 
-        public string Translate(Expression expression, IDbDialect dialect, out DbStatementDefinition definition)
+        public string Translate(Expression expression, DbDialectBase dialect, out DbStatementDefinition definition)
         {
             _dialect = dialect;
             _statement = new StringBuilder();

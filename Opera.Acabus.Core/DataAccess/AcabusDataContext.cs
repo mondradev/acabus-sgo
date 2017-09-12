@@ -1,10 +1,11 @@
 ﻿using InnSyTech.Standard.Configuration;
 using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Net.Messenger.Iso8583;
+using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using InnSyTech.Standard.Net.Messenger.Iso8583;
 
 namespace Opera.Acabus.Core.DataAccess
 {
@@ -44,6 +45,24 @@ namespace Opera.Acabus.Core.DataAccess
             {
                 Filename = Path.Combine(_resourcesDirectory, "app.conf")
             };
+
+            Type dbType = TypeHelper.LoadFromDll(
+                ConfigContext["connectionDb"]["assembly"].ToString(),
+                ConfigContext["connectionDb"]["type"].ToString()
+            );
+
+            Type dialectType = TypeHelper.LoadFromDll(
+               ConfigContext["connectionDb"]["assemblyDialect"].ToString(),
+               ConfigContext["connectionDb"]["typeDialect"].ToString()
+            );
+
+            if (!dialectType.IsAssignableFrom(typeof(DbDialectBase)))
+                throw new InvalidOperationException($"El tipo '{dialectType.FullName}' no deriva de '{typeof(DbDialectBase).FullName}'");
+
+            _dbContext = DbFactory.CreateSession(
+                dbType,
+                (DbDialectBase)Activator.CreateInstance(dialectType, ConfigContext["connectionDb"]["connectionString"].ToString())
+            );
         }
 
         /// <summary>

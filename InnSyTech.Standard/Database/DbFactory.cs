@@ -14,7 +14,7 @@ namespace InnSyTech.Standard.Database
         /// <typeparam name="ConnectionType">Tipo de conexión a la base de datos.</typeparam>
         /// <param name="dialect">Dialecto utilizado para la comunicación correcta de la base de datos.</param>
         /// <returns>Una sesión de conexión a la base de datos.</returns>
-        public static IDbSession CreateSession<ConnectionType>(IDbDialect dialect)
+        public static IDbSession CreateSession<ConnectionType>(DbDialectBase dialect)
             => CreateSession(typeof(ConnectionType), dialect);
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace InnSyTech.Standard.Database
         /// Dialecto utilizado para la comunicación correcta de la base de datos.
         /// </param>
         /// <returns>Una sesión de conexión a la base de datos.</returns>
-        public static IDbSession CreateSession(Type connectionType, IDbDialect dialect)
+        public static IDbSession CreateSession(Type connectionType, DbDialectBase dialect)
         {
             if (dialect == null)
                 throw new ArgumentNullException(nameof(dialect));

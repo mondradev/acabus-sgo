@@ -26,7 +26,7 @@ namespace InnSyTech.Standard.Database.Linq
         /// <summary>
         /// Dialecto que permite la interpretación de la base de datos.
         /// </summary>
-        private IDbDialect _dialect;
+        private DbDialectBase _dialect;
 
         /// <summary>
         /// Transacciones actualmente en ejecución.
@@ -38,7 +38,7 @@ namespace InnSyTech.Standard.Database.Linq
         /// </summary>
         /// <param name="connection">Conexión la basde de datos.</param>
         /// <param name="dialect">Dialecto que utilizará el proveedor para comunicarse la base de datos.</param>
-        public DbProvider(DbConnection connection, IDbDialect dialect)
+        public DbProvider(DbConnection connection, DbDialectBase dialect)
         {
             _connection = connection;
             _dialect = dialect;
@@ -47,7 +47,7 @@ namespace InnSyTech.Standard.Database.Linq
         /// <summary>
         /// Obtiene el dialecto utilizado para comunicarse con la base de datos.
         /// </summary>
-        public IDbDialect Dialect => _dialect;
+        public DbDialectBase Dialect => _dialect;
 
         /// <summary>
         /// Comienza una consulta transaccional en la base de datos.
