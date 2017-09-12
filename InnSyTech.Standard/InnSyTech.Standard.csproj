@@ -82,13 +82,13 @@
     <Compile Include="Database\IDbDialect.cs" />
     <Compile Include="Database\Utils\DbHelper.cs" />
     <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />
+    <Compile Include="Net\Messenger\Iso8583\AppMessage.cs" />
     <Compile Include="Utils\TypeHelper.cs" />
     <Compile Include="Mvvm\Command.cs" />
     <Compile Include="Mvvm\Converters\TranslateEnumConverter.cs" />
     <Compile Include="Mvvm\NotifyPropertyChanged.cs" />
     <Compile Include="Mvvm\ViewModelBase.cs" />
     <Compile Include="Mvvm\ViewModelService.cs" />
-    <Compile Include="Net\Messenger\Iso8583\Message.cs" />
     <Compile Include="PostgreSQL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SecureShell\Scp.cs" />

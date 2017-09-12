@@ -1,5 +1,6 @@
 ﻿using InnSyTech.Standard.Configuration;
 using InnSyTech.Standard.Net.Messenger.Iso8583;
+using Opera.Acabus.Core.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,12 +17,12 @@ namespace Opera.Acabus.Core.Services
     /// mensajería, permitiendo así tener acceso a la base de datos centralizada y al resto de los
     /// componentes que integran todo el sistema.
     /// </summary>
-    public static class Server
+    public static class AppServer
     {
         /// <summary>
         /// Define el puerto TCP utilizado por el servidor para escuchar peticiones.
         /// </summary>
-        private static readonly Int32 DEFAULT_PORT = int.Parse(ConfigurationManager.Settings["port", "Server"].ToString());
+        private static readonly Int32 DEFAULT_PORT = (int)AcabusDataContext.ConfigContext["server"].ToInteger("port");
 
         /// <summary>
         /// Es la dirección IP del servidor.
@@ -31,7 +32,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// En lista todas las sesiones abiertas.
         /// </summary>
-        private static List<Session> _sessions;
+        private static List<AppSession> _sessions;
 
         /// <summary>
         /// Instancia que permite la escucha por TCP.
@@ -46,11 +47,11 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Crea una instancia estática del servidor.
         /// </summary>
-        static Server()
+        static AppServer()
         {
-            _ipAddress = Dns.GetHostEntry(ConfigurationManager.Settings["hostname","Server"].ToString()).AddressList[0];
+            _ipAddress = Dns.GetHostEntry(AcabusDataContext.ConfigContext["server"].ToString("hostname") ?? "localhost").AddressList[0];
             _tokenSource = new CancellationTokenSource();
-            _sessions = new List<Session>();
+            _sessions = new List<AppSession>();
         }
 
         /// <summary>
@@ -60,9 +61,6 @@ namespace Opera.Acabus.Core.Services
         {
             if (_sessions == null)
                 return;
-
-            //foreach (var session in _sessions)
-            //    session.SendMessage(Messages.DISCONNECTING_SERVER);
 
             _tokenSource.Cancel();
 
@@ -118,9 +116,9 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="client">Cliente TCP remoto.</param>
         /// <param name="buffer">Buffer de lectura.</param>
-        internal static void MessageProcessing(Session client, Message request)
+        internal static void MessageProcessing(AppSession client, AppMessage request)
         {
-            var message = DataAccess.AcabusData.ProcessingRequest(request);
+            var message = AcabusDataContext.ProcessingRequest(request);
             client.SendMessage(message);
         }
 
@@ -128,7 +126,7 @@ namespace Opera.Acabus.Core.Services
         /// Remueve una sesión cerrada de la lista de sesiones del servidor.
         /// </summary>
         /// <param name="session">Sesión a eliminar del servidor.</param>
-        internal static void RemoveTask(Session session)
+        internal static void RemoveTask(AppSession session)
             => _sessions?.Remove(session);
 
         /// <summary>
@@ -140,7 +138,7 @@ namespace Opera.Acabus.Core.Services
         {
             try
             {
-                var session = new Session(client)
+                var session = new AppSession(client)
                 {
                     GlobalCancellationToken = token
                 };

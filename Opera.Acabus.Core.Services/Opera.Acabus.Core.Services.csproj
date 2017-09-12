@@ -42,8 +42,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Server.cs" />
-    <Compile Include="Session.cs" />
+    <Compile Include="AppServer.cs" />
+    <Compile Include="AppSession.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

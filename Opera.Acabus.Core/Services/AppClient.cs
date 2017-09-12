@@ -101,7 +101,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="message">Mensaje a envíar.</param>
         /// <returns>Mensaje con el cual ha respondido el servidor.</returns>
-        public Message SendRequest(Message message)
+        public AppMessage SendRequest(AppMessage message)
         {
             TcpClient client = new TcpClient(ServerIP.ToString(), ServerPort);
 
@@ -143,7 +143,7 @@ namespace Opera.Acabus.Core.Services
                 readBytes.AddRange(buffer.Take(countReadBytes));
             }
 
-            Message response = Message.GetMessage(readBytes.ToArray());
+            AppMessage response = AppMessage.FromBytes(readBytes.ToArray());
 
             client.Close();
 

@@ -1,14 +1,18 @@
 ﻿using InnSyTech.Standard.Net.Messenger.Iso8583;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.Services
 {
-    internal class Session
+    /// <summary>
+    /// Representa una sesión de una conexión al servidor de aplicación.
+    /// </summary>
+    internal sealed class AppSession
     {
         /// <summary>
         /// Determina el tamaño del buffer de datos.
@@ -34,7 +38,7 @@ namespace Opera.Acabus.Core.Services
         /// Crea una nueva sesión de conexión con el cliente remoto.
         /// </summary>
         /// <param name="client">Cliente TCP remoto.</param>
-        public Session(TcpClient client)
+        public AppSession(TcpClient client)
         {
             _client = client;
             _tokenSource = new CancellationTokenSource();
@@ -68,14 +72,14 @@ namespace Opera.Acabus.Core.Services
                     if (ie is TaskCanceledException)
                         Trace.WriteLine($"Sesión terminada {_client.Client} ---> {ie.Message}", "INFO");
             }
-            Server.RemoveTask(this);
+            AppServer.RemoveTask(this);
         }
 
         /// <summary>
         /// Envía un mensaje al cliente remoto,
         /// </summary>
         /// <param name="message">Mensaje por envíar.</param>
-        public void SendMessage(Message message)
+        public void SendMessage(AppMessage message)
         {
             var stream = _client.GetStream();
             byte[] bytes = message.ToBytes();
@@ -92,7 +96,7 @@ namespace Opera.Acabus.Core.Services
 
             _task = Task.Run(() =>
             {
-                StringBuilder builder = new StringBuilder();
+                List<byte> builder = new List<byte>();
                 Boolean endTask = false;
                 while (!_tokenSource.IsCancellationRequested)
                 {
@@ -115,20 +119,18 @@ namespace Opera.Acabus.Core.Services
                     var task = stream.ReadAsync(buffer, 0, BUFFER_SIZE, _tokenSource.Token);
                     int bytesRead = task.Result;
 
-                    builder.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+                    builder.AddRange(buffer.Take(bytesRead));
 
                     if (_tokenSource.IsCancellationRequested)
                         break;
 
                     if ((endTask = bytesRead < BUFFER_SIZE))
                         break;
-
                 }
+
                 if (endTask)
-                    Server.MessageProcessing(this, Message.Parse(builder.ToString()));
+                    AppServer.MessageProcessing(this, AppMessage.FromBytes(builder.ToArray()));
             }, _tokenSource.Token);
         }
-
-
     }
 }
