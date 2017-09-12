@@ -82,6 +82,18 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         }
 
         /// <summary>
+        /// Obtiene o establece el campo especificado, si el campo no está disponible, este será agregado.
+        /// </summary>
+        public Object this[UInt16 id] {
+            get => GetField(id);
+            set {
+                if (_fields.Where(f => f.ID == id).Any())
+                    RemoveField(id);
+                AddField(id, value);
+            }
+        }
+
+        /// <summary>
         ///  Obtiene el mensaje a partir de un secuencia de bytes.
         /// </summary>
         public static AppMessage FromBytes(byte[] bytes)
@@ -97,6 +109,9 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         {
             if (_template is null)
                 throw new InvalidOperationException("No hay una plantilla definida para la creación de la cadena ISO8583, utilice la función Message.SetTemplate");
+
+            if (String.IsNullOrEmpty(iso8583str))
+                return null;
 
             var header = iso8583str.Substring(0, 16);
             var bytes = header.Cut(8);
@@ -290,7 +305,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <returns>Un true en caso de remover el campo.</returns>
         /// <exception cref="ObjectDisposedException">Mensaje desechado previamente.</exception>
         /// <exception cref="ArgumentException">Identificador no puede ser 0.</exception>
-        public bool RemoveField(Int16 id)
+        public bool RemoveField(UInt16 id)
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(AppMessage).FullName);

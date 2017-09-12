@@ -128,7 +128,7 @@ namespace Opera.Acabus.Core.Services
                         break;
                 }
 
-                if (endTask)
+                if (endTask && builder.Count > 0)
                     AppServer.MessageProcessing(this, AppMessage.FromBytes(builder.ToArray()));
             }, _tokenSource.Token);
         }

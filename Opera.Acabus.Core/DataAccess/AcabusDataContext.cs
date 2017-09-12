@@ -18,7 +18,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Nombre del directorio de recursos.
         /// </summary>
-        private static readonly string RESOURCES_DIRECTORY = Path.Combine(Environment.CurrentDirectory, "Resources");
+        private static readonly string _resourcesDirectory;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="ConfigContext" />.
@@ -35,12 +35,14 @@ namespace Opera.Acabus.Core.DataAccess
         /// </summary>
         static AcabusDataContext()
         {
-            if (!Directory.Exists(RESOURCES_DIRECTORY))
-                Directory.CreateDirectory(RESOURCES_DIRECTORY);
+            _resourcesDirectory = Path.Combine(Environment.CurrentDirectory, "Resources");
+
+            if (!Directory.Exists(_resourcesDirectory))
+                Directory.CreateDirectory(_resourcesDirectory);
 
             _configContext = new Configuration()
             {
-                Filename = Path.Combine(RESOURCES_DIRECTORY, "app.conf")
+                Filename = Path.Combine(_resourcesDirectory, "app.conf")
             };
         }
 
@@ -48,31 +50,31 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene una lista de autobuses desde la base de datos.
         /// </summary>
         public static IEnumerable<Bus> AllBuses
-            => DbContext.Read<Bus>();
+            => DbContext?.Read<Bus>();
 
         /// <summary>
         /// Obtiene una lista de equipos desde la base de datos.
         /// </summary>
         public static IEnumerable<Device> AllDevices
-            => DbContext.Read<Device>();
+            => DbContext?.Read<Device>();
 
         /// <summary>
         /// Obtiene una lista de rutas desde la base de datos.
         /// </summary>
         public static IEnumerable<Route> AllRoute
-            => DbContext.Read<Route>();
+            => DbContext?.Read<Route>();
 
         /// <summary>
         /// Obtiene una lista del personal desde la base de datos.
         /// </summary>
         public static IEnumerable<Staff> AllStaff
-            => DbContext.Read<Staff>();
+            => DbContext?.Read<Staff>();
 
         /// <summary>
         /// Obtiene una lista de estaciones desde la base de datos.
         /// </summary>
         public static IEnumerable<Station> AllStations
-            => DbContext.Read<Station>();
+            => DbContext?.Read<Station>();
 
         /// <summary>
         /// Obtiene el controlador de las configuraciones.
@@ -91,7 +93,8 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>El mensaje de respuesta a la petición.</returns>
         public static AppMessage ProcessingRequest(AppMessage request)
         {
-            throw new NotImplementedException();
+            request[64] = "No hay funciones implementadas";
+            return request;
         }
     }
 }

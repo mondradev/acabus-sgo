@@ -92,7 +92,7 @@ namespace Opera.Acabus.Core.Services
         /// Obiente o establece el token de cancelación de la instancia.
         /// </summary>
         public CancellationTokenSource TokenSource {
-            get => _tokenSource;
+            get => _tokenSource ?? (_tokenSource = new CancellationTokenSource());
             set => _tokenSource = value;
         }
 
@@ -111,7 +111,7 @@ namespace Opera.Acabus.Core.Services
 
             NetworkStream stream = client.GetStream();
 
-            stream.WriteAsync(buffer, 0, buffer.Length, _tokenSource.Token);
+            stream.WriteAsync(buffer, 0, buffer.Length, TokenSource.Token);
 
             if (_tokenSource.IsCancellationRequested)
                 return null;
@@ -120,6 +120,8 @@ namespace Opera.Acabus.Core.Services
 
             List<Byte> readBytes = new List<byte>();
 
+            bool responsing = false;
+
             while (!_tokenSource.IsCancellationRequested)
             {
                 Thread.Sleep(10);
@@ -127,8 +129,8 @@ namespace Opera.Acabus.Core.Services
                 if (_tokenSource.IsCancellationRequested)
                     return null;
 
-                if (!stream.DataAvailable)
-                    continue;
+                if (!stream.DataAvailable && responsing)
+                    break;
 
                 var task = stream.ReadAsync(buffer, 0, BUFFER_SIZE, _tokenSource.Token);
 
@@ -141,9 +143,11 @@ namespace Opera.Acabus.Core.Services
                     throw new IOException("Error al leer desde el socket de conexión.", countReadBytes);
 
                 readBytes.AddRange(buffer.Take(countReadBytes));
+
+                responsing = true;
             }
 
-            AppMessage response = AppMessage.FromBytes(readBytes.ToArray());
+            AppMessage response = readBytes.Count > 0 ? AppMessage.FromBytes(readBytes.ToArray()) : null;
 
             client.Close();
 

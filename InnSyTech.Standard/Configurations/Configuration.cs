@@ -19,7 +19,7 @@ namespace InnSyTech.Standard.Configuration
         /// <summary>
         /// Nombre por default del archivo de configuración.
         /// </summary>
-        private readonly string FILENAME_DEFAULT = Path.Combine(Environment.CurrentDirectory, "app.conf");
+        private static readonly string _filenameDefault;
 
         /// <summary>
         /// Especifica el estado de lectura del archivo de configuración.
@@ -30,6 +30,14 @@ namespace InnSyTech.Standard.Configuration
         /// Instancia de documento Xml que controla al archivo de configuración.
         /// </summary>
         private XmlDocument _xmlDoc;
+
+        /// <summary>
+        /// Constructor estático de la clase.
+        /// </summary>
+        static Configuration()
+        {
+            _filenameDefault = Path.Combine(Environment.CurrentDirectory, "app.conf");
+        }
 
         /// <summary>
         /// Especifica el estado de E/S del archivo de configuración.
@@ -92,7 +100,6 @@ namespace InnSyTech.Standard.Configuration
 
                     if (node == null)
                         throw new InvalidOperationException($"No se puede agregar la configuración debido a un problema con el archivo: {Filename}");
-
 
                     _xmlDoc.Save(Filename);
 
@@ -250,7 +257,7 @@ namespace InnSyTech.Standard.Configuration
                 var xmlDoc = new XmlDocument();
 
                 if (String.IsNullOrEmpty(Filename))
-                    Filename = FILENAME_DEFAULT;
+                    Filename = _filenameDefault;
 
                 if (!File.Exists(Filename))
                     _xmlDoc = CreateConfBase();

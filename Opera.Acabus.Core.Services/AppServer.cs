@@ -1,5 +1,4 @@
-﻿using InnSyTech.Standard.Configuration;
-using InnSyTech.Standard.Net.Messenger.Iso8583;
+﻿using InnSyTech.Standard.Net.Messenger.Iso8583;
 using Opera.Acabus.Core.DataAccess;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Define el puerto TCP utilizado por el servidor para escuchar peticiones.
         /// </summary>
-        private static readonly Int32 DEFAULT_PORT = (int)AcabusDataContext.ConfigContext["server"].ToInteger("port");
+        private static readonly Int32 _serverPort;
 
         /// <summary>
         /// Es la dirección IP del servidor.
@@ -49,7 +48,11 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         static AppServer()
         {
-            _ipAddress = Dns.GetHostEntry(AcabusDataContext.ConfigContext["server"].ToString("hostname") ?? "localhost").AddressList[0];
+            IPHostEntry iPHostEntry
+                = Dns.GetHostEntry(AcabusDataContext.ConfigContext["server"]?.ToString("hostname") ?? "localhost");
+
+            _serverPort = (int)(AcabusDataContext.ConfigContext["server"]?.ToInteger("port") ?? 9000);
+            _ipAddress = iPHostEntry.AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault();
             _tokenSource = new CancellationTokenSource();
             _sessions = new List<AppSession>();
         }
@@ -85,16 +88,15 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Inicializa el servidor del nucleo de Acabus SGO.
         /// </summary>
-        public static bool Initialize()
+        public static void Initialize()
         {
             try
             {
-                _tcpListener = new TcpListener(_ipAddress, DEFAULT_PORT);
+                _tcpListener = new TcpListener(_ipAddress, _serverPort);
                 _tcpListener.Start();
 
-                Task.Run((Action)InitMonitor, _tokenSource.Token);
-
-                return true;
+                Task.Run((Action)InitMonitor, _tokenSource.Token)
+                    .Wait();
             }
             catch (SocketException ex)
             {
@@ -107,8 +109,6 @@ namespace Opera.Acabus.Core.Services
                 else
                     Trace.WriteLine($"Se ha detenido el servidor sin solicitarlo --> {ex.Message}", "ERROR");
             }
-
-            return false;
         }
 
         /// <summary>
@@ -183,6 +183,5 @@ namespace Opera.Acabus.Core.Services
                 }
             }
         }
-
     }
 }
