@@ -75,7 +75,7 @@ namespace Opera.Acabus.Core.Models
         /// <param name="id">Identificador único de la ruta.</param>
         /// <param name="number">Número de ruta.</param>
         /// <param name="type">Tipo de ruta.</param>
-        public Route(ushort id, ushort number, RouteType type)
+        public Route(ulong id, ushort number, RouteType type)
         {
             _id = id;
             _routeNumber = number;
