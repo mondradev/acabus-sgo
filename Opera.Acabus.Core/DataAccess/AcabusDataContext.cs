@@ -5,6 +5,7 @@ using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace Opera.Acabus.Core.DataAccess
@@ -116,6 +117,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>El mensaje de respuesta a la petición.</returns>
         public static AppMessage ProcessingRequest(AppMessage request)
         {
+            Trace.WriteLine($"Mensaje recibido: {request}", "DEBUG");
             request[64] = "No hay funciones implementadas";
             return request;
         }

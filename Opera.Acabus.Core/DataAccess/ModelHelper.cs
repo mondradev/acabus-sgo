@@ -36,6 +36,24 @@ namespace Opera.Acabus.Core.DataAccess
         }
 
         /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Staff"/>.
+        /// </summary>
+        /// <param name="staff">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Staff"/></returns>
+        public static Byte[] GetBytes(this Staff staff)
+        {
+            var id = staff.ID; // 8 bytes
+            var type = (byte)staff.Area;
+            var name = staff.Name;
+
+            var bid = BitConverter.GetBytes(id);
+            var bname = GetBytesFromString(name);
+            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
+
+            return new[] { bid, new[] { type }, bnameLength, bname }.Merge().ToArray();
+        }
+
+        /// <summary>
         /// Obtiene los bytes que conforman una instancia <see cref="Bus"/>.
         /// </summary>
         /// <param name="bus">Instancia a convertir a bytes.</param>
@@ -175,6 +193,25 @@ namespace Opera.Acabus.Core.DataAccess
             {
                 Name = name,
                 AssignedSection = assignation
+            };
+        }
+
+        /// <summary>
+        /// Obtiene una instancia <see cref="Staff"/> desde un vector de bytes.
+        /// </summary>
+        /// <param name="bytes">Vector de bytes que contiene la instancia <see cref="Staff"/>.</param>
+        /// <returns>Una instancia <see cref="Staff"/>.</returns>
+        public static Staff GetStaff(Byte[] bytes)
+        {
+            var id = BitConverter.ToUInt64(bytes, 0);
+            var area = (AssignableArea)bytes.Skip(8).Take(1).Single();
+            var nameLength = BitConverter.ToUInt16(bytes, 9);
+            var name = GetStringFromBytes(bytes, 11, nameLength);
+
+            return new Staff(id)
+            {
+                Name = name,
+                Area = area
             };
         }
 

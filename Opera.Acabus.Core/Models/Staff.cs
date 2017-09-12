@@ -37,7 +37,7 @@ namespace Opera.Acabus.Core.Models
     }
 
     /// <summary>
-    /// Define la estructura del personal del área de TI.
+    /// Define la estructura del personal de trabajo.
     /// </summary>
     [Entity]
     public class Staff : NotifyPropertyChanged, IComparable, IComparable<Staff>
@@ -58,6 +58,17 @@ namespace Opera.Acabus.Core.Models
         private String _name;
 
         /// <summary>
+        /// Crea una instancia persistente de <see cref="Staff"/>.
+        /// </summary>
+        /// <param name="id">Identificador del personal.</param>
+        public Staff(ulong id) { _id = id; }
+
+        /// <summary>
+        /// Crea una nueva instanica de <see cref="Staff"/>.
+        /// </summary>
+        public Staff() { }
+
+        /// <summary>
         /// Obtiene o establece el area asignada.
         /// </summary>
         [Column(Converter = typeof(DbEnumConverter<AssignableArea>))]
@@ -75,7 +86,7 @@ namespace Opera.Acabus.Core.Models
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
         public UInt64 ID {
             get => _id;
-            set {
+            private set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }
@@ -95,16 +106,16 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Compara dos instancias de <see cref="Staff"/> y determina si son diferentes.
         /// </summary>
-        /// <param name="tiStaff">Un miembro del personal a comparar.</param>
-        /// <param name="anotherTIStaff">Otro miembro del personal a comparar.</param>
+        /// <param name="staff">Un miembro del personal a comparar.</param>
+        /// <param name="anotherStaff">Otro miembro del personal a comparar.</param>
         /// <returns>Un valor <see cref="true"/> si los miembros son diferentes.</returns>
-        public static bool operator !=(Staff tiStaff, Staff anotherTIStaff)
+        public static bool operator !=(Staff staff, Staff anotherStaff)
         {
-            if (tiStaff is null && anotherTIStaff is null) return false;
-            if (tiStaff is null || anotherTIStaff is null) return true;
+            if (staff is null && anotherStaff is null) return false;
+            if (staff is null || anotherStaff is null) return true;
 
-            if (tiStaff.Area != anotherTIStaff.Area) return true;
-            if (tiStaff.Name != anotherTIStaff.Name) return true;
+            if (staff.Area != anotherStaff.Area) return true;
+            if (staff.Name != anotherStaff.Name) return true;
 
             return false;
         }
@@ -112,16 +123,16 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Compara dos instancias de <see cref="Staff"/> y determina si son iguales.
         /// </summary>
-        /// <param name="tiStaff">Un miembro del personal a comparar.</param>
-        /// <param name="anotherTIStaff">Otro miembro del personal a comparar.</param>
+        /// <param name="staff">Un miembro del personal a comparar.</param>
+        /// <param name="anotherStaff">Otro miembro del personal a comparar.</param>
         /// <returns>Un valor <see cref="true"/> si ambos miembros son iguales.</returns>
-        public static bool operator ==(Staff tiStaff, Staff anotherTIStaff)
+        public static bool operator ==(Staff staff, Staff anotherStaff)
         {
-            if (tiStaff is null && anotherTIStaff is null) return true;
-            if (tiStaff is null || anotherTIStaff is null) return false;
+            if (staff is null && anotherStaff is null) return true;
+            if (staff is null || anotherStaff is null) return false;
 
-            if (tiStaff.Area != anotherTIStaff.Area) return false;
-            if (tiStaff.Name != anotherTIStaff.Name) return false;
+            if (staff.Area != anotherStaff.Area) return false;
+            if (staff.Name != anotherStaff.Name) return false;
 
             return true;
         }
