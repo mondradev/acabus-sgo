@@ -47,22 +47,26 @@ namespace Opera.Acabus.Core.DataAccess
             };
 
             Type dbType = TypeHelper.LoadFromDll(
-                ConfigContext["connectionDb"]["assembly"].ToString(),
-                ConfigContext["connectionDb"]["type"].ToString()
+                ConfigContext["connectionDb"]?["assembly"]?.ToString(),
+                ConfigContext["connectionDb"]?["type"]?.ToString()
             );
 
             Type dialectType = TypeHelper.LoadFromDll(
-               ConfigContext["connectionDb"]["assemblyDialect"].ToString(),
-               ConfigContext["connectionDb"]["typeDialect"].ToString()
+               ConfigContext["connectionDb"]?["assemblyDialect"]?.ToString(),
+               ConfigContext["connectionDb"]?["typeDialect"]?.ToString()
             );
 
-            if (!dialectType.IsAssignableFrom(typeof(DbDialectBase)))
-                throw new InvalidOperationException($"El tipo '{dialectType.FullName}' no deriva de '{typeof(DbDialectBase).FullName}'");
 
-            _dbContext = DbFactory.CreateSession(
-                dbType,
-                (DbDialectBase)Activator.CreateInstance(dialectType, ConfigContext["connectionDb"]["connectionString"].ToString())
-            );
+            if (dialectType != null && dbType != null)
+            {
+                if (!dialectType.IsAssignableFrom(typeof(DbDialectBase)))
+                    throw new InvalidOperationException($"El tipo '{dialectType.FullName}' no deriva de '{typeof(DbDialectBase).FullName}'");
+
+                _dbContext = DbFactory.CreateSession(
+                    dbType,
+                    (DbDialectBase)Activator.CreateInstance(dialectType, ConfigContext["connectionDb"]?["connectionString"]?.ToString())
+                );
+            }
         }
 
         /// <summary>
