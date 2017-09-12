@@ -47,7 +47,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="id">Identificador único de estación.</param>
         /// <param name="stationNumber">Número de estación.</param>
-        public Station(ushort id, ushort stationNumber)
+        public Station(ulong id, ushort stationNumber)
         {
             _id = id;
             _stationNumber = stationNumber;

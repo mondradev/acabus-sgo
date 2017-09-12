@@ -13,6 +13,50 @@ namespace Opera.Acabus.Core.DataAccess
     public static class ModelHelper
     {
         /// <summary>
+        /// Obtiene una instancia <see cref="Bus"/> desde un vector de bytes.
+        /// </summary>
+        /// <param name="bytes">Vector de bytes que contiene la instancia <see cref="Bus"/>.</param>
+        /// <returns>Una instancia <see cref="Bus"/>.</returns>
+        public static Bus GetBus(Byte[] bytes)
+        {
+            var id = BitConverter.ToUInt64(bytes, 0);
+            var type = (BusType)bytes.Skip(8).Take(1).Single();
+            var status = (BusStatus)bytes.Skip(9).Take(1).Single();
+            var economicLength = BitConverter.ToUInt16(bytes, 10);
+
+            var economicNumber = GetStringFromBytes(bytes, 12, economicLength);
+            var routeID = BitConverter.ToUInt64(bytes, 12 + economicLength);
+
+            return new Bus(id, economicNumber)
+            {
+                Route = AcabusDataContext.AllRoute?.SingleOrDefault(r => r.ID == routeID),
+                Status = status,
+                Type = type
+            };
+        }
+
+        /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Bus"/>.
+        /// </summary>
+        /// <param name="bus">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Bus"/></returns>
+        public static Byte[] GetBytes(this Bus bus)
+        {
+            var id = bus.ID; // 8 bytes
+            var route = bus.Route?.ID;
+            var status = (byte)bus.Status;
+            var type = (byte)bus.Type;
+            var economic = bus.EconomicNumber;
+
+            var bid = BitConverter.GetBytes(id);
+            var broute = BitConverter.GetBytes(route ?? 0L);
+            var beconomic = GetBytesFromString(economic);
+            var beconomicLength = BitConverter.GetBytes((UInt16)beconomic.Length);
+
+            return new[] { bid, new[] { type, status }, beconomicLength, beconomic, broute }.Merge().ToArray();
+        }
+
+        /// <summary>
         /// Obtiene los bytes que conforman una instancia <see cref="Device"/>.
         /// </summary>
         /// <param name="device">Instancia a convertir a bytes.</param>
@@ -58,8 +102,34 @@ namespace Opera.Acabus.Core.DataAccess
             var bnumber = BitConverter.GetBytes(number);
             var bassigned = GetBytesFromString(assignedSection);
             var bname = GetBytesFromString(name);
+            var bassignedLength = BitConverter.GetBytes((UInt16)bassigned.Length);
+            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
 
-            return new[] { bid, bnumber, new[] { type, (byte)bname.Length }, bname, new[] { (byte)bassigned.Length }, bassigned }.Merge().ToArray();
+            return new[] { bid, bnumber, new[] { type }, bnameLength, bname, bassignedLength, bassigned }.Merge().ToArray();
+        }
+
+        /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Station"/>.
+        /// </summary>
+        /// <param name="station">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Station"/></returns>
+        public static Byte[] GetBytes(this Station station)
+        {
+            var id = station.ID; // 8 bytes
+            var name = station.Name; // n bytes
+            var assignedSection = station.AssignedSection; // n bytes
+            var number = station.StationNumber; // 2 bytes
+            var route = station.Route?.ID;
+
+            var bid = BitConverter.GetBytes(id);
+            var bnumber = BitConverter.GetBytes(number);
+            var bassigned = GetBytesFromString(assignedSection);
+            var bname = GetBytesFromString(name);
+            var bassignedLength = BitConverter.GetBytes((UInt16)bassigned.Length);
+            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
+            var broute = BitConverter.GetBytes(route ?? 0L);
+
+            return new[] { bid, bnumber, bnameLength, bname, bassignedLength, bassigned, broute }.Merge().ToArray();
         }
 
         /// <summary>
@@ -95,11 +165,11 @@ namespace Opera.Acabus.Core.DataAccess
             var number = BitConverter.ToUInt16(bytes, 8);
             var type = (RouteType)bytes.Skip(10).Take(1).Single();
 
-            var nameLenght = bytes.Skip(11).Take(1).Single();
-            var assignationLength = bytes.Skip(12 + nameLenght).Take(1).Single();
+            var nameLenght = BitConverter.ToUInt16(bytes, 11);
+            var assignationLength = BitConverter.ToUInt16(bytes, 13 + nameLenght);
 
-            var assignation = GetStringFromBytes(bytes, 12 + nameLenght + 1, assignationLength);
-            string name = GetStringFromBytes(bytes, 12, nameLenght);
+            string name = GetStringFromBytes(bytes, 13, nameLenght);
+            var assignation = GetStringFromBytes(bytes, 13 + nameLenght + 2, assignationLength);
 
             return new Route(id, number, type)
             {
@@ -109,12 +179,46 @@ namespace Opera.Acabus.Core.DataAccess
         }
 
         /// <summary>
+        /// Obtiene una instancia <see cref="Station"/> desde un vector de bytes.
+        /// </summary>
+        /// <param name="bytes">Vector de bytes que contiene la instancia <see cref="Station"/>.</param>
+        /// <returns>Una instancia <see cref="Station"/>.</returns>
+        public static Station GetStation(Byte[] bytes)
+        {
+            var id = BitConverter.ToUInt64(bytes, 0);
+            var number = BitConverter.ToUInt16(bytes, 8);
+
+            var nameLenght = BitConverter.ToUInt16(bytes, 10);
+            var assignationLength = BitConverter.ToUInt16(bytes, 12 + nameLenght);
+
+            string name = GetStringFromBytes(bytes, 12, nameLenght);
+            var assignation = GetStringFromBytes(bytes, 12 + nameLenght + 2, assignationLength);
+
+            var routeID = BitConverter.ToUInt64(bytes, 12 + nameLenght + 2 + assignationLength);
+
+            return new Station(id, number)
+            {
+                Name = name,
+                AssignedSection = assignation,
+                Route = AcabusDataContext.AllRoute?.SingleOrDefault(r => r.ID == routeID)
+            };
+        }
+
+        /// <summary>
         /// Obtiene los bytes de la cadena especificada.
         /// </summary>
         /// <param name="s">Cadena a extraer los bytes.</param>
         /// <returns>Una secuencias de bytes que representan a la cadena especificada.</returns>
         private static byte[] GetBytesFromString(string s)
-            => String.IsNullOrEmpty(s) ? new byte[] { } : Encoding.UTF8.GetBytes(s);
+        {
+            if (String.IsNullOrEmpty(s))
+                return new byte[] { };
+
+            if (s.Length > 255)
+                s = s.Substring(0, 255);
+
+            return Encoding.UTF8.GetBytes(s);
+        }
 
         /// <summary>
         /// Obtiene una cadena a partir de una secuencia de bytes.

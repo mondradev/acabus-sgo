@@ -15,22 +15,22 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// En operación (Valor predeterminado).
         /// </summary>
-        OPERATIONAL,
+        OPERATIONAL = 0,
 
         /// <summary>
         /// En reparación o taller mecánico.
         /// </summary>
-        IN_REPAIR,
+        IN_REPAIR = 1,
 
         /// <summary>
         /// Sin energía en baterías.
         /// </summary>
-        WITHOUT_ENERGY,
+        WITHOUT_ENERGY = 2,
 
         /// <summary>
         /// Otras razones.
         /// </summary>
-        OTHERS_REASONS
+        OTHERS_REASONS = 4
     }
 
     /// <summary>
