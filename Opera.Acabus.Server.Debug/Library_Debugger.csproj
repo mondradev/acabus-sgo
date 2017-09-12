@@ -66,6 +66,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="acabus.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="App.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -76,10 +80,6 @@
       <Project>{f74fee3d-d536-44df-9e2c-53540ce78173}</Project>
       <Name>InnSyTech.Standard</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassiveSsh\Acabus_Control_Operaciones.csproj">
-      <Project>{E196B435-1093-4704-8F4D-FC430842FFCD}</Project>
-      <Name>Acabus_Control_Operaciones</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Opera.Acabus.Core.Services\Opera.Acabus.Core.Services.csproj">
       <Project>{5adb847e-ea0b-40e1-b784-cd3a310f483e}</Project>
       <Name>Opera.Acabus.Core.Services</Name>
@@ -87,10 +87,6 @@
     <ProjectReference Include="..\Opera.Acabus.Core\Opera.Acabus.Core.csproj">
       <Project>{5870b3e0-a665-4014-94d1-4ed21ceb442f}</Project>
       <Name>Opera.Acabus.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Opera.Acabus.TrunkMonitor\Opera.Acabus.TrunkMonitor.csproj">
-      <Project>{2CA72C78-D881-48C2-9CC1-3BB0BB3F3C6C}</Project>
-      <Name>Opera.Acabus.TrunkMonitor</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
