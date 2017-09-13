@@ -59,7 +59,7 @@ namespace Opera.Acabus.Core.Services
             _appID = AcabusDataContext.ConfigContext.Read("App")?.ToInteger("ID") ?? 0;
             _serverID = AcabusDataContext.ConfigContext.Read("Server")?.ToInteger("ID") ?? 0;
             _serverPort = (Int32)(AcabusDataContext.ConfigContext.Read("Server")?.ToInteger("Port") ?? 9000);
-            _serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext.Read("Server")?.ToString("ip") ?? "127.0.0.1");
+            _serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext.Read("Server")?.ToString("IP") ?? "127.0.0.1");
             _clientIP = IPAddress.Any;
         }
 

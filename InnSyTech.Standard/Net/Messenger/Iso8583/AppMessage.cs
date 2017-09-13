@@ -1,5 +1,6 @@
 ﻿using InnSyTech.Standard.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -56,7 +57,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
     /// <summary>
     /// Define la estructura de un mensaje ISO8583 para la comunicación de equipos remotos. Para su utilización requiere de una plantilla que indique el tipo de cada campo que se desea implementar en los mensajes.
     /// </summary>
-    public sealed class AppMessage : IDisposable
+    public sealed class AppMessage : IDisposable, IEnumerable
     {
         /// <summary>
         /// Plantilla de campos para el codificado y decodificado de mensajes.
@@ -88,8 +89,8 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
             get => GetField(id);
             set {
                 if (_fields.Where(f => f.ID == id).Any())
-                    RemoveField(id);
-                AddField(id, value);
+                    Remove(id);
+                Add(id, value);
             }
         }
 
@@ -131,7 +132,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
             foreach (var field in fields)
             {
                 var value = Decode(field, body, out int lenght);
-                message.AddField((UInt16)field, value);
+                message.Add((UInt16)field, value);
                 body = body.Substring(lenght);
             }
 
@@ -166,7 +167,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <exception cref="ArgumentException">
         /// Identificador no puede ser 0 o previamente agregado.
         /// </exception>
-        public AppMessage AddField(UInt16 id, Object value)
+        public AppMessage Add(UInt16 id, Object value)
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(AppMessage).FullName);
@@ -221,7 +222,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         {
             try
             {
-                return DateTime.Parse(GetString(id));
+                return DateTime.Parse(GetString(id) ?? DateTime.Now.ToString());
             }
             catch (FormatException ex)
             {
@@ -238,7 +239,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         {
             try
             {
-                return Double.Parse(GetString(id));
+                return Double.Parse(GetString(id) ?? "0");
             }
             catch (FormatException ex)
             {
@@ -247,22 +248,11 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         }
 
         /// <summary>
-        /// Obtiene el valor de un campo especificado del mensaje.
+        /// Obtiene el enumerador de la secuencia.
         /// </summary>
-        /// <param name="id">Identificador del campo.</param>
-        /// <returns>El valor del campo especificado.</returns>
-        /// <exception cref="ObjectDisposedException">Mensaje ya ha sido desechado.</exception>
-        /// <exception cref="ArgumentException">El identificador del campo es 0.</exception>
-        public Object GetField(UInt16 id)
-        {
-            if (_isDisposed)
-                throw new ObjectDisposedException(typeof(AppMessage).FullName);
-
-            if (id == 0)
-                throw new ArgumentException("El identificador del campo no puede ser 0.");
-
-            return _fields.FirstOrDefault(field => field.ID == id).Value;
-        }
+        /// <returns>Enumerador de los campos.</returns>
+        public IEnumerator GetEnumerator()
+            => new FieldEnumerator(_fields);
 
         /// <summary>
         /// Obtiene el valor de un campo de tipo numérico entero.
@@ -273,7 +263,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         {
             try
             {
-                return Int64.Parse(GetString(id));
+                return Int64.Parse(GetString(id) ?? "0");
             }
             catch (FormatException ex)
             {
@@ -290,7 +280,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         {
             try
             {
-                return GetField(id).ToString();
+                return GetField(id)?.ToString();
             }
             catch (InvalidCastException ex)
             {
@@ -305,7 +295,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <returns>Un true en caso de remover el campo.</returns>
         /// <exception cref="ObjectDisposedException">Mensaje desechado previamente.</exception>
         /// <exception cref="ArgumentException">Identificador no puede ser 0.</exception>
-        public bool RemoveField(UInt16 id)
+        public bool Remove(UInt16 id)
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(AppMessage).FullName);
@@ -382,7 +372,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
                     length = int.Parse(body.Substring(0, 3)) * 2 + 3;
                     return GetBytes(body.Substring(3, length - 3));
             }
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("La plantilla no se puede aplicar para la decodificación del mensaje.");
         }
 
         /// <summary>
@@ -530,6 +520,24 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
 
             return iso8583Str.ToString();
         }
+
+        /// <summary>
+        /// Obtiene el valor de un campo especificado del mensaje.
+        /// </summary>
+        /// <param name="id">Identificador del campo.</param>
+        /// <returns>El valor del campo especificado.</returns>
+        /// <exception cref="ObjectDisposedException">Mensaje ya ha sido desechado.</exception>
+        /// <exception cref="ArgumentException">El identificador del campo es 0.</exception>
+        private Object GetField(UInt16 id)
+        {
+            if (_isDisposed)
+                throw new ObjectDisposedException(typeof(AppMessage).FullName);
+
+            if (id == 0)
+                throw new ArgumentException("El identificador del campo no puede ser 0.");
+
+            return _fields.FirstOrDefault(field => field.ID == id).Value;
+        }
     }
 
     /// <summary>
@@ -567,5 +575,64 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// Obtiene el valor del campo.
         /// </summary>
         public object Value => _value;
+    }
+
+    /// <summary>
+    /// Representa el enumerador de la secuencia, permitiendo iterar cada uno de los campos establecidos en un mensaje.
+    /// </summary>
+    internal class FieldEnumerator : IEnumerator
+    {
+        /// <summary>
+        /// Campo actual.
+        /// </summary>
+        private object _current;
+
+        /// <summary>
+        /// Campos del mensaje.
+        /// </summary>
+        private List<Field> _fields;
+
+        /// <summary>
+        /// Posición en la lista de campos.
+        /// </summary>
+        private int _index = -1;
+
+        /// <summary>
+        /// Crea una nueva instancia de <see cref="FieldEnumerator"/>.
+        /// </summary>
+        /// <param name="fields">Lista de campos del mensaje.</param>
+        public FieldEnumerator(List<Field> fields)
+        {
+            _fields = fields;
+        }
+
+        /// <summary>
+        /// Obtiene el campo actual.
+        /// </summary>
+        public object Current => _current;
+
+        /// <summary>
+        /// Avanza al siguiente campo si es posible.
+        /// </summary>
+        /// <returns>Un valor true en caso que se logró avanzar en la secuencia.</returns>
+        public bool MoveNext()
+        {
+            if (_index++ == -1 && _fields.Count > 0)
+                return (_current = _fields[_index]) != null;
+
+            if (_index++ == _fields.Count - 2)
+                return (_current = _fields[_index]) != null;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Reinicia la secuencia.
+        /// </summary>
+        public void Reset()
+        {
+            _current = null;
+            _index = -1;
+        }
     }
 }

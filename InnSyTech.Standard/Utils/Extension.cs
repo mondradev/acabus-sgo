@@ -51,5 +51,6 @@ namespace InnSyTech.Standard.Utils
                 foreach (var item in enumerable)
                     yield return item;
         }
+
     }
 }

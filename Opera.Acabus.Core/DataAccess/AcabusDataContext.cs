@@ -109,17 +109,6 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene la sesión a la base de datos.
         /// </summary>
         public static IDbSession DbContext => _dbContext;
-
-        /// <summary>
-        /// Procesa un mensaje y devuelve el resultado según su contenido.
-        /// </summary>
-        /// <param name="request">Mensaje que representa la petición.</param>
-        /// <returns>El mensaje de respuesta a la petición.</returns>
-        public static AppMessage ProcessingRequest(AppMessage request)
-        {
-            Trace.WriteLine($"Mensaje recibido: {request}", "DEBUG");
-            request[64] = "No hay funciones implementadas";
-            return request;
-        }
+        
     }
 }

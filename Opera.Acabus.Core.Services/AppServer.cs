@@ -49,13 +49,25 @@ namespace Opera.Acabus.Core.Services
         static AppServer()
         {
             IPHostEntry iPHostEntry
-                = Dns.GetHostEntry(AcabusDataContext.ConfigContext["server"]?.ToString("hostname") ?? "localhost");
+                = Dns.GetHostEntry(AcabusDataContext.ConfigContext["Server"]?.ToString("Hostname") ?? "localhost");
 
-            _serverPort = (int)(AcabusDataContext.ConfigContext["server"]?.ToInteger("port") ?? 9000);
+            _serverPort = (int)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Hort") ?? 9000);
             _ipAddress = iPHostEntry.AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault();
             _tokenSource = new CancellationTokenSource();
             _sessions = new List<AppSession>();
         }
+
+        /// <summary>
+        /// Representa un método utilizado para la interpretación de las peticiones del servidor de aplicación SGO.
+        /// </summary>
+        /// <param name="message">Mensaje de petición.</param>
+        /// <returns>Mensaje de respuesta.</returns>
+        public delegate AppMessage CallProcessingRequest(AppMessage message);
+
+        /// <summary>
+        /// Método utilizado para la interpretación de las peticiones al servidor.
+        /// </summary>
+        public static CallProcessingRequest ProcessingRequest { get; set; }
 
         /// <summary>
         /// Cierra las sesiones abiertas y deja de recibir las peticiones de conexión.
@@ -118,7 +130,9 @@ namespace Opera.Acabus.Core.Services
         /// <param name="buffer">Buffer de lectura.</param>
         internal static void MessageProcessing(AppSession client, AppMessage request)
         {
-            var message = AcabusDataContext.ProcessingRequest(request);
+            var message = ProcessingRequest?.Invoke(request);
+            if (message != null)
+                message = new AppMessage() { { 64, "El servidor no tiene funciones disponibles." } };
             client.SendMessage(message);
         }
 

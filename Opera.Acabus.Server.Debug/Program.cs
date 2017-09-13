@@ -30,7 +30,7 @@ namespace Opera.Acabus.Server.Debug
                 var res = client.SendRequest(msj);
                 Console.WriteLine(res);
 
-                res.AddField(63, new Route(2, 2, RouteType.TRUNK) { Name = "OVIEDO", AssignedSection = null }.GetBytes());
+                res.Add(63, new Route(2, 2, RouteType.TRUNK) { Name = "OVIEDO", AssignedSection = null }.GetBytes());
                 res = client.SendRequest(res);
                 Route route = ModelHelper.GetRoute(res.GetBytes(63));
                 Console.WriteLine(res);

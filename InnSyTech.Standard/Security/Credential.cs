@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InnSyTech.Standard.Utils
+namespace InnSyTech.Standard.Security
 {
     /// <summary>
     /// Permisos básicos de una credencial de acceso a sistemas informáticos.

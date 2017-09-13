@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace InnSyTech.Standard.Utils
+namespace InnSyTech.Standard.Translates
 {
     /// <summary>
     /// Esta clase permite la traducción de una enumeración a un texto que puede ser leido por un ser humano.

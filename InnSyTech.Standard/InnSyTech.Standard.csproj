@@ -95,8 +95,8 @@
     <Compile Include="SecureShell\Ssh.cs" />
     <Compile Include="SecureShell\SshPsql.cs" />
     <Compile Include="Net\ConnectionTCP.cs" />
-    <Compile Include="Utils\Credential.cs" />
-    <Compile Include="Utils\EnumTranslate.cs" />
+    <Compile Include="Security\Credential.cs" />
+    <Compile Include="Translates\EnumTranslate.cs" />
     <Compile Include="Utils\Extension.cs" />
   </ItemGroup>
   <ItemGroup>
