@@ -60,7 +60,9 @@
     <Compile Include="Converters\DeviceTypeConverter.cs" />
     <Compile Include="Converters\RouteTypeSpanishConverter.cs" />
     <Compile Include="Dispatcher.cs" />
-    <Compile Include="Modules\ISgoModule.cs" />
+    <Compile Include="Modules\IModuleInfo.cs" />
+    <Compile Include="Modules\ModuleBase.cs" />
+    <Compile Include="Modules\ModuleInfoBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

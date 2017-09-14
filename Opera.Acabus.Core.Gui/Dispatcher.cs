@@ -38,37 +38,6 @@ namespace Opera.Acabus.Core.Gui
         public static event RequestShowContentHandler RequestingShowDialog;
 
         /// <summary>
-        /// Define la estructura de la información de un módulo de la aplicación.
-        /// </summary>
-        public interface IModuleInfo
-        {
-            /// <summary>
-            /// Obtiene icono del módulo.
-            /// </summary>
-            System.Windows.FrameworkElement Icon { get; }
-
-            /// <summary>
-            /// Obtiene o establece si el módulo está cargado.
-            /// </summary>
-            Boolean IsLoaded { get; set; }
-
-            /// <summary>
-            /// Obtiene si el módulo es secundario.
-            /// </summary>
-            Boolean IsSecundary { get; }
-
-            /// <summary>
-            /// Obtiene el nombre de módulo.
-            /// </summary>
-            String Name { get; }
-
-            /// <summary>
-            /// Obtiene clase de la vista principal del módulo.
-            /// </summary>
-            Type ViewType { get; }
-        }
-
-        /// <summary>
         /// Solicita al controlador de interfaz mostrar la vista pasada por parametro.
         /// </summary>
         public static void RequestShowContent(System.Windows.Controls.UserControl content)

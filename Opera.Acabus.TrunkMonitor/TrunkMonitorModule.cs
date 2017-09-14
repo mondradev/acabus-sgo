@@ -12,7 +12,7 @@ namespace Opera.Acabus.TrunkMonitor
     /// <summary>
     /// Define la información del módulo de monitor de vía y equipos externos.
     /// </summary>
-    public class TrunkMonitorModule : ISgoModule
+    public class TrunkMonitorModule : IModuleInfo
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AllLinks" />.
@@ -32,7 +32,7 @@ namespace Opera.Acabus.TrunkMonitor
         /// <summary>
         /// Indica si el módulo es secundario o de configuración.
         /// </summary>
-        public bool IsSecundary => false;
+        public bool IsConfiguration => false;
 
         /// <summary>
         /// Indica si el módulo es solo de servicio.
@@ -47,7 +47,7 @@ namespace Opera.Acabus.TrunkMonitor
         /// <summary>
         /// Obtiene el tipo de la vista principal del módulo.
         /// </summary>
-        public Type View => typeof(TrunkMonitorView);
+        public Type ViewType => typeof(TrunkMonitorView);
 
         /// <summary>
         /// Permite la carga de los datos utilizados por el módulo <see cref="TrunkMonitor"/>
