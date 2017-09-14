@@ -1,7 +1,7 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.Models;
-using Opera.Acabus.TrunkMonitor.Utils;
+using Opera.Acabus.TrunkMonitor.Helpers;
 using System;
 
 namespace Opera.Acabus.TrunkMonitor.Models
@@ -109,10 +109,16 @@ namespace Opera.Acabus.TrunkMonitor.Models
         public Station StationA {
             get => _stationA;
             set {
+
+                if (_stationA != null && value == null)
+                    _stationA?.RemoveLink(this);
+
                 _stationA = value;
-                OnPropertyChanged(nameof(StationA));
+
                 if (value != null)
-                    _stationA.AddLink(this);
+                    _stationA?.AddLink(this);
+
+                OnPropertyChanged(nameof(StationA));
             }
         }
 

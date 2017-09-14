@@ -1,4 +1,4 @@
-﻿using InnSyTech.Standard.Utils;
+﻿using InnSyTech.Standard.Translates;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

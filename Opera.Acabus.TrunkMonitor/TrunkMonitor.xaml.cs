@@ -1,7 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.TrunkMonitor.Helpers;
 using Opera.Acabus.TrunkMonitor.Models;
-using Opera.Acabus.TrunkMonitor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

@@ -4,12 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Opera.Acabus.TrunkMonitor.Utils
+namespace Opera.Acabus.TrunkMonitor.Helpers
 {
     /// <summary>
     /// Provee a las instancias de <see cref="Station"/> el manejo de enlaces de comunicación <see cref="Link"/>.
     /// </summary>
-    public static class StationExtensions
+    public static class StationHelper
     {
         ///<summary>
         /// Lleva el control de todas las instancias <see cref="Station"/> y su limite de latencia aceptable.
@@ -46,7 +46,9 @@ namespace Opera.Acabus.TrunkMonitor.Utils
             lock (_stations)
                 if (!_stations.ContainsKey(station))
                     _stations.Add(station, new ObservableCollection<Link>());
-            _stations[station].Add(link);
+
+            if (!_stations[station].Contains(link))
+                _stations[station].Add(link);
         }
 
         /// <summary>
@@ -111,12 +113,16 @@ namespace Opera.Acabus.TrunkMonitor.Utils
         /// </summary>
         /// <param name="station">Estación a la que se quitará el enlace.</param>
         /// <param name="link">Enlace a remover.</param>
-        public static void RemoveLink(this Station station, Link link)
+        public static bool RemoveLink(this Station station, Link link)
         {
             lock (_stations)
                 if (!_stations.ContainsKey(station))
                     _stations.Add(station, new ObservableCollection<Link>());
-            _stations[station].Remove(link);
+
+            if (_stations[station].Contains(link))
+                return _stations[station].Remove(link);
+
+            return false;
         }
 
         /// <summary>

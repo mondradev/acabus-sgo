@@ -1,5 +1,5 @@
-﻿using Opera.Acabus.TrunkMonitor.Models;
-using Opera.Acabus.TrunkMonitor.Utils;
+﻿using Opera.Acabus.TrunkMonitor.Helpers;
+using Opera.Acabus.TrunkMonitor.Models;
 using System;
 
 namespace Opera.Acabus.TrunkMonitor.Service

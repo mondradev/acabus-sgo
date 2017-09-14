@@ -1,12 +1,13 @@
 ﻿using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.TrunkMonitor.Helpers;
 using Opera.Acabus.TrunkMonitor.Models;
 using Opera.Acabus.TrunkMonitor.Service;
-using Opera.Acabus.TrunkMonitor.Utils;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -173,7 +174,8 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <summary>
         /// Obtiene o establece la lista de enlaces de estaciones.
         /// </summary>
-        public ObservableCollection<Link> Links => AcabusData.CC?.GetLinks();
+        public ObservableCollection<Link> Links => AcabusDataContext.DbContext?.Read<Station>()
+            .SingleOrDefault(s=> s.Name.Contains("CENTRO DE CONTROL"))?.GetLinks();
 
         /// <summary>
         /// Obtiene el comando cuando se desencadena el evento Loaded de la vista.

@@ -68,7 +68,7 @@
       <DependentUpon>TrunkMonitor.xaml</DependentUpon>
     </Compile>
     <Compile Include="TrunkMonitorModule.cs" />
-    <Compile Include="Utils\StationExtensions.cs" />
+    <Compile Include="Helpers\StationHelper.cs" />
     <Compile Include="ViewModels\TrunkMonitorViewModel.cs" />
     <Compile Include="Views\TrunkMonitorView.xaml.cs">
       <DependentUpon>TrunkMonitorView.xaml</DependentUpon>

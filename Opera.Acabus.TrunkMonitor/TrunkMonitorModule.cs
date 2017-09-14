@@ -5,7 +5,6 @@ using Opera.Acabus.TrunkMonitor.Models;
 using Opera.Acabus.TrunkMonitor.Views;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Windows;
 
 namespace Opera.Acabus.TrunkMonitor
@@ -18,13 +17,12 @@ namespace Opera.Acabus.TrunkMonitor
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AllLinks" />.
         /// </summary>
-        private static ICollection<Link> _allLinks;
+        private static IEnumerable<Link> _allLinks;
 
         /// <summary>
         /// Obtiene una lista de todos los enlaces de comunicación.
         /// </summary>
-        public static ICollection<Link> AllLinks
-            => _allLinks ?? (_allLinks = new ObservableCollection<Link>());
+        public static IEnumerable<Link> AllLinks => _allLinks;
 
         /// <summary>
         /// Obtiene el icono del módulo.
@@ -58,7 +56,7 @@ namespace Opera.Acabus.TrunkMonitor
         {
             try
             {
-                _allLinks = AcabusData.Session.GetObjects<Link>();
+                _allLinks = AcabusDataContext.DbContext?.Read<Link>();
                 return true;
             }
             catch { return false; }
