@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Input;
 using static Opera.Acabus.Core.Gui.Dispatcher.RequestSendMessageArg;
 
 namespace Opera.Acabus.Core.Gui
@@ -9,7 +10,8 @@ namespace Opera.Acabus.Core.Gui
     public static class Dispatcher
     {
         /// <summary>
-        /// Representa el método que controla el evento para la petición envío de mensajes y notificaciones a la interfaz.
+        /// Representa el método que controla el evento para la petición envío de mensajes y
+        /// notificaciones a la interfaz.
         /// </summary>
         /// <param name="arg">Argumentos del evento.</param>
         public delegate void RequestSendMessageHandler(RequestSendMessageArg arg);
@@ -36,6 +38,11 @@ namespace Opera.Acabus.Core.Gui
         /// través de un cuadro de diálogo.
         /// </summary>
         public static event RequestShowContentHandler RequestingShowDialog;
+
+        /// <summary>
+        /// Obtiene o establece el comando que cierra el cuadro de dialogo abierto actualmente.
+        /// </summary>
+        public static ICommand CloseDialogCommand { get; set; }
 
         /// <summary>
         /// Solicita al controlador de interfaz mostrar la vista pasada por parametro.
@@ -69,7 +76,8 @@ namespace Opera.Acabus.Core.Gui
                 .Invoke(new RequestSendMessageArg(message, RequestSendType.NOTIFY));
 
         /// <summary>
-        /// Define la estructura de los argumentos utilizados para la solicitud de envío de mensajes o notificaciones a la interfaz.
+        /// Define la estructura de los argumentos utilizados para la solicitud de envío de mensajes
+        /// o notificaciones a la interfaz.
         /// </summary>
         public sealed class RequestSendMessageArg : EventArgs
         {
@@ -90,12 +98,14 @@ namespace Opera.Acabus.Core.Gui
             public enum RequestSendType
             {
                 /// <summary>
-                /// Petición de envío tipo mensaje. Muestra un pequeño cuadro de diálogo con el mensaje a mostrar.
+                /// Petición de envío tipo mensaje. Muestra un pequeño cuadro de diálogo con el
+                /// mensaje a mostrar.
                 /// </summary>
                 MESSAGE,
 
                 /// <summary>
-                /// Petición de envío tipo notificación. Muestra una notificación en la parte inferior de la ventana.
+                /// Petición de envío tipo notificación. Muestra una notificación en la parte
+                /// inferior de la ventana.
                 /// </summary>
                 NOTIFY
             }
@@ -112,8 +122,8 @@ namespace Opera.Acabus.Core.Gui
         }
 
         /// <summary>
-        /// Define la estructura de los argumentos utilizados para la solicitud de muestra de contenido o
-        /// cuadros de dialogos con función de llamada de vuelta.
+        /// Define la estructura de los argumentos utilizados para la solicitud de muestra de
+        /// contenido o cuadros de dialogos con función de llamada de vuelta.
         /// </summary>
         public sealed class RequestShowContentArg : EventArgs
         {

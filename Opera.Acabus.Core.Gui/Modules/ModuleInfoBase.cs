@@ -27,14 +27,7 @@ namespace Opera.Acabus.Core.Gui.Modules
             _dependencies.Add(typeof(IModuleInfo).Assembly);
             _dependencies.Add(typeof(DataAccess.AcabusDataContext).Assembly);
         }
-
-        /// <summary>
-        /// Crea una instancia de <see cref="ModuleInfoBase"/>.
-        /// </summary>
-        public ModuleInfoBase() : this(null)
-        {
-        }
-
+        
         /// <summary>
         /// Obtiene el autor del módulo.
         /// </summary>
