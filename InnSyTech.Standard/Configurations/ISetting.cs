@@ -48,5 +48,12 @@ namespace InnSyTech.Standard.Configuration
         /// <param name="name">Nombre del atributo.</param>
         /// <returns>Cadena del valor del atributo.</returns>
         string ToString(string name);
+
+        /// <summary>
+        /// Obtiene todas las configuraciones que incluye en el interior del nodo especificado.
+        /// </summary>
+        /// <param name="name">Nombre del nodo de configuración.</param>
+        /// <returns>Una secuencias de configuraciones.</returns>
+        IReadOnlyList<ISetting> GetSettings(string name);
     }
 }

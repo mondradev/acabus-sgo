@@ -52,6 +52,22 @@ namespace InnSyTech.Standard.Configuration
         }
 
         /// <summary>
+        /// Obtiene todas las configuraciones que incluye el nodo especificado.
+        /// </summary>
+        /// <param name="name">Nombre del nodo de configuración.</param>
+        /// <returns>Una secuencia de configuraciones.</returns>
+        public IReadOnlyList<ISetting> GetSettings(string name)
+        {
+            var attr = GetValue(name);
+            if (attr is List<ISetting>)
+                return attr as List<ISetting>;
+            else if (attr is ISetting)
+                return new List<ISetting> { attr as ISetting };
+            else
+                return new List<ISetting>();
+        }
+
+        /// <summary>
         /// Obtiene el valor de un atributo o configuración del nombre especificado.
         /// </summary>
         /// <param name="name">Nombre la configuración o atributo a obtener.</param>
@@ -107,7 +123,15 @@ namespace InnSyTech.Standard.Configuration
                 setting._attributes.Add(attr.Name, attr.Value);
 
             foreach (XmlNode child in node.ChildNodes)
-                setting._attributes.Add(child.Name, new Setting(child));
+                if (setting._attributes.ContainsKey(child.Name))
+                    if (setting._attributes[child.Name] is List<ISetting>)
+                        (setting._attributes[child.Name] as List<ISetting>).Add(new Setting(child));
+                    else
+                        setting._attributes[child.Name] = new List<ISetting>() {
+                            setting._attributes[child.Name] as Setting
+                        };
+                else
+                    setting._attributes.Add(child.Name, new Setting(child));
         }
     }
 }

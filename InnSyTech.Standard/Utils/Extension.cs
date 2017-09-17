@@ -52,5 +52,16 @@ namespace InnSyTech.Standard.Utils
                     yield return item;
         }
 
+        /// <summary>
+        /// Obtiene el mensaje de una instancia <see cref="Exception"/> desde su excepción más profunda.
+        /// </summary>
+        /// <returns>Un mensaje de la excepción ocurrida.</returns>
+        public static String PrintMessage(this Exception exception)
+        {
+            while (exception.InnerException != null)
+                exception = exception.InnerException;
+
+            return exception.Message + "\n" + exception.StackTrace.Trim();
+        }
     }
 }

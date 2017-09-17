@@ -1,5 +1,7 @@
-﻿using System;
+﻿using InnSyTech.Standard.Utils;
+using System;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace InnSyTech.Standard.Database
 {
@@ -33,8 +35,17 @@ namespace InnSyTech.Standard.Database
 
             if (!typeof(DbConnection).IsAssignableFrom(connectionType))
                 throw new ArgumentOutOfRangeException(nameof(connectionType), "El tipo de conexión no hereda de System.Data.Common.DbConnection");
-
-            return new DbSession((DbConnection)Activator.CreateInstance(connectionType, dialect.ConnectionString), dialect);
+            try
+            {
+                DbConnection dbConnection = (DbConnection)Activator.CreateInstance(connectionType, new object[] { dialect.ConnectionString });
+                return new DbSession(dbConnection, dialect);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine("Error a inicializar el controlador de base de datos.", "ERROR");
+                Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
+                return null;
+            }
         }
     }
 }
