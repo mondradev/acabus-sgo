@@ -38,7 +38,7 @@ namespace Opera.Acabus.Sgo
         /// <param name="buttonContent">Contenido del botón.</param>
         /// <param name="tooltip">Tip de la herramienta.</param>
         /// <param name="isSecundary">Es un modulo secundario.</param>
-        internal void AddToolButton(String name, ICommand command, FrameworkElement buttonContent, String tooltip, Boolean isSecundary)
+        internal void CreateToolButton(String name, ICommand command, FrameworkElement buttonContent, String tooltip)
         {
             foreach (var item in _mainToolBar.Children)
                 if (item is Button)
@@ -60,8 +60,6 @@ namespace Opera.Acabus.Sgo
                 Padding = new Thickness(0),
                 Foreground = TryFindResource("IdealForegroundColorBrush") as Brush
             };
-            if (isSecundary)
-                DockPanel.SetDock(newButton, Dock.Right);
             _mainToolBar.Children.Add(newButton);
         }
 
