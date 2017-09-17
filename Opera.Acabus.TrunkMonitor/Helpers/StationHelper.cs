@@ -3,6 +3,7 @@ using Opera.Acabus.TrunkMonitor.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Opera.Acabus.TrunkMonitor.Helpers
 {
@@ -47,8 +48,13 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
                 if (!_stations.ContainsKey(station))
                     _stations.Add(station, new ObservableCollection<Link>());
 
-            if (!_stations[station].Contains(link))
-                _stations[station].Add(link);
+            ObservableCollection<Link> links = _stations[station];
+
+            if (links.Any(l => l.ID == link.ID && l != link))
+                links.Remove(links.Single(l => l.ID == link.ID && l != link));
+
+            if (!links.Contains(link))
+                links.Add(link);
         }
 
         /// <summary>

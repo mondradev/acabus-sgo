@@ -16,10 +16,10 @@
 
     <i:Interaction.Triggers>
         <i:EventTrigger>
-            <i:InvokeCommandAction Command="{Binding LoadedHandlerCommand, Mode=OneWay}"/>
+            <i:InvokeCommandAction Command="{Binding LoadCommand, Mode=OneWay}"/>
         </i:EventTrigger>
         <i:EventTrigger EventName="Unloaded">
-            <i:InvokeCommandAction Command="{Binding UnloadedHandlerCommand, Mode=OneWay}"/>
+            <i:InvokeCommandAction Command="{Binding UnloadCommand, Mode=OneWay}"/>
         </i:EventTrigger>
     </i:Interaction.Triggers>
 

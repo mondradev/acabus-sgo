@@ -1,5 +1,4 @@
-﻿using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Gui.Modules;
+﻿using Opera.Acabus.Core.Gui.Modules;
 using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Helpers;
 using Opera.Acabus.TrunkMonitor.Models;
@@ -61,8 +60,12 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <summary>
         /// Obtiene o establece la lista de enlaces de estaciones.
         /// </summary>
-        public ObservableCollection<Link> Links => AcabusDataContext.DbContext?.Read<Station>()
-            .SingleOrDefault(s => s.Name.Contains("CENTRO DE CONTROL"))?.GetLinks();
+        public ObservableCollection<Link> Links => TrunkMonitorModule.AllLinks
+            .ToList()
+            .Where(l => l.StationA.Name.Contains("CENTRO DE CONTROL"))
+            .Select(l => l.StationA)
+            .SingleOrDefault()?
+            .GetLinks();
 
         /// <summary>
         /// Permite crear una tarea que se ejecutará desde el monitor de vía.
@@ -175,11 +178,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <summary>
         /// Nombre de la tarea como se visualizará en el monitor.
         /// </summary>
-        public String Name { get; private set; }
+        public String Name { get; }
 
         /// <summary>
         /// Acción que realizará la tarea cuando esta se seleccione.
         /// </summary>
-        public Action<Station> Task { get; private set; }
+        public Action<Station> Task { get; }
     }
 }

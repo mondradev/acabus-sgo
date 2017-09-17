@@ -1,10 +1,12 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using InnSyTech.Standard.Database.Linq;
+using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui.Modules;
 using Opera.Acabus.TrunkMonitor.Models;
 using Opera.Acabus.TrunkMonitor.Views;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace Opera.Acabus.TrunkMonitor
@@ -15,11 +17,6 @@ namespace Opera.Acabus.TrunkMonitor
     public sealed class TrunkMonitorModule : ModuleInfoBase
     {
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="AllLinks" />.
-        /// </summary>
-        private static IEnumerable<Link> _allLinks;
-
-        /// <summary>
         /// Crea una instancia nueva de <see cref="TrunkMonitorModule"/>.
         /// </summary>
         public TrunkMonitorModule() : base(null) { }
@@ -27,7 +24,9 @@ namespace Opera.Acabus.TrunkMonitor
         /// <summary>
         /// Obtiene una lista de todos los enlaces de comunicación.
         /// </summary>
-        public static IEnumerable<Link> AllLinks => _allLinks;
+        public static IEnumerable<Link> AllLinks => AcabusDataContext.DbContext?
+            .Read<Link>()
+            .LoadReference(1);
 
         /// <summary>
         /// Obtiene el autor del módulo.
@@ -62,14 +61,6 @@ namespace Opera.Acabus.TrunkMonitor
         /// <summary>
         /// Permite la carga de los datos utilizados por el módulo <see cref="TrunkMonitor"/>
         /// </summary>
-        public override bool LoadModule()
-        {
-            try
-            {
-                _allLinks = AcabusDataContext.DbContext?.Read<Link>();
-                return true;
-            }
-            catch { return false; }
-        }
+        public override bool LoadModule() => true;
     }
 }

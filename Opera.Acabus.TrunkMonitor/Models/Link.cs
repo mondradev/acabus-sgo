@@ -10,7 +10,7 @@ namespace Opera.Acabus.TrunkMonitor.Models
     /// Define la estructura de un enlace de comunicación entre una estación en extremo A y otra en extremo B.
     /// </summary>
     [Entity(TableName = "Links")]
-    public sealed class Link : NotifyPropertyChanged
+    public sealed class Link : NotifyPropertyChanged, IComparable<Link>, IComparable
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="ID" />.
@@ -109,7 +109,6 @@ namespace Opera.Acabus.TrunkMonitor.Models
         public Station StationA {
             get => _stationA;
             set {
-
                 if (_stationA != null && value == null)
                     _stationA?.RemoveLink(this);
 
@@ -133,6 +132,95 @@ namespace Opera.Acabus.TrunkMonitor.Models
                 OnPropertyChanged(nameof(StationB));
             }
         }
+
+        /// <summary>
+        /// Compara dos instancias de <see cref="Link"/> y determina si son diferentes.
+        /// </summary>
+        /// <param name="link">Un enlace a comparar.</param>
+        /// <param name="anotherLink">Otro enlace a comparar.</param>
+        /// <returns>Un valor true si los enlaces son diferentes.</returns>
+        public static bool operator !=(Link link, Link anotherLink)
+        {
+            if (link is null && anotherLink is null) return false;
+            if (link is null || anotherLink is null) return true;
+
+            return link.CompareTo(anotherLink) != 0;
+        }
+
+        /// <summary>
+        /// Compara dos instancias de <see cref="Link"/> y determina si son iguales.
+        /// </summary>
+        /// <param name="link">Un enlace a comparar.</param>
+        /// <param name="anotherLink">Otro enlace a comparar.</param>
+        /// <returns>Un valor true si los enlaces son iguales.</returns>
+        public static bool operator ==(Link link, Link anotherLink)
+        {
+            if (link is null && anotherLink is null) return true;
+            if (link is null || anotherLink is null) return false;
+
+            return link.Equals(anotherLink);
+        }
+
+        /// <summary>
+        /// Compara la instancia <see cref="Link"/> actual con otra instancia y
+        /// devuelve un entero que indica si la posición de la instancia actual es anterior,
+        /// posterior o igual que la del otro objeto en el criterio de ordenación.
+        /// </summary>
+        /// <param name="other">Otra instancia.</param>
+        /// <returns>
+        /// Un valor 0 si las instancias son iguales, 1 si la instancia es mayor que la otra y -1 si
+        /// la instancia menor que la otra.
+        /// </returns>
+        public int CompareTo(object other)
+        {
+            if (other is null) return 1;
+            if (other.GetType() != GetType()) return 1;
+            return CompareTo(other as Link);
+        }
+
+        /// <summary>
+        /// Compara la instancia <see cref="Link"/> actual con otra instancia <see cref="Link"/> y
+        /// devuelve un entero que indica si la posición de la instancia actual es anterior,
+        /// posterior o igual que la del otro objeto en el criterio de ordenación.
+        /// </summary>
+        /// <param name="other">Otra instancia <see cref="Link"/>.</param>
+        /// <returns>
+        /// Un valor 0 si las instancias son iguales, 1 si la instancia es mayor que la otra y -1 si
+        /// la instancia menor que la otra.
+        /// </returns>
+        public int CompareTo(Link other)
+        {
+            if (other is null) return 1;
+
+            var comparer = StationA?.CompareTo(other.StationA) ?? -1;
+
+            if (comparer == 0)
+                return StationB?.CompareTo(other.StationB) ?? -1;
+
+            return comparer;
+        }
+
+        /// <summary>
+        /// Determina si la instancia actual es igual a la pasada por argumento de la función.
+        /// </summary>
+        /// <param name="obj">Instancia a comparar con la actual.</param>
+        /// <returns>Un valor true si la instancia es igual a la actual.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (obj.GetType() != GetType()) return false;
+
+            var anotherLink = obj as Link;
+
+            return CompareTo(anotherLink) == 0;
+        }
+
+        /// <summary>
+        /// Devuelve el código hash de la instancia actual.
+        /// </summary>
+        /// <returns>Un código hash que representa la instancia actual.</returns>
+        public override int GetHashCode()
+            => Tuple.Create(StationA, StationB).GetHashCode();
 
         /// <summary>
         /// Representa en una cadena la instancia actual.
