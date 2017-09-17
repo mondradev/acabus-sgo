@@ -316,11 +316,7 @@ namespace Opera.Acabus.Core.Models
             if (device is null && anotherDevice is null) return false;
             if (device is null || anotherDevice is null) return true;
 
-            if (device.Type != anotherDevice.Type) return true;
-            if (device.Location != anotherDevice.Location) return true;
-            if (device.SerialNumber != anotherDevice.SerialNumber) return true;
-
-            return false;
+            return device.CompareTo(anotherDevice) != 0;
         }
 
         /// <summary>
@@ -334,11 +330,7 @@ namespace Opera.Acabus.Core.Models
             if (device is null && anotherDevice is null) return true;
             if (device is null || anotherDevice is null) return false;
 
-            if (device.Type != anotherDevice.Type) return false;
-            if (device.Location != anotherDevice.Location) return false;
-            if (device.SerialNumber != anotherDevice.SerialNumber) return false;
-
-            return true;
+            return device.Equals(anotherDevice);
         }
 
         /// <summary>
@@ -390,11 +382,7 @@ namespace Opera.Acabus.Core.Models
 
             var anotherDevice = obj as Device;
 
-            if (anotherDevice.Type != Type) return false;
-            if (anotherDevice.SerialNumber != SerialNumber) return false;
-            if (anotherDevice.Location != Location) return false;
-
-            return true;
+            return CompareTo(anotherDevice) == 0;
         }
 
         /// <summary>

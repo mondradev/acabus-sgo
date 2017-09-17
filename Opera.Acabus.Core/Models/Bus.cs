@@ -191,16 +191,13 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="bus">Un autobus a comparar.</param>
         /// <param name="anotherBus">Otro autobus a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si los autobuses son diferentes.</returns>
+        /// <returns>Un valor true si los autobuses son diferentes.</returns>
         public static bool operator !=(Bus bus, Bus anotherBus)
         {
             if (bus is null && anotherBus is null) return false;
             if (bus is null || anotherBus is null) return true;
 
-            if (bus.Type != anotherBus.Type) return true;
-            if (bus.EconomicNumber != anotherBus.EconomicNumber) return true;
-
-            return false;
+            return bus.CompareTo(anotherBus) != 0;
         }
 
         /// <summary>
@@ -208,16 +205,13 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="bus">Una estación a comparar.</param>
         /// <param name="anotherBus">Otra estación a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si las estaciones son iguales.</returns>
+        /// <returns>Un valor true si las estaciones son iguales.</returns>
         public static bool operator ==(Bus bus, Bus anotherBus)
         {
             if (bus is null && anotherBus is null) return true;
             if (bus is null || anotherBus is null) return false;
 
-            if (bus.Type != anotherBus.Type) return false;
-            if (bus.EconomicNumber != anotherBus.EconomicNumber) return false;
-
-            return true;
+            return bus.Equals(anotherBus);
         }
 
         /// <summary>
@@ -259,7 +253,7 @@ namespace Opera.Acabus.Core.Models
         /// Determina si la instancia actual es igual a la pasada por argumento de la función.
         /// </summary>
         /// <param name="obj">Instancia a comparar con la actual.</param>
-        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la actual.</returns>
+        /// <returns>Un valor true si la instancia es igual a la actual.</returns>
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
@@ -267,10 +261,7 @@ namespace Opera.Acabus.Core.Models
 
             var anotherBus = obj as Bus;
 
-            if (anotherBus.Type != Type) return false;
-            if (anotherBus.EconomicNumber != EconomicNumber) return false;
-
-            return true;
+            return CompareTo(anotherBus) == 0;
         }
 
         /// <summary>

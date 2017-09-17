@@ -60,7 +60,7 @@ namespace Opera.Acabus.Core.DataAccess
 
             if (dialectType != null && dbType != null)
             {
-                if (!dialectType.IsAssignableFrom(typeof(DbDialectBase)))
+                if (!typeof(DbDialectBase).IsAssignableFrom(dialectType))
                     throw new InvalidOperationException($"El tipo '{dialectType.FullName}' no deriva de '{typeof(DbDialectBase).FullName}'");
 
                 _dbContext = DbFactory.CreateSession(

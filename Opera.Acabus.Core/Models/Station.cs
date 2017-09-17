@@ -133,10 +133,7 @@ namespace Opera.Acabus.Core.Models
             if (station is null && anotherStation is null) return false;
             if (station is null || anotherStation is null) return true;
 
-            if (station.StationNumber != anotherStation.StationNumber) return true;
-            if (station.Route != anotherStation.Route) return true;
-
-            return false;
+            return station.CompareTo(anotherStation) != 0;
         }
 
         /// <summary>
@@ -150,10 +147,7 @@ namespace Opera.Acabus.Core.Models
             if (station is null && anotherStation is null) return true;
             if (station is null || anotherStation is null) return false;
 
-            if (station.StationNumber != anotherStation.StationNumber) return false;
-            if (station.Route != anotherStation.Route) return false;
-
-            return true;
+            return station.Equals(anotherStation);
         }
 
         /// <summary>
@@ -203,10 +197,7 @@ namespace Opera.Acabus.Core.Models
 
             var anotherStation = obj as Station;
 
-            if (anotherStation.StationNumber != StationNumber) return false;
-            if (anotherStation.Route != Route) return false;
-
-            return true;
+            return CompareTo(anotherStation) == 0;
         }
 
         /// <summary>

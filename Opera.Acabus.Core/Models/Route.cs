@@ -169,11 +169,7 @@ namespace Opera.Acabus.Core.Models
             if (route is null && anotherRoute is null) return false;
             if (route is null || anotherRoute is null) return true;
 
-            if (!route.Name.Equals(anotherRoute.Name)) return true;
-            if (!route.RouteNumber.Equals(anotherRoute.RouteNumber)) return true;
-            if (!route.Type.Equals(anotherRoute.Type)) return true;
-
-            return false;
+            return route.CompareTo(anotherRoute) != 0;
         }
 
         /// <summary>
@@ -187,11 +183,7 @@ namespace Opera.Acabus.Core.Models
             if (route is null && anotherRoute is null) return true;
             if (route is null || anotherRoute is null) return false;
 
-            if (!route.Name.Equals(anotherRoute.Name)) return false;
-            if (!route.RouteNumber.Equals(anotherRoute.RouteNumber)) return false;
-            if (!route.Type.Equals(anotherRoute.Type)) return false;
-
-            return true;
+            return route.Equals(anotherRoute);
         }
 
         /// <summary>
@@ -242,11 +234,7 @@ namespace Opera.Acabus.Core.Models
 
             var anotherObject = obj as Route;
 
-            if (!Name.Equals(anotherObject.Name)) return false;
-            if (!RouteNumber.Equals(anotherObject.RouteNumber)) return false;
-            if (!Type.Equals(anotherObject.Type)) return false;
-
-            return true;
+            return CompareTo(anotherObject) == 0;
         }
 
         /// <summary>

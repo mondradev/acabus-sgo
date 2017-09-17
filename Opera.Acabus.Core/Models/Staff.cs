@@ -99,7 +99,7 @@ namespace Opera.Acabus.Core.Models
             get => _name;
             set {
                 _name = value;
-                OnPropertyChanged("Name");
+                OnPropertyChanged(nameof(Name));
             }
         }
 
@@ -114,10 +114,7 @@ namespace Opera.Acabus.Core.Models
             if (staff is null && anotherStaff is null) return false;
             if (staff is null || anotherStaff is null) return true;
 
-            if (staff.Area != anotherStaff.Area) return true;
-            if (staff.Name != anotherStaff.Name) return true;
-
-            return false;
+            return staff.CompareTo(anotherStaff) != 0;
         }
 
         /// <summary>
@@ -131,10 +128,7 @@ namespace Opera.Acabus.Core.Models
             if (staff is null && anotherStaff is null) return true;
             if (staff is null || anotherStaff is null) return false;
 
-            if (staff.Area != anotherStaff.Area) return false;
-            if (staff.Name != anotherStaff.Name) return false;
-
-            return true;
+            return staff.Equals(anotherStaff);
         }
 
         /// <summary>
@@ -182,12 +176,9 @@ namespace Opera.Acabus.Core.Models
             if (obj is null) return false;
             if (obj.GetType() != GetType()) return false;
 
-            var anotherTechnician = obj as Staff;
+            var anotherStaff = obj as Staff;
 
-            if (anotherTechnician.Area != Area) return false;
-            if (anotherTechnician.Name != Name) return false;
-
-            return true;
+            return CompareTo(anotherStaff) == 0;
         }
 
         /// <summary>
