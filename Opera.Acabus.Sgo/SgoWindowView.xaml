@@ -16,7 +16,7 @@
     Height="auto" Width="auto"
     Style="{StaticResource BaseStyle}" 
     Icon="acabus_icon.ico">
-    <materialDesign:DialogHost>
+    <materialDesign:DialogHost x:Name="_dialogHost" x:FieldModifier="private">
         <Grid Margin="0"  Background="{DynamicResource MaterialDesignPaper}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />

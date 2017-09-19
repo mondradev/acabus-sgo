@@ -45,6 +45,11 @@ namespace Opera.Acabus.Core.Gui
         public static ICommand CloseDialogCommand { get; set; }
 
         /// <summary>
+        /// Obtiene o establece el comando que abre el cuadro de dialogo.
+        /// </summary>
+        public static ICommand OpenDialogCommand { get; set; }
+
+        /// <summary>
         /// Solicita al controlador de interfaz mostrar la vista pasada por parametro.
         /// </summary>
         public static void RequestShowContent(System.Windows.Controls.UserControl content)

@@ -1,4 +1,5 @@
 ﻿using MahApps.Metro.Controls;
+using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -20,6 +21,10 @@ namespace Opera.Acabus.Sgo
         /// </summary>
         private Queue<String> _messages = new Queue<String>();
 
+        /// <summary>
+        /// Contiene los mensajes de error omitidos en la aplicación.
+        /// </summary>
+        private List<String> messageSkiped = new List<string>();
 
         /// <summary>
         /// Crea una instancia de la ventana principal.
@@ -28,6 +33,37 @@ namespace Opera.Acabus.Sgo
         {
             InitializeComponent();
             DataContext = new SgoWindowModelView(this);
+
+            _dialogHost.SnackbarMessageQueue = _snackBar.MessageQueue;
+        }
+
+        /// <summary>
+        /// Obtiene el controlador del cuadro de diálogo de la ventana.
+        /// </summary>
+        public DialogHost DialogHost => _dialogHost;
+
+        /// <summary>
+        /// Agrega un mensaje a la cola de notificaciones en la aplicación.
+        /// </summary>
+        /// <param name="message">Mensaje que se agregará.</param>
+        /// <param name="action">Acción que realiza el Snackbar al hacer clic en el botón.</param>
+        /// <param name="actionName">Nombre de la acción a realizar.</param>
+        internal void AddMessage(String message, Action action = null, String actionName = "OCULTAR")
+        {
+            if (_messages.Contains(message.ToUpper())) return;
+            if (messageSkiped.Contains(message.ToUpper())) return;
+            action = action ?? (() => messageSkiped.Add(message.ToUpper()));
+
+            Application.Current?.Invoke(() =>
+            {
+                _snackBar.MessageQueue.Enqueue(message.ToUpper(), actionName, action);
+                _messages.Enqueue(message.ToUpper());
+                new Task(() =>
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(3));
+                    _messages.Dequeue();
+                }).Start();
+            });
         }
 
         /// <summary>
@@ -71,36 +107,6 @@ namespace Opera.Acabus.Sgo
         {
             _content.Children.Clear();
             _content.Children.Add(content);
-        }
-        /// <summary>
-        /// Contiene los mensajes de error omitidos en la aplicación.
-        /// </summary>
-        private List<String> messageSkiped = new List<string>();
-
-        /// <summary>
-        /// Agrega un mensaje a la cola de notificaciones en la aplicación.
-        /// </summary>
-        /// <param name="message">Mensaje que se agregará.</param>
-        /// <param name="action">Acción que realiza el Snackbar al hacer clic en el botón.</param>
-        /// <param name="actionName">Nombre de la acción a realizar.</param>
-        internal void AddMessage(String message, Action action = null, String actionName = "OCULTAR")
-        {
-            if (_messages.Contains(message.ToUpper())) return;
-            if (messageSkiped.Contains(message.ToUpper())) return;
-            action = action ?? (() => messageSkiped.Add(message.ToUpper()));
-
-            Application.Current?.Invoke(() =>
-            {
-                _snackBar.MessageQueue.Enqueue(message.ToUpper(), actionName, action);
-                _messages.Enqueue(message.ToUpper());
-                new Task(() =>
-                {
-                    Thread.Sleep(TimeSpan.FromSeconds(3));
-                    _messages.Dequeue();
-                }).Start();
-            });
-
-
         }
     }
 }

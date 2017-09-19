@@ -47,30 +47,20 @@ namespace Opera.Acabus.Sgo
             _modulesLoaded = new List<IModuleInfo>();
 
             Dispatcher.CloseDialogCommand = DialogHost.CloseDialogCommand;
+            Dispatcher.OpenDialogCommand = new Command(param => OpenDialg(param));
 
-            Dispatcher.RequestingShowContent += arg =>
-             {
-                 _view.ShowContent(arg.Content);
-             };
+            Dispatcher.RequestingShowContent += arg
+                => _view.ShowContent(arg.Content);
 
-            Dispatcher.RequestingShowDialog += async arg =>
-            {
-                Dispatcher.CloseDialogCommand.Execute(null);
+            Dispatcher.RequestingShowDialog += arg
+                => Dispatcher.OpenDialogCommand?.Execute(arg);
 
-                Object response = await DialogHost.Show(arg.Content);
-                GC.SuppressFinalize(arg.Content);
-
-                arg.Callback?.Invoke(response);
-            };
-
-            Dispatcher.RequestingSendMessageOrNotify += async arg =>
+            Dispatcher.RequestingSendMessageOrNotify += arg =>
             {
                 switch (arg.SendType)
                 {
                     case Dispatcher.RequestSendMessageArg.RequestSendType.MESSAGE:
-                        Dispatcher.CloseDialogCommand.Execute(null);
-                        System.Threading.Thread.Sleep(1000);
-                        await DialogHost.Show(new DialogTemplateView() { Message = arg.Message });
+                        OpenDialg(new DialogTemplateView() { Message = arg.Message });
                         break;
 
                     case Dispatcher.RequestSendMessageArg.RequestSendType.NOTIFY:
@@ -140,6 +130,33 @@ namespace Opera.Acabus.Sgo
                     Dispatcher.SendNotify($"No se encontró módulo '{module.ToString("fullname")}' en libería '{module.ToString("assembly")}'");
                 }
             }
+        }
+
+        /// <summary>
+        /// Muestra un cuadro de diálogo en la ventana actual.
+        /// </summary>
+        /// <param name="parameters">Parametros del cuadro de dialogo.</param>
+        private void OpenDialg(object parameters)
+        {
+            var dialogHost = _view.DialogHost;
+
+            DialogClosingEventHandler callback = async (sender, eventArgs) =>
+            {
+                if (parameters is Dispatcher.RequestShowContentArg)
+                {
+                    Dispatcher.RequestShowContentArg arg = parameters as Dispatcher.RequestShowContentArg;
+                    Object response = await DialogHost.Show(arg.Content);
+                    GC.SuppressFinalize(arg.Content);
+                    arg.Callback?.Invoke(response);
+                }
+                else
+                    await DialogHost.Show(parameters);
+            };
+
+            if (dialogHost.IsOpen)
+                dialogHost.DialogClosingCallback = callback;
+            else
+                callback.Invoke(_view, new DialogClosingEventArgs(null, null));
         }
 
         /// <summary>
