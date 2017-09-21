@@ -126,17 +126,17 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Resources\app.conf">
+    <Content Include="Resources\app.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Resources\opera.acabus.data.db">
+    <Content Include="Resources\opera.acabus.data.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -156,10 +156,6 @@
       <Project>{5870b3e0-a665-4014-94d1-4ed21ceb442f}</Project>
       <Name>Opera.Acabus.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Opera.Acabus.DatabaseController\Opera.Acabus.DatabaseController.csproj">
-      <Project>{4144812c-d5d3-41d5-9a11-6d931471a897}</Project>
-      <Name>Opera.Acabus.DatabaseController</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Opera.Acabus.TrunkMonitor\Opera.Acabus.TrunkMonitor.csproj">
       <Project>{2ca72c78-d881-48c2-9cc1-3bb0bb3f3c6c}</Project>
       <Name>Opera.Acabus.TrunkMonitor</Name>
@@ -170,6 +166,22 @@
   </ItemGroup>
   <ItemGroup>
     <SplashScreen Include="SplashScreen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libraries\Npgsql.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Libraries\System.Data.SQLite.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libraries\Opera.Acabus.DatabaseController.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Modules\Opera.Acabus.TrunkMonitor.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
