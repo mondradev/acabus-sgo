@@ -8,29 +8,11 @@ using System.Linq;
 namespace Opera.Acabus.TrunkMonitor.Helpers
 {
     /// <summary>
-    /// Provee a las instancias de <see cref="Station"/> el manejo de enlaces de comunicación <see cref="Link"/>.
+    /// Provee a las instancias de <see cref="Station"/> el manejo de enlaces de comunicación <see
+    /// cref="Link"/> y sus propiedades adheridas.
     /// </summary>
     public static class StationHelper
     {
-        ///<summary>
-        /// Lleva el control de todas las instancias <see cref="Station"/> y su limite de latencia aceptable.
-        ///</summary>
-        private static Dictionary<Station, UInt16> _stationMaximunAcceptablePing
-            = new Dictionary<Station, ushort>();
-
-        ///<summary>
-        /// Lleva el control de todas las instancias <see cref="Station"/> y su limite de latencia optima.
-        ///</summary>
-        private static Dictionary<Station, UInt16> _stationMaximunPing
-            = new Dictionary<Station, ushort>();
-
-        /// <summary>
-        /// Lleva el control de todas las instancias <see cref="Station"/> y su vinculo con una lista
-        /// de <see cref="Link"/>;
-        /// </summary>
-        private static Dictionary<Station, ObservableCollection<Link>> _stations
-            = new Dictionary<Station, ObservableCollection<Link>>();
-
         ///<summary>
         /// Lleva el control de todas las instancias <see cref="Station"/> y su información de estado.
         ///</summary>
@@ -44,11 +26,9 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// <param name="link">Enlace nuevo que se añadirá.</param>
         public static void AddLink(this Station station, Link link)
         {
-            lock (_stations)
-                if (!_stations.ContainsKey(station))
-                    _stations.Add(station, new ObservableCollection<Link>());
+            var info = station.GetStateInfo();
 
-            ObservableCollection<Link> links = _stations[station];
+            ICollection<Link> links = info?.Links;
 
             if (links.Any(l => l.ID == link.ID && l != link))
                 links.Remove(links.Single(l => l.ID == link.ID && l != link));
@@ -58,16 +38,68 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         }
 
         /// <summary>
+        /// Calcula <see cref="LinkState"/> a partir de la latencia obtenida durante <see cref="DoPingLinkDevice(Station)"/>.
+        /// </summary>
+        /// <param name="station">Estación a obtener su estado de enlace.</param>
+        /// <returns>Estado de enlace de la estación.</returns>
+        public static LinkState CalculateLinkState(this Station station)
+            => LinkStateHelper.CalculateLinkState(
+                station.GetPing(),
+                station.GetMaximunPing(),
+                station.GetMaximunAcceptablePing());
+
+        /// <summary>
+        /// Realiza un ping a todos los equipos de la estación y calcula la latencia promedio de esta.
+        /// </summary>
+        /// <param name="station">Estación a realizar el ping.</param>
+        /// <returns>Latencia promedio de la estación.</returns>
+        public static Int16 DoPing(this Station station)
+        {
+            var ping = 0;
+            var nDevice = 0;
+            foreach (var device in station.Devices)
+            {
+                var pingTemp = device.DoPing();
+                if (device.GetState() != LinkState.DISCONNECTED)
+                {
+                    ping += pingTemp;
+                    nDevice++;
+                }
+            }
+
+            var info = station.GetStateInfo();
+
+            info.Ping = (Int16)(ping / nDevice);
+            info.Status = station.CalculateLinkState();
+
+            return station.GetPing();
+        }
+
+        /// <summary>
+        /// Realiza un ping a un equipo del tipo <see cref="DeviceType.SW"/> o uno aleatorio y
+        /// obtiene su latencia.
+        /// </summary>
+        /// <param name="station">Estación a realizar el ping.</param>
+        /// <returns>La latencia de la estación.</returns>
+        public static Int16 DoPingLinkDevice(this Station station)
+        {
+            var linkDevice = station.Devices.FirstOrDefault(device => device.Type == DeviceType.SW);
+            if (linkDevice == null)
+                linkDevice = station.Devices.FirstOrDefault();
+            if (linkDevice == null) return -1;
+            var ping = linkDevice.DoPing();
+            return ping;
+        }
+
+        /// <summary>
         /// Obtiene todos los enlaces de esta estación.
         /// </summary>
         /// <param name="station">Instancia <see cref="Station"/> que contiene los enlaces.</param>
         /// <returns>Una lista de <see cref="Link"/>.</returns>
         public static ObservableCollection<Link> GetLinks(this Station station)
         {
-            lock (_stations)
-                if (!_stations.ContainsKey(station))
-                    _stations.Add(station, new ObservableCollection<Link>());
-            return _stations[station];
+            var info = station.GetStateInfo();
+            return info.Links as ObservableCollection<Link>;
         }
 
         /// <summary>
@@ -76,13 +108,7 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// <param name="station">Estación a obtener su propiedad.</param>
         /// <returns>La latencia máxima aceptable.</returns>
         public static UInt16 GetMaximunAcceptablePing(this Station station)
-        {
-            lock (_stationMaximunAcceptablePing)
-                if (!_stationMaximunAcceptablePing.ContainsKey(station))
-                    _stationMaximunAcceptablePing.Add(station, 600);
-
-            return _stationMaximunAcceptablePing[station];
-        }
+            => station.GetStateInfo().MaximunAcceptablePing;
 
         /// <summary>
         /// Obtiene el limite de latencia optima de la estación.
@@ -90,13 +116,15 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// <param name="station">Estación a obtener su propiedad.</param>
         /// <returns>El limite de latencia optima.</returns>
         public static UInt16 GetMaximunPing(this Station station)
-        {
-            lock (_stationMaximunPing)
-                if (!_stationMaximunPing.ContainsKey(station))
-                    _stationMaximunPing.Add(station, 90);
+            => station.GetStateInfo().MaximunPing;
 
-            return _stationMaximunPing[station];
-        }
+        /// <summary>
+        /// Obtiene la latencia obtenida durante <see cref="DoPing(Station)"/>.
+        /// </summary>
+        /// <param name="station">Estación a obtener su propiedad.</param>
+        /// <return>Latencia producida por <see cref="DoPing(Station)"/>.</return>
+        public static Int16 GetPing(this Station station)
+            => station.GetStateInfo().Ping;
 
         /// <summary>
         /// Obtiene la información de estado de esta estación.
@@ -121,12 +149,11 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// <param name="link">Enlace a remover.</param>
         public static bool RemoveLink(this Station station, Link link)
         {
-            lock (_stations)
-                if (!_stations.ContainsKey(station))
-                    _stations.Add(station, new ObservableCollection<Link>());
+            var info = station.GetStateInfo();
+            var links = info.Links;
 
-            if (_stations[station].Contains(link))
-                return _stations[station].Remove(link);
+            if (links.Contains(link))
+                return links.Remove(link);
 
             return false;
         }
@@ -137,12 +164,7 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// <param name="station">Estación a obtener su propiedad.</param>
         /// <param name="maxAcceptablePing">La latencia máxima aceptable.</param>
         public static void SetMaximunAcceptablePing(this Station station, UInt16 maxAcceptablePing)
-        {
-            lock (_stationMaximunAcceptablePing)
-                if (!_stationMaximunAcceptablePing.ContainsKey(station))
-                    _stationMaximunAcceptablePing.Add(station, maxAcceptablePing);
-                else _stationMaximunAcceptablePing[station] = maxAcceptablePing;
-        }
+            => station.GetStateInfo().MaximunAcceptablePing = maxAcceptablePing;
 
         /// <summary>
         /// Establece el limite de latencia optima de la estación.
@@ -150,11 +172,6 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// <param name="station">Estación a obtener su propiedad.</param>
         /// <param name="maxPing">El limite de latencia optima.</param>
         public static void SetMaximunPing(this Station station, UInt16 maxPing)
-        {
-            lock (_stationMaximunPing)
-                if (!_stationMaximunPing.ContainsKey(station))
-                    _stationMaximunPing.Add(station, maxPing);
-                else _stationMaximunPing[station] = maxPing;
-        }
+            => station.GetStateInfo().MaximunPing = maxPing;
     }
 }

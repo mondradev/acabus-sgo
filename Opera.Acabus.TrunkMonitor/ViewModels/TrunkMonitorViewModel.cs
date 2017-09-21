@@ -3,7 +3,6 @@ using Opera.Acabus.Core.Gui.Modules;
 using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Helpers;
 using Opera.Acabus.TrunkMonitor.Models;
-using Opera.Acabus.TrunkMonitor.Service;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,6 +29,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private static TrunkMonitorViewModel _instance;
 
         /// <summary>
+        /// Campo que provee a la propiedad ' <see cref="ControlCenter"/>'.
+        /// </summary>
+        private Station _controlCenter;
+
+        /// <summary>
         /// Obtiene un valor True en caso que el monitor de vía se encuentre en ejecución.
         /// </summary>
         private Boolean _isRunnig;
@@ -50,10 +54,13 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private UInt16 _nTasks;
 
         /// <summary>
+        /// Temporizador del monitor de estaciones y externos.
+        /// </summary>
+        private Timer _stationMonitor;
+        /// <summary>
         /// Tareas disponibles para la ejecución en el monitor de vía.
         /// </summary>
         private TaskTrunkMonitor[] _tasks;
-
         /// <summary>
         /// Crea una instance del modelo de la vista del monitor de vía.
         /// </summary>
@@ -63,6 +70,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// Obtiene la instancia del modelo de la vista del monitor de vía.
         /// </summary>
         public static TrunkMonitorViewModel Instance => _instance;
+
+        /// <summary>
+        /// Obtiene la estación que representa a Centro de Control.
+        /// </summary>
+        public Station ControlCenter => _controlCenter;
 
         /// <summary>
         /// Obtiene o establece la lista de enlaces de estaciones.
@@ -99,10 +111,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         {
             List<Link> linksList = TrunkMonitorModule.AllLinks.ToList();
 
-            _links = linksList.Where(l => l.StationA.Name.Contains("CENTRO DE CONTROL"))
+            _controlCenter = linksList.Where(l => l.StationA.Name.Contains("CENTRO DE CONTROL"))
                 .Select(l => l.StationA)
-                .FirstOrDefault()?
-                .GetLinks();
+                .FirstOrDefault();
+
+            _links = ControlCenter?.GetLinks();
 
             foreach (var link in linksList)
             {
@@ -113,7 +126,7 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
             OnPropertyChanged(nameof(Links));
 
             _isRunnig = true;
-            InitLinkMonitor();
+            InitMonitor();
         }
 
         /// <summary>
@@ -129,12 +142,26 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <summary>
         /// Inicializa el monitor de enlace de estaciones.
         /// </summary>
-        private void InitLinkMonitor()
+        private void InitMonitor()
         {
             _linkMonitor = new Timer(delegate
             {
                 UpdateLinkStatus(Links);
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(TIME_WAIT_LINK));
+
+            _stationMonitor = new Timer(delegate
+            {
+                UpdateStationStatus(ControlCenter);
+            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(TIME_WAIT_LINK));
+        }
+
+        /// <summary>
+        /// Actualiza el estado de las estaciones.
+        /// </summary>
+        /// <param name="controlCenter">Estación de partida.</param>
+        private void UpdateStationStatus(Station controlCenter)
+        {
+            
         }
 
         /// <summary>

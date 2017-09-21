@@ -2,12 +2,12 @@
 using Opera.Acabus.TrunkMonitor.Models;
 using System;
 
-namespace Opera.Acabus.TrunkMonitor.Service
+namespace Opera.Acabus.TrunkMonitor.Helpers
 {
     /// <summary>
-    /// Provee de funciones de servicio las instancias <see cref="Link"/>.
+    /// Provee de funciones las instancias <see cref="Link"/>.
     /// </summary>
-    public static class LinkService
+    public static class LinkHelper
     {
         /// <summary>
         /// Realiza un ping ambos extremos del enlace y obtiene la latencia generada.
@@ -20,11 +20,11 @@ namespace Opera.Acabus.TrunkMonitor.Service
             var pingB = link.StationB.DoPingLinkDevice();
             link.Ping = pingA > pingB ? pingA : pingB;
 
-            link.State = LinkStateExtensions.CalculateLinkState(
+            link.State = LinkStateHelper.CalculateLinkState(
                     pingA, 
                     link.StationA.GetMaximunPing(), 
                     link.StationA.GetMaximunAcceptablePing())
-                .And(LinkStateExtensions.CalculateLinkState(
+                .And(LinkStateHelper.CalculateLinkState(
                     pingB, 
                     link.StationB.GetMaximunPing(),
                     link.StationB.GetMaximunAcceptablePing())
