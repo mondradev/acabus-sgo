@@ -24,7 +24,7 @@ namespace Opera.Acabus.TrunkMonitor
         /// <summary>
         /// Obtiene una lista de todos los enlaces de comunicación.
         /// </summary>
-        public static IEnumerable<Link> AllLinks => AcabusDataContext.DbContext?
+        public static IQueryable<Link> AllLinks => AcabusDataContext.DbContext?
             .Read<Link>()
             .LoadReference(1);
 

@@ -1,9 +1,11 @@
-﻿using Opera.Acabus.Core.Gui.Modules;
+﻿using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.Gui.Modules;
 using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Helpers;
 using Opera.Acabus.TrunkMonitor.Models;
 using Opera.Acabus.TrunkMonitor.Service;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -23,7 +25,7 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private const Double TIME_WAIT_LINK = 0.5;
 
         /// <summary>
-        /// Campo que provee a la propiedad 'Instance'.
+        /// Campo que provee a la propiedad '<see cref="Instance"/>'.
         /// </summary>
         private static TrunkMonitorViewModel _instance;
 
@@ -36,6 +38,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// Temporizador del monitor de enlaces.
         /// </summary>
         private Timer _linkMonitor;
+
+        /// <summary>
+        /// Campo que provee a la propiedad '<see cref="Links"/>'.
+        /// </summary>
+        private ObservableCollection<Link> _links;
 
         /// <summary>
         /// Número total de tareas disponibles.
@@ -60,12 +67,7 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <summary>
         /// Obtiene o establece la lista de enlaces de estaciones.
         /// </summary>
-        public ObservableCollection<Link> Links => TrunkMonitorModule.AllLinks
-            .ToList()
-            .Where(l => l.StationA.Name.Contains("CENTRO DE CONTROL"))
-            .Select(l => l.StationA)
-            .SingleOrDefault()?
-            .GetLinks();
+        public ObservableCollection<Link> Links => _links;
 
         /// <summary>
         /// Permite crear una tarea que se ejecutará desde el monitor de vía.
@@ -95,6 +97,21 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <param name="parameter">Parametro del comando.</param>
         protected override void OnLoad(object parameter)
         {
+            List<Link> linksList = TrunkMonitorModule.AllLinks.ToList();
+
+            _links = linksList.Where(l => l.StationA.Name.Contains("CENTRO DE CONTROL"))
+                .Select(l => l.StationA)
+                .FirstOrDefault()?
+                .GetLinks();
+
+            foreach (var link in linksList)
+            {
+                AcabusDataContext.DbContext.LoadRefences(link.StationA, nameof(Station.Devices));
+                AcabusDataContext.DbContext.LoadRefences(link.StationB, nameof(Station.Devices));
+            }
+
+            OnPropertyChanged(nameof(Links));
+
             _isRunnig = true;
             InitLinkMonitor();
         }

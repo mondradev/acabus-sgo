@@ -1,11 +1,9 @@
 ﻿using InnSyTech.Standard.Configuration;
 using InnSyTech.Standard.Database;
-using InnSyTech.Standard.Net.Messenger.Iso8583;
 using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace Opera.Acabus.Core.DataAccess
