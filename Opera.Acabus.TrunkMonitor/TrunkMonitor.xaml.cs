@@ -29,22 +29,12 @@ namespace Opera.Acabus.TrunkMonitor
 
         // Using a DependencyProperty as the backing store for Links.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty LinksProperty =
-            DependencyProperty.Register("Links", typeof(ObservableCollection<Link>), typeof(TrunkMonitor), new PropertyMetadata(new ObservableCollection<Link>()));
+            DependencyProperty.Register("Links", typeof(ObservableCollection<Link>), typeof(TrunkMonitor), new PropertyMetadata(new ObservableCollection<Link>(), UpdateLinks));
 
         /// <summary>
         /// Indica el margen del panel de enlace.
         /// </summary>
         private const Int16 MARGIN_LINK_PANEL = 16;
-
-        /// <summary>
-        /// Indica si debe dibujarse los enlaces.
-        /// </summary>
-        private bool _drawLinks;
-
-        /// <summary>
-        /// Indica si debe dibujarse las estaciones.
-        /// </summary>
-        private bool _drawStationsCards;
 
         /// <summary>
         /// Listado de todas las areas de enlace.
@@ -63,9 +53,7 @@ namespace Opera.Acabus.TrunkMonitor
         {
             _linkAreas = new List<Grid>();
             _stationCards = new List<Card>();
-            _drawStationsCards = true;
 
-            Loaded += (sender, eventArgs) => DrawLinks();
             InitializeComponent();
         }
 
@@ -83,28 +71,7 @@ namespace Opera.Acabus.TrunkMonitor
         [Description("Obtiene o establece la lista de enlaces que serán representados por el monitor de vía"), Category("Común")]
         public ObservableCollection<Link> Links {
             get { return (ObservableCollection<Link>)GetValue(LinksProperty); }
-            set {
-                SetValue(LinksProperty, value);
-                if (value != null) value.CollectionChanged += UpdateItems;
-            }
-        }
-
-        /// <summary>
-        /// Método que ocurre cuando el control actual requiere ser dibujado nuevamente.
-        /// </summary>
-        /// <param name="drawingContext">Contexto gráfico.</param>
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            base.OnRender(drawingContext);
-
-            if (_drawStationsCards)
-            {
-                CreateStationCards(Links, _content);
-                _drawStationsCards = false;
-            }
-
-            if (_drawLinks)
-                DrawLinks();
+            set { SetValue(LinksProperty, value); }
         }
 
         /// <summary>
@@ -165,6 +132,21 @@ namespace Opera.Acabus.TrunkMonitor
             });
             linkLine.ToolTip = pingTooltip;
             return linkLine;
+        }
+
+        /// <summary>
+        /// Es invocado cuando ocurre un cambio en la propiedad <see cref="LinksProperty"/>.
+        /// </summary>
+        /// <param name="dependecy">Objeto que presenta el cambio en la propiedad.</param>
+        /// <param name="arguments">Datos del cambio ocurrido.</param>
+        private static void UpdateLinks(DependencyObject dependecy, DependencyPropertyChangedEventArgs arguments)
+        {
+            var instance = dependecy as TrunkMonitor;
+            if (arguments.NewValue != null)
+            {
+                (arguments.NewValue as ObservableCollection<Link>).CollectionChanged += instance.UpdateItems;
+                instance.UpdateItems(instance, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            }
         }
 
         /// <summary>
@@ -320,7 +302,6 @@ namespace Opera.Acabus.TrunkMonitor
                     }
                 }
             }
-            _drawLinks = false;
         }
 
         /// <summary>
@@ -387,8 +368,14 @@ namespace Opera.Acabus.TrunkMonitor
             _linkAreas.ForEach((grid) => GC.SuppressFinalize(grid));
             _linkAreas.Clear();
 
-            _drawStationsCards = true;
-            _drawLinks = true;
+            if (Links.Count > 0)
+            {
+                CreateStationCards(Links, _content);
+
+                _content.UpdateLayout();
+
+                DrawLinks();
+            }
         }
 
         /// <summary>
