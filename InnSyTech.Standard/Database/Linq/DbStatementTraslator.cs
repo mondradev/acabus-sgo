@@ -166,7 +166,8 @@ namespace InnSyTech.Standard.Database.Linq
 
             _selectedList?.Add(fieldDef);
             _fieldLabels.Add(new object[] { label, fieldDef });
-            _statement.AppendFormat("{0}.{1}", label, fieldDef.GetFieldName());
+            if (_statement.Length > 0)
+                _statement.AppendFormat("{0}.{1}", label, fieldDef.GetFieldName());
             _statementDefinition.AddEntity(entityReference);
 
             return m;
@@ -205,6 +206,7 @@ namespace InnSyTech.Standard.Database.Linq
                     break;
 
                 case "Single":
+
                     break;
 
                 case "SingleOrDefault":
@@ -217,6 +219,10 @@ namespace InnSyTech.Standard.Database.Linq
                     break;
 
                 case "Select":
+                    LambdaExpression lambdaSelect = (LambdaExpression)StripQuotes(m.Arguments.Last());
+                    Visit(m.Arguments.Last());
+                    _statementDefinition.Select = lambdaSelect.Compile();
+                    Visit(m.Arguments.First());
                     break;
 
                 case "Contains":
@@ -374,6 +380,48 @@ namespace InnSyTech.Standard.Database.Linq
                 count = ProcessEntity(count, subEntity);
 
             return count;
+        }
+
+        public abstract class ProjectionRow
+        {
+            public abstract object GetValue(int index);
+        }
+
+        internal class ColumnProjector : ExpressionVisitor
+        {
+            private static MethodInfo GetValue;
+            private int iColumn;
+            private ParameterExpression row;
+
+            internal ColumnProjector()
+            {
+                if (GetValue == null)
+                {
+                    GetValue = typeof(ProjectionRow).GetMethod("GetValue");
+                }
+            }
+
+            internal Expression ProjectColumns(Expression expression, ParameterExpression row)
+            {
+                this.row = row;
+
+                Expression selector = this.Visit(expression);
+
+                return selector;
+            }
+
+            protected override Expression VisitMember(MemberExpression m)
+            {
+                if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
+                {
+
+                    return Expression.Convert(Expression.Call(this.row, GetValue, Expression.Constant(iColumn++)), m.Type);
+                }
+                else
+                {
+                    return base.VisitMember(m);
+                }
+            }
         }
     }
 }

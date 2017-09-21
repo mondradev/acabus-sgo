@@ -42,6 +42,11 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
         public List<DbFieldDefinition> Orders { get; }
 
         /// <summary>
+        /// Obtiene el delegado de la salida seleccionada.
+        /// </summary>
+        public Delegate Select { get; set; }
+
+        /// <summary>
         /// Nivel de profundidad de la referencia.
         /// </summary>
         public int ReferenceDepth { get; set; }

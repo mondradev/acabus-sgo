@@ -26,7 +26,11 @@ namespace InnSyTech.Standard.Database.Linq
 
             while (reader.Read())
             {
-                var instance = DbHelper.ToInstance(elementType, reader, definition.Entities.First(), definition.ReferenceDepth);
+                object instance = DbHelper.ToInstance(definition.Entities.First().EntityType, reader, definition.Entities.First(), definition.ReferenceDepth);
+
+                if (definition.Select != null)
+                    instance = definition.Select.DynamicInvoke(instance);
+
                 list.Add(instance);
             }
 

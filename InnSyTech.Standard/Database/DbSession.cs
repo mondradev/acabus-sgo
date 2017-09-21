@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace InnSyTech.Standard.Database
@@ -130,6 +131,69 @@ namespace InnSyTech.Standard.Database
 
                     Provider.CloseConnection();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Carga los valores para una propiedad de tipo colección que representan una referencia externa a la entidad especificada.
+        /// </summary>
+        /// <typeparam name="TData">Tipo de la instancia a cargar su referencia.</typeparam>
+        /// <param name="instance">Instancia persistida que tiene la referencia.</param>
+        /// <param name="propertyName">Nombre de la propiedad.</param>
+        /// <returns>Un true en caso de cargar correctamente la propiedad.</returns>
+        public bool LoadRefences<TData>(TData instance, string propertyName)
+        {
+            try
+            {
+                var propertyCollection = instance.GetType().GetProperty(propertyName);
+                Type typeInstance = TypeHelper.GetElementType(propertyCollection.PropertyType);
+
+                if (!typeof(ICollection<>).MakeGenericType(typeInstance).IsAssignableFrom(propertyCollection.PropertyType))
+                    throw new ArgumentException($"La propiedad especificada no es una colección: '{propertyName}'.");
+
+                var field = DbHelper.GetField(propertyCollection);
+                var primaryKey = DbHelper.GetPrimaryKey(instance.GetType());
+
+                if (String.IsNullOrEmpty(field.ForeignKeyName))
+                    throw new ArgumentException($"La propiedad no incluye el campo de referencia utilizado para la relación.");
+
+                var collection = field.GetValue(instance);
+
+                var foreignKey = DbHelper.GetFields(typeInstance)
+                    .Where(f => f.IsForeignKey && f.Name == field.ForeignKeyName)
+                    .FirstOrDefault();
+
+                var collectionRead = GetType().GetMethod("Read")
+                    .MakeGenericMethod(typeInstance)
+                    .Invoke(this, null) as IQueryable;
+
+                var parameter = Expression.Parameter(typeInstance, "d");
+                var foreignProperty = Expression.MakeMemberAccess(parameter, foreignKey.PropertyInfo);
+                var foreignID = Expression.MakeMemberAccess(foreignProperty, primaryKey.PropertyInfo);
+                var primaryValue = Expression.Constant(primaryKey.GetValue(instance));
+                var equals = Expression.Equal(foreignID, primaryValue);
+                var lambda = Expression.Lambda(equals, parameter);
+
+                var whereMethod = typeof(Queryable)
+                     .GetMethods().First(m => m.Name.Equals(nameof(Queryable.Where)) && m.IsGenericMethod)
+                     .MakeGenericMethod(typeInstance);
+
+                collectionRead = whereMethod.Invoke(null, new object[] { collectionRead, lambda }) as IQueryable;
+
+                var addMethod = propertyCollection.PropertyType.GetMethod("Add");
+
+                foreach (var item in collectionRead)
+                {
+                    foreignKey.SetValue(item, instance);
+                    addMethod.Invoke(collection, new[] { item });
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
+                return false;
             }
         }
 

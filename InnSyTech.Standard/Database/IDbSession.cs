@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace InnSyTech.Standard.Database
 {
@@ -51,5 +52,14 @@ namespace InnSyTech.Standard.Database
         /// Un true si la instancia fue correctamente actualizada así como sus referencias de ser necesario.
         /// </returns>
         bool Update<TData>(TData instance, int referenceDepth = 0);
+
+        /// <summary>
+        /// Carga los valores para una propiedad de tipo colección que representan una referencia externa a la entidad especificada.
+        /// </summary>
+        /// <typeparam name="TData">Tipo de la instancia a cargar su referencia.</typeparam>
+        /// <param name="instance">Instancia persistida que tiene la referencia.</param>
+        /// <param name="propertyName">Nombre de la propiedad.</param>
+        /// <returns>Un true en caso de cargar correctamente la propiedad.</returns>
+        bool LoadRefences<TData>(TData instance, String propertyName);
     }
 }

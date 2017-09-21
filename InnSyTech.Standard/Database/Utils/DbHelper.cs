@@ -31,6 +31,39 @@ namespace InnSyTech.Standard.Database.Utils
         }
 
         /// <summary>
+        /// Obtiene el campo que representa a la propiedad especificada.
+        /// </summary>
+        /// <param name="property">Propiedad a obtener su valor.</param>
+        /// <returns>El campo que representa a la propiedad.</returns>
+        public static DbFieldInfo GetField(PropertyInfo property)
+        {
+            if (property.GetCustomAttributes().Count() > 0)
+            {
+                foreach (Attribute attribute in property.GetCustomAttributes())
+                    if (attribute is ColumnAttribute)
+                    {
+                        ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+
+                        if (columnAttribute.IsIgnored) continue;
+
+                        String name = columnAttribute.Name;
+                        name = String.IsNullOrEmpty(name) ? property.Name : name;
+
+                        return new DbFieldInfo(
+                            name,
+                            property,
+                            columnAttribute.IsPrimaryKey,
+                            columnAttribute.Converter,
+                            columnAttribute.IsAutonumerical,
+                            columnAttribute.IsForeignKey,
+                            columnAttribute.ForeignKeyName);
+                    }
+            }
+
+            return new DbFieldInfo(property.Name, property);
+        }
+
+        /// <summary>
         /// Obtiene el nombre que maneja la base de datos para el miembro de la entidad especificada.
         /// </summary>
         /// <param name="member">Miembro a obtener el nombre.</param>
