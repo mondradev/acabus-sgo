@@ -48,6 +48,8 @@ namespace Opera.Acabus.TrunkMonitor.Models
         public StationStateInfo(Station owner)
         {
             _station = owner;
+            _maximunAcceptablePing = 600;
+            _maximunPing = 100;
         }
 
         /// <summary>

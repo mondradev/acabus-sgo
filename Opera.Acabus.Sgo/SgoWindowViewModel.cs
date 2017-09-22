@@ -156,7 +156,7 @@ namespace Opera.Acabus.Sgo
             if (dialogHost.IsOpen)
                 dialogHost.DialogClosingCallback = callback;
             else
-                callback.Invoke(_view, new DialogClosingEventArgs(null, null));
+                callback.Invoke(_view, null);
         }
 
         /// <summary>

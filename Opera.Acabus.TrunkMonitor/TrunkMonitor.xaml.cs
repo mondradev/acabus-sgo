@@ -1,4 +1,5 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using InnSyTech.Standard.Mvvm;
+using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Helpers;
 using Opera.Acabus.TrunkMonitor.Models;
@@ -18,6 +19,34 @@ using System.Windows.Shapes;
 namespace Opera.Acabus.TrunkMonitor
 {
     /// <summary>
+    /// Proporciona una estructura para manipular la tareas que se prodrán ejecutar dentro del
+    /// monitor de vía.
+    /// </summary>
+    public sealed class TaskTrunkMonitor
+    {
+        /// <summary>
+        /// Crea una instance de una tarea de monitor de vía inicializando sus propiedades.
+        /// </summary>
+        /// <param name="name">Nombre de la tarea.</param>
+        /// <param name="task">Acción a realizar por la tarea.</param>
+        public TaskTrunkMonitor(String name, Action<Station> task)
+        {
+            Name = name;
+            Task = task;
+        }
+
+        /// <summary>
+        /// Nombre de la tarea como se visualizará en el monitor.
+        /// </summary>
+        public String Name { get; }
+
+        /// <summary>
+        /// Acción que realizará la tarea cuando esta se seleccione.
+        /// </summary>
+        public Action<Station> Task { get; }
+    }
+
+    /// <summary>
     /// Define la lógica del componente visual <see cref="TrunkMonitor"/>. Permite la visualización
     /// de las comunicaciones de las estaciones del SIT.
     /// </summary>
@@ -30,6 +59,10 @@ namespace Opera.Acabus.TrunkMonitor
         // Using a DependencyProperty as the backing store for Links.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty LinksProperty =
             DependencyProperty.Register("Links", typeof(ObservableCollection<Link>), typeof(TrunkMonitor), new PropertyMetadata(new ObservableCollection<Link>(), UpdateLinks));
+
+        // Using a DependencyProperty as the backing store for Tasks.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty TasksProperty =
+            DependencyProperty.Register("Tasks", typeof(ObservableCollection<TaskTrunkMonitor>), typeof(TrunkMonitor), new PropertyMetadata(new ObservableCollection<TaskTrunkMonitor>(), UpdateTask));
 
         /// <summary>
         /// Indica el margen del panel de enlace.
@@ -72,6 +105,15 @@ namespace Opera.Acabus.TrunkMonitor
         public ObservableCollection<Link> Links {
             get { return (ObservableCollection<Link>)GetValue(LinksProperty); }
             set { SetValue(LinksProperty, value); }
+        }
+
+        /// <summary>
+        /// Obtiene o establece la lista de las tareas disponibles en el monitor de vía.
+        /// </summary>
+        [Description("Obtiene o establece la lista de las tareas disponibles en el monitor de vía"), Category("Común")]
+        public ObservableCollection<TaskTrunkMonitor> Tasks {
+            get { return (ObservableCollection<TaskTrunkMonitor>)GetValue(TasksProperty); }
+            set { SetValue(TasksProperty, value); }
         }
 
         /// <summary>
@@ -138,15 +180,30 @@ namespace Opera.Acabus.TrunkMonitor
         /// Es invocado cuando ocurre un cambio en la propiedad <see cref="LinksProperty"/>.
         /// </summary>
         /// <param name="dependecy">Objeto que presenta el cambio en la propiedad.</param>
-        /// <param name="arguments">Datos del cambio ocurrido.</param>
-        private static void UpdateLinks(DependencyObject dependecy, DependencyPropertyChangedEventArgs arguments)
+        /// <param name="args">Datos del cambio ocurrido.</param>
+        private static void UpdateLinks(DependencyObject dependecy, DependencyPropertyChangedEventArgs args)
         {
             var instance = dependecy as TrunkMonitor;
-            if (arguments.NewValue != null)
-            {
-                (arguments.NewValue as ObservableCollection<Link>).CollectionChanged += instance.UpdateItems;
-                instance.UpdateItems(instance, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            }
+
+            if (args.NewValue != null)
+                (args.NewValue as ObservableCollection<Link>).CollectionChanged += instance.UpdateItems;
+
+            instance.UpdateItems(instance, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+
+        /// <summary>
+        /// Es invocado cuando la lista de tareas es cambiada.
+        /// </summary>
+        /// <param name="dependency">Objeto que presenta el cambio en la propiedad.</param>
+        /// <param name="args">Datos del cambio ocurrido.</param>
+        private static void UpdateTask(DependencyObject dependency, DependencyPropertyChangedEventArgs args)
+        {
+            var instance = dependency as TrunkMonitor;
+
+            if (args.NewValue != null)
+                (args.NewValue as ObservableCollection<TaskTrunkMonitor>).CollectionChanged += instance.UpdateContextMenu;
+
+            instance.UpdateContextMenu(instance, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         /// <summary>
@@ -170,7 +227,7 @@ namespace Opera.Acabus.TrunkMonitor
                 Margin = new Thickness(6, 4, 0, 0)
             };
 
-            card.SetBinding(Card.ToolTipProperty, new Binding("Name"));
+            card.SetBinding(ToolTipProperty, new Binding("Name"));
 
             (card.Content as Grid).ColumnDefinitions.Add(new ColumnDefinition());
             (card.Content as Grid).ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(8) });
@@ -202,7 +259,10 @@ namespace Opera.Acabus.TrunkMonitor
                 {
                     VerticalAlignment = VerticalAlignment.Stretch
                 };
+
                 Card stationCard = CreateStationCard(link.StationB);
+
+                _stationCards.Add(stationCard);
 
                 TextBlock label = new TextBlock()
                 {
@@ -211,15 +271,19 @@ namespace Opera.Acabus.TrunkMonitor
                     TextWrapping = TextWrapping.WrapWithOverflow,
                     TextTrimming = TextTrimming.CharacterEllipsis
                 };
+
                 label.SetBinding(TextBlock.TextProperty, new Binding("Name") { Source = stationCard.DataContext });
+
                 (stationCard.Content as Grid).Children.Add(label);
 
                 Ellipse indicator = new Ellipse() { Height = 16, Width = 16 };
+
                 indicator.SetBinding(Shape.FillProperty, new Binding("Status")
                 {
                     Source = (stationCard.DataContext as Station).GetStateInfo(),
                     Converter = new ConverterConnectionStateToBrush()
                 });
+
                 Grid.SetColumn(indicator, 2);
                 Grid.SetRow(indicator, 0);
                 (stationCard.Content as Grid).Children.Add(indicator);
@@ -232,7 +296,7 @@ namespace Opera.Acabus.TrunkMonitor
                     {
                         Margin = new Thickness(4)
                     };
-                    container.SetBinding(Grid.BackgroundProperty, new Binding("BackgroundLink") { Source = this });
+                    container.SetBinding(Panel.BackgroundProperty, new Binding("BackgroundLink") { Source = this });
                     container.Children.Add(linkPanel);
                     linkPanel.Margin = new Thickness(MARGIN_LINK_PANEL, 0, 16, 8);
                     stationCard.Margin = new Thickness(4);
@@ -252,6 +316,29 @@ namespace Opera.Acabus.TrunkMonitor
 
                 CreateStationCards(link.StationB.GetLinks(), linkPanel);
             }
+        }
+
+        /// <summary>
+        /// Crea el menú contextual de la estación especificada.
+        /// </summary>
+        /// <param name="station">Estación del menú contextual.</param>
+        /// <returns>Un menú contextual.</returns>
+        private ContextMenu CreateTaskMenu(Station station)
+        {
+            ContextMenu menuContext = new ContextMenu();
+
+            foreach (var task in Tasks)
+            {
+                MenuItem menu = new MenuItem()
+                {
+                    Header = task.Name,
+                    Command = new Command(param => task.Task(param as Station)),
+                    CommandParameter = station
+                };
+                menuContext.Items.Add(menu);
+            }
+
+            return menuContext;
         }
 
         /// <summary>
@@ -357,18 +444,34 @@ namespace Opera.Acabus.TrunkMonitor
         }
 
         /// <summary>
+        /// Actualiza la lista de tareas de cada estación.
+        /// </summary>
+        /// <param name="instance">Instancia de monitor.</param>
+        /// <param name="args">Datos del cambio.</param>
+        private void UpdateContextMenu(Object instance, NotifyCollectionChangedEventArgs args)
+        {
+            if (args.Action == NotifyCollectionChangedAction.Move) return;
+
+            foreach (var item in _stationCards)
+            {
+                var station = item.DataContext as Station;
+                item.ContextMenu = CreateTaskMenu(station);
+            }
+        }
+
+        /// <summary>
         /// Método que es desencadenado cuando la lista de enlaces es afectada.
         /// </summary>
-        /// <param name="sender">Lista de enlaces del componente.</param>
-        /// <param name="e">Argumentos de la notificación de cambio.</param>
-        private void UpdateItems(object sender, NotifyCollectionChangedEventArgs e)
+        /// <param name="sender">Instancia la cual presenta el cambio en la propiedad.</param>
+        /// <param name="arg">Argumentos de la notificación de cambio.</param>
+        private void UpdateItems(object sender, NotifyCollectionChangedEventArgs arg)
         {
-            if (e.Action == NotifyCollectionChangedAction.Move) return;
+            if (arg.Action == NotifyCollectionChangedAction.Move) return;
 
             _linkAreas.ForEach((grid) => GC.SuppressFinalize(grid));
             _linkAreas.Clear();
 
-            if (Links.Count > 0)
+            if ((Links?.Count ?? 0) > 0)
             {
                 CreateStationCards(Links, _content);
 

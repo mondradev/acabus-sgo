@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:tm="clr-namespace:Opera.Acabus.TrunkMonitor"
     xmlns:vm="clr-namespace:Opera.Acabus.TrunkMonitor.ViewModels"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     x:Name="TrunkMonitor"
     x:Class="Opera.Acabus.TrunkMonitor.Views.TrunkMonitorView"
     mc:Ignorable="d" 
@@ -24,6 +25,6 @@
     </i:Interaction.Triggers>
 
     <Grid>
-        <tm:TrunkMonitor x:Name="Monitor" x:FieldModifier="private"  Margin="0,8,0,0" Links="{Binding Links, Mode=OneWay}" />
+        <tm:TrunkMonitor x:Name="Monitor" x:FieldModifier="private"  Margin="0,8,0,0" Links="{Binding Links, Mode=OneWay}" Tasks="{Binding TasksAvailable, Mode=OneWay}" />
     </Grid>
 </UserControl>
