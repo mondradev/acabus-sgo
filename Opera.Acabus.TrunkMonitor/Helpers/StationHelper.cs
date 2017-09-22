@@ -49,11 +49,11 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
                 station.GetMaximunAcceptablePing());
 
         /// <summary>
-        /// Realiza un ping a todos los equipos de la estación y calcula la latencia promedio de esta.
+        /// Verifica si todos los equipos de la estación están conectados.
         /// </summary>
-        /// <param name="station">Estación a realizar el ping.</param>
-        /// <returns>Latencia promedio de la estación.</returns>
-        public static Int16 DoPing(this Station station)
+        /// <param name="station">Estación a realizar la revisión.</param>
+        /// <returns>Un valor true si todos están conectados.</returns>
+        public static bool CheckDevice(this Station station)
         {
             var ping = 0;
             var nDevice = 0;
@@ -68,11 +68,16 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
             }
 
             var info = station.GetStateInfo();
+            var percentage = nDevice / station.Devices.Count;
 
-            info.Ping = (Int16)(ping / nDevice);
-            info.Status = station.CalculateLinkState();
+            if (percentage < 0.5)
+                info.Status = LinkState.BAD;
+            else if (percentage < 1)
+                info.Status = LinkState.MEDIUM;
+            else
+                info.Status = LinkState.GOOD;
 
-            return station.GetPing();
+            return (nDevice == station.Devices.Count);
         }
 
         /// <summary>
@@ -119,10 +124,10 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
             => station.GetStateInfo().MaximunPing;
 
         /// <summary>
-        /// Obtiene la latencia obtenida durante <see cref="DoPing(Station)"/>.
+        /// Obtiene la latencia obtenida durante <see cref="CheckDevice(Station)"/>.
         /// </summary>
         /// <param name="station">Estación a obtener su propiedad.</param>
-        /// <return>Latencia producida por <see cref="DoPing(Station)"/>.</return>
+        /// <return>Latencia producida por <see cref="CheckDevice(Station)"/>.</return>
         public static Int16 GetPing(this Station station)
             => station.GetStateInfo().Ping;
 

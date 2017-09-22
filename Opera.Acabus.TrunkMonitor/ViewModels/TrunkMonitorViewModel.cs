@@ -147,14 +147,30 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// </summary>
         private void InitMonitor()
         {
+            var isRunningLink = false;
+            var isRunningStation = false;
             _linkMonitor = new Timer(delegate
             {
+                if (isRunningLink)
+                    return;
+
+                isRunningLink = true;
+
                 UpdateLinkStatus(Links);
+
+                isRunningLink = false;
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(TIME_WAIT_LINK));
 
             _stationMonitor = new Timer(delegate
             {
+                if (isRunningStation)
+                    return;
+
+                isRunningStation = true;
+
                 UpdateStationStatus(ControlCenter);
+
+                isRunningStation = false;
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(TIME_WAIT_STATION));
         }
 
@@ -196,10 +212,10 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
             if (stationA == null)
                 return;
 
-            stationA.DoPing();
-
             foreach (var link in stationA.GetLinks())
                 Task.Run(() => UpdateStationStatus(link.StationB));
+            
+            stationA.CheckDevice();
         }
     }
 }

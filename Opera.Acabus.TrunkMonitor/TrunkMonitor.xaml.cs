@@ -471,6 +471,9 @@ namespace Opera.Acabus.TrunkMonitor
             _linkAreas.ForEach((grid) => GC.SuppressFinalize(grid));
             _linkAreas.Clear();
 
+            _stationCards.ForEach(card => GC.SuppressFinalize(card));
+            _stationCards.Clear();
+
             if ((Links?.Count ?? 0) > 0)
             {
                 CreateStationCards(Links, _content);
@@ -478,6 +481,8 @@ namespace Opera.Acabus.TrunkMonitor
                 _content.UpdateLayout();
 
                 DrawLinks();
+
+                UpdateContextMenu(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             }
         }
 
