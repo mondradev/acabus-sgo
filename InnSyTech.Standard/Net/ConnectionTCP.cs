@@ -48,6 +48,10 @@ namespace InnSyTech.Standard.Net
                     if (i == attempts && pr.Status != IPStatus.Success)
                         return -1;
                 }
+
+                if (pr?.Status != IPStatus.Success)
+                    return -1;
+
                 return (Int16)pr.RoundtripTime;
             }
             catch (Exception)

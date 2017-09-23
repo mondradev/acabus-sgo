@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace InnSyTech.Standard.Utils
@@ -25,6 +26,24 @@ namespace InnSyTech.Standard.Utils
                 partsStr.Add(str.Substring(i * lengthPart, lengthPart));
 
             return partsStr.ToArray();
+        }
+
+        /// <summary>
+        /// Obtiene un elemento de la secuencia de manera aleatoría que cumple con el predicado especificado.
+        /// </summary>
+        /// <typeparam name="TData">Tipo de dato de la secuencia.</typeparam>
+        /// <param name="source">Secuencia de origen.</param>
+        /// <param name="predicate">Predicado a validar con los elementos.</param>
+        /// <returns>Elemento devuelto por la secuencia.</returns>
+        public static TData GetRandom<TData>(this IEnumerable<TData> source, Func<TData, bool> predicate)
+        {
+            IEnumerable<TData> valids = source.Where(predicate);
+            var count = valids.Count();
+
+            Random random = new Random((int)DateTime.Now.Ticks);
+            var index = (int)(random.NextDouble() * count);
+
+            return valids.ElementAt(index);
         }
 
         /// <summary>
