@@ -32,11 +32,12 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// Realiza un eco al dispositivo obteniendo el tiempo de este.
         /// </summary>
         /// <param name="device">Dispositivo a realizar eco.</param>
+        /// <param name="eco">Especifica el número de ecos al dispositivo.</param>
         /// <returns>Duración del eco.</returns>
-        public static Int16 DoPing(this Device device)
+        public static Int16 DoPing(this Device device, Int16 eco = 3)
         {
             var info = device.GetStateInfo();
-            var ping = ConnectionTCP.SendToPing(device.IPAddress.ToString(), 3);
+            var ping = ConnectionTCP.SendToPing(device.IPAddress.ToString(), eco);
             var linkState = device.CalculateLinkState();
 
             info.Ping = ping;

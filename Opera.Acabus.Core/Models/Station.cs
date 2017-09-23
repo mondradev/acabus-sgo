@@ -27,6 +27,11 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         private UInt64 _id;
 
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="IsExternal" />.
+        /// </summary>
+        private Boolean _isExternal;
+
         ///<summary>
         /// Campo que provee a la propiedad <see cref="Name"/>.
         ///</summary>
@@ -56,7 +61,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Crea una instancia de <see cref="Station"/>.
         /// </summary>
-        public Station() { }
+        public Station() : this(0, 0) { }
 
         /// <summary>
         /// Obtiene o establece la sección de atención a esta ubicación.
@@ -85,6 +90,17 @@ namespace Opera.Acabus.Core.Models
             private set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el valor que indica si la estación es externa a vía.
+        /// </summary>
+        public Boolean IsExternal {
+            get => _isExternal;
+            set {
+                _isExternal = value;
+                OnPropertyChanged(nameof(IsExternal));
             }
         }
 

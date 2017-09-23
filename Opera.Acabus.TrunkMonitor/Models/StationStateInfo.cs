@@ -27,6 +27,11 @@ namespace Opera.Acabus.TrunkMonitor.Models
         private UInt16 _maximunPing;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="Messages" />.
+        /// </summary>
+        private ObservableCollection<String> _message;
+
+        /// <summary>
         /// Campo que provee a la propiedad <see cref="Ping" />.
         /// </summary>
         private Int16 _ping;
@@ -50,6 +55,18 @@ namespace Opera.Acabus.TrunkMonitor.Models
             _station = owner;
             _maximunAcceptablePing = 600;
             _maximunPing = 100;
+            _status = LinkState.GOOD;
+            
+            _message = new ObservableCollection<String>();
+            _message.CollectionChanged += (sender, args) =>
+            {
+                if (_message.Count > 2)
+                    Status = LinkState.BAD;
+                else if (_message.Count > 0)
+                    Status = LinkState.MEDIUM;
+                else
+                    Status = LinkState.GOOD;
+            };
         }
 
         /// <summary>
@@ -79,6 +96,11 @@ namespace Opera.Acabus.TrunkMonitor.Models
                 OnPropertyChanged(nameof(MaximunPing));
             }
         }
+
+        /// <summary>
+        /// Obtiene una lista de los mensajes arrojados por la revisión de estación.
+        /// </summary>
+        public ICollection<String> Messages => _message;
 
         /// <summary>
         /// Obtiene o establece el valor del tiempo del eco.

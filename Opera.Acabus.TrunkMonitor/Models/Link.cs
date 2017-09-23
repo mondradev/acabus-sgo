@@ -48,6 +48,7 @@ namespace Opera.Acabus.TrunkMonitor.Models
             _id = id;
             _stationA = stationA;
             _stationB = stationB;
+            _state = LinkState.GOOD;
         }
 
         /// <summary>
@@ -55,16 +56,12 @@ namespace Opera.Acabus.TrunkMonitor.Models
         /// </summary>
         /// <param name="stationA">Estación del extremo A.</param>
         /// <param name="stationB">Estación del extremo B.</param>
-        public Link(Station stationA, Station stationB)
-        {
-            _stationA = stationA;
-            _stationB = stationB;
-        }
+        public Link(Station stationA, Station stationB) : this(0, stationA, stationB) { }
 
         /// <summary>
         /// Crea una nueva instancia de <see cref="Link"/>.
         /// </summary>
-        public Link() { }
+        public Link() : this(0, null, null) { }
 
         /// <summary>
         /// Obtiene o establece el identificador único del enlace.

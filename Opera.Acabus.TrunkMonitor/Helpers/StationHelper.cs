@@ -1,9 +1,11 @@
-﻿using Opera.Acabus.Core.Models;
+﻿using InnSyTech.Standard.Utils;
+using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Opera.Acabus.TrunkMonitor.Helpers
 {
@@ -52,32 +54,36 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// Verifica si todos los equipos de la estación están conectados.
         /// </summary>
         /// <param name="station">Estación a realizar la revisión.</param>
-        /// <returns>Un valor true si todos están conectados.</returns>
-        public static bool CheckDevice(this Station station)
+        public static void CheckDevice(this Station station)
         {
-            var ping = 0;
-            var nDevice = 0;
-            foreach (var device in station.Devices)
-            {
-                var pingTemp = device.DoPing();
-                if (device.GetState() != LinkState.DISCONNECTED)
-                {
-                    ping += pingTemp;
-                    nDevice++;
-                }
-            }
-
             var info = station.GetStateInfo();
-            var percentage = nDevice / station.Devices.Count;
+            var devices = station.Devices.Where(d => new[] {
+                DeviceType.APP,
+                DeviceType.CDE,
+                DeviceType.DB,
+                DeviceType.KVR,
+                DeviceType.NVR,
+                DeviceType.PDE,
+                DeviceType.PMR,
+                DeviceType.SW,
+                DeviceType.TD,
+                DeviceType.TOR,
+                DeviceType.TS,
+                DeviceType.TSI
+            }.Contains(d.Type));
 
-            if (percentage < 0.5)
-                info.Status = LinkState.BAD;
-            else if (percentage < 1)
-                info.Status = LinkState.MEDIUM;
-            else
-                info.Status = LinkState.GOOD;
-
-            return (nDevice == station.Devices.Count);
+            foreach (var device in devices)
+                Task.Run(() =>
+                {
+                    string message = $"Equipo desconectado: {device}";
+                    if (device.DoPing(2) < 0)
+                    {
+                        if (!info.Messages.Contains(message))
+                            info.Messages.Add(message);
+                    }
+                    else
+                        info.Messages.Remove(message);
+                });
         }
 
         /// <summary>
@@ -89,10 +95,25 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         public static Int16 DoPingLinkDevice(this Station station)
         {
             var linkDevice = station.Devices.FirstOrDefault(device => device.Type == DeviceType.SW);
+
+            if (linkDevice == null && station.IsExternal)
+                linkDevice = station.Devices.FirstOrDefault(d => d.Type == DeviceType.KVR);
+
             if (linkDevice == null)
-                linkDevice = station.Devices.FirstOrDefault();
+                linkDevice = station.Devices
+                    .GetRandom(d => new[] {
+                        DeviceType.CDE,
+                        DeviceType.KVR,
+                        DeviceType.PMR,
+                        DeviceType.TD,
+                        DeviceType.TS,
+                        DeviceType.TSI
+                    }.Contains(d.Type));
+
             if (linkDevice == null) return -1;
+
             var ping = linkDevice.DoPing();
+
             return ping;
         }
 

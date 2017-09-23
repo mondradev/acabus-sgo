@@ -1,4 +1,5 @@
-﻿using Opera.Acabus.Core.DataAccess;
+﻿using InnSyTech.Standard.Mvvm;
+using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui.Modules;
 using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Helpers;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,22 +28,12 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <summary>
         /// Obtiene el tiempo (minutos) de espera del monitor de estaciones.
         /// </summary>
-        private const Double TIME_WAIT_STATION = 5;
-
-        /// <summary>
-        /// Campo que provee a la propiedad '<see cref="Instance"/>'.
-        /// </summary>
-        private static TrunkMonitorViewModel _instance;
+        private const Double TIME_WAIT_STATION = 0.5;
 
         /// <summary>
         /// Campo que provee a la propiedad ' <see cref="ControlCenter"/>'.
         /// </summary>
         private Station _controlCenter;
-
-        /// <summary>
-        /// Obtiene un valor True en caso que el monitor de vía se encuentre en ejecución.
-        /// </summary>
-        private Boolean _isRunnig;
 
         /// <summary>
         /// Temporizador del monitor de enlaces.
@@ -66,12 +58,30 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <summary>
         /// Crea una instance del modelo de la vista del monitor de vía.
         /// </summary>
-        public TrunkMonitorViewModel() { _instance = this; }
+        public TrunkMonitorViewModel()
+        {
+            ViewModelService.Register(this);
 
-        /// <summary>
-        /// Obtiene la instancia del modelo de la vista del monitor de vía.
-        /// </summary>
-        public static TrunkMonitorViewModel Instance => _instance;
+            var torniquiteType = new[]
+            {
+                DeviceType.TD,
+                DeviceType.TOR,
+                DeviceType.TSI,
+                DeviceType.TS
+            };
+
+            CreateTask("Alertas", (station) =>
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                foreach (var message in station.GetStateInfo().Messages)
+                    stringBuilder.AppendLine(message);
+
+                if (stringBuilder.Length == 0)
+                    stringBuilder.AppendLine("Sin alertas.");
+
+                ShowMessage(stringBuilder.Insert(0, $"Estación: {station}\n\n").ToString());
+            });
+        }
 
         /// <summary>
         /// Obtiene la estación que representa a Centro de Control.
@@ -94,19 +104,15 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// </summary>
         /// <param name="name">Nombre de la tarea a crear.</param>
         /// <param name="task">Acción que realizará la tarea al ejecutarse.</param>
-        public static void CreateTask(String name, Action<Station> task)
-        {
-            Instance?.TasksAvailable.Add(new TaskTrunkMonitor(name, task));
-        }
+        public void CreateTask(String name, Action<Station> task)
+            => TasksAvailable.Add(new TaskTrunkMonitor(name, task));
 
         /// <summary>
         /// Permite crear una tarea que se ejecutará desde el monitor de vía.
         /// </summary>
         /// <param name="task">Nueva tarea.</param>
-        public static void CreateTask(TaskTrunkMonitor task)
-        {
-            Instance?.TasksAvailable.Add(task);
-        }
+        public void CreateTask(TaskTrunkMonitor task)
+            => TasksAvailable.Add(task);
 
         /// <summary>
         /// Función llamada por el comando <see cref="LoadCommand"/>.
@@ -147,31 +153,15 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// </summary>
         private void InitMonitor()
         {
-            var isRunningLink = false;
-            var isRunningStation = false;
             _linkMonitor = new Timer(delegate
             {
-                if (isRunningLink)
-                    return;
-
-                isRunningLink = true;
-
                 UpdateLinkStatus(Links);
-
-                isRunningLink = false;
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(TIME_WAIT_LINK));
 
             _stationMonitor = new Timer(delegate
             {
-                if (isRunningStation)
-                    return;
-
-                isRunningStation = true;
-
                 UpdateStationStatus(ControlCenter);
-
-                isRunningStation = false;
-            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(TIME_WAIT_STATION));
+            }, null, TimeSpan.FromSeconds(0.5), TimeSpan.FromMinutes(TIME_WAIT_STATION));
         }
 
         /// <summary>
@@ -183,7 +173,7 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
 
             foreach (var link in links)
             {
-                new Task(() =>
+                Task.Run(() =>
                 {
                     if (state != LinkState.DISCONNECTED)
                     {
@@ -199,7 +189,7 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                         link.Ping = -1;
                     }
                     UpdateLinkStatus(link.StationB?.GetLinks(), link.State);
-                }).Start();
+                });
             }
         }
 
@@ -212,10 +202,10 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
             if (stationA == null)
                 return;
 
-            foreach (var link in stationA.GetLinks())
-                Task.Run(() => UpdateStationStatus(link.StationB));
-            
             stationA.CheckDevice();
+
+            foreach (var link in stationA.GetLinks())
+                UpdateStationStatus(link.StationB);
         }
     }
 }
