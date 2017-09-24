@@ -31,6 +31,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private const Double TIME_WAIT_STATION = 0.5;
 
         /// <summary>
+        /// Temporizador del monitor de replica de estaciones y externos.
+        /// </summary>
+        private Timer _checkReplica;
+
+        /// <summary>
         /// Campo que provee a la propiedad ' <see cref="ControlCenter"/>'.
         /// </summary>
         private Station _controlCenter;
@@ -54,6 +59,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// Campo que provee a la propiedad <see cref="TasksAvailable" />.
         /// </summary>
         private ICollection<TaskTrunkMonitor> _taskAvailable;
+
+        /// <summary>
+        /// Obtiene el tiempo (minutos) de espera para verificar la replica.
+        /// </summary>
+        private int TIME_WAIT_REPLICA = 5;
 
         /// <summary>
         /// Crea una instance del modelo de la vista del monitor de vía.
@@ -149,6 +159,21 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         }
 
         /// <summary>
+        /// Verifica la replica de los equipos de las estaciones.
+        /// </summary>
+        /// <param name="initialStation">Estación inicial.</param>
+        private void CheckReplica(Station initialStation)
+        {
+            if (initialStation == null)
+                return;
+
+            foreach (var link in initialStation.GetLinks())
+                Task.Run(() => CheckReplica(link.StationB));
+
+            initialStation.VerifyReplica();
+        }
+
+        /// <summary>
         /// Inicializa el monitor de enlace de estaciones.
         /// </summary>
         private void InitMonitor()
@@ -162,6 +187,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
             {
                 UpdateStationStatus(ControlCenter);
             }, null, TimeSpan.FromSeconds(0.5), TimeSpan.FromMinutes(TIME_WAIT_STATION));
+
+            _checkReplica = new Timer(delegate
+            {
+                CheckReplica(ControlCenter);
+            }, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(TIME_WAIT_REPLICA));
         }
 
         /// <summary>
@@ -177,15 +207,16 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                 {
                     if (state != LinkState.DISCONNECTED)
                     {
-                        link.DoPing();
-                        if (link.State == LinkState.DISCONNECTED)
+                        var ping = link.DoPing();
+                        if (link.State == LinkState.DISCONNECTED || ping < 0)
+                        {
+                            link.State = LinkState.DISCONNECTED;
                             SendNotify(String.Format("Enlace {0} sin conexión", link));
+                        }
                     }
                     else
-                        link.State = LinkState.DISCONNECTED;
-                    if (link.State > state)
                     {
-                        link.State = state;
+                        link.State = LinkState.DISCONNECTED;
                         link.Ping = -1;
                     }
                     UpdateLinkStatus(link.StationB?.GetLinks(), link.State);

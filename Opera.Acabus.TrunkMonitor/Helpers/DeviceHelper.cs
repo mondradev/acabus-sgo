@@ -1,8 +1,10 @@
 ﻿using InnSyTech.Standard.Net;
+using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Models;
 using Opera.Acabus.TrunkMonitor.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Opera.Acabus.TrunkMonitor.Helpers
 {
@@ -27,6 +29,24 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
                 device.GetPing(),
                 device.Station.GetMaximunPing(),
                 device.Station.GetMaximunAcceptablePing());
+
+        /// <summary>
+        /// Verifica si el dispositivo tiene transacciones por replicar.
+        /// </summary>
+        /// <param name="device">Dispositivo a verificar.</param>
+        /// <returns>Un valor true si el equipo tiene información pendiente por replicar.</returns>
+        public static bool PendingReplica(this Device device)
+        {
+            var query = AcabusDataContext.ConfigContext["QueryCheckReplica" + device.Type]?.ToString("value");
+
+            if (String.IsNullOrEmpty(query))
+            {
+                Trace.WriteLine("No hay una consulta SQL para verificar la replica de dispositivos tipo: " + device.Type, "NOTIFY");
+                return false;
+            }
+            
+            return false;
+        }
 
         /// <summary>
         /// Realiza un eco al dispositivo obteniendo el tiempo de este.

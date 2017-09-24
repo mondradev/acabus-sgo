@@ -87,6 +87,48 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         }
 
         /// <summary>
+        /// Verifica el estado de replica de los equipo del tipo <see cref="DeviceType.KVR"/>, <see
+        /// cref="DeviceType.PMR"/>, <see cref="DeviceType.TD"/>, <see cref="DeviceType.TSI"/> y <see
+        /// cref="DeviceType.TS"/>. En caso de haber problemas de replica se envían mensajes a las
+        /// alertas de estación.
+        /// </summary>
+        /// <param name="stationToCheck">Estación a verificar el equipo replicado.</param>
+        public static void VerifyReplica(this Station stationToCheck)
+        {
+            if (stationToCheck == null)
+                return;
+
+            if (stationToCheck.Devices.Count == 0)
+                return;
+
+            var info = stationToCheck.GetStateInfo();
+
+            foreach (var device in stationToCheck.Devices.Where(d => new[] {
+                DeviceType.KVR,
+                DeviceType.PMR,
+                DeviceType.TD,
+                DeviceType.TS,
+                DeviceType.TSI
+            }.Contains(d.Type)))
+            {
+                Task.Run(() =>
+                {
+                    if (device.DoPing() < 0)
+                        return;
+
+                    string message = $"Pendiente por replicar {device}";
+                    if (device.PendingReplica())
+                    {
+                        if (!info.Messages.Contains(message))
+                            info.Messages.Add(message);
+                    }
+                    else
+                        info.Messages.Remove(message);
+                });
+            }
+        }
+
+        /// <summary>
         /// Realiza un ping a un equipo del tipo <see cref="DeviceType.SW"/> o uno aleatorio y
         /// obtiene su latencia.
         /// </summary>

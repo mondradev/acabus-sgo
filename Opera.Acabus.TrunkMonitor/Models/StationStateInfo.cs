@@ -3,6 +3,7 @@ using Opera.Acabus.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Opera.Acabus.TrunkMonitor.Models
 {
@@ -56,7 +57,7 @@ namespace Opera.Acabus.TrunkMonitor.Models
             _maximunAcceptablePing = 600;
             _maximunPing = 100;
             _status = LinkState.GOOD;
-            
+
             _message = new ObservableCollection<String>();
             _message.CollectionChanged += (sender, args) =>
             {
@@ -66,6 +67,12 @@ namespace Opera.Acabus.TrunkMonitor.Models
                     Status = LinkState.MEDIUM;
                 else
                     Status = LinkState.GOOD;
+
+                var disconnected = _message.Where(m => m.Contains("Desconectado")).Count();
+                var percentage = (double)(disconnected / _station.Devices.Count);
+
+                if (percentage < 0.6 && Status > LinkState.BAD)
+                    Status = LinkState.BAD;
             };
         }
 
