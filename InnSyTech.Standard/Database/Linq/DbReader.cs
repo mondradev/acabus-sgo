@@ -23,7 +23,7 @@ namespace InnSyTech.Standard.Database.Linq
         public static object Process(Type elementType, DbDataReader reader, DbStatementDefinition definition)
         {
             var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType)) as IList;
-
+            var readItem = 0;
             while (reader.Read())
             {
                 object instance = DbHelper.ToInstance(definition.Entities.First().EntityType, reader, definition.Entities.First(), definition.ReferenceDepth);
@@ -32,6 +32,10 @@ namespace InnSyTech.Standard.Database.Linq
                     instance = definition.Select.DynamicInvoke(instance);
 
                 list.Add(instance);
+                readItem++;
+
+                if (definition.CountToTake != 0 && readItem == definition.CountToTake)
+                    break;
             }
 
             return list;

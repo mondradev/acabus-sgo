@@ -205,17 +205,31 @@ namespace InnSyTech.Standard.Database.Linq
                     Visit(m.Arguments[0]);
                     break;
 
+                case "Take":
+                    var count = (int)(m.Arguments.Last() as ConstantExpression).Value;
+                    Visit(m.Arguments.First());
+                    _statementDefinition.CountToTake = _statementDefinition.CountToTake > count && _statementDefinition.CountToTake != 0 
+                        ? count : _statementDefinition.CountToTake;
+                    break;
+
                 case "Single":
-
-                    break;
-
                 case "SingleOrDefault":
-                    break;
-
-                case "First":
-                    break;
-
                 case "FirstOrDefault":
+                case "First":
+                    _statementDefinition.CountToTake = _statementDefinition.CountToTake > 1 && _statementDefinition.CountToTake != 0 
+                        ? 1 : _statementDefinition.CountToTake;
+                    Visit(m.Arguments.First());
+                    if (m.Arguments.Count > 1)
+                    {
+                        if (_statementDefinition.Filters.Count == 0)
+                            _statement.Append(" WHERE ");
+                        else
+                            _statement.Append(" AND ");
+
+                        _selectedList = _statementDefinition.Filters;
+
+                        Visit((StripQuotes(m.Arguments.Last()) as LambdaExpression).Body);
+                    }
                     break;
 
                 case "Select":
@@ -414,7 +428,6 @@ namespace InnSyTech.Standard.Database.Linq
             {
                 if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
                 {
-
                     return Expression.Convert(Expression.Call(this.row, GetValue, Expression.Constant(iColumn++)), m.Type);
                 }
                 else

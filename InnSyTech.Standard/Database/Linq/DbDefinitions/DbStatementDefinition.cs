@@ -27,6 +27,11 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
         }
 
         /// <summary>
+        /// Obtiene o establece la cantidad de elementos que se obtendrán.
+        /// </summary>
+        public int CountToTake { get; set; }
+
+        /// <summary>
         /// Obtiene un listado de todas las entidades involucradas en la sentencia.
         /// </summary>
         public List<DbEntityDefinition> Entities { get; }
@@ -42,14 +47,14 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
         public List<DbFieldDefinition> Orders { get; }
 
         /// <summary>
-        /// Obtiene el delegado de la salida seleccionada.
-        /// </summary>
-        public Delegate Select { get; set; }
-
-        /// <summary>
         /// Nivel de profundidad de la referencia.
         /// </summary>
         public int ReferenceDepth { get; set; }
+
+        /// <summary>
+        /// Obtiene el delegado de la salida seleccionada.
+        /// </summary>
+        public Delegate Select { get; set; }
 
         /// <summary>
         /// Obtiene la sentencia secundaría.
