@@ -177,6 +177,7 @@ namespace Acabus.Modules.Core.DataAccess
             _cc = AllStations.FirstOrDefault(station => station.Name.Contains("CENTRO DE CONTROL"));
 
             LoadOffDutyVehiclesSettings();
+
         }
     }
 }

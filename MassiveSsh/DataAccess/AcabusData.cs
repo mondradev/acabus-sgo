@@ -376,20 +376,23 @@ namespace Acabus.DataAccess
         /// <returns>Valor de la propiedad.</returns>
         public static String GetProperty(String name, String type)
         {
-            LoadXmlConfig();
-            XmlNodeList property = _xmlConfig?.SelectSingleNode("Acabus")?.SelectSingleNode("Settings")?.SelectNodes("Property");
-
-            if (property == null)
-                return null;
-
-            foreach (var item in property)
+            try
             {
-                String nameAttr = XmlUtils.GetAttribute(item as XmlNode, "Name");
-                String typeAttr = XmlUtils.GetAttribute(item as XmlNode, "Type");
-                if (nameAttr.Equals(name) && typeAttr.Equals(type))
-                    return XmlUtils.GetAttribute(item as XmlNode, "Value");
-            }
-            return null;
+                LoadXmlConfig();
+                XmlNodeList property = _xmlConfig?.SelectSingleNode("Acabus")?.SelectSingleNode("Settings")?.SelectNodes("Property");
+
+                if (property == null)
+                    return null;
+
+                foreach (var item in property)
+                {
+                    String nameAttr = XmlUtils.GetAttribute(item as XmlNode, "Name");
+                    String typeAttr = XmlUtils.GetAttribute(item as XmlNode, "Type");
+                    if (nameAttr.Equals(name) && typeAttr.Equals(type))
+                        return XmlUtils.GetAttribute(item as XmlNode, "Value");
+                }
+                return null;
+            }catch { return null; }
         }
 
         /// <summary>
