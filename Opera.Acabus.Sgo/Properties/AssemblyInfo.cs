@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("InnSy Tech")]
 [assembly: AssemblyProduct("Opera.Acabus.Sgo")]
-[assembly: AssemblyCopyright("Copyright InnSy Tech ©  2017")]
+[assembly: AssemblyCopyright("Copyright © InnSy Tech 2017")]
 [assembly: AssemblyTrademark("Acabus SGO")]
 [assembly: AssemblyCulture("")]
 
@@ -50,7 +50,7 @@ using System.Windows;
 //
 // Puede especificar todos los valores o utilizar los números de compilación y de revisión predeterminados
 // mediante el carácter '*', como se muestra a continuación:
-[assembly: AssemblyVersion("3.2.*")]
+[assembly: AssemblyVersion("3.3.*")]
 //[assembly: AssemblyVersion("3.2.1.23")]
 //[assembly: AssemblyFileVersion("3.2.1.23")]
 [assembly: NeutralResourcesLanguage("es-MX")]

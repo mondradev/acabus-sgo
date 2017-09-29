@@ -13,27 +13,27 @@ namespace Opera.Acabus.TrunkMonitor.Models
     public class StationStateInfo : NotifyPropertyChanged
     {
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Links" />.
+        /// Campo que provee a la propiedad <see cref="Links"/>.
         /// </summary>
         private ICollection<Link> _links;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="MaximunAcceptablePing" />.
+        /// Campo que provee a la propiedad <see cref="MaximunAcceptablePing"/>.
         /// </summary>
         private UInt16 _maximunAcceptablePing;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="MaximunPing" />.
+        /// Campo que provee a la propiedad <see cref="MaximunPing"/>.
         /// </summary>
         private UInt16 _maximunPing;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Messages" />.
+        /// Campo que provee a la propiedad <see cref="Messages"/>.
         /// </summary>
-        private ObservableCollection<String> _message;
+        private ObservableCollection<StationMessage> _message;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Ping" />.
+        /// Campo que provee a la propiedad <see cref="Ping"/>.
         /// </summary>
         private Int16 _ping;
 
@@ -43,7 +43,7 @@ namespace Opera.Acabus.TrunkMonitor.Models
         private Station _station;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Status" />.
+        /// Campo que provee a la propiedad <see cref="Status"/>.
         /// </summary>
         private LinkState _status;
 
@@ -58,21 +58,32 @@ namespace Opera.Acabus.TrunkMonitor.Models
             _maximunPing = 100;
             _status = LinkState.GOOD;
 
-            _message = new ObservableCollection<String>();
+            _message = new ObservableCollection<StationMessage>();
             _message.CollectionChanged += (sender, args) =>
             {
-                if (_message.Count > 2)
+                Status = LinkState.GOOD;
+
+                var message = _message.ToList();
+
+                if (message.Count == 0)
+                    return;
+
+                var priorities = message.GroupBy(m => m.Priority);
+
+                var high = priorities.FirstOrDefault(g => g.Key == Priority.HIGH)?.Count() ?? 0;
+                var medium = priorities.FirstOrDefault(g => g.Key == Priority.MEDIUM)?.Count() ?? 0;
+                var low = priorities.FirstOrDefault(g => g.Key == Priority.LOW)?.Count() ?? 0;
+
+                medium += low / 2;
+                high += medium / 2;
+
+                if (high > 0)
                     Status = LinkState.BAD;
-                else if (_message.Count > 0)
+                else if (medium > 0 || low > 0)
                     Status = LinkState.MEDIUM;
                 else
                     Status = LinkState.GOOD;
 
-                var disconnected = _message.Where(m => m.Contains("Desconectado")).Count();
-                var percentage = (double)(disconnected / _station.Devices.Count);
-
-                if (percentage < 0.6 && Status > LinkState.BAD)
-                    Status = LinkState.BAD;
             };
         }
 
@@ -107,7 +118,7 @@ namespace Opera.Acabus.TrunkMonitor.Models
         /// <summary>
         /// Obtiene una lista de los mensajes arrojados por la revisión de estación.
         /// </summary>
-        public ICollection<String> Messages => _message;
+        public ICollection<StationMessage> Messages => _message;
 
         /// <summary>
         /// Obtiene o establece el valor del tiempo del eco.
@@ -135,6 +146,108 @@ namespace Opera.Acabus.TrunkMonitor.Models
                 _status = value;
                 OnPropertyChanged(nameof(Status));
             }
+        }
+
+        /// <summary>
+        /// Representa la estructura de un mensaje de estación.
+        /// </summary>
+        public sealed class StationMessage
+        {
+            /// <summary>
+            /// Crea una instancia nueva de <see cref="StationMessage"/>.
+            /// </summary>
+            /// <param name="device">Dispositivo involucrado en el mensaje.</param>
+            /// <param name="message">Mensaje a crear.</param>
+            /// <param name="priority">
+            /// Prioridad del mensaje, de manera predeterminada es baja <see cref="Priority.LOW"/>.
+            /// </param>
+            public StationMessage(Device device, String message, Priority priority = Priority.LOW)
+            {
+                Priority = priority;
+                Device = device;
+                Message = message;
+            }
+
+            /// <summary>
+            /// Obtiene el dispositivo involucrado.
+            /// </summary>
+            public Device Device { get; }
+
+            /// <summary>
+            /// Obtiene el mensaje.
+            /// </summary>
+            public String Message { get; }
+
+            /// <summary>
+            /// Obtiene la prioridad del mensaje.
+            /// </summary>
+            public Priority Priority { get; }
+
+            /// <summary>
+            /// Compara dos instancias de <see cref="StationMessage"/> y determina si son diferentes.
+            /// </summary>
+            /// <param name="left">Operando izquierdo.</param>
+            /// <param name="right">Operando derecho.</param>
+            /// <returns>Un valor true si son diferentes.</returns>
+            public static bool operator !=(StationMessage left, StationMessage right)
+            {
+                if (left is null && right is null)
+                    return false;
+
+                if (left is null || right is null)
+                    return true;
+
+                return !left.Equals(right);
+            }
+
+            /// <summary>
+            /// Compara dos instancias de <see cref="StationMessage"/> y determina si son iguales.
+            /// </summary>
+            /// <param name="left">Operando izquierdo.</param>
+            /// <param name="right">Operando derecho.</param>
+            /// <returns>Un valor true si son iguales.</returns>
+            public static bool operator ==(StationMessage left, StationMessage right)
+            {
+                if (left is null && right is null)
+                    return true;
+
+                if (left is null || right is null)
+                    return false;
+
+                return left.Equals(right);
+            }
+
+            /// <summary>
+            /// Compara dos instancia y determina si son iguales.
+            /// </summary>
+            /// <param name="obj">Otra instancia.</param>
+            /// <returns>Un valor true si son iguales las instancias.</returns>
+            public override bool Equals(object obj)
+            {
+                if (obj is null)
+                    return false;
+
+                if (obj.GetType() != GetType())
+                    return false;
+
+                var anotherObj = obj as StationMessage;
+
+                return Device == anotherObj.Device && Message == anotherObj.Message;
+            }
+
+            /// <summary>
+            /// Devuelve el código Hash de la instancia actual.
+            /// </summary>
+            /// <returns>Código Hash de la instancia.</returns>
+            public override int GetHashCode()
+                => Tuple.Create(Device, Message, Priority).GetHashCode();
+
+            /// <summary>
+            /// Devuelve una cadena que representa a la instancia actual.
+            /// </summary>
+            /// <returns>Una cadena que representa a la instancia.</returns>
+            public override string ToString()
+                => Message;
         }
     }
 }

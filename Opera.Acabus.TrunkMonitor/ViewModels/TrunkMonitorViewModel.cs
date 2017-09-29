@@ -26,6 +26,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private const Double TIME_WAIT_LINK = 0.5;
 
         /// <summary>
+        /// Obtiene el tiempo (minutos) de espera para verificar la replica.
+        /// </summary>
+        private const int TIME_WAIT_REPLICA = 10;
+
+        /// <summary>
         /// Obtiene el tiempo (minutos) de espera del monitor de estaciones.
         /// </summary>
         private const Double TIME_WAIT_STATION = 0.5;
@@ -61,30 +66,17 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private ICollection<TaskTrunkMonitor> _taskAvailable;
 
         /// <summary>
-        /// Obtiene el tiempo (minutos) de espera para verificar la replica.
-        /// </summary>
-        private int TIME_WAIT_REPLICA = 5;
-
-        /// <summary>
         /// Crea una instance del modelo de la vista del monitor de vía.
         /// </summary>
         public TrunkMonitorViewModel()
         {
             ViewModelService.Register(this);
 
-            var torniquiteType = new[]
-            {
-                DeviceType.TD,
-                DeviceType.TOR,
-                DeviceType.TSI,
-                DeviceType.TS
-            };
-
             CreateTask("Alertas", (station) =>
             {
                 StringBuilder stringBuilder = new StringBuilder();
                 foreach (var message in station.GetStateInfo().Messages)
-                    stringBuilder.AppendLine(message);
+                    stringBuilder.AppendLine(message.Message);
 
                 if (stringBuilder.Length == 0)
                     stringBuilder.AppendLine("Sin alertas.");
@@ -130,7 +122,10 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <param name="parameter">Parametro del comando.</param>
         protected override void OnLoad(object parameter)
         {
-            List<Link> linksList = TrunkMonitorModule.AllLinks.ToList();
+            List<Link> linksList = TrunkMonitorModule.AllLinks?.ToList();
+
+            if (linksList == null)
+                return;
 
             _controlCenter = linksList.Where(l => l.StationA.Name.Contains("CENTRO DE CONTROL"))
                 .Select(l => l.StationA)
@@ -155,7 +150,9 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <param name="parameter">Parametro del comando.</param>
         protected override void OnUnload(object parameter)
         {
-            _linkMonitor.Dispose();
+            _linkMonitor?.Dispose();
+            _stationMonitor?.Dispose();
+            _checkReplica?.Dispose();
         }
 
         /// <summary>

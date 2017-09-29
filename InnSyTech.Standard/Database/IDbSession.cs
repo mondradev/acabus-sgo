@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace InnSyTech.Standard.Database
@@ -8,6 +9,16 @@ namespace InnSyTech.Standard.Database
     /// </summary>
     public interface IDbSession
     {
+        /// <summary>
+        /// Ejecuta una consulta de tipo SELECT y obtiene el resultado en una secuencia de
+        /// diccionarios. Utilice el patrón @n para definir un parametro en la consulta, por ejemplo
+        /// @0 para el parametro inicial.
+        /// </summary>
+        /// <param name="query">Una consulta SQL de lectura.</param>
+        /// <param name="parameters">Parametros de la consulta.</param>
+        /// <returns>Devuelve una secuencia de diccionarios con el resultado de la consulta.</returns>
+        IEnumerable<Dictionary<String, Object>> Batch(String query, params object[] parameters);
+
         /// <summary>
         /// Crea una instancia persistente a partir de un tipo definido que corresponde a una tabla
         /// en la base de datos. Esto equivale a un INSERT INTO de Sql.
@@ -27,6 +38,15 @@ namespace InnSyTech.Standard.Database
         /// <param name="instance">Instancia a eliminar.</param>
         /// <returns>Un true si la instancia fue borrada así como sus referencias de ser necesario.</returns>
         bool Delete<TData>(TData instance);
+
+        /// <summary>
+        /// Carga los valores para una propiedad de tipo colección que representan una referencia externa a la entidad especificada.
+        /// </summary>
+        /// <typeparam name="TData">Tipo de la instancia a cargar su referencia.</typeparam>
+        /// <param name="instance">Instancia persistida que tiene la referencia.</param>
+        /// <param name="propertyName">Nombre de la propiedad.</param>
+        /// <returns>Un true en caso de cargar correctamente la propiedad.</returns>
+        bool LoadRefences<TData>(TData instance, String propertyName);
 
         /// <summary>
         /// Realiza una lectura de elementos del tipo especificado que corresponde a una tabla en la
@@ -52,14 +72,5 @@ namespace InnSyTech.Standard.Database
         /// Un true si la instancia fue correctamente actualizada así como sus referencias de ser necesario.
         /// </returns>
         bool Update<TData>(TData instance, int referenceDepth = 0);
-
-        /// <summary>
-        /// Carga los valores para una propiedad de tipo colección que representan una referencia externa a la entidad especificada.
-        /// </summary>
-        /// <typeparam name="TData">Tipo de la instancia a cargar su referencia.</typeparam>
-        /// <param name="instance">Instancia persistida que tiene la referencia.</param>
-        /// <param name="propertyName">Nombre de la propiedad.</param>
-        /// <returns>Un true en caso de cargar correctamente la propiedad.</returns>
-        bool LoadRefences<TData>(TData instance, String propertyName);
     }
 }

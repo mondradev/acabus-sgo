@@ -74,6 +74,11 @@ namespace Opera.Acabus.Core.Gui.Modules
         public abstract Type ViewType { get; }
 
         /// <summary>
+        /// Obtiene el nombre código del módulo
+        /// </summary>
+        public abstract string CodeName { get; }
+
+        /// <summary>
         /// Carga la configuración inicial del módulo. Este método es llamadó cuando se carga el
         /// módulo en memoria.
         /// </summary>

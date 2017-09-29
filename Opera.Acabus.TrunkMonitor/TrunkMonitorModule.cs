@@ -59,6 +59,11 @@ namespace Opera.Acabus.TrunkMonitor
         public override Type ViewType => typeof(TrunkMonitorView);
 
         /// <summary>
+        /// Obtiene el nombre código del módulo.
+        /// </summary>
+        public override string CodeName => "Trunk_Monitor";
+
+        /// <summary>
         /// Permite la carga de los datos utilizados por el módulo <see cref="TrunkMonitor"/>
         /// </summary>
         public override bool LoadModule() => true;

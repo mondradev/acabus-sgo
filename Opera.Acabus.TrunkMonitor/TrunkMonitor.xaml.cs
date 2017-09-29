@@ -221,7 +221,6 @@ namespace Opera.Acabus.TrunkMonitor
                     Width = 150,
                     Height = 20
                 },
-                Foreground = (Brush)TryFindResource("AccentColorBrush"),
                 Padding = new Thickness(16),
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Margin = new Thickness(6, 4, 0, 0)

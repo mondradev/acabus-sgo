@@ -97,6 +97,11 @@ namespace Opera.Acabus.Core.Gui.Modules
         Type ViewType { get; }
 
         /// <summary>
+        /// Obtiene el nombre código del módulo.
+        /// </summary>
+        string CodeName { get; }
+
+        /// <summary>
         /// Carga el módulo en el sistema y devuelve un valor que indica si lo hizo correctamente.
         /// </summary>
         /// <returns>Un valor true si cargó correctamente.</returns>

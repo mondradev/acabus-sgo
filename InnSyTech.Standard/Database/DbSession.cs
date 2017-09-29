@@ -31,6 +31,53 @@ namespace InnSyTech.Standard.Database
         public DbProvider Provider { get; }
 
         /// <summary>
+        /// Ejecuta una consulta de tipo SELECT y obtiene el resultado en una secuencia de
+        /// diccionarios. Utilice el patrón @n para definir un parametro en la consulta, por ejemplo
+        /// @0 para el parametro inicial.
+        /// </summary>
+        /// <param name="query">Una consulta SQL de lectura.</param>
+        /// <param name="parameters">Parametros de la consulta.</param>
+        /// <returns>Devuelve una secuencia de diccionarios con el resultado de la consulta.</returns>
+        public IEnumerable<Dictionary<String, Object>> Batch(String query, params object[] parameters)
+        {
+            lock (Provider)
+            {
+                DbTransaction transaction = Provider.BeginTransaction();
+                DbCommand command = Provider.CreateCommand(transaction);
+                var count = 0;
+
+                command.CommandText = query;
+
+                foreach (var param in parameters)
+                {
+                    var p = command.CreateParameter();
+                    p.ParameterName = "@" + count;
+                    p.Value = param;
+                    command.Parameters.Add(p);
+                    count++;
+                }
+
+                command.Prepare();
+
+                var result = command.ExecuteReader();
+
+                while (result.Read())
+                    yield return DbHelper.ToDictionary(result);
+
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                    Provider.EndTransaction(transaction);
+                }
+
+                if (command != null)
+                    command.Dispose();
+
+                Provider.CloseConnection();
+            }
+        }
+
+        /// <summary>
         /// Crea una instancia persistente a partir de un tipo definido que corresponde a una tabla
         /// en la base de datos. Esto equivale a un INSERT INTO de Sql.
         /// </summary>
@@ -103,6 +150,7 @@ namespace InnSyTech.Standard.Database
                     parameter.Value = primaryKey.GetValue(instance);
 
                     command.Parameters.Add(parameter);
+                    command.Prepare();
 
                     Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
 
@@ -313,6 +361,7 @@ namespace InnSyTech.Standard.Database
             statement.Replace(", {{parameters}}", String.Empty);
             statement.Replace(", {{parametersAndFields}}", String.Empty);
 
+            command.Prepare();
             command.CommandText = statement.ToString();
 
             Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
@@ -372,6 +421,7 @@ namespace InnSyTech.Standard.Database
 
             statement.Replace(", {{parametersAndFields}}", String.Empty);
 
+            command.Prepare();
             command.CommandText = statement.ToString();
 
             Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");

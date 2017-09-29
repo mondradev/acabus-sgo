@@ -279,5 +279,27 @@ namespace InnSyTech.Standard.Database.Utils
             object reference = ToInstance(foreignField.PropertyType, reader, definition, depth);
             foreignField.SetValue(instance, reference);
         }
+
+        /// <summary>
+        /// Convierte un resultado de lector de base de datos en un diccionario.
+        /// </summary>
+        /// <param name="reader">Lecto de la base de datos.</param>
+        /// <returns>Un diccionario correspondiente al registro.</returns>
+        public static Dictionary<string, object> ToDictionary(DbDataReader reader)
+        {
+            var row = new Dictionary<String, object>();
+
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                var name = reader.GetName(i);
+                var value = reader.IsDBNull(i) ? null : reader[i];
+
+                if (String.IsNullOrEmpty(name))
+                    continue;
+
+                row.Add(name, value);
+            }
+            return row;
+        }
     }
 }

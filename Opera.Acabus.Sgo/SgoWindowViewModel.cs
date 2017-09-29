@@ -23,10 +23,12 @@ namespace Opera.Acabus.Sgo
         /// </summary>
         private static SgoWindowModelView _instance;
 
+        private bool _configurationAvailable;
+
         /// <summary>
-        /// Lista de todos los módulos cargados.
+        /// Lista de todos los módulos cargados en el visor.
         /// </summary>
-        private List<IModuleInfo> _modulesLoaded;
+        private List<IModuleInfo> _modules;
 
         /// <summary>
         /// Instancia de la vista de la ventana principal.
@@ -44,7 +46,7 @@ namespace Opera.Acabus.Sgo
 
             _view = view;
             _instance = this;
-            _modulesLoaded = new List<IModuleInfo>();
+            _modules = new List<IModuleInfo>();
 
             Dispatcher.CloseDialogCommand = DialogHost.CloseDialogCommand;
             Dispatcher.OpenDialogCommand = new Command(param => OpenDialg(param));
@@ -82,7 +84,7 @@ namespace Opera.Acabus.Sgo
         /// <summary>
         /// Obtiene una lista de los módulos cargados en el visor.
         /// </summary>
-        public IReadOnlyList<IModuleInfo> ModulesLoaded => _modulesLoaded;
+        public IReadOnlyList<IModuleInfo> ModulesLoaded => _modules;
 
         /// <summary>
         /// Carga todos los modulos leidos del archivo de configuración de la aplicación.
@@ -101,25 +103,7 @@ namespace Opera.Acabus.Sgo
 
                     IModuleInfo moduleInfo = (IModuleInfo)Activator.CreateInstance(type);
 
-                    _modulesLoaded.Add(moduleInfo);
-
-                    if (moduleInfo.ModuleType == ModuleType.SERVICE)
-                        if (!moduleInfo.LoadModule())
-                            Dispatcher.SendNotify($"El servicio '{moduleInfo.Name} no se logró iniciar.");
-
-                    if (moduleInfo.ModuleType == ModuleType.VIEWER)
-                    {
-                        UserControl moduleView = null;
-                        _view.CreateToolButton(moduleInfo.Name.Replace(" ", "_"), new Command(delegate
-                         {
-                             if (moduleView == null)
-                                 moduleView = (UserControl)Activator.CreateInstance(moduleInfo.ViewType);
-                             _view.ShowContent(moduleView);
-                         }), moduleInfo.Icon, moduleInfo.Name);
-
-                        if (!moduleInfo.LoadModule())
-                            Dispatcher.SendNotify($"El módulo '{moduleInfo.Name} no se logró iniciar.");
-                    }
+                    _modules.Add(moduleInfo);
                 }
                 catch (FileNotFoundException)
                 {
@@ -128,6 +112,47 @@ namespace Opera.Acabus.Sgo
                 catch (Exception)
                 {
                     Dispatcher.SendNotify($"No se encontró módulo '{module.ToString("fullname")}' en libería '{module.ToString("assembly")}'");
+                }
+            }
+
+            foreach (IModuleInfo moduleInfo in _modules)
+            {
+                if (moduleInfo.ModuleType == ModuleType.SERVICE)
+                    if (!moduleInfo.LoadModule())
+                        Dispatcher.SendNotify($"El servicio '{moduleInfo.Name} no se logró iniciar.");
+
+                if (moduleInfo.ModuleType == ModuleType.VIEWER)
+                {
+                    UserControl moduleView = null;
+                    _view.CreateToolButton(moduleInfo.CodeName, new Command(delegate
+                    {
+                        if (moduleView == null)
+                            moduleView = (UserControl)Activator.CreateInstance(moduleInfo.ViewType);
+                        _view.ShowContent(moduleView);
+                    }), moduleInfo.Icon, moduleInfo.Name);
+
+                    if (!moduleInfo.LoadModule())
+                        Dispatcher.SendNotify($"El módulo '{moduleInfo.Name} no se logró iniciar.");
+                }
+
+                if (moduleInfo.ModuleType == ModuleType.CONFIGURATION)
+                {
+                    if (!_configurationAvailable)
+                    {
+                        _view.CreateSettingsButton();
+
+                        _configurationAvailable = true;
+                    }
+
+                    UserControl moduleView = null;
+
+                    _view.AddSetting(moduleInfo.Name, new Command(delegate
+                    {
+                        if (moduleView == null)
+                            moduleView = (UserControl)Activator.CreateInstance(moduleInfo.ViewType);
+
+                        _view.ShowContent(moduleView);
+                    }));
                 }
             }
         }

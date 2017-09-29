@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using static Opera.Acabus.TrunkMonitor.Models.StationStateInfo;
 
 namespace Opera.Acabus.TrunkMonitor.Helpers
 {
@@ -75,7 +76,8 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
             foreach (var device in devices)
                 Task.Run(() =>
                 {
-                    string message = $"Equipo desconectado: {device}";
+                    var message = new StationMessage(device, $"Equipo desconectado: {device}", Priority.HIGH);
+
                     if (device.DoPing(2) < 0)
                     {
                         if (!info.Messages.Contains(message))
@@ -116,7 +118,8 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
                     if (device.DoPing() < 0)
                         return;
 
-                    string message = $"Pendiente por replicar {device}";
+                    var message = new StationMessage(device, $"Pendiente por replicar {device}", Priority.MEDIUM);
+
                     if (device.PendingReplica())
                     {
                         if (!info.Messages.Contains(message))

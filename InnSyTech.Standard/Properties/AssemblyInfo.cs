@@ -6,13 +6,13 @@ using System.Runtime.InteropServices;
 // La información general de un ensamblado se controla mediante el siguiente 
 // conjunto de atributos. Cambie estos valores de atributo para modificar la información
 // asociada con un ensamblado.
-[assembly: AssemblyTitle("InnSyTech.Standard")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Librería estandar de InnSy Tech")]
+[assembly: AssemblyDescription("Proporciona funciones de acceso a la base de datos, utilizadades y administración de configuraciones.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("InnSy Tech")]
 [assembly: AssemblyProduct("InnSyTech.Standard")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Copyright © InnSy Tech 2017")]
+[assembly: AssemblyTrademark("InnSy Tech Standard")]
 [assembly: AssemblyCulture("")]
 
 // Si establece ComVisible en false, los tipos de este ensamblado no estarán visibles 
@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 //
 // Puede especificar todos los valores o usar los números de compilación y de revisión predeterminados
 // mediante el carácter "*", como se muestra a continuación:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("2.0.*")]
+//[assembly: AssemblyVersion("1.0.0.0")]
+//[assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: NeutralResourcesLanguage("es-MX")]
 

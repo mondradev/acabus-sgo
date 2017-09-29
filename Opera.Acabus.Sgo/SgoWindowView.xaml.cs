@@ -67,6 +67,47 @@ namespace Opera.Acabus.Sgo
         }
 
         /// <summary>
+        /// Agrega una opción de configuración al visor.
+        /// </summary>
+        /// <param name="description">Descripción breve de la configuración.</param>
+        /// <param name="command">Comando que desencadena al hacer clic en la configuración.</param>
+        internal void AddSetting(String description, ICommand command)
+        {
+            PopupBox settingPopup = _mainToolBar.FindChild<PopupBox>("System_Config_SGO");
+
+            if (settingPopup == null)
+                return;
+
+            (settingPopup.Content as StackPanel).Children.Add(new Button
+            {
+                Content = description,
+                Command = command
+            });
+        }
+
+        /// <summary>
+        /// Crea el botón de configuraciones del visor.
+        /// </summary>
+        internal void CreateSettingsButton()
+        {
+            if (_mainToolBar.FindChild<PopupBox>("System_Config_SGO") != null)
+                return;
+
+            var popup = new PopupBox
+            {
+                PlacementMode = PopupBoxPlacementMode.BottomAndAlignRightEdges,
+                PopupContent = new PackIcon { Kind = PackIconKind.Settings },
+                ToolTip = "Configuraciones",
+                Content = new StackPanel(),
+                Name = "System_Config_SGO"
+            };
+
+            DockPanel.SetDock(popup, Dock.Right);
+
+            _mainToolBar.Children.Add(popup);
+        }
+
+        /// <summary>
         /// Permite añadir un botón a la barra de herramientas.
         /// </summary>
         /// <param name="name">Nombre del componente o modulo.</param>
