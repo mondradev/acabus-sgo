@@ -207,10 +207,12 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         public static StationStateInfo GetStateInfo(this Station station)
         {
             lock (_stationStateInfo)
+            {
                 if (!_stationStateInfo.ContainsKey(station))
                     _stationStateInfo.Add(station, new StationStateInfo(station));
 
-            return _stationStateInfo[station];
+                return _stationStateInfo[station];
+            }
         }
 
         /// <summary>

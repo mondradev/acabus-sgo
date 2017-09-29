@@ -75,7 +75,9 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
             CreateTask("Alertas", (station) =>
             {
                 StringBuilder stringBuilder = new StringBuilder();
-                foreach (var message in station.GetStateInfo().Messages)
+                StationStateInfo stateInfo = station.GetStateInfo();
+
+                foreach (var message in stateInfo.Messages)
                     stringBuilder.AppendLine(message.Message);
 
                 if (stringBuilder.Length == 0)
