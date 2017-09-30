@@ -2,12 +2,14 @@
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Windows.UI.Notifications;
 
 namespace Opera.Acabus.Sgo
 {
@@ -17,9 +19,19 @@ namespace Opera.Acabus.Sgo
     public partial class SgoWindowView : MetroWindow
     {
         /// <summary>
-        /// Una lista de mensajes que han sido mostrados mediante el Snackbar.
+        /// Indica el tiempo de expiración de los mensajes notificados.
         /// </summary>
-        private Queue<String> _messages = new Queue<String>();
+        private readonly TimeSpan EXPIRE_MESSAGE_TIME = TimeSpan.FromMinutes(5);
+
+        /// <summary>
+        /// Una lista de mensajes que han sido mostrados mediante las notificaciones.
+        /// </summary>
+        private Queue<ToastMessage> _messages = new Queue<ToastMessage>();
+
+        /// <summary>
+        /// Monitor de los mensajes de notificaciones del monitor.
+        /// </summary>
+        private Timer _notificationMessageMonitor;
 
         /// <summary>
         /// Contiene los mensajes de error omitidos en la aplicación.
@@ -33,8 +45,9 @@ namespace Opera.Acabus.Sgo
         {
             InitializeComponent();
             DataContext = new SgoWindowModelView(this);
-
+            
             _dialogHost.SnackbarMessageQueue = _snackBar.MessageQueue;
+            _notificationMessageMonitor = new Timer(DropExpiredMessage, null, TimeSpan.Zero, EXPIRE_MESSAGE_TIME);
         }
 
         /// <summary>
@@ -50,20 +63,23 @@ namespace Opera.Acabus.Sgo
         /// <param name="actionName">Nombre de la acción a realizar.</param>
         internal void AddMessage(String message, Action action = null, String actionName = "OCULTAR")
         {
-            if (_messages.Contains(message.ToUpper())) return;
+            if (_messages.Any(m => m.Message == message)) return;
             if (messageSkiped.Contains(message.ToUpper())) return;
+
             action = action ?? (() => messageSkiped.Add(message.ToUpper()));
 
             Application.Current?.Invoke(() =>
             {
-                _snackBar.MessageQueue.Enqueue(message.ToUpper(), actionName, action);
-                _messages.Enqueue(message.ToUpper());
-                new Task(() =>
-                {
-                    Thread.Sleep(TimeSpan.FromSeconds(3));
-                    _messages.Dequeue();
-                }).Start();
+                var mainWindow = Application.Current.MainWindow;
+
+                if (mainWindow.IsActive && mainWindow.WindowState != WindowState.Minimized)
+                    _snackBar.MessageQueue.Enqueue(message.ToUpper(), actionName, action, true);
+                else
+                    SendToastNotification(message);
             });
+
+            _messages.Enqueue(new ToastMessage(message));
+
         }
 
         /// <summary>
@@ -110,17 +126,17 @@ namespace Opera.Acabus.Sgo
         /// <summary>
         /// Permite añadir un botón a la barra de herramientas.
         /// </summary>
-        /// <param name="name">Nombre del componente o modulo.</param>
+        /// <param name="codeName">Nombre del componente o modulo.</param>
         /// <param name="command">Comando para hacer su llamada.</param>
         /// <param name="buttonContent">Contenido del botón.</param>
         /// <param name="tooltip">Tip de la herramienta.</param>
         /// <param name="isSecundary">Es un modulo secundario.</param>
-        internal void CreateToolButton(String name, ICommand command, FrameworkElement buttonContent, String tooltip)
+        internal void CreateToolButton(String codeName, ICommand command, FrameworkElement buttonContent, String tooltip)
         {
             foreach (var item in _mainToolBar.Children)
                 if (item is Button)
-                    if (((Button)item).Name == name)
-                        throw new ArgumentException($"Ya existe un botón con el mismo nombre '{name}'");
+                    if (((Button)item).Name == codeName)
+                        throw new ArgumentException($"Ya existe un botón con el mismo nombre código '{codeName}'");
 
             buttonContent.Height = 24;
             buttonContent.Width = 24;
@@ -130,7 +146,7 @@ namespace Opera.Acabus.Sgo
             {
                 Content = buttonContent,
                 Command = command,
-                Name = name,
+                Name = codeName,
                 ToolTip = tooltip,
                 Style = TryFindResource("MaterialDesignToolButton") as Style,
                 Margin = new Thickness(16),
@@ -148,6 +164,65 @@ namespace Opera.Acabus.Sgo
         {
             _content.Children.Clear();
             _content.Children.Add(content);
+        }
+
+        /// <summary>
+        /// Elimina los mensajes notificados al pasar el tiempo especificado.
+        /// </summary>
+        /// <param name="state">Estado del temporizador.</param>
+        private void DropExpiredMessage(object state)
+        {
+            while (_messages.Any(m => (DateTime.Now - m.TimeCreated) > EXPIRE_MESSAGE_TIME))
+                _messages.Dequeue();
+        }
+
+        /// <summary>
+        /// Envía una notificación a Windows.
+        /// </summary>
+        /// <param name="message">Mensaje a notificar.</param>
+        private void SendToastNotification(string message)
+        {
+            var toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastImageAndText01);
+            var stringElements = toastXml.GetElementsByTagName("text");
+            var imageElement = toastXml.GetElementsByTagName("image");
+            
+            stringElements[0].AppendChild(toastXml.CreateTextNode(message));
+            imageElement[0].Attributes.GetNamedItem("src").NodeValue = String.Format("file:///{0}", Path.GetFullPath("Resources/AppNotificationTile.png"));
+
+            var toast = new ToastNotification(toastXml);
+
+            toast.Dismissed += (sender, arg) =>
+            {
+                if (arg.Reason == ToastDismissalReason.UserCanceled)
+                    messageSkiped.Add(message);
+            };
+
+            ToastNotificationManager.CreateToastNotifier(Application.Current.MainWindow.Title).Show(toast);
+        }
+
+        /// <summary>
+        /// Representa un mensaje de notificación.
+        /// </summary>
+        private class ToastMessage
+        {
+            /// <summary>
+            /// Crea un nuevo mensaje.
+            /// </summary>
+            public ToastMessage(String message)
+            {
+                Message = message;
+                TimeCreated = DateTime.Now;
+            }
+
+            /// <summary>
+            /// Obtiene el mensaje de la notificación.
+            /// </summary>
+            public String Message { get; }
+
+            /// <summary>
+            /// Obtiene el tiempo cuando se creó la notificación.
+            /// </summary>
+            public DateTime TimeCreated { get; }
         }
     }
 }

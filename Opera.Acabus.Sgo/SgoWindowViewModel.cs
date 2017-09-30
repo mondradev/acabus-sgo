@@ -23,6 +23,9 @@ namespace Opera.Acabus.Sgo
         /// </summary>
         private static SgoWindowModelView _instance;
 
+        /// <summary>
+        /// Indica si está activa el botón de configuración.
+        /// </summary>
         private bool _configurationAvailable;
 
         /// <summary>
@@ -49,6 +52,7 @@ namespace Opera.Acabus.Sgo
             _modules = new List<IModuleInfo>();
 
             Dispatcher.CloseDialogCommand = DialogHost.CloseDialogCommand;
+
             Dispatcher.OpenDialogCommand = new Command(param => OpenDialg(param));
 
             Dispatcher.RequestingShowContent += arg
