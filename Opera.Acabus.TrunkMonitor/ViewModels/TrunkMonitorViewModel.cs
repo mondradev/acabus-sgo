@@ -210,7 +210,7 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                         if (link.State == LinkState.DISCONNECTED || ping < 0)
                         {
                             link.State = LinkState.DISCONNECTED;
-                            SendNotify(String.Format("Enlace {0} sin conexión", link));
+                            SendNotify(String.Format("Enlace a {0} sin conexión", link.StationB));
                         }
                     }
                     else

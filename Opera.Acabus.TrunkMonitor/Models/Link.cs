@@ -48,7 +48,7 @@ namespace Opera.Acabus.TrunkMonitor.Models
             _id = id;
             _stationA = stationA;
             _stationB = stationB;
-            _state = LinkState.GOOD;
+            _state = LinkState.DISCONNECTED;
         }
 
         /// <summary>
