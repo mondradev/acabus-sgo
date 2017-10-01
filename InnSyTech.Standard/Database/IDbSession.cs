@@ -49,6 +49,21 @@ namespace InnSyTech.Standard.Database
         bool LoadRefences<TData>(TData instance, String propertyName);
 
         /// <summary>
+        /// Carga los valores para una propiedad de tipo colección que representan una referencia
+        /// externa a la entidad especificada desde una fuente de datos.
+        /// </summary>
+        /// <typeparam name="TData">Tipo de la instancia a cargar su referencia.</typeparam>
+        /// <typeparam name="TDataSource">Tipo de la secuencia origen.</typeparam>
+        /// <param name="instance">Instancia persistida que tiene la referencia.</param>
+        /// <param name="propertyName">Nombre de la propiedad.</param>
+        /// <param name="dataSource">
+        /// Fuente de datos utilizada para cargar las referencias. Esta secuencia debe tener carga su
+        /// referencia que coincide con la que se cargará en la instancia actual.
+        /// </param>
+        /// <returns>Un true en caso de cargar correctamente la propiedad.</returns>
+        bool LoadRefences<TData, TDataSource>(TData instance, String propertyName, IEnumerable<TDataSource> dataSource);
+
+        /// <summary>
         /// Realiza una lectura de elementos del tipo especificado que corresponde a una tabla en la
         /// base de datos, gracias a la estructura <see cref="IQueryable{T}"/> se puede aplicar
         /// filtros y ordernamiento como otros métodos que se encuentren disponibles. Esto equivale a

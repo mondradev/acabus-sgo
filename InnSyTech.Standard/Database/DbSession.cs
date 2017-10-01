@@ -78,6 +78,66 @@ namespace InnSyTech.Standard.Database
         }
 
         /// <summary>
+        /// Carga los valores para una propiedad de tipo colección que representan una referencia externa a la entidad especificada desde una fuente de datos.
+        /// </summary>
+        /// <typeparam name="TData">Tipo de la instancia a cargar su referencia.</typeparam>
+        /// <typeparam name="TDataSource">Tipo de la secuencia origen.</typeparam>
+        /// <param name="instance">Instancia persistida que tiene la referencia.</param>
+        /// <param name="propertyName">Nombre de la propiedad.</param>
+        /// <param name="dataSource">Fuente de datos utilizada para cargar las referencias. Esta secuencia debe tener carga su referencia que coincide con la que se cargará en la instancia actual.</param>
+        /// <returns>Un true en caso de cargar correctamente la propiedad.</returns>
+        public bool LoadRefences<TData, TDataSource>(TData instance, String propertyName, IEnumerable<TDataSource> dataSource)
+        {
+            try
+            {
+                var propertyCollection = instance.GetType().GetProperty(propertyName);
+                Type propertyType = TypeHelper.GetElementType(propertyCollection.PropertyType);
+
+                if (!typeof(ICollection<>).MakeGenericType(propertyType).IsAssignableFrom(propertyCollection.PropertyType))
+                    throw new ArgumentException($"La propiedad especificada no es una colección: '{propertyName}'.");
+
+                if (typeof(TDataSource) != TypeHelper.GetElementType(propertyType))
+                    throw new ArgumentException($"El tipo de la fuente de datos no coincide con el tipo de la propiedad.");
+
+                var field = DbHelper.GetField(propertyCollection);
+                var primaryKey = DbHelper.GetPrimaryKey(instance.GetType());
+
+                if (String.IsNullOrEmpty(field.ForeignKeyName))
+                    throw new ArgumentException($"La propiedad no incluye el campo de referencia utilizado para la relación.");
+
+                var collection = field.GetValue(instance);
+
+                var foreignKey = DbHelper.GetFields(propertyType)
+                    .Where(f => f.IsForeignKey && f.Name == field.ForeignKeyName)
+                    .FirstOrDefault();
+               
+                var parameter = Expression.Parameter(propertyType, "i");
+                var foreignProperty = Expression.MakeMemberAccess(parameter, foreignKey.PropertyInfo);
+                var equalsNotNull = Expression.NotEqual(foreignProperty, Expression.Constant(null));
+                var foreignID = Expression.MakeMemberAccess(foreignProperty, primaryKey.PropertyInfo);
+                var primaryValue = Expression.Constant(primaryKey.GetValue(instance));
+                var equals = Expression.Equal(foreignID, primaryValue);
+                var and = Expression.AndAlso(equalsNotNull, equals);
+                var lambda = Expression.Lambda(and, parameter);
+                
+                var addMethod = propertyCollection.PropertyType.GetMethod("Add");
+
+                foreach (var item in dataSource.Where(lambda.Compile() as Func<TDataSource, bool>))
+                {
+                    foreignKey.SetValue(item, instance);
+                    addMethod.Invoke(collection, new object[] { item });
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Crea una instancia persistente a partir de un tipo definido que corresponde a una tabla
         /// en la base de datos. Esto equivale a un INSERT INTO de Sql.
         /// </summary>
