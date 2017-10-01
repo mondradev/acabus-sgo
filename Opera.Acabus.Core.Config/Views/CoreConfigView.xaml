@@ -28,7 +28,7 @@
                     <TextBlock Text="EQUIPOS" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
                 </TabItem.Header>
                 <Grid>
-                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Devices}" IsReadOnly="True">
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding AllDevices}" IsReadOnly="True">
                         <DataGrid.Resources>
                             <converters:DeviceTypeSpanishConverter x:Key="DeviceTypeConverter" />
                         </DataGrid.Resources>
@@ -48,7 +48,7 @@
                     <TextBlock Text="ESTACIONES" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
                 </TabItem.Header>
                 <Grid>
-                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Stations}" IsReadOnly="True">
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding AllStations}" IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding ID}" ClipboardContentBinding="{x:Null}" Header="ID Estación" />
                             <DataGridTextColumn Binding="{Binding StationNumber}" ClipboardContentBinding="{x:Null}" Header="Número de estación" />
@@ -64,7 +64,7 @@
                     <TextBlock Text="AUTOBUSES" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
                 </TabItem.Header>
                 <Grid>
-                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Buses}" IsReadOnly="True">
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding AllBuses}" IsReadOnly="True">
                         <DataGrid.Resources>
                             <converters:BusTypeSpanishConverter x:Key="VehicleTypeConverter" />
                         </DataGrid.Resources>
@@ -84,7 +84,7 @@
                     <TextBlock Text="RUTAS" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
                 </TabItem.Header>
                 <Grid>
-                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Routes}" IsReadOnly="True">
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding AllRoutes}" IsReadOnly="True">
                         <DataGrid.Resources>
                             <converters:RouteTypeSpanishConverter x:Key="RouteTypeConverter" />
                         </DataGrid.Resources>
@@ -101,10 +101,10 @@
             </TabItem>
             <TabItem>
                 <TabItem.Header>
-                    <TextBlock Text="PERSONAL EMPLEADO" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
+                    <TextBlock Text="PERSONAL EMPLEADO" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="150" TextAlignment="Center" Cursor="Hand" />
                 </TabItem.Header>
                 <Grid>
-                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Staff}" IsReadOnly="True">
+                    <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding AllStaff}" IsReadOnly="True">
                         <DataGrid.Resources>
                             <converters:AssignableAreaSpanishConverter x:Key="AssignableAreaConverter" />
                         </DataGrid.Resources>
@@ -119,6 +119,7 @@
         </dragablz:TabablzControl>
 
         <materialDesignMahApps:PopupBox Style="{DynamicResource MaterialDesignMultiFloatingActionAccentPopupBox}"
+            IsEnabled="{Binding IsActive}"
             PlacementMode="TopAndAlignCentres"
             Margin="0,0,16,16" ToggleCheckedContentCommand="{Binding ShowAddDeviceCommand}"
             ToolTip="Añadir equipo" Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" PopupMode="MouseOver" Grid.RowSpan="4">

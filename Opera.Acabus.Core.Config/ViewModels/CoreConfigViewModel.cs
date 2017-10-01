@@ -1,4 +1,5 @@
 ﻿using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Mvvm;
 using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Config.Views;
@@ -11,6 +12,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Opera.Acabus.Core.Config.ViewModels
@@ -20,6 +22,31 @@ namespace Opera.Acabus.Core.Config.ViewModels
     /// </summary>
     public class CoreConfigViewModel : ViewModelBase
     {
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="AllBuses" />.
+        /// </summary>
+        private ICollection<Bus> _allBuses;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="AllDevices" />.
+        /// </summary>
+        private ICollection<Device> _allDevices;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="AllRoutes" />.
+        /// </summary>
+        private ICollection<Route> _allRoutes;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="AllStaff" />.
+        /// </summary>
+        private ICollection<Staff> _allStaff;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="AllStations" />.
+        /// </summary>
+        private ICollection<Station> _allStations;
+
         /// <summary>
         /// Crea una instancia de <see cref="CoreConfigViewModel"/>.
         /// </summary>
@@ -32,25 +59,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     Dispatcher.SendNotify("DESCARGANDO RUTAS...");
                     if (DownloadRoutes())
                     {
-                        OnPropertyChanged(nameof(Routes));
                         Dispatcher.SendNotify("RUTAS DESCARGAS CORRECTAMENTE, DESCAGANDO AUTOBUSES...");
                         if (DownloadBuses())
-                        {
                             Dispatcher.SendNotify("AUTOBUSES DESCARGADOS Y REASIGNADOS A SUS RUTAS CORRECTAMENTE.");
-                            OnPropertyChanged(nameof(Buses));
-                        }
                         else
                             Dispatcher.SendNotify("ERROR: FALLA AL DESCARGAR LOS AUTOBUSES");
                         Dispatcher.SendNotify("DESCARGANDO ESTACIONES...");
                         if (DownloadStations())
                         {
-                            OnPropertyChanged(nameof(Stations));
                             Dispatcher.SendNotify("ESTACIONES DESCARGADAS CORRECTAMENTE, DESCARGANDO EQUIPOS ASIGNADOS...");
                             if (DownloadDevices())
-                            {
                                 Dispatcher.SendNotify("EQUIPOS DESCARGADOS CORRECTAMENTE.");
-                                OnPropertyChanged(nameof(Devices));
-                            }
                             else
                                 Dispatcher.SendNotify("ERROR: FALLA AL DESCARGAR LOS EQUIPOS");
                         }
@@ -59,6 +78,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     }
                     else
                         Dispatcher.SendNotify("ERROR: FALLA AL DESCARGAR LAS RUTAS");
+
+                    ReadFromDataBase();
                 });
             });
 
@@ -66,10 +87,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
             {
                 Task.Run(() =>
                 {
-                    OnPropertyChanged(nameof(Routes));
-                    OnPropertyChanged(nameof(Buses));
-                    OnPropertyChanged(nameof(Stations));
-                    OnPropertyChanged(nameof(Devices));
+                    ReadFromDataBase();
                     Dispatcher.SendNotify("LISTA DE EQUIPOS, ESTACIONES, AUTOBUSES Y RUTAS ACTUALIZADAS.");
                 });
             });
@@ -84,8 +102,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                             Dispatcher.SendNotify("DESCAGANDO AUTOBUSES Y REASIGNANDO...");
                             if (DownloadBuses())
                                 Dispatcher.SendNotify("VEHÍCULOS AUTOBUSES Y REASIGNADOS.");
-                            OnPropertyChanged(nameof(Routes));
-                            OnPropertyChanged(nameof(Buses));
+                            ReadFromDataBase();
                         });
                         break;
 
@@ -96,30 +113,37 @@ namespace Opera.Acabus.Core.Config.ViewModels
             });
 
             ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), RefreshCommand.Execute));
-
-            Task.Run(() =>
-            {
-                OnPropertyChanged(nameof(Routes));
-                OnPropertyChanged(nameof(Buses));
-                OnPropertyChanged(nameof(Stations));
-                OnPropertyChanged(nameof(Devices));
-            });
         }
 
         /// <summary>
-        /// Obtiene una lista de todos los autobuses.
+        /// Obtiene una lista de todos los autobuses
         /// </summary>
-        public IEnumerable<Bus> Buses => AcabusDataContext.AllBuses;
+        public ICollection<Bus> AllBuses => _allBuses;
+
+        /// <summary>
+        /// Obtiene una lista de todos los equipos.
+        /// </summary>
+        public ICollection<Device> AllDevices => _allDevices;
+
+        /// <summary>
+        /// Obtiene una lista de todas las rutas.
+        /// </summary>
+        public ICollection<Route> AllRoutes => _allRoutes;
+
+        /// <summary>
+        /// Obtiene una lista de todo el personal empleado.
+        /// </summary>
+        public ICollection<Staff> AllStaff => _allStaff;
+
+        /// <summary>
+        /// Obtiene una lista de todas las estaciones.
+        /// </summary>
+        public ICollection<Station> AllStations => _allStations;
 
         /// <summary>
         /// Obtiene el comando para reasignar ruta a los autobuses.
         /// </summary>
         public ICommand BusReassingCommand { get; }
-
-        /// <summary>
-        /// Obtiene una lista de todos los dispositivos.
-        /// </summary>
-        public IEnumerable<Device> Devices => AcabusDataContext.AllDevices;
 
         /// <summary>
         /// Obtiene el comando para descargar la información del servidor.
@@ -132,24 +156,19 @@ namespace Opera.Acabus.Core.Config.ViewModels
         public ICommand RefreshCommand { get; }
 
         /// <summary>
-        /// Obtiene una lista de todas las rutas.
-        /// </summary>
-        public IEnumerable<Route> Routes => AcabusDataContext.AllRoutes;
-
-        /// <summary>
         /// Obtiene el comando para mostrar el formulario para añadir equipos.
         /// </summary>
         public ICommand ShowAddDeviceCommand { get; }
 
         /// <summary>
-        /// Obtiene una lista de el personal del área de TI.
+        /// Campo que provee a la propiedad <see cref="IsActive" />.
         /// </summary>
-        public IEnumerable<Staff> Staff => AcabusDataContext.AllStaff;
+        private bool _isActive;
 
         /// <summary>
-        /// Obtiene una lista de todas las estaciones.
+        /// Obtiene si los controles están activos. Estos se deshabilitan cuando está cargando la base de datos.
         /// </summary>
-        public IEnumerable<Station> Stations => AcabusDataContext.AllStations;
+        public bool IsActive => _isActive;
 
         /// <summary>
         /// Carga los valor al momento de mostrar el módulo de configuración.
@@ -157,10 +176,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="parameter">Parametros de carga.</param>
         protected override void OnLoad(object parameter)
         {
-            OnPropertyChanged(nameof(Routes));
-            OnPropertyChanged(nameof(Buses));
-            OnPropertyChanged(nameof(Stations));
-            OnPropertyChanged(nameof(Devices));
+            Task.Run((Action)ReadFromDataBase);
         }
 
         /// <summary>
@@ -219,7 +235,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
                     Bus vehicleReassign = null;
 
-                    if ((vehicleReassign = Buses.FirstOrDefault(vehicleTemp => vehicleTemp.ID == vehicle.ID)) != null)
+                    if ((vehicleReassign = AllBuses.FirstOrDefault(vehicleTemp => vehicleTemp.ID == vehicle.ID)) != null)
                     {
                         vehicleReassign.Route?.Buses.Remove(vehicle);
 
@@ -284,8 +300,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
                         idBus = UInt64.Parse(row["idBus"].ToString().Trim());
                         type = (DeviceType)Enum.Parse(typeof(DeviceType), row["deviceType"].ToString().Trim());
 
-                        station = Stations.FirstOrDefault(stationFind => stationFind.StationNumber == idStation);
-                        bus = Buses.FirstOrDefault(vehicleFind => vehicleFind.ID == idBus);
+                        station = AllStations.FirstOrDefault(stationFind => stationFind.StationNumber == idStation);
+                        bus = AllBuses.FirstOrDefault(vehicleFind => vehicleFind.ID == idBus);
                     }
                     catch (ArgumentOutOfRangeException ex)
                     {
@@ -302,7 +318,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
                     var deviceReassign = null as Device;
 
-                    if ((deviceReassign = Devices.FirstOrDefault(deviceTemp => device.ID == deviceTemp.ID)) != null)
+                    if ((deviceReassign = AllDevices.FirstOrDefault(deviceTemp => device.ID == deviceTemp.ID)) != null)
                     {
                         deviceReassign.Station?.Devices.Remove(device);
                         deviceReassign.Bus?.Devices.Remove(device);
@@ -364,7 +380,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                         Name = row["name"].ToString().Trim().ToUpper()
                     };
 
-                    if (Routes.Contains(route)) continue;
+                    if (AllRoutes.Contains(route)) continue;
 
                     AcabusDataContext.DbContext.Create(route);
                 }
@@ -428,7 +444,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
                     var stationReassign = null as Station;
 
-                    if ((stationReassign = Stations.FirstOrDefault(statioTemp => statioTemp.ID == station.ID)) != null)
+                    if ((stationReassign = AllStations.FirstOrDefault(statioTemp => statioTemp.ID == station.ID)) != null)
                     {
                         stationReassign.Route?.Stations.Remove(station);
 
@@ -447,6 +463,47 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 return true;
             }
             catch { return false; }
+        }
+
+        /// <summary>
+        /// Lee toda la información desde la base de datos.
+        /// </summary>
+        private void ReadFromDataBase()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _isActive = false;
+                OnPropertyChanged(nameof(IsActive));
+            });
+
+            /// Lectura desde la base de datos.
+
+            _allDevices = AcabusDataContext.AllDevices.LoadReference(1).ToList();
+            _allBuses = AcabusDataContext.AllBuses.LoadReference(1).ToList();
+            _allStations = AcabusDataContext.AllStations.LoadReference(1).ToList();
+            _allRoutes = AcabusDataContext.AllRoutes.LoadReference(1).ToList();
+            _allStaff = AcabusDataContext.AllStaff.ToList();
+
+            foreach (var s in _allStations)
+                AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), _allDevices);
+            foreach (var b in _allBuses)
+                AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), _allDevices);
+            foreach (var r in _allRoutes)
+            {
+                AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), _allBuses);
+                AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), _allStations);
+            }
+            
+                Application.Current.Dispatcher.Invoke(() =>
+            {
+                _isActive = true;
+                OnPropertyChanged(nameof(IsActive));
+                OnPropertyChanged(nameof(AllBuses));
+                OnPropertyChanged(nameof(AllDevices));
+                OnPropertyChanged(nameof(AllRoutes));
+                OnPropertyChanged(nameof(AllStaff));
+                OnPropertyChanged(nameof(AllStations));
+            });
         }
 
         /// <summary>

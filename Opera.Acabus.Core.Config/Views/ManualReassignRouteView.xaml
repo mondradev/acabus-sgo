@@ -4,13 +4,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
     xmlns:ViewModels="clr-namespace:Opera.Acabus.Core.Config.ViewModels"
     x:Class="Opera.Acabus.Core.Config.Views.ManualReassignRouteView"
     mc:Ignorable="d">
     <UserControl.DataContext>
         <ViewModels:ManualReassignRouteViewModel />
     </UserControl.DataContext>
-    <Grid Width="400">
+    <Grid Width="500">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="0" />
@@ -24,12 +25,17 @@
         </Grid.RowDefinitions>
         <TextBlock Text="Asignación manual de ruta" FontSize="20" Padding="16,24,16,16" />
         <DataGrid Margin="0" Grid.Row="2" IsReadOnly="True" ItemsSource="{Binding Buses}" SelectedItem="{Binding SelectedBus}" AutoGenerateColumns="False">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                    <i:InvokeCommandAction Command="{Binding UpdateSelectionCommand}" CommandParameter="{Binding SelectedItems, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Número económico" Binding="{Binding EconomicNumber}" />
                 <DataGridTextColumn Header="Ruta asignada" Binding="{Binding Route}" />
             </DataGrid.Columns>
         </DataGrid>
-        <TextBox materialDesign:HintAssist.Hint="Número(s) económico(s)"  Text="{Binding EconomicNumbers}" Grid.Row="4" Margin="16,0" />
+        <TextBox materialDesign:HintAssist.Hint="Número(s) económico(s)"  Text="{Binding EconomicNumbers}" Grid.Row="4" Margin="16,0" AcceptsReturn="True" MaxLines="200" VerticalScrollBarVisibility="Auto" MaxHeight="100" />
         <ComboBox materialDesign:HintAssist.Hint="Ruta" Grid.Row="6" ItemsSource="{Binding Routes, Mode=OneWay}" SelectedItem="{Binding SelectedRoute}" Margin="16,0" />
         <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,8,0,0">
             <Button Command="{Binding DiscartCommand}" ToolTip="Limpiar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0,0,8,8" Height="Auto" MinHeight="36">

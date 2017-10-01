@@ -1,8 +1,10 @@
-﻿using InnSyTech.Standard.Mvvm;
+﻿using InnSyTech.Standard.Database.Linq;
+using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -37,17 +39,35 @@ namespace Opera.Acabus.Core.Config.ViewModels
         {
             ReassignRouteCommand = new Command(ReassignRoute, CanReassignRoute);
             DoneCommand = Dispatcher.CloseDialogCommand;
+
             DiscartCommand = new Command(parameter =>
             {
                 SelectedRoute = null;
                 EconomicNumbers = String.Empty;
+            });
+
+            UpdateSelectionCommand = new Command(param =>
+            {
+                var selectedBuses = param as IList;
+
+                if (selectedBuses == null) return;
+
+                _economicNumbers = String.Empty;
+
+                foreach (Bus b in selectedBuses)
+                    _economicNumbers += b.EconomicNumber + "\n";
+
+                _economicNumbers= _economicNumbers.Remove(_economicNumbers.Length - 1);
+
+                OnPropertyChanged(nameof(EconomicNumbers));
+
             });
         }
 
         /// <summary>
         /// Obtiene una lista de todos los autobuses registrados.
         /// </summary>
-        public IEnumerable<Bus> Buses => AcabusDataContext.AllBuses;
+        public IEnumerable<Bus> Buses => AcabusDataContext.AllBuses.LoadReference(1);
 
         /// <summary>
         /// Obtiene el comando para descartar la información del formulario.
@@ -76,10 +96,15 @@ namespace Opera.Acabus.Core.Config.ViewModels
         public ICommand ReassignRouteCommand { get; }
 
         /// <summary>
+        /// Actualiza la lista de selección de la tabla.
+        /// </summary>
+        public ICommand UpdateSelectionCommand { get; }
+
+
+        /// <summary>
         /// Obtiene una lista de las rutas disponibles para reasignación.
         /// </summary>
-        public IEnumerable<Route> Routes
-            => AcabusDataContext.AllRoutes;
+        public IEnumerable<Route> Routes => AcabusDataContext.AllRoutes;
 
         /// <summary>
         /// Obtiene o establece autobus seleccionado en la tabla.
