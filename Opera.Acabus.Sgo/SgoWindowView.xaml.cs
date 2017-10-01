@@ -45,7 +45,7 @@ namespace Opera.Acabus.Sgo
         {
             InitializeComponent();
             DataContext = new SgoWindowModelView(this);
-            
+
             _dialogHost.SnackbarMessageQueue = _snackBar.MessageQueue;
             _notificationMessageMonitor = new Timer(DropExpiredMessage, null, TimeSpan.Zero, EXPIRE_MESSAGE_TIME);
         }
@@ -94,7 +94,7 @@ namespace Opera.Acabus.Sgo
             if (settingPopup == null)
                 return;
 
-            (settingPopup.Content as StackPanel).Children.Add(new Button
+            (settingPopup.PopupContent as StackPanel).Children.Add(new Button
             {
                 Content = description,
                 Command = command
@@ -112,10 +112,17 @@ namespace Opera.Acabus.Sgo
             var popup = new PopupBox
             {
                 PlacementMode = PopupBoxPlacementMode.BottomAndAlignRightEdges,
-                PopupContent = new PackIcon { Kind = PackIconKind.Settings },
                 ToolTip = "Configuraciones",
-                Content = new StackPanel(),
-                Name = "System_Config_SGO"
+                PopupContent = new StackPanel(),
+                Name = "System_Config_SGO",
+                Margin = new Thickness(16, 0, 16, 0),
+                ToggleContent = new PackIcon
+                {
+                    Kind = PackIconKind.Settings,
+                    Height = 24,
+                    Width = 24,
+                    Margin = new Thickness(0)
+                }
             };
 
             DockPanel.SetDock(popup, Dock.Right);
@@ -185,7 +192,7 @@ namespace Opera.Acabus.Sgo
             var toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastImageAndText01);
             var stringElements = toastXml.GetElementsByTagName("text");
             var imageElement = toastXml.GetElementsByTagName("image");
-            
+
             stringElements[0].AppendChild(toastXml.CreateTextNode(message));
             imageElement[0].Attributes.GetNamedItem("src").NodeValue = String.Format("file:///{0}", Path.GetFullPath("Resources/AppNotificationTile.png"));
 

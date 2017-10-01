@@ -162,6 +162,10 @@
       <Project>{f74fee3d-d536-44df-9e2c-53540ce78173}</Project>
       <Name>InnSyTech.Standard</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Opera.Acabus.Core.Config\Opera.Acabus.Core.Config.csproj">
+      <Project>{5b43d988-0e6d-402e-9ff5-8da927fa9d49}</Project>
+      <Name>Opera.Acabus.Core.Config</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Opera.Acabus.Core.Gui\Opera.Acabus.Core.Gui.csproj">
       <Project>{5af35be9-b74b-4f44-84e3-1010cce72c5e}</Project>
       <Name>Opera.Acabus.Core.Gui</Name>

@@ -128,7 +128,8 @@ namespace InnSyTech.Standard.Configuration
                         (setting._attributes[child.Name] as List<ISetting>).Add(new Setting(child));
                     else
                         setting._attributes[child.Name] = new List<ISetting>() {
-                            setting._attributes[child.Name] as Setting
+                            setting._attributes[child.Name] as Setting,
+                            new Setting(child)
                         };
                 else
                     setting._attributes.Add(child.Name, new Setting(child));
