@@ -83,7 +83,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Obtiene una lista de rutas desde la base de datos.
         /// </summary>
-        public static IEnumerable<Route> AllRoute
+        public static IEnumerable<Route> AllRoutes
             => DbContext?.Read<Route>();
 
         /// <summary>

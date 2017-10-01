@@ -29,7 +29,7 @@ namespace Opera.Acabus.Core.DataAccess
 
             return new Bus(id, economicNumber)
             {
-                Route = AcabusDataContext.AllRoute?.SingleOrDefault(r => r.ID == routeID),
+                Route = AcabusDataContext.AllRoutes?.SingleOrDefault(r => r.ID == routeID),
                 Status = status,
                 Type = type
             };
@@ -237,7 +237,7 @@ namespace Opera.Acabus.Core.DataAccess
             {
                 Name = name,
                 AssignedSection = assignation,
-                Route = AcabusDataContext.AllRoute?.SingleOrDefault(r => r.ID == routeID)
+                Route = AcabusDataContext.AllRoutes?.SingleOrDefault(r => r.ID == routeID)
             };
         }
 
