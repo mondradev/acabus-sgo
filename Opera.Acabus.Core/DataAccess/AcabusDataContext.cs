@@ -3,8 +3,8 @@ using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Opera.Acabus.Core.DataAccess
 {
@@ -71,31 +71,31 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Obtiene una lista de autobuses desde la base de datos.
         /// </summary>
-        public static IEnumerable<Bus> AllBuses
+        public static IQueryable<Bus> AllBuses
             => DbContext?.Read<Bus>();
 
         /// <summary>
         /// Obtiene una lista de equipos desde la base de datos.
         /// </summary>
-        public static IEnumerable<Device> AllDevices
+        public static IQueryable<Device> AllDevices
             => DbContext?.Read<Device>();
 
         /// <summary>
         /// Obtiene una lista de rutas desde la base de datos.
         /// </summary>
-        public static IEnumerable<Route> AllRoutes
+        public static IQueryable<Route> AllRoutes
             => DbContext?.Read<Route>();
 
         /// <summary>
         /// Obtiene una lista del personal desde la base de datos.
         /// </summary>
-        public static IEnumerable<Staff> AllStaff
+        public static IQueryable<Staff> AllStaff
             => DbContext?.Read<Staff>();
 
         /// <summary>
         /// Obtiene una lista de estaciones desde la base de datos.
         /// </summary>
-        public static IEnumerable<Station> AllStations
+        public static IQueryable<Station> AllStations
             => DbContext?.Read<Station>();
 
         /// <summary>

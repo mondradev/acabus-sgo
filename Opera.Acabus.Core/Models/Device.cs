@@ -346,10 +346,15 @@ namespace Opera.Acabus.Core.Models
         public int CompareTo(Device other)
         {
             if (other is null) return 1;
-            if (String.IsNullOrEmpty(SerialNumber))
+
+            if (String.IsNullOrEmpty(SerialNumber) && Location != null)
                 return Location is Station
                     ? Station.CompareTo(other.Station)
                     : Bus.CompareTo(other.Bus);
+
+            if (String.IsNullOrEmpty(SerialNumber))
+                return Type.CompareTo(other.Type);
+
             return SerialNumber.CompareTo(other.SerialNumber);
         }
 
