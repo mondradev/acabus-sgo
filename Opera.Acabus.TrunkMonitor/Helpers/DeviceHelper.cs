@@ -120,7 +120,7 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"{device} -->" + ex.PrintMessage().JoinLines(), "DEBUG");
+                Trace.WriteLine($"{device} --> " + ex.PrintMessage().JoinLines(), "DEBUG");
                 return false;
             }
         }

@@ -24,6 +24,8 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
             Entities = new List<DbEntityDefinition>();
             Filters = new List<DbFieldDefinition>();
             Orders = new List<DbFieldDefinition>();
+
+            IsEnumerable = true;
         }
 
         /// <summary>
@@ -40,6 +42,11 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
         /// Obtiene un listado de todos los campos utilizados para filtrar la sentencia.
         /// </summary>
         public List<DbFieldDefinition> Filters { get; }
+
+        /// <summary>
+        /// Obtiene o establece si el resultado será una secuancia.
+        /// </summary>
+        public bool IsEnumerable { get; set;  }
 
         /// <summary>
         /// Obtiene un listado de todos los campos utilizados para realizar el ordenamiento.

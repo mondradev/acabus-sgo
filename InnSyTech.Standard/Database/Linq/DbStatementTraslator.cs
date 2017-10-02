@@ -216,8 +216,8 @@ namespace InnSyTech.Standard.Database.Linq
                 case "SingleOrDefault":
                 case "FirstOrDefault":
                 case "First":
-                    _statementDefinition.CountToTake = _statementDefinition.CountToTake > 1 && _statementDefinition.CountToTake != 0 
-                        ? 1 : _statementDefinition.CountToTake;
+                    _statementDefinition.IsEnumerable = false;
+                    _statementDefinition.CountToTake = 1;
                     Visit(m.Arguments.First());
                     if (m.Arguments.Count > 1)
                     {

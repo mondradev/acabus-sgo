@@ -48,6 +48,11 @@ namespace Opera.Acabus.Core.Config.ViewModels
         private ICollection<Station> _allStations;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="IsActive" />.
+        /// </summary>
+        private bool _isActive;
+
+        /// <summary>
         /// Crea una instancia de <see cref="CoreConfigViewModel"/>.
         /// </summary>
         public CoreConfigViewModel()
@@ -151,6 +156,11 @@ namespace Opera.Acabus.Core.Config.ViewModels
         public ICommand DownloadDataCommand { get; }
 
         /// <summary>
+        /// Obtiene si los controles están activos. Estos se deshabilitan cuando está cargando la base de datos.
+        /// </summary>
+        public bool IsActive => _isActive;
+
+        /// <summary>
         /// Obtiene el comando para actualizar la información desde la base de datos local.
         /// </summary>
         public ICommand RefreshCommand { get; }
@@ -159,16 +169,6 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// Obtiene el comando para mostrar el formulario para añadir equipos.
         /// </summary>
         public ICommand ShowAddDeviceCommand { get; }
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="IsActive" />.
-        /// </summary>
-        private bool _isActive;
-
-        /// <summary>
-        /// Obtiene si los controles están activos. Estos se deshabilitan cuando está cargando la base de datos.
-        /// </summary>
-        public bool IsActive => _isActive;
 
         /// <summary>
         /// Carga los valor al momento de mostrar el módulo de configuración.
@@ -191,7 +191,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
                 if (serverCC == null) return false;
 
-                string busQuery = serverCC?.GetSetting("downloadFromServer")?.ToString("buses");
+                string busQuery = serverCC?.GetSetting("downloadFromServer")?.GetSetting("buses").ToString("value");
                 string connectionString = serverCC?.ToString("connectionString");
 
                 Type dbConnectionType = TypeHelper.LoadFromDll("Libraries/Npgsql.dll", "Npgsql.NpgsqlConnection");
@@ -215,16 +215,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     {
                         id = UInt64.Parse(row["id"].ToString().Trim());
                         type = (BusType)UInt16.Parse(row["type"].ToString().Trim());
-                        economicNumber = row["economicNumber"].ToString().Trim();
-                        idRouteAssigned = UInt64.Parse(row["idRoute"].ToString().Trim());
+                        economicNumber = row["economicnumber"].ToString().Trim();
+                        idRouteAssigned = UInt64.Parse(row["idroute"].ToString().Trim());
                     }
-                    catch (ArgumentOutOfRangeException ex)
+                    catch (Exception ex)
                     {
-                        Trace.WriteLine("La consulta para la descarga de los autobuses debe devolver los campos {id: ulong, type: ushort, economicNumber: string, idRoute: ulong}", "ERROR");
+                        if (ex is KeyNotFoundException || ex is FormatException)
+                            Trace.WriteLine("La consulta para la descarga de los autobuses debe devolver los campos {id: ulong, type: ushort, economicnumber: string, idroute: ulong}", "ERROR");
                         throw ex;
                     }
 
-                    var routeAssigned = AcabusDataContext.AllRoutes.Where(r => r.ID == idRouteAssigned).FirstOrDefault();
+                    var routeAssigned = AllRoutes.Where(r => r.ID == idRouteAssigned).FirstOrDefault();
 
                     Bus vehicle = new Bus(id, economicNumber)
                     {
@@ -253,7 +254,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex) { Trace.WriteLine(ex.PrintMessage().JoinLines()); return false; }
         }
 
         /// <summary>
@@ -268,7 +269,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
                 if (serverCC == null) return false;
 
-                string deviceQuery = serverCC?.GetSetting("downloadFromServer")?.ToString("devices");
+                string deviceQuery = serverCC?.GetSetting("downloadFromServer")?.GetSetting("devices").ToString("value");
                 string connectionString = serverCC?.ToString("connectionString");
 
                 Type dbConnectionType = TypeHelper.LoadFromDll("Libraries/Npgsql.dll", "Npgsql.NpgsqlConnection");
@@ -296,16 +297,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
                         id = UInt64.Parse(row["id"].ToString().Trim());
                         serialNumber = row["serial"].ToString().Trim();
                         ipAddress = row["ip"].ToString().Trim();
-                        idStation = UInt64.Parse(row["idStation"].ToString().Trim());
-                        idBus = UInt64.Parse(row["idBus"].ToString().Trim());
-                        type = (DeviceType)Enum.Parse(typeof(DeviceType), row["deviceType"].ToString().Trim());
+                        idStation = UInt64.Parse(row["idstation"]?.ToString().Trim() ?? "0");
+                        idBus = UInt64.Parse(row["idbus"]?.ToString().Trim() ?? "0");
+                        type = (DeviceType)Enum.Parse(typeof(DeviceType), row["type"].ToString().Trim());
 
                         station = AllStations.FirstOrDefault(stationFind => stationFind.StationNumber == idStation);
                         bus = AllBuses.FirstOrDefault(vehicleFind => vehicleFind.ID == idBus);
                     }
-                    catch (ArgumentOutOfRangeException ex)
+                    catch (Exception ex)
                     {
-                        Trace.WriteLine("La consulta para la descarga de los equipos debe devolver los campos {id: ulong, serial: string, idStation: ulong, idBus: ulong, deviceType: string}", "ERROR");
+                        if (ex is KeyNotFoundException || ex is FormatException)
+                            Trace.WriteLine("La consulta para la descarga de los equipos debe devolver los campos {id: ulong, serial: string, idstation: ulong, idbus: ulong, type: string}", "ERROR");
                         throw ex;
                     }
 
@@ -341,7 +343,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex) { Trace.WriteLine(ex.PrintMessage().JoinLines()); return false; }
         }
 
         /// <summary>
@@ -356,7 +358,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
                 if (serverCC == null) return false;
 
-                string routeQuery = serverCC?.GetSetting("downloadFromServer")?.ToString("routes");
+                string routeQuery = serverCC?.GetSetting("downloadFromServer")?.GetSetting("routes").ToString("value");
                 string connectionString = serverCC?.ToString("connectionString");
 
                 Type dbConnectionType = TypeHelper.LoadFromDll("Libraries/Npgsql.dll", "Npgsql.NpgsqlConnection");
@@ -371,13 +373,27 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
                 foreach (var row in resultSet)
                 {
-                    var id = UInt16.Parse(row["id"].ToString());
-                    var number = UInt16.Parse(row["number"].ToString());
-                    var type = (RouteType)Enum.Parse(typeof(RouteType), row["type"].ToString(), true);
+                    var id = default(ulong);
+                    var number = default(ushort);
+                    var type = default(RouteType);
+                    var name = null as String;
 
+                    try
+                    {
+                        id = UInt16.Parse(row["id"].ToString());
+                        number = UInt16.Parse(row["number"].ToString());
+                        type = (RouteType)Enum.Parse(typeof(RouteType), row["type"].ToString(), true);
+                        name = row["name"].ToString().Trim().ToUpper();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is KeyNotFoundException || ex is FormatException)
+                            Trace.WriteLine("La consulta para la descarga de los equipos debe devolver los campos {id: ulong, name: string, number: ushort, type: string}", "ERROR");
+                        throw ex;
+                    }
                     Route route = new Route(id, number, type)
                     {
-                        Name = row["name"].ToString().Trim().ToUpper()
+                        Name = name
                     };
 
                     if (AllRoutes.Contains(route)) continue;
@@ -386,7 +402,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex) { Trace.WriteLine(ex.PrintMessage().JoinLines()); return false; }
         }
 
         /// <summary>
@@ -401,7 +417,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
                 if (serverCC == null) return false;
 
-                string stationQuery = serverCC?.GetSetting("downloadFromServer")?.ToString("stations");
+                string stationQuery = serverCC?.GetSetting("downloadFromServer")?.GetSetting("stations").ToString("value");
                 string connectionString = serverCC?.ToString("connectionString");
 
                 Type dbConnectionType = TypeHelper.LoadFromDll("Libraries/Npgsql.dll", "Npgsql.NpgsqlConnection");
@@ -427,12 +443,13 @@ namespace Opera.Acabus.Core.Config.ViewModels
                         id = UInt64.Parse(row["id"].ToString().Trim());
                         name = row["name"].ToString().Trim();
                         stationNumber = UInt16.Parse(row["number"].ToString().Trim());
-                        idRoute = UInt64.Parse(row["idRoute"].ToString().Trim());
-                        routeAssigned = AcabusDataContext.AllRoutes.FirstOrDefault(route => route.ID == idRoute);
+                        idRoute = UInt64.Parse(row["idroute"].ToString().Trim());
+                        routeAssigned = AllRoutes.FirstOrDefault(route => route.ID == idRoute);
                     }
-                    catch (ArgumentOutOfRangeException ex)
+                    catch (Exception ex)
                     {
-                        Trace.WriteLine("La consulta para la descarga de las estaciones debe devolver los campos {id: ulong, name: string, number: ushort, idRoute: ulong}", "ERROR");
+                        if (ex is KeyNotFoundException || ex is FormatException)
+                            Trace.WriteLine("La consulta para la descarga de las estaciones debe devolver los campos {id: ulong, name: string, number: ushort, idroute: ulong}", "ERROR");
                         throw ex;
                     }
 
@@ -462,7 +479,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex) { Trace.WriteLine(ex.PrintMessage().JoinLines()); return false; }
         }
 
         /// <summary>
@@ -493,17 +510,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), _allBuses);
                 AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), _allStations);
             }
-            
-                Application.Current.Dispatcher.Invoke(() =>
-            {
-                _isActive = true;
-                OnPropertyChanged(nameof(IsActive));
-                OnPropertyChanged(nameof(AllBuses));
-                OnPropertyChanged(nameof(AllDevices));
-                OnPropertyChanged(nameof(AllRoutes));
-                OnPropertyChanged(nameof(AllStaff));
-                OnPropertyChanged(nameof(AllStations));
-            });
+
+            Application.Current.Dispatcher.Invoke(() =>
+        {
+            _isActive = true;
+            OnPropertyChanged(nameof(IsActive));
+            OnPropertyChanged(nameof(AllBuses));
+            OnPropertyChanged(nameof(AllDevices));
+            OnPropertyChanged(nameof(AllRoutes));
+            OnPropertyChanged(nameof(AllStaff));
+            OnPropertyChanged(nameof(AllStations));
+        });
         }
 
         /// <summary>
@@ -530,7 +547,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
             /// <summary>
             /// Obtiene el número de transacciones por conexión permitidas.
             /// </summary>
-            public override int TransactionPerConnection => 10;
+            public override int TransactionPerConnection => 1;
         }
     }
 }

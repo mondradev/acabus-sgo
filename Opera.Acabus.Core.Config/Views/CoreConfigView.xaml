@@ -35,7 +35,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding ID}" ClipboardContentBinding="{x:Null}" Header="ID Equipo" />
                             <DataGridTextColumn Binding="{Binding SerialNumber, TargetNullValue='(SIN ASIGNAR)'}" ClipboardContentBinding="{x:Null}" Header="Número de serie" />
-                            <DataGridTextColumn Binding="{Binding IPAddress}" ClipboardContentBinding="{x:Null}" Header="Dirección IP" />
+                            <DataGridTextColumn CanUserReorder="False" Binding="{Binding IPAddress}" ClipboardContentBinding="{x:Null}" Header="Dirección IP" />
                             <DataGridTextColumn Binding="{Binding Type, Converter={StaticResource DeviceTypeConverter}}" ClipboardContentBinding="{x:Null}" Header="Tipo" />
                             <DataGridTextColumn Binding="{Binding Station, TargetNullValue='(SIN ASIGNAR)'}" ClipboardContentBinding="{x:Null}" Header="Estación" />
                             <DataGridTextColumn Binding="{Binding Bus, TargetNullValue='(SIN ASIGNAR)'}" ClipboardContentBinding="{x:Null}" Header="Autobus" />
