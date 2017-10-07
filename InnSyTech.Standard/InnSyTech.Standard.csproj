@@ -46,12 +46,14 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configurations\Configuration.cs" />
@@ -78,7 +80,13 @@
     <Compile Include="Database\DbFieldInfo.cs" />
     <Compile Include="Database\Utils\DbHelper.cs" />
     <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />
-    <Compile Include="Net\Messenger\Iso8583\AppMessage.cs" />
+    <Compile Include="Gui\GuiHelper.cs" />
+    <Compile Include="Net\Messenger\Iso8583\Client8583.cs" />
+    <Compile Include="Net\Messenger\Iso8583\Message8583.cs" />
+    <Compile Include="Net\Messenger\Iso8583\Server8583.cs" />
+    <Compile Include="Net\Notifications\Push\ClientPush.cs" />
+    <Compile Include="Net\Notifications\Push\NotificationPush.cs" />
+    <Compile Include="Net\Notifications\Push\ServerPush.cs" />
     <Compile Include="Utils\TypeHelper.cs" />
     <Compile Include="Mvvm\Command.cs" />
     <Compile Include="Mvvm\Converters\TranslateEnumConverter.cs" />

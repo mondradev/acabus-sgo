@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
 
-namespace InnSyTech.Standard.Mvvm.Utils
+namespace InnSyTech.Standard.Mvvm.Converters
 {
     /// <summary>
     /// Convertidor para la traducción de la enumeración <see cref="T"/>.

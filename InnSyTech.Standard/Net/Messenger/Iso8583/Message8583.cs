@@ -57,7 +57,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
     /// <summary>
     /// Define la estructura de un mensaje ISO8583 para la comunicación de equipos remotos. Para su utilización requiere de una plantilla que indique el tipo de cada campo que se desea implementar en los mensajes.
     /// </summary>
-    public sealed class AppMessage : IDisposable, IEnumerable
+    public sealed class Message8583 : IDisposable, IEnumerable
     {
         /// <summary>
         /// Plantilla de campos para el codificado y decodificado de mensajes.
@@ -77,7 +77,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <summary>
         /// Crea un nuevo mensaje.
         /// </summary>
-        public AppMessage()
+        public Message8583()
         {
             _fields = new List<Field>();
         }
@@ -97,16 +97,16 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <summary>
         ///  Obtiene el mensaje a partir de un secuencia de bytes.
         /// </summary>
-        public static AppMessage FromBytes(byte[] bytes)
+        public static Message8583 FromBytes(byte[] bytes)
             => Parse(Encoding.UTF8.GetString(bytes));
 
         /// <summary>
-        /// Convierte una cadena que representa un mensaje según la plantilla utilizada y devuelve una instancia <see cref="AppMessage"/>.
+        /// Convierte una cadena que representa un mensaje según la plantilla utilizada y devuelve una instancia <see cref="Message8583"/>.
         /// </summary>
         /// <param name="iso8583str">Cadena de un mensaje ISO8583.</param>
-        /// <returns>Una instancia <see cref="AppMessage"/>.</returns>
+        /// <returns>Una instancia <see cref="Message8583"/>.</returns>
         /// <exception cref="InvalidOperationException">No se ha establecido una plantilla.</exception>
-        public static AppMessage Parse(String iso8583str)
+        public static Message8583 Parse(String iso8583str)
         {
             if (_template is null)
                 throw new InvalidOperationException("No hay una plantilla definida para la creación de la cadena ISO8583, utilice la función Message.SetTemplate");
@@ -127,7 +127,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
                         fields.Add(i + aux);
                 aux += 8;
             }
-            AppMessage message = new AppMessage();
+            Message8583 message = new Message8583();
             var body = iso8583str.Substring(16);
             foreach (var field in fields)
             {
@@ -167,10 +167,10 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <exception cref="ArgumentException">
         /// Identificador no puede ser 0 o previamente agregado.
         /// </exception>
-        public AppMessage Add(UInt16 id, Object value)
+        public Message8583 Add(UInt16 id, Object value)
         {
             if (_isDisposed)
-                throw new ObjectDisposedException(typeof(AppMessage).FullName);
+                throw new ObjectDisposedException(typeof(Message8583).FullName);
 
             if (id == 0)
                 throw new ArgumentException("El identificador del campo no puede ser 0.");
@@ -190,7 +190,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         public void Dispose()
         {
             if (_isDisposed)
-                throw new ObjectDisposedException(typeof(AppMessage).FullName);
+                throw new ObjectDisposedException(typeof(Message8583).FullName);
 
             _fields.Clear();
             _isDisposed = true;
@@ -298,7 +298,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         public bool Remove(UInt16 id)
         {
             if (_isDisposed)
-                throw new ObjectDisposedException(typeof(AppMessage).FullName);
+                throw new ObjectDisposedException(typeof(Message8583).FullName);
 
             if (id == 0)
                 throw new ArgumentException("El identificador del campo no puede ser 0.");
@@ -531,7 +531,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         private Object GetField(UInt16 id)
         {
             if (_isDisposed)
-                throw new ObjectDisposedException(typeof(AppMessage).FullName);
+                throw new ObjectDisposedException(typeof(Message8583).FullName);
 
             if (id == 0)
                 throw new ArgumentException("El identificador del campo no puede ser 0.");

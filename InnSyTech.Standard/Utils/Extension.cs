@@ -43,6 +43,9 @@ namespace InnSyTech.Standard.Utils
             Random random = new Random((int)DateTime.Now.Ticks);
             var index = (int)(random.NextDouble() * count);
 
+            if (index >= valids.Count())
+                return default(TData);
+
             return valids.ElementAt(index);
         }
 
