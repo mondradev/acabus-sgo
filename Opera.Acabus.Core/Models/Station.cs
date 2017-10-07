@@ -23,12 +23,12 @@ namespace Opera.Acabus.Core.Models
         private ObservableCollection<Device> _devices;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="ID" />.
+        /// Campo que provee a la propiedad <see cref="ID"/>.
         /// </summary>
         private UInt64 _id;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="IsExternal" />.
+        /// Campo que provee a la propiedad <see cref="IsExternal"/>.
         /// </summary>
         private Boolean _isExternal;
 
@@ -38,7 +38,7 @@ namespace Opera.Acabus.Core.Models
         private String _name;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Route" />.
+        /// Campo que provee a la propiedad <see cref="Route"/>.
         /// </summary>
         private Route _route;
 
@@ -143,7 +143,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="station">Una estación a comparar.</param>
         /// <param name="anotherStation">Otra estación a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si las estaciones son diferentes.</returns>
+        /// <returns>Un valor true si las estaciones son diferentes.</returns>
         public static bool operator !=(Station station, Station anotherStation)
         {
             if (station is null && anotherStation is null) return false;
@@ -157,7 +157,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="station">Una estación a comparar.</param>
         /// <param name="anotherStation">Otra estación a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si las estaciones son iguales.</returns>
+        /// <returns>Un valor true si las estaciones son iguales.</returns>
         public static bool operator ==(Station station, Station anotherStation)
         {
             if (station is null && anotherStation is null) return true;
@@ -167,9 +167,9 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
-        /// Compara la instancia <see cref="Station"/> actual con otra instancia <see cref="Station"/> y
-        /// devuelve un entero que indica si la posición de la instancia actual es anterior,
-        /// posterior o igual que la del otro objeto en el criterio de ordenación.
+        /// Compara la instancia <see cref="Station"/> actual con otra instancia <see
+        /// cref="Station"/> y devuelve un entero que indica si la posición de la instancia actual es
+        /// anterior, posterior o igual que la del otro objeto en el criterio de ordenación.
         /// </summary>
         /// <param name="other">Otra instancia <see cref="Station"/>.</param>
         /// <returns>
@@ -185,9 +185,9 @@ namespace Opera.Acabus.Core.Models
         }
 
         /// <summary>
-        /// Compara la instancia <see cref="Station"/> actual con otra instancia y
-        /// devuelve un entero que indica si la posición de la instancia actual es anterior,
-        /// posterior o igual que la del otro objeto en el criterio de ordenación.
+        /// Compara la instancia <see cref="Station"/> actual con otra instancia y devuelve un entero
+        /// que indica si la posición de la instancia actual es anterior, posterior o igual que la
+        /// del otro objeto en el criterio de ordenación.
         /// </summary>
         /// <param name="other">Otra instancia.</param>
         /// <returns>
@@ -205,7 +205,7 @@ namespace Opera.Acabus.Core.Models
         /// Determina si la instancia actual es igual a la pasada por argumento de la función.
         /// </summary>
         /// <param name="obj">Instancia a comparar con la actual.</param>
-        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la actual.</returns>
+        /// <returns>Un valor true si la instancia es igual a la actual.</returns>
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
@@ -224,7 +224,8 @@ namespace Opera.Acabus.Core.Models
             => Tuple.Create(StationNumber, Route).GetHashCode();
 
         /// <summary>
-        /// Devuelve el código de la estación actual que es formado a partir de el número de ruta y de estación.
+        /// Devuelve el código de la estación actual que es formado a partir de el número de ruta y
+        /// de estación.
         /// </summary>
         /// <returns>Un código de estación.</returns>
         public String GetStationCode()

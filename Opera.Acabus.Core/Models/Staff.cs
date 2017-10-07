@@ -6,42 +6,16 @@ using System;
 namespace Opera.Acabus.Core.Models
 {
     /// <summary>
-    /// Define las áreas asignables de actividades.
-    /// </summary>
-    public enum AssignableArea
-    {
-        /// <summary>
-        /// Área de mantenimiento (Valor predeterminado).
-        /// </summary>
-        MANTTO = 0,
-
-        /// <summary>
-        /// Área de supervisión de mantenimiento.
-        /// </summary>
-        SUPERVISOR = 1,
-
-        /// <summary>
-        /// Área de soporte técnico.
-        /// </summary>
-        SUPPORT = 2,
-
-        /// <summary>
-        /// Área de base de datos.
-        /// </summary>
-        DATABASE = 4,
-
-        /// <summary>
-        /// Área de gerencia TI.
-        /// </summary>
-        IT_MANAGER = 8
-    }
-
-    /// <summary>
     /// Define la estructura del personal de trabajo.
     /// </summary>
     [Entity]
     public class Staff : NotifyPropertyChanged, IComparable, IComparable<Staff>
     {
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="Active" />.
+        /// </summary>
+        private bool _active;
+
         /// <summary>
         /// Campo que provee a la propiedad 'Area'.
         /// </summary>
@@ -67,6 +41,17 @@ namespace Opera.Acabus.Core.Models
         /// Crea una nueva instanica de <see cref="Staff"/>.
         /// </summary>
         public Staff() { }
+
+        /// <summary>
+        /// Obtiene o establece si el elemento de personal sigue activo.
+        /// </summary>
+        public bool Active {
+            get => _active;
+            set {
+                _active = value;
+                OnPropertyChanged(nameof(Active));
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece el area asignada.
@@ -108,7 +93,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="staff">Un miembro del personal a comparar.</param>
         /// <param name="anotherStaff">Otro miembro del personal a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si los miembros son diferentes.</returns>
+        /// <returns>Un valor true si los miembros son diferentes.</returns>
         public static bool operator !=(Staff staff, Staff anotherStaff)
         {
             if (staff is null && anotherStaff is null) return false;
@@ -122,7 +107,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="staff">Un miembro del personal a comparar.</param>
         /// <param name="anotherStaff">Otro miembro del personal a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si ambos miembros son iguales.</returns>
+        /// <returns>Un valor true si ambos miembros son iguales.</returns>
         public static bool operator ==(Staff staff, Staff anotherStaff)
         {
             if (staff is null && anotherStaff is null) return true;
@@ -170,7 +155,7 @@ namespace Opera.Acabus.Core.Models
         /// Determina si la instancia actual es igual a la pasada por argumento de la función.
         /// </summary>
         /// <param name="obj">Instancia a comparar con la actual.</param>
-        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la actual.</returns>
+        /// <returns>Un valor true si la instancia es igual a la actual.</returns>
         public override bool Equals(object obj)
         {
             if (obj is null) return false;

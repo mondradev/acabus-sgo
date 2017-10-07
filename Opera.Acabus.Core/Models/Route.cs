@@ -163,7 +163,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="route">Una instancia <see cref="Route"/> a comparar.</param>
         /// <param name="anotherRoute">Otra instancia <see cref="Route"/> a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si ambas instancias son diferentes.</returns>
+        /// <returns>Un valor true si ambas instancias son diferentes.</returns>
         public static bool operator !=(Route route, Route anotherRoute)
         {
             if (route is null && anotherRoute is null) return false;
@@ -177,7 +177,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="route">Una instancia <see cref="Route"/> a comparar.</param>
         /// <param name="anotherRoute">Otra instancia <see cref="Route"/> a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si ambas instancias son iguales.</returns>
+        /// <returns>Un valor true si ambas instancias son iguales.</returns>
         public static bool operator ==(Route route, Route anotherRoute)
         {
             if (route is null && anotherRoute is null) return true;
@@ -226,7 +226,7 @@ namespace Opera.Acabus.Core.Models
         /// Determina si la instancia actual es igual a la pasada por argumento de la función.
         /// </summary>
         /// <param name="obj">Instancia a comparar con la actual.</param>
-        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la actual.</returns>
+        /// <returns>Un valor true si la instancia es igual a la actual.</returns>
         public override bool Equals(object obj)
         {
             if (obj is null) return false;

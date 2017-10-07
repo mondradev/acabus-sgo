@@ -236,6 +236,7 @@ namespace Opera.Acabus.Core.Models
             set {
                 _bus = value;
                 OnPropertyChanged(nameof(Bus));
+                OnPropertyChanged(nameof(Location));
             }
         }
 
@@ -290,6 +291,7 @@ namespace Opera.Acabus.Core.Models
             set {
                 _station = value;
                 OnPropertyChanged(nameof(Station));
+                OnPropertyChanged(nameof(Location));
             }
         }
 
@@ -310,7 +312,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="device">Un equipo a comparar.</param>
         /// <param name="anotherDevice">Otro equipo a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si los equipos son diferentes.</returns>
+        /// <returns>Un valor true si los equipos son diferentes.</returns>
         public static bool operator !=(Device device, Device anotherDevice)
         {
             if (device is null && anotherDevice is null) return false;
@@ -324,7 +326,7 @@ namespace Opera.Acabus.Core.Models
         /// </summary>
         /// <param name="device">Un equipo a comparar.</param>
         /// <param name="anotherDevice">Otro equipo a comparar.</param>
-        /// <returns>Un valor <see cref="true"/> si los equipos son iguales.</returns>
+        /// <returns>Un valor true si los equipos son iguales.</returns>
         public static bool operator ==(Device device, Device anotherDevice)
         {
             if (device is null && anotherDevice is null) return true;
@@ -379,7 +381,7 @@ namespace Opera.Acabus.Core.Models
         /// Determina si la instancia actual es igual a la pasada por argumento de la función.
         /// </summary>
         /// <param name="obj">Instancia a comparar con la actual.</param>
-        /// <returns>Un valor <see cref="true"/> si la instancia es igual a la actual.</returns>
+        /// <returns>Un valor true si la instancia es igual a la actual.</returns>
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
