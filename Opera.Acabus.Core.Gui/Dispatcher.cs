@@ -50,6 +50,13 @@ namespace Opera.Acabus.Core.Gui
         public static ICommand OpenDialogCommand { get; set; }
 
         /// <summary>
+        /// Cierra el cuadro de dialogo actualmente abierto en la pantalla.
+        /// </summary>
+        /// <param name="parameter">Valor a devolver del cierre del cuadro de dialogo.</param>
+        public static void CloseDialog(Object parameter = null)
+            => CloseDialogCommand?.Execute(parameter);
+
+        /// <summary>
         /// Solicita al controlador de interfaz mostrar la vista pasada por parametro.
         /// </summary>
         public static void RequestShowContent(System.Windows.Controls.UserControl content)

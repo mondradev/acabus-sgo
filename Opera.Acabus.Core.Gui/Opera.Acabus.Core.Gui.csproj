@@ -57,13 +57,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converters\AssignableAreaSpanishConverter.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\BusStatusSpanishConverter.cs" />
     <Compile Include="Converters\BusTypeSpanishConverter.cs" />
     <Compile Include="Converters\DeviceTypeConverter.cs" />
+    <Compile Include="Converters\EnumToColorConverter.cs" />
+    <Compile Include="Converters\PriorityToColorConverter.cs" />
     <Compile Include="Converters\RouteTypeSpanishConverter.cs" />
     <Compile Include="Dispatcher.cs" />
-    <Compile Include="Modules\IModuleInfo.cs" />
-    <Compile Include="Modules\ModuleInfoBase.cs" />
+    <Compile Include="Modules\ModuleInfoGui.cs" />
     <Compile Include="Modules\ModuleViewerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

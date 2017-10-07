@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opera.Acabus.Core.Modules;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,10 +8,49 @@ using System.Windows;
 namespace Opera.Acabus.Core.Gui.Modules
 {
     /// <summary>
-    /// Clase abstracta que implementa la interfaz <see cref="IModuleInfo"/> y sirve como base para
-    /// la creación de caractaristicas de un módulo.
+    /// Enumera los tipos de módulos disponibles.
     /// </summary>
-    public abstract class ModuleInfoBase : IModuleInfo
+    public enum ModuleType
+    {
+        /// <summary>
+        /// Tipo visor. Este tipo requiere un valor válido en la propiedad <see
+        /// cref="IModuleInfo.ViewType"/> y <see cref="IModuleInfo.Icon"/>.
+        /// </summary>
+        VIEWER,
+
+        /// <summary>
+        /// Tipo configuración. Este tipo requiere un valor válido en <see cref="IModuleInfo.ViewType"/>.
+        /// </summary>
+        CONFIGURATION,
+
+        /// <summary>
+        /// Tipo de servicio. Este tipo se ejecuta en un hilo independiente.
+        /// </summary>
+        SERVICE
+    }
+
+    /// <summary>
+    /// Contiene los valores para determinar en que lado de la barra principal de una aplicación se
+    /// coloca el elemento visual.
+    /// </summary>
+    public enum Side
+    {
+        /// <summary>
+        /// Lado izquierdo.
+        /// </summary>
+        LEFT,
+
+        /// <summary>
+        /// Lado derecho (Comúnmente utilizado para botones de configuración o búsqueda).
+        /// </summary>
+        RIGHT
+    }
+
+    /// <summary>
+    /// Clase abstracta que implementa la interfaz <see cref="IModuleInfo"/> y sirve como base para
+    /// la creación de caractaristicas de un módulo que involucra la interfaz gráfica.
+    /// </summary>
+    public abstract class ModuleInfoGui : IModuleInfo
     {
         /// <summary>
         /// Dependencias del módulo.
@@ -18,20 +58,30 @@ namespace Opera.Acabus.Core.Gui.Modules
         private HashSet<Assembly> _dependencies;
 
         /// <summary>
-        /// Crea una instancia nueva de <see cref="ModuleInfoBase"/> especificando sus dependencias.
+        /// Crea una instancia nueva de <see cref="ModuleInfoGui"/> especificando sus dependencias.
         /// </summary>
         /// <param name="dependencies">Dependencias del módulo.</param>
-        public ModuleInfoBase(Assembly[] dependencies)
+        public ModuleInfoGui(Assembly[] dependencies)
         {
             _dependencies = dependencies != null ? new HashSet<Assembly>(dependencies) : new HashSet<Assembly>();
-            _dependencies.Add(typeof(IModuleInfo).Assembly);
+            _dependencies.Add(typeof(ModuleInfoGui).Assembly);
             _dependencies.Add(typeof(DataAccess.AcabusDataContext).Assembly);
         }
-        
+
+        /// <summary>
+        /// Crea una instancia nueva de <see cref="ModuleInfoGui"/>.
+        /// </summary>
+        public ModuleInfoGui() : this(null) { }
+
         /// <summary>
         /// Obtiene el autor del módulo.
         /// </summary>
         public abstract string Author { get; }
+
+        /// <summary>
+        /// Obtiene el nombre código del módulo
+        /// </summary>
+        public abstract string CodeName { get; }
 
         /// <summary>
         /// Obtiene la lista de dependencias del módulo.
@@ -72,11 +122,6 @@ namespace Opera.Acabus.Core.Gui.Modules
         /// Obtiene el tipo de la interfaz gráfica del módulo.
         /// </summary>
         public abstract Type ViewType { get; }
-
-        /// <summary>
-        /// Obtiene el nombre código del módulo
-        /// </summary>
-        public abstract string CodeName { get; }
 
         /// <summary>
         /// Carga la configuración inicial del módulo. Este método es llamadó cuando se carga el

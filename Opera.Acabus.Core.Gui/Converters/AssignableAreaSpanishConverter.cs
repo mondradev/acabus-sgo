@@ -1,4 +1,4 @@
-﻿using InnSyTech.Standard.Mvvm.Utils;
+﻿using InnSyTech.Standard.Mvvm.Converters;
 using Opera.Acabus.Core.Models;
 using System.Collections.Generic;
 
@@ -14,6 +14,7 @@ namespace Opera.Acabus.Core.Gui.Converters
         /// </summary>
         public AssignableAreaSpanishConverter()
             : base(new Dictionary<AssignableArea, string>() {
+                { AssignableArea.EVERYBODY, "CUALQUIER" },
                 { AssignableArea.MANTTO, "MANTENIMIENTO" },
                 { AssignableArea.SUPERVISOR, "SUPERVISOR" },
                 { AssignableArea.SUPPORT, "SOPORTE TÉCNICO" },
