@@ -9,14 +9,14 @@
              mc:Ignorable="d">
     <Grid MinWidth="300" MaxWidth="500">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <TextBlock Margin="16,24,16,8" TextWrapping="Wrap" Text="{Binding Message, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DialogTemplateView}}}" FontSize="14"/>
+        <TextBlock Margin="16,24,16,8" TextWrapping="Wrap" Text="{Binding Message, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:DialogTemplateView}}}" FontSize="14" />
         <StackPanel Margin="8" HorizontalAlignment="Right" Grid.Row="1">
             <Button Content="LISTO" Height="Auto" HorizontalContentAlignment="Left"
-                                HorizontalAlignment="Right" Margin="0" Style="{StaticResource MaterialDesignFlatButton}" 
-                                 Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" MinHeight="36"/>
+                                HorizontalAlignment="Right" Margin="0" Style="{StaticResource MaterialDesignFlatButton}"
+                                 Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" MinHeight="36" IsCancel="True" IsDefault="True" />
         </StackPanel>
     </Grid>
 </UserControl>

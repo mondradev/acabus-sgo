@@ -313,7 +313,8 @@ namespace Opera.Acabus.TrunkMonitor
                         parent.Children.Add(linkPanel);
                 }
 
-                CreateStationCards(link.StationB.GetLinks(), linkPanel);
+                if (link?.StationB != null)
+                    CreateStationCards(link.StationB.GetLinks(), linkPanel);
             }
         }
 
@@ -472,6 +473,8 @@ namespace Opera.Acabus.TrunkMonitor
 
             _stationCards.ForEach(card => GC.SuppressFinalize(card));
             _stationCards.Clear();
+
+            _content.Children.Clear();
 
             if ((Links?.Count ?? 0) > 0)
             {

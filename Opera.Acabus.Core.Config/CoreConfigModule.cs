@@ -8,7 +8,7 @@ namespace Opera.Acabus.Core.Config
     /// <summary>
     /// Define la configuración del nucleo del SGO.
     /// </summary>
-    public class CoreConfigModule : ModuleInfoBase
+    public class CoreConfigModule : ModuleInfoGui
     {
         /// <summary>
         /// Crea una instancia nueva de <see cref="CoreConfigModule"/>.

@@ -14,7 +14,7 @@ namespace Opera.Acabus.TrunkMonitor
     /// <summary>
     /// Define la información del módulo de monitor de vía y equipos externos.
     /// </summary>
-    public sealed class TrunkMonitorModule : ModuleInfoBase
+    public sealed class TrunkMonitorModule : ModuleInfoGui
     {
         /// <summary>
         /// Crea una instancia nueva de <see cref="TrunkMonitorModule"/>.

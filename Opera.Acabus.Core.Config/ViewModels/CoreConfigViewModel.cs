@@ -171,12 +171,33 @@ namespace Opera.Acabus.Core.Config.ViewModels
         public ICommand ShowAddDeviceCommand { get; }
 
         /// <summary>
-        /// Carga los valor al momento de mostrar el módulo de configuración.
+        /// Carga los valores al momento de mostrar el módulo de configuración.
         /// </summary>
         /// <param name="parameter">Parametros de carga.</param>
         protected override void OnLoad(object parameter)
         {
             Task.Run((Action)ReadFromDataBase);
+        }
+
+        /// <summary>
+        /// Descarga los valores del módulo al momento de ocultar la vista.
+        /// </summary>
+        /// <param name="parameter">Parametros de descarga</param>
+        protected override void OnUnload(object parameter)
+        {
+            _isActive = false;
+            _allDevices = null;
+            _allBuses = null;
+            _allStations = null;
+            _allRoutes = null;
+            _allStaff = null;
+
+            OnPropertyChanged(nameof(IsActive));
+            OnPropertyChanged(nameof(AllBuses));
+            OnPropertyChanged(nameof(AllDevices));
+            OnPropertyChanged(nameof(AllRoutes));
+            OnPropertyChanged(nameof(AllStaff));
+            OnPropertyChanged(nameof(AllStations));
         }
 
         /// <summary>
@@ -301,7 +322,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                         idBus = UInt64.Parse(row["idbus"]?.ToString().Trim() ?? "0");
                         type = (DeviceType)Enum.Parse(typeof(DeviceType), row["type"].ToString().Trim());
 
-                        station = AllStations.FirstOrDefault(stationFind => stationFind.StationNumber == idStation);
+                        station = AllStations.FirstOrDefault(stationFind => stationFind.ID == idStation);
                         bus = AllBuses.FirstOrDefault(vehicleFind => vehicleFind.ID == idBus);
                     }
                     catch (Exception ex)
@@ -487,12 +508,6 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// </summary>
         private void ReadFromDataBase()
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _isActive = false;
-                OnPropertyChanged(nameof(IsActive));
-            });
-
             /// Lectura desde la base de datos.
 
             _allDevices = AcabusDataContext.AllDevices.LoadReference(1).ToList();

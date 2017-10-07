@@ -4,6 +4,7 @@ using MaterialDesignThemes.Wpf;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Gui.Modules;
+using Opera.Acabus.Core.Modules;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -49,7 +50,7 @@ namespace Opera.Acabus.Sgo
 
             _view = view;
             _instance = this;
-            _modules = new List<IModuleInfo>();
+            _modules = AcabusDataContext.ModulesLoaded;
 
             Dispatcher.CloseDialogCommand = DialogHost.CloseDialogCommand;
 
@@ -80,6 +81,8 @@ namespace Opera.Acabus.Sgo
             };
 
             Trace.Listeners.Add(new TraceListenerImp());
+            Trace.AutoFlush = true;
+            Trace.UseGlobalLock = true;
 
             LoadModule();
         }
@@ -125,25 +128,27 @@ namespace Opera.Acabus.Sgo
 
             foreach (IModuleInfo moduleInfo in _modules)
             {
-                if (moduleInfo.ModuleType == ModuleType.SERVICE)
+                var moduleGui = moduleInfo as ModuleInfoGui;
+
+                if ((moduleGui == null && moduleInfo != null) || moduleGui.ModuleType == ModuleType.SERVICE)
                     if (!moduleInfo.LoadModule())
                         Dispatcher.SendNotify($"El servicio '{moduleInfo.Name} no se logró iniciar.");
 
-                if (moduleInfo.ModuleType == ModuleType.VIEWER)
+                if (moduleGui.ModuleType == ModuleType.VIEWER)
                 {
                     UserControl moduleView = null;
                     _view.CreateToolButton(moduleInfo.CodeName, new Command(delegate
                     {
                         if (moduleView == null)
-                            moduleView = (UserControl)Activator.CreateInstance(moduleInfo.ViewType);
+                            moduleView = (UserControl)Activator.CreateInstance(moduleGui.ViewType);
                         _view.ShowContent(moduleView);
-                    }), moduleInfo.Icon, moduleInfo.Name);
+                    }), moduleGui.Icon, moduleInfo.Name);
 
                     if (!moduleInfo.LoadModule())
                         Dispatcher.SendNotify($"El módulo '{moduleInfo.Name} no se logró iniciar.");
                 }
 
-                if (moduleInfo.ModuleType == ModuleType.CONFIGURATION)
+                if (moduleGui.ModuleType == ModuleType.CONFIGURATION)
                 {
                     if (!_configurationAvailable)
                     {
@@ -157,7 +162,7 @@ namespace Opera.Acabus.Sgo
                     _view.AddSetting(moduleInfo.Name, new Command(delegate
                     {
                         if (moduleView == null)
-                            moduleView = (UserControl)Activator.CreateInstance(moduleInfo.ViewType);
+                            moduleView = (UserControl)Activator.CreateInstance(moduleGui.ViewType);
 
                         _view.ShowContent(moduleView);
                     }));
@@ -173,7 +178,7 @@ namespace Opera.Acabus.Sgo
         {
             if (parameters == null) return;
 
-            var dialogHost = _view.DialogHost;            
+            var dialogHost = _view.DialogHost;
 
             if (dialogHost.IsOpen)
                 DialogHost.CloseDialogCommand.Execute(null, null);

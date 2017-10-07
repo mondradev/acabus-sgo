@@ -7,6 +7,7 @@ using Opera.Acabus.TrunkMonitor.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,27 @@ using System.Threading.Tasks;
 
 namespace Opera.Acabus.TrunkMonitor.ViewModels
 {
+    /// <summary>
+    /// Define las diferentes tareas que se ejecutan.
+    /// </summary>
+    internal enum TaskDescriptor
+    {
+        /// <summary>
+        /// Del tipo replica.
+        /// </summary>
+        REPLY,
+
+        /// <summary>
+        /// Del tipo de enlace.
+        /// </summary>
+        LINK,
+
+        /// <summary>
+        /// Del tipo de estación.
+        /// </summary>
+        STATION_LINK
+    }
+
     /// <summary>
     /// Modelo la vista del monitor de vía, proporciona toda las funciones que realizará el monitor
     /// de vía.
@@ -36,11 +58,6 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private const Double TIME_WAIT_STATION = 0.5;
 
         /// <summary>
-        /// Temporizador del monitor de replica de estaciones y externos.
-        /// </summary>
-        private Timer _checkReplica;
-
-        /// <summary>
         /// Campo que provee a la propiedad ' <see cref="ControlCenter"/>'.
         /// </summary>
         private Station _controlCenter;
@@ -51,9 +68,34 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private Timer _linkMonitor;
 
         /// <summary>
-        /// Campo que provee a la propiedad '<see cref="Links"/>'.
+        /// Campo que provee a la propiedad ' <see cref="Links"/>'.
         /// </summary>
         private ObservableCollection<Link> _links;
+
+        /// <summary>
+        /// Temporizador del monitor de replica de estaciones y externos.
+        /// </summary>
+        private Timer _replyMonitor;
+
+        /// <summary>
+        /// Indica si el monitor de enlaces está en ejecución.
+        /// </summary>
+        private bool _runningLinkMonitor = false;
+
+        /// <summary>
+        /// Indica si el monitor de replica está en ejecución.
+        /// </summary>
+        private bool _runningReplyMonitor = false;
+
+        /// <summary>
+        /// Indica si el monitor de estaciones está en ejecución.
+        /// </summary>
+        private bool _runningStationMonitor = false;
+
+        /// <summary>
+        /// Una lista de todas las tareas actualmente en ejecución.
+        /// </summary>
+        private ObservableCollection<TaskService> _runningTasks;
 
         /// <summary>
         /// Temporizador del monitor de estaciones y externos.
@@ -61,9 +103,14 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         private Timer _stationMonitor;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="TasksAvailable" />.
+        /// Campo que provee a la propiedad <see cref="TasksAvailable"/>.
         /// </summary>
         private ICollection<TaskTrunkMonitor> _taskAvailable;
+
+        /// <summary>
+        /// Es la fuente del token de cancelación de todos los procesos del módulo.
+        /// </summary>
+        private CancellationTokenSource _tokenSource;
 
         /// <summary>
         /// Crea una instance del modelo de la vista del monitor de vía.
@@ -85,6 +132,33 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
 
                 ShowMessage(stringBuilder.Insert(0, $"Estación: {station}\n\n").ToString());
             });
+
+            _tokenSource = new CancellationTokenSource();
+            _runningTasks = new ObservableCollection<TaskService>();
+
+            _runningTasks.CollectionChanged += (sender, arguments) =>
+            {
+                if (arguments.Action != NotifyCollectionChangedAction.Remove
+                    && arguments.Action != NotifyCollectionChangedAction.Reset)
+                    return;
+
+                var runningTasks = _runningTasks.ToArray();
+
+                if (!runningTasks.Any(t => t?.Descriptor == TaskDescriptor.LINK))
+                    _runningLinkMonitor = false;
+
+                if (!runningTasks.Any(t => t?.Descriptor == TaskDescriptor.REPLY))
+                    _runningReplyMonitor = false;
+
+                if (!runningTasks.Any(t => t?.Descriptor == TaskDescriptor.STATION_LINK))
+                    _runningStationMonitor = false;
+
+                if (!runningTasks.Any())
+                    _tokenSource = new CancellationTokenSource();
+
+                foreach (var taskService in runningTasks.Where(t => t == null || t.Task.IsCanceled))
+                    _runningTasks.Remove(taskService);
+            };
         }
 
         /// <summary>
@@ -124,6 +198,9 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <param name="parameter">Parametro del comando.</param>
         protected override void OnLoad(object parameter)
         {
+            _links = null;
+            OnPropertyChanged(nameof(Links));
+
             List<Link> linksList = TrunkMonitorModule.AllLinks?.ToList();
 
             if (linksList == null)
@@ -152,24 +229,51 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         /// <param name="parameter">Parametro del comando.</param>
         protected override void OnUnload(object parameter)
         {
+            _tokenSource?.Cancel();
+
             _linkMonitor?.Dispose();
             _stationMonitor?.Dispose();
-            _checkReplica?.Dispose();
+            _replyMonitor?.Dispose();
         }
 
         /// <summary>
         /// Verifica la replica de los equipos de las estaciones.
         /// </summary>
         /// <param name="initialStation">Estación inicial.</param>
-        private void CheckReplica(Station initialStation)
+        private void CheckReply(Station initialStation)
         {
             if (initialStation == null)
                 return;
 
-            foreach (var link in initialStation.GetLinks())
-                Task.Run(() => CheckReplica(link.StationB));
+            if (_tokenSource.IsCancellationRequested)
+                return;
 
-            initialStation.VerifyReplica();
+            foreach (var link in initialStation.GetLinks())
+            {
+                if (_tokenSource.IsCancellationRequested)
+                    break;
+
+                var currentTask = null as Task;
+
+                currentTask = Task.Run(() =>
+                {
+                    try
+                    {
+                        CheckReply(link.StationB);
+                    }
+                    finally
+                    {
+                        _runningTasks.Remove(new TaskService(currentTask, TaskDescriptor.REPLY));
+                    }
+                }, _tokenSource.Token);
+
+                _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.REPLY));
+            }
+
+            if (_tokenSource.IsCancellationRequested)
+                return;
+
+            initialStation.VerifyReply(_tokenSource.Token);
         }
 
         /// <summary>
@@ -179,17 +283,32 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
         {
             _linkMonitor = new Timer(delegate
             {
+                if (_runningLinkMonitor && _runningTasks.Count > 0)
+                    return;
+
+                _runningLinkMonitor = true;
+
                 UpdateLinkStatus(Links);
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(TIME_WAIT_LINK));
 
             _stationMonitor = new Timer(delegate
             {
+                if (_runningStationMonitor && _runningTasks.Count > 0)
+                    return;
+
+                _runningStationMonitor = true;
+
                 UpdateStationStatus(ControlCenter);
             }, null, TimeSpan.FromSeconds(0.5), TimeSpan.FromMinutes(TIME_WAIT_STATION));
 
-            _checkReplica = new Timer(delegate
+            _replyMonitor = new Timer(delegate
             {
-                CheckReplica(ControlCenter);
+                if (_runningReplyMonitor && _runningTasks.Count > 0)
+                    return;
+
+                _runningReplyMonitor = true;
+
+                CheckReply(ControlCenter);
             }, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(TIME_WAIT_REPLICA));
         }
 
@@ -202,24 +321,46 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
 
             foreach (var link in links)
             {
-                Task.Run(() =>
-                {
-                    if (state != LinkState.DISCONNECTED)
-                    {
-                        var ping = link.DoPing();
-                        if (link.State == LinkState.DISCONNECTED || ping < 0)
-                        {
-                            link.State = LinkState.DISCONNECTED;
-                            SendNotify(String.Format("Enlace a {0} sin conexión", link.StationB));
-                        }
-                    }
-                    else
-                    {
-                        link.State = LinkState.DISCONNECTED;
-                        link.Ping = -1;
-                    }
-                    UpdateLinkStatus(link.StationB?.GetLinks(), link.State);
-                });
+                if (_tokenSource.IsCancellationRequested)
+                    break;
+
+                var currentTask = null as Task;
+
+                currentTask = Task.Run(() =>
+                 {
+                     try
+                     {
+                         if (_tokenSource.IsCancellationRequested)
+                             return;
+
+                         if (state != LinkState.DISCONNECTED)
+                         {
+                             var ping = link.DoPing();
+
+                             if (link.State == LinkState.DISCONNECTED || ping < 0)
+                             {
+                                 link.State = LinkState.DISCONNECTED;
+                                 SendNotify(String.Format("Enlace a {0} sin conexión", link.StationB));
+                             }
+                         }
+                         else
+                         {
+                             link.State = LinkState.DISCONNECTED;
+                             link.Ping = -1;
+                         }
+
+                         if (_tokenSource.IsCancellationRequested)
+                             return;
+
+                         UpdateLinkStatus(link.StationB?.GetLinks(), link.State);
+                     }
+                     finally
+                     {
+                         _runningTasks.Remove(new TaskService(currentTask, TaskDescriptor.LINK));
+                     }
+                 }, _tokenSource.Token);
+
+                _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.LINK));
             }
         }
 
@@ -232,10 +373,79 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
             if (stationA == null)
                 return;
 
-            stationA.CheckDevice();
+            if (_tokenSource.IsCancellationRequested)
+                return;
 
-            foreach (var link in stationA.GetLinks())
-                UpdateStationStatus(link.StationB);
+            var currentTask = null as Task;
+
+            currentTask = Task.Run(() =>
+            {
+                try
+                {
+                    stationA.CheckDevice();
+
+                    foreach (var link in stationA.GetLinks())
+                    {
+                        if (_tokenSource.IsCancellationRequested)
+                            break;
+
+                        UpdateStationStatus(link.StationB);
+                    }
+                }
+                finally
+                {
+                    _runningTasks.Remove(new TaskService(currentTask, TaskDescriptor.STATION_LINK));
+                }
+            });
+
+            _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.STATION_LINK));
         }
+    }
+
+    /// <summary>
+    /// Representa una tarea de servicio proporcionado por el módulo.
+    /// </summary>
+    internal class TaskService
+    {
+        /// <summary>
+        /// Crea una instancia nueva.
+        /// </summary>
+        /// <param name="task">La tarea a ser contenida.</param>
+        /// <param name="descriptor">Descriptor de la tarea.</param>
+        public TaskService(Task task, TaskDescriptor descriptor)
+        {
+            Task = task;
+            Descriptor = descriptor;
+        }
+
+        /// <summary>
+        /// Obtiene el descriptor de la tarea.
+        /// </summary>
+        public TaskDescriptor Descriptor { get; }
+
+        /// <summary>
+        /// Obtiene la tarea.
+        /// </summary>
+        public Task Task { get; }
+
+        /// <summary>
+        /// Determina si dos instancias son igual.
+        /// </summary>
+        /// <param name="obj">Otra instancia a comparar.</param>
+        /// <returns>Un valor de true si las instancias son igual.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            if (obj.GetType() != typeof(TaskService)) return false;
+
+            return (obj as TaskService).GetHashCode() == GetHashCode();
+        }
+
+        /// <summary>
+        /// Obtiene el código hash de la instancia actual.
+        /// </summary>
+        /// <returns>Código hash del objeto.</returns>
+        public override int GetHashCode()
+            => Tuple.Create(Task, Descriptor).GetHashCode();
     }
 }

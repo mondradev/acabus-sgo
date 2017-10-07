@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using static Opera.Acabus.TrunkMonitor.Models.StationStateInfo;
 
@@ -33,8 +34,8 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
 
             ICollection<Link> links = info?.Links;
 
-            if (links.Any(l => l.ID == link.ID && l != link))
-                links.Remove(links.Single(l => l.ID == link.ID && l != link));
+            while (links.Any(l => l.ID == link.ID && l != link))
+                links.Remove(links.FirstOrDefault(l => l.ID == link.ID && l != link));
 
             if (!links.Contains(link))
                 links.Add(link);
@@ -74,18 +75,17 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
             }.Contains(d.Type));
 
             foreach (var device in devices)
-                Task.Run(() =>
-                {
-                    var message = new StationMessage(device, $"Equipo desconectado: {device}", Priority.HIGH);
+            {
+                var message = new StationMessage(device, $"Equipo desconectado: {device}", Priority.HIGH);
 
-                    if (device.DoPing(2) < 0)
-                    {
-                        if (!info.Messages.Contains(message))
-                            info.Messages.Add(message);
-                    }
-                    else
-                        info.Messages.Remove(message);
-                });
+                if (device.DoPing(2) < 0)
+                {
+                    if (!info.Messages.Contains(message))
+                        info.Messages.Add(message);
+                }
+                else
+                    info.Messages.Remove(message);
+            }
         }
 
         /// <summary>
@@ -95,12 +95,16 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         /// alertas de estación.
         /// </summary>
         /// <param name="stationToCheck">Estación a verificar el equipo replicado.</param>
-        public static void VerifyReplica(this Station stationToCheck)
+        /// <param name="token">Token de cancelación de la tarea.</param>
+        public static void VerifyReply(this Station stationToCheck, CancellationToken token)
         {
             if (stationToCheck == null)
                 return;
 
             if (stationToCheck.Devices.Count == 0)
+                return;
+
+            if (token.IsCancellationRequested)
                 return;
 
             var info = stationToCheck.GetStateInfo();
@@ -113,21 +117,24 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
                 DeviceType.TSI
             }.Contains(d.Type)))
             {
-                Task.Run(() =>
+                if (token.IsCancellationRequested)
+                    return;
+
+                if (device.DoPing() < 0)
+                    return;
+
+                var message = new StationMessage(device, $"Pendiente por replicar {device}", Priority.MEDIUM);
+
+                if (token.IsCancellationRequested)
+                    return;
+
+                if (device.PendingReplica())
                 {
-                    if (device.DoPing() < 0)
-                        return;
-
-                    var message = new StationMessage(device, $"Pendiente por replicar {device}", Priority.MEDIUM);
-
-                    if (device.PendingReplica())
-                    {
-                        if (!info.Messages.Contains(message))
-                            info.Messages.Add(message);
-                    }
-                    else
-                        info.Messages.Remove(message);
-                });
+                    if (!info.Messages.Contains(message))
+                        info.Messages.Add(message);
+                }
+                else
+                    info.Messages.Remove(message);
             }
         }
 
@@ -208,6 +215,9 @@ namespace Opera.Acabus.TrunkMonitor.Helpers
         {
             lock (_stationStateInfo)
             {
+                if (station == null)
+                    return null;
+
                 if (!_stationStateInfo.ContainsKey(station))
                     _stationStateInfo.Add(station, new StationStateInfo(station));
 
