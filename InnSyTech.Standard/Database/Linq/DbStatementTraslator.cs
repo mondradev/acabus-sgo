@@ -198,6 +198,14 @@ namespace InnSyTech.Standard.Database.Linq
                     Visit(m.Arguments[1]);
                     break;
 
+                case "OrderByDescending":
+                    Visit(m.Arguments[0]);
+                    _statement.Append(" ORDER BY ");
+                    _selectedList = _statementDefinition.Orders;
+                    Visit(m.Arguments[1]);
+                    _statement.Append(" DESC ");
+                    break;
+
                 case "LoadReference":
                     var depth = (int)(m.Arguments[1] as ConstantExpression).Value;
                     _statementDefinition.ReferenceDepth = depth;
@@ -208,8 +216,9 @@ namespace InnSyTech.Standard.Database.Linq
                 case "Take":
                     var count = (int)(m.Arguments.Last() as ConstantExpression).Value;
                     Visit(m.Arguments.First());
-                    _statementDefinition.CountToTake = _statementDefinition.CountToTake > count && _statementDefinition.CountToTake != 0 
+                    _statementDefinition.CountToTake = _statementDefinition.CountToTake > count && _statementDefinition.CountToTake != 0
                         ? count : _statementDefinition.CountToTake;
+                    _statement.AppendFormat(" LIMIT {0} ", count);
                     break;
 
                 case "Single":
@@ -230,6 +239,7 @@ namespace InnSyTech.Standard.Database.Linq
 
                         Visit((StripQuotes(m.Arguments.Last()) as LambdaExpression).Body);
                     }
+                    _statement.Append(" LIMIT 1 ");
                     break;
 
                 case "Select":

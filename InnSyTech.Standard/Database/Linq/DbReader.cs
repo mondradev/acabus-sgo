@@ -37,6 +37,9 @@ namespace InnSyTech.Standard.Database.Linq
                 if (definition.CountToTake != 0 && readItem == definition.CountToTake)
                     break;
             }
+
+            reader?.Close();
+
             if (definition.CountToTake == 1 && !definition.IsEnumerable && list.Count > 0)
                 return list[0];
             return list;
