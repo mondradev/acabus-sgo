@@ -79,7 +79,7 @@ namespace Opera.Acabus.Core.Services
         /// Envía un mensaje al cliente remoto,
         /// </summary>
         /// <param name="message">Mensaje por envíar.</param>
-        public void SendMessage(AppMessage message)
+        public void SendMessage(Message8583 message)
         {
             var stream = _client.GetStream();
             byte[] bytes = message.ToBytes();
@@ -129,7 +129,7 @@ namespace Opera.Acabus.Core.Services
                 }
 
                 if (endTask && builder.Count > 0)
-                    AppServer.MessageProcessing(this, AppMessage.FromBytes(builder.ToArray()));
+                    AppServer.MessageProcessing(this, Message8583.FromBytes(builder.ToArray()));
             }, _tokenSource.Token);
         }
     }

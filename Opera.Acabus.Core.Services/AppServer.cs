@@ -62,7 +62,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="message">Mensaje de petición.</param>
         /// <returns>Mensaje de respuesta.</returns>
-        public delegate AppMessage CallProcessingRequest(AppMessage message);
+        public delegate Message8583 CallProcessingRequest(Message8583 message);
 
         /// <summary>
         /// Método utilizado para la interpretación de las peticiones al servidor.
@@ -128,11 +128,11 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="client">Cliente TCP remoto.</param>
         /// <param name="buffer">Buffer de lectura.</param>
-        internal static void MessageProcessing(AppSession client, AppMessage request)
+        internal static void MessageProcessing(AppSession client, Message8583 request)
         {
             var message = ProcessingRequest?.Invoke(request);
             if (message != null)
-                message = new AppMessage() { { 64, "El servidor no tiene funciones disponibles." } };
+                message = new Message8583() { { 64, "El servidor no tiene funciones disponibles." } };
             client.SendMessage(message);
         }
 
