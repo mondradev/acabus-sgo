@@ -127,6 +127,16 @@ namespace InnSyTech.Standard.Database.Linq
 
                     case TypeCode.Object:
                         throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
+
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                        if (c.Value.GetType().IsEnum)
+                            _statement.Append((int)c.Value);
+                        else
+                            _statement.Append(c.Value);
+                        break;
+
                     default:
                         _statement.Append(c.Value);
                         break;

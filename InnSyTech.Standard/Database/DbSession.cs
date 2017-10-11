@@ -110,7 +110,7 @@ namespace InnSyTech.Standard.Database
                 var foreignKey = DbHelper.GetFields(propertyType)
                     .Where(f => f.IsForeignKey && f.Name == field.ForeignKeyName)
                     .FirstOrDefault();
-               
+
                 var parameter = Expression.Parameter(propertyType, "i");
                 var foreignProperty = Expression.MakeMemberAccess(parameter, foreignKey.PropertyInfo);
                 var equalsNotNull = Expression.NotEqual(foreignProperty, Expression.Constant(null));
@@ -119,8 +119,11 @@ namespace InnSyTech.Standard.Database
                 var equals = Expression.Equal(foreignID, primaryValue);
                 var and = Expression.AndAlso(equalsNotNull, equals);
                 var lambda = Expression.Lambda(and, parameter);
-                
+
                 var addMethod = propertyCollection.PropertyType.GetMethod("Add");
+                var clearMethod = propertyCollection.PropertyType.GetMethod("Clear");
+
+                clearMethod?.Invoke(collection, null);
 
                 foreach (var item in dataSource.Where(lambda.Compile() as Func<TDataSource, bool>))
                 {
