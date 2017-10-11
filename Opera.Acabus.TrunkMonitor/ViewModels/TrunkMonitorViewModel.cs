@@ -356,7 +356,10 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                      }
                      finally
                      {
-                         _runningTasks.Remove(new TaskService(currentTask, TaskDescriptor.LINK));
+                         var task = new TaskService(currentTask, TaskDescriptor.LINK);
+
+                         if (_runningTasks.Contains(task))
+                             _runningTasks.Remove(task);
                      }
                  }, _tokenSource.Token);
 
