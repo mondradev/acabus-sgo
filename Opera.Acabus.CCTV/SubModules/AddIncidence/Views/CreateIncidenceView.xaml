@@ -1,0 +1,45 @@
+﻿<UserControl
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewmodels="clr-namespace:Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels"
+    xmlns:single="clr-namespace:Opera.Acabus.Cctv.SubModules.AddIncidence.Views"
+    xmlns:Converters="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
+    x:Class="Opera.Acabus.Cctv.SubModules.AddIncidence.Views.CreateIncidenceView"
+    DataContext="{DynamicResource CreateIncidenceVM}">
+    <UserControl.Resources>
+        <Converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <viewmodels:AddIncidencesViewModel x:Key="AddIncidencesVM" />
+        <viewmodels:CreateIncidenceViewModel x:Key="CreateIncidenceVM" />
+        <viewmodels:MultiIncidenceViewModel x:Key="MultiIncidencesVM" />
+    </UserControl.Resources>
+    <Grid MinWidth="800" MinHeight="500">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="16" />
+            <RowDefinition />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Margin="16,24,16,0" TextWrapping="Wrap" Text="Nueva incidencia" FontSize="20" />
+        <Grid x:Name="_content" x:FieldModifier="private" Grid.Row="2">
+            <single:AddIncidencesView Margin="16,0" DataContext="{StaticResource AddIncidencesVM}"
+                    Visibility="{Binding IsMultiIncidence, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter={x:Static Converters:BooleanToVisibilityConverter.Not}, Source={StaticResource CreateIncidenceVM}}" />
+            <single:MultiIncidenceView Margin="16,0" DataContext="{StaticResource MultiIncidencesVM}"
+                    Visibility="{Binding IsMultiIncidence, Converter={StaticResource BooleanToVisibilityConverter}, Source={StaticResource CreateIncidenceVM}}" />
+        </Grid>
+        <DockPanel Grid.Row="4">
+            <Button Command="{Binding ChangeModeCommand}" ToolTip="Cambia la forma de abrir las incidencias (única o múltiples)" Height="Auto" HorizontalContentAlignment="Center"
+                                Content="{Binding ModeButtonCaption}" HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}" MinHeight="36" />
+            <StackPanel Orientation="Horizontal"  DockPanel.Dock="Right" HorizontalAlignment="Right">
+                <Button Command="{Binding DiscardCommand}" ToolTip="Descarta lo cambios realizados" Height="Auto" HorizontalContentAlignment="Center"
+                                Content="DESCARTAR" HorizontalAlignment="Right" Margin="8,8,0,8" Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True" MinHeight="36" />
+                <Button Command="{Binding CreateIncidenceCommand, Source={StaticResource AddIncidencesVM}}" ToolTip="Crear una nueva incidencia" Height="Auto" HorizontalContentAlignment="Center"
+                                Content="CREAR" HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}" IsDefault="True" MinHeight="36"
+                                Visibility="{Binding IsMultiIncidence, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter={x:Static Converters:BooleanToVisibilityConverter.Not}, Source={StaticResource CreateIncidenceVM}}" />
+                <Button Command="{Binding CreateIncidenceCommand, Source={StaticResource MultiIncidencesVM}}"  ToolTip="Crear las nuevas incidencias" Height="Auto" HorizontalContentAlignment="Center"
+                                Content="CREAR" HorizontalAlignment="Right" Margin="8" Style="{StaticResource MaterialDesignFlatButton}" IsDefault="True" MinHeight="36"
+                         Visibility="{Binding IsMultiIncidence, Converter={StaticResource BooleanToVisibilityConverter}, Source={StaticResource CreateIncidenceVM}}" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>
