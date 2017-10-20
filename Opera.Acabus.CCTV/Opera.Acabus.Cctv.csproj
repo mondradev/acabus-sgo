@@ -82,6 +82,10 @@
     <Compile Include="SubModules\AddIncidence\Views\MultiIncidenceView.xaml.cs">
       <DependentUpon>MultiIncidenceView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SubModules\CloseIncidence\ViewModels\CloseIncidenceViewModel.cs" />
+    <Compile Include="SubModules\CloseIncidence\Views\CloseIncidenceView.xaml.cs">
+      <DependentUpon>CloseIncidenceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SubModules\ModifyIncidence\ViewModels\ModifyIncidenceViewModel.cs" />
     <Compile Include="SubModules\ModifyIncidence\Views\ModifyIncidenceView.xaml.cs">
       <DependentUpon>ModifyIncidenceView.xaml</DependentUpon>
@@ -124,6 +128,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SubModules\AddIncidence\Views\MultiIncidenceView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SubModules\CloseIncidence\Views\CloseIncidenceView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

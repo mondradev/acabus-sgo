@@ -3,6 +3,8 @@ using InnSyTech.Standard.Gui;
 using InnSyTech.Standard.Utils;
 using Opera.Acabus.Cctv.Models;
 using Opera.Acabus.Cctv.SubModules.AddIncidence.Views;
+using Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels;
+using Opera.Acabus.Cctv.SubModules.CloseIncidences.Views;
 using Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels;
 using Opera.Acabus.Cctv.SubModules.ModifyIncidence.Views;
 using Opera.Acabus.Cctv.SubModules.OffDutyBus.Views;
@@ -95,7 +97,20 @@ namespace Opera.Acabus.Cctv
         /// </param>
         public void InvokeCloseIncidence(IEnumerable<Incidence> selectedIncidences, Action callback = null)
         {
-            throw new NotImplementedException();
+            if (selectedIncidences.Count() > 1)
+                return;
+            else
+                Dispatcher.RequestShowDialog(new CloseIncidenceView
+                {
+                    DataContext = new CloseIncidenceViewModel
+                    {
+                        SelectedIncidence = selectedIncidences.FirstOrDefault()
+                    }
+                }, delegate
+                {
+                    RefreshData();
+                    callback?.Invoke();
+                });
         }
 
         /// <summary>
