@@ -324,7 +324,7 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
                     StartDate = RefundDateTime,
                     Technician = SelectedTechnician,
                     WhoReporting = AcabusDataContext.ConfigContext["Owner"]?.ToString("name"),
-                    Observations = Observations ?? String.Format("DEVOLUCIÓN {0:C} A {1}", Quantity, SelectedDestiny),
+                    Observations = Observations ?? String.Format("DEVOLUCIÓN {0} {1:C} A {2}", SelectedDestiny.CashType.Translate(), Single.Parse(Quantity), SelectedDestiny),
                     Priority = Priority.NONE,
                     Fault = refundFault,
                     Status = status

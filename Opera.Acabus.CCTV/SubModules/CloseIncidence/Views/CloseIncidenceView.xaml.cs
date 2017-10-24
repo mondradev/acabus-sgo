@@ -3,7 +3,7 @@
 namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.Views
 {
     /// <summary>
-    /// Lógica de interacción para CloseIncidenceView.xaml
+    /// Define la lógica de la vista de <see cref="CloseIncidenceView"/>.
     /// </summary>
     public partial class CloseIncidenceView : UserControl
     {

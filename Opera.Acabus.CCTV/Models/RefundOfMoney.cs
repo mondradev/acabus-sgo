@@ -71,7 +71,7 @@ namespace Opera.Acabus.Cctv.Models
         /// <param name="incidence">Incidencia asociada a la devolución.</param>
         public RefundOfMoney(UInt64 id, Incidence incidence)
         {
-            if (incidence.Device?.Type != DeviceType.KVR)
+            if (incidence != null && incidence.Device?.Type != DeviceType.KVR)
                 throw new ArgumentException("La incidencia debe pertenecer a un Kiosko.");
 
             _incidence = incidence;

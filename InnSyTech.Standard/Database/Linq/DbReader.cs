@@ -40,8 +40,10 @@ namespace InnSyTech.Standard.Database.Linq
 
             reader?.Close();
 
-            if (definition.CountToTake == 1 && !definition.IsEnumerable && list.Count > 0)
-                return list[0];
+            if (definition.CountToTake == 1 && !definition.IsEnumerable)
+                if (list.Count >= definition.CountToTake)
+                    return list[0];
+                else return null;
             return list;
         }
     }
