@@ -514,7 +514,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
             _allBuses = AcabusDataContext.AllBuses.LoadReference(1).ToList();
             _allStations = AcabusDataContext.AllStations.LoadReference(1).ToList();
             _allRoutes = AcabusDataContext.AllRoutes.LoadReference(1).ToList();
-            _allStaff = AcabusDataContext.AllStaff.ToList();
+            _allStaff = AcabusDataContext.AllStaff.Where(s => s.Active == true).ToList();
 
             foreach (var s in _allStations)
                 AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), _allDevices);

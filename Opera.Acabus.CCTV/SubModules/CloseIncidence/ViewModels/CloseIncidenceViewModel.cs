@@ -323,8 +323,6 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
         /// <param name="parameter">Parametro del comando.</param>
         private void CloseIncidenceCommandExecute(object parameter)
         {
-            AcabusDataContext.GetService("Cctv_Manager", out dynamic service);
-
             var previousStatus = SelectedIncidence.Status;
             SelectedIncidence.Technician = SelectedTechnician;
             SelectedIncidence.Observations = Observations;
@@ -345,10 +343,7 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                     refundOfMoney.Incidence.Status = IncidenceStatus.CLOSE;
 
                     if (AcabusDataContext.DbContext.Update(refundOfMoney, 1))
-                    {
                         ShowMessage(String.Format("Devolución correcta: F-{0:D5}", SelectedIncidence.Folio));
-                        (service as CctvModule).RefreshData();
-                    }
                     else
                         ShowMessage(String.Format("No se confirmó la devolución de dinero F-{0:D5}", SelectedIncidence.Folio));
                 }
@@ -376,15 +371,12 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                 }
 
                 if (String.IsNullOrEmpty(Observations))
-                    SelectedIncidence.Observations = String.Format("DEVOLUCIÓN DE {0} ({1:C}) A {2}",
+                    SelectedIncidence.Observations = String.Format("DEVOLUCIÓN DE {0} {1:C} A {2}",
                         CashTypeName, refundOfMoney.Quantity, refundOfMoney.CashDestiny.Description);
 
                 if (AcabusDataContext.DbContext.Create(refundOfMoney))
                     if (AcabusDataContext.DbContext.Update(SelectedIncidence))
-                    {
-                        (service as CctvModule).RefreshData();
                         ShowMessage(String.Format("Incidencia cerrada correctamente: F-{0:D5}", SelectedIncidence.Folio));
-                    }
                     else
                     {
                         AcabusDataContext.DbContext.Delete(refundOfMoney);
@@ -392,10 +384,7 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                     }
             }
             else if (AcabusDataContext.DbContext.Update(SelectedIncidence))
-            {
-                (service as CctvModule).RefreshData();
                 ShowMessage(String.Format("Incidencia cerrada correctamente: F-{0:D5}", SelectedIncidence.Folio));
-            }
             else
                 ShowMessage("Error al cerrar la incidencia, intentelo de nuevo.");
         }

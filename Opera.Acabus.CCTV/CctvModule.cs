@@ -98,7 +98,17 @@ namespace Opera.Acabus.Cctv
         public void InvokeCloseIncidence(IEnumerable<Incidence> selectedIncidences, Action callback = null)
         {
             if (selectedIncidences.Count() > 1)
-                return;
+                Dispatcher.RequestShowDialog(new MultiCloseIncidencesView
+                {
+                    DataContext = new MultiCloseIncidencesViewModel
+                    {
+                        SelectedIncidences = new ObservableCollection<Incidence>(selectedIncidences)
+                    }
+                }, delegate
+                {
+                    RefreshData();
+                    callback?.Invoke();
+                });
             else
                 Dispatcher.RequestShowDialog(new CloseIncidenceView
                 {
