@@ -157,7 +157,8 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                     _tokenSource = new CancellationTokenSource();
 
                 foreach (var taskService in runningTasks.Where(t => t == null || t.Task.IsCanceled))
-                    _runningTasks.Remove(taskService);
+                    if (taskService != null)
+                        _runningTasks.Remove(taskService);
             };
         }
 
@@ -234,6 +235,12 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
             _linkMonitor?.Dispose();
             _stationMonitor?.Dispose();
             _replyMonitor?.Dispose();
+
+            _runningLinkMonitor = false;
+            _runningReplyMonitor = false;
+            _runningStationMonitor = false;
+
+            _runningTasks.Clear();
         }
 
         /// <summary>
@@ -284,7 +291,13 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
             _linkMonitor = new Timer(delegate
             {
                 if (_runningLinkMonitor && _runningTasks.Count > 0)
+                {
+                    foreach (var t in _runningTasks.Where(rt => rt.Task.IsCompleted).ToArray())
+                        if (t != null)
+                            _runningTasks.Remove(t);
+
                     return;
+                }
 
                 _runningLinkMonitor = true;
 
@@ -358,8 +371,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                      {
                          var task = new TaskService(currentTask, TaskDescriptor.LINK);
 
-                         if (_runningTasks.Contains(task))
-                             _runningTasks.Remove(task);
+                         lock (_runningTasks)
+                         {
+                             if (_runningTasks.Contains(task))
+                                 _runningTasks.Remove(task);
+                         }
                      }
                  }, _tokenSource.Token);
 
