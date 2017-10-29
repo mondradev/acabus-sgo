@@ -14,6 +14,6 @@ namespace Opera.Acabus.Core.Gui.Converters
         /// <summary>
         /// Crea una instancia nueva de <see cref="DeviceTypeSpanishConverter"/>.
         /// </summary>
-        public DeviceTypeSpanishConverter() : base(new DeviceTypeSpanishTranslate()) { }
+        public DeviceTypeSpanishConverter() : base(new DeviceTypeSpanishTranslator()) { }
     }
 }

@@ -58,9 +58,9 @@ namespace Opera.Acabus.Cctv.ViewModels
 
             ReassignTechnicianCommand = new Command(p =>
             {
-                if (OpenedIncidences.Count == 0) return;
+                if (OpenedIncidences.Where(i => i.Status == IncidenceStatus.OPEN).Count() == 0) return;
 
-                foreach (var incidence in OpenedIncidences)
+                foreach (var incidence in OpenedIncidences.Where(i => i.Status == IncidenceStatus.OPEN))
                     if (incidence.RequireReassign())
                         if (incidence.AssignStaff())
                             AcabusDataContext.DbContext.Update(incidence);

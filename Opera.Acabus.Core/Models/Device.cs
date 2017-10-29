@@ -143,14 +143,14 @@ namespace Opera.Acabus.Core.Models
         ///<summary>
         /// Traductor al español de la enumeración <see cref="DeviceType"/>.
         ///</summary>
-        private static DeviceTypeSpanishTranslate _translate;
+        private static DeviceTypeSpanishTranslator _translate;
 
         /// <summary>
         /// Constructo estático de la clase <see cref="DeviceTypeExtension"/>.
         /// </summary>
         static DeviceTypeExtension()
         {
-            _translate = new DeviceTypeSpanishTranslate();
+            _translate = new DeviceTypeSpanishTranslator();
         }
 
         /// <summary>
@@ -411,12 +411,12 @@ namespace Opera.Acabus.Core.Models
     /// Esta clase permite la traducción de la enumeración <see cref="DeviceType"/> a texto en
     /// "Español" que puede leer un ser humano.
     /// </summary>
-    public sealed class DeviceTypeSpanishTranslate : EnumTranslator<DeviceType>
+    public sealed class DeviceTypeSpanishTranslator : EnumTranslator<DeviceType>
     {
         /// <summary>
         /// Crea una instancia del traductor.
         /// </summary>
-        public DeviceTypeSpanishTranslate()
+        public DeviceTypeSpanishTranslator()
             : base(new Dictionary<DeviceType, string>() {
                 { DeviceType.TA, "TORNIQUETE ABORDO" },
                 { DeviceType.MRV, "GRABADOR DE VIDEO MÓVIL" },

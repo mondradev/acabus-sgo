@@ -142,7 +142,11 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                     && arguments.Action != NotifyCollectionChangedAction.Reset)
                     return;
 
-                var runningTasks = _runningTasks.ToArray();
+                var runningTasks = null as TaskService[];
+
+                lock (_runningTasks)
+                    if (_runningTasks != null)
+                        runningTasks = _runningTasks.ToArray();
 
                 if (!runningTasks.Any(t => t?.Descriptor == TaskDescriptor.LINK))
                     _runningLinkMonitor = false;
@@ -270,11 +274,13 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                     }
                     finally
                     {
-                        _runningTasks.Remove(new TaskService(currentTask, TaskDescriptor.REPLY));
+                        lock (_runningTasks)
+                            _runningTasks.Remove(new TaskService(currentTask, TaskDescriptor.REPLY));
                     }
                 }, _tokenSource.Token);
 
-                _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.REPLY));
+                lock (_runningTasks)
+                    _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.REPLY));
             }
 
             if (_tokenSource.IsCancellationRequested)
@@ -379,7 +385,8 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                      }
                  }, _tokenSource.Token);
 
-                _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.LINK));
+                lock (_runningTasks)
+                    _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.LINK));
             }
         }
 
@@ -413,11 +420,13 @@ namespace Opera.Acabus.TrunkMonitor.ViewModels
                 }
                 finally
                 {
-                    _runningTasks.Remove(new TaskService(currentTask, TaskDescriptor.STATION_LINK));
+                    lock (_runningTasks)
+                        _runningTasks.Remove(new TaskService(currentTask, TaskDescriptor.STATION_LINK));
                 }
             });
 
-            _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.STATION_LINK));
+            lock (_runningTasks)
+                _runningTasks.Add(new TaskService(currentTask, TaskDescriptor.STATION_LINK));
         }
     }
 

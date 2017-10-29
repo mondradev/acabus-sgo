@@ -5,6 +5,7 @@ using Opera.Acabus.Cctv.Models;
 using Opera.Acabus.Cctv.SubModules.AddIncidence.Views;
 using Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels;
 using Opera.Acabus.Cctv.SubModules.CloseIncidences.Views;
+using Opera.Acabus.Cctv.SubModules.IncidenceHistorial.Views;
 using Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels;
 using Opera.Acabus.Cctv.SubModules.ModifyIncidence.Views;
 using Opera.Acabus.Cctv.SubModules.OffDutyBus.Views;
@@ -135,9 +136,7 @@ namespace Opera.Acabus.Cctv
         /// Invoca el cuadro de dialogo que permite la busqueda de multiples folios en el historial.
         /// </summary>
         public void InvokeHistoryIncidence()
-        {
-            throw new NotImplementedException();
-        }
+            => Dispatcher.RequestShowDialog(new IncidencesHistorialView());
 
         /// <summary>
         /// Invoca el cuadro de dialogo que permite la modificación de los atributos del folio.

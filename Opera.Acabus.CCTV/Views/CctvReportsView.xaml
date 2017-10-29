@@ -15,7 +15,7 @@
     <UserControl.Resources>
         <coreConverters:PriorityToColorConverter x:Key="PriorityToColorConverter" />
         <coreConverters:BooleanToVisibilityConverter x:Key="BooleanVisibilityConverter" />
-        <cctvConverters:IncidenceStatusConverter x:Key="StatusConverter" />
+        <cctvConverters:IncidenceStatusSpanishConverter x:Key="StatusConverter" />
 
         <CollectionViewSource x:Key="OpenedIncidencesCollection" Source="{Binding OpenedIncidences}">
             <CollectionViewSource.SortDescriptions>

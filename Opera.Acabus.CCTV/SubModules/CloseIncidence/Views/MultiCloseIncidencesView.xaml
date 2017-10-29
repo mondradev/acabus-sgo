@@ -10,7 +10,7 @@
     x:Class="Opera.Acabus.Cctv.SubModules.CloseIncidences.Views.MultiCloseIncidencesView"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <cv:IncidenceStatusConverter x:Key="IncidenceStatusConverter" />
+        <cv:IncidenceStatusSpanishConverter x:Key="IncidenceStatusConverter" />
     </UserControl.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger>

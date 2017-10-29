@@ -61,7 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CctvModule.cs" />
-    <Compile Include="Converters\IncidenceStatusConverter.cs" />
+    <Compile Include="Converters\CashTypeSpanishConverter.cs" />
+    <Compile Include="Converters\IncidenceStatusSpanishConverter.cs" />
     <Compile Include="Helpers\IncidenceExtension.cs" />
     <Compile Include="Models\AssignableStaff.cs" />
     <Compile Include="Models\CashDestiny.cs" />
@@ -89,6 +90,10 @@
     <Compile Include="SubModules\CloseIncidence\ViewModels\CloseIncidenceViewModel.cs" />
     <Compile Include="SubModules\CloseIncidence\Views\CloseIncidenceView.xaml.cs">
       <DependentUpon>CloseIncidenceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SubModules\IncidenceHistorial\ViewModels\IncidencesHistorialViewModel.cs" />
+    <Compile Include="SubModules\IncidenceHistorial\Views\IncidencesHistorialView.xaml.cs">
+      <DependentUpon>IncidencesHistorialView.xaml</DependentUpon>
     </Compile>
     <Compile Include="SubModules\ModifyIncidence\ViewModels\ModifyIncidenceViewModel.cs" />
     <Compile Include="SubModules\ModifyIncidence\Views\ModifyIncidenceView.xaml.cs">
@@ -140,6 +145,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SubModules\CloseIncidence\Views\CloseIncidenceView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SubModules\IncidenceHistorial\Views\IncidencesHistorialView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
