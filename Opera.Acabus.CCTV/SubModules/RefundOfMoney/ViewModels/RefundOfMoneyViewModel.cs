@@ -304,12 +304,12 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
         {
             try
             {
-                ulong idFault = (ulong)(AcabusDataContext.ConfigContext["RefundOfMoney"]?.ToInteger(IsMoney ? "Money" : "Bill") ?? 0);
+                ulong idFault = (ulong)(AcabusDataContext.ConfigContext["Cctv"]?.GetSetting("refundOfMoney")?.ToInteger(IsMoney ? "Money" : "Bill") ?? 0);
 
                 if (idFault == 0)
                     throw new InvalidOperationException("Se requiere que exista una configuración " +
                         "para el identificador de la actividad relacionada con la devolución del dinero. " +
-                        "Añada la configuración --> <RefundOfMoney Money=\"id_fault\" Bill=\"id_fault\" />");
+                        "Añada la configuración --> <Cctv> <refundOfMoney Money=\"id_fault\" Bill=\"id_fault\" /> </Cctv>");
 
                 IncidenceStatus status = SelectedDestiny.RequiresMoving ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
                 DeviceFault refundFault = AcabusDataContext.DbContext.Read<DeviceFault>().FirstOrDefault(df => df.ID == idFault);

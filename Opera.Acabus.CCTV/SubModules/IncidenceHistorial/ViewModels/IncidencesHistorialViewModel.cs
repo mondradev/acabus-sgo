@@ -126,8 +126,9 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
         /// Obtiene el listado de las compañias que reprotan.
         /// </summary>
         public IEnumerable<String> AllCompanies
-                    => AcabusDataContext.ConfigContext["Business"]?
-                .GetSettings("Business")?
+                    => AcabusDataContext.ConfigContext["Cctv"]?
+                .GetSetting("business")?
+                .GetSettings("business")?
                 .Select(s => s.ToString("value"))
                 .OrderBy(s => s);
 

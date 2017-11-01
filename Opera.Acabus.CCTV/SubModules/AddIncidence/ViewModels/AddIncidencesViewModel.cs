@@ -87,8 +87,9 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         /// Obtiene una lista de las entidades que realizan reportes.
         /// </summary>
         public IEnumerable<String> Business
-            => AcabusDataContext.ConfigContext["Business"]?
-                .GetSettings("Business")?
+            => AcabusDataContext.ConfigContext["Cctv"]?
+                .GetSetting("business")?
+                .GetSettings("business")?
                 .Select(s => s.ToString("value"))
                 .OrderBy(s => s);
 

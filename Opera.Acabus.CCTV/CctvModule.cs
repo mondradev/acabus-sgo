@@ -5,6 +5,7 @@ using Opera.Acabus.Cctv.Models;
 using Opera.Acabus.Cctv.SubModules.AddIncidence.Views;
 using Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels;
 using Opera.Acabus.Cctv.SubModules.CloseIncidences.Views;
+using Opera.Acabus.Cctv.SubModules.ExportData.Views;
 using Opera.Acabus.Cctv.SubModules.IncidenceHistorial.Views;
 using Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels;
 using Opera.Acabus.Cctv.SubModules.ModifyIncidence.Views;
@@ -128,9 +129,7 @@ namespace Opera.Acabus.Cctv
         /// Invoca el cuadro de dialogo que permite exportar la información en formato CSV.
         /// </summary>
         public void InvokeExportDialog()
-        {
-            throw new NotImplementedException();
-        }
+            => Dispatcher.RequestShowDialog(new ExportDataView());
 
         /// <summary>
         /// Invoca el cuadro de dialogo que permite la busqueda de multiples folios en el historial.

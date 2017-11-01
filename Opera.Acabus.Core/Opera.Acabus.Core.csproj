@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataAccess\AcabusDataContext.cs" />
+    <Compile Include="DataAccess\CsvDump.cs" />
     <Compile Include="DataAccess\DbConverters\DbIPAddressConverter.cs" />
     <Compile Include="DataAccess\ModelHelper.cs" />
     <Compile Include="Models\AssignableArea.cs" />

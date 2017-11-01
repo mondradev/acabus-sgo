@@ -60,12 +60,15 @@ namespace Opera.Acabus.Cctv.ViewModels
             {
                 if (OpenedIncidences.Where(i => i.Status == IncidenceStatus.OPEN).Count() == 0) return;
 
-                foreach (var incidence in OpenedIncidences.Where(i => i.Status == IncidenceStatus.OPEN))
-                    if (incidence.RequireReassign())
-                        if (incidence.AssignStaff())
-                            AcabusDataContext.DbContext.Update(incidence);
+                Task.Run(() =>
+                {
+                    foreach (var incidence in OpenedIncidences.Where(i => i.Status == IncidenceStatus.OPEN))
+                        if (incidence.RequireReassign())
+                            if (incidence.AssignStaff())
+                                AcabusDataContext.DbContext.Update(incidence);
 
-                ShowMessage("Reasignación completada.");
+                    ShowMessage("Reasignación completada.");
+                });
             });
 
             CopyingClipboardCommand = new Command(p => (p as Incidence).ToClipboard());

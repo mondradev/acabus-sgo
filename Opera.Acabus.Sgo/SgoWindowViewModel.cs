@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Opera.Acabus.Sgo
@@ -57,27 +58,30 @@ namespace Opera.Acabus.Sgo
             Dispatcher.OpenDialogCommand = new Command(param => OpenDialg(param as Dispatcher.RequestShowContentArg));
 
             Dispatcher.RequestingShowContent += arg
-                => _view.ShowContent(arg.Content);
+                => Application.Current.Dispatcher.Invoke(() => _view.ShowContent(arg.Content));
 
             Dispatcher.RequestingShowDialog += arg
                 => Dispatcher.OpenDialogCommand?.Execute(arg);
 
             Dispatcher.RequestingSendMessageOrNotify += arg =>
             {
-                switch (arg.SendType)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    case Dispatcher.RequestSendMessageArg.RequestSendType.MESSAGE:
-                        Dispatcher.OpenDialogCommand
-                        .Execute(new Dispatcher.RequestShowContentArg(new DialogTemplateView()
-                        {
-                            Message = arg.Message
-                        }));
-                        break;
+                    switch (arg.SendType)
+                    {
+                        case Dispatcher.RequestSendMessageArg.RequestSendType.MESSAGE:
+                            Dispatcher.OpenDialogCommand
+                            .Execute(new Dispatcher.RequestShowContentArg(new DialogTemplateView()
+                            {
+                                Message = arg.Message
+                            }));
+                            break;
 
-                    case Dispatcher.RequestSendMessageArg.RequestSendType.NOTIFY:
-                        Trace.WriteLine(arg.Message?.ToUpper(), "NOTIFY");
-                        break;
-                }
+                        case Dispatcher.RequestSendMessageArg.RequestSendType.NOTIFY:
+                            Trace.WriteLine(arg.Message?.ToUpper(), "NOTIFY");
+                            break;
+                    }
+                });
             };
 
             Trace.Listeners.Add(new TraceListenerImp());
@@ -183,10 +187,9 @@ namespace Opera.Acabus.Sgo
             if (dialogHost.IsOpen)
                 DialogHost.CloseDialogCommand.Execute(null, null);
 
-            Dispatcher.RequestShowContentArg arg = parameters as Dispatcher.RequestShowContentArg;
-            Object response = await DialogHost.Show(arg.Content);
-            GC.SuppressFinalize(arg.Content);
-            arg.Callback?.Invoke(response);
+            Object response = await DialogHost.Show(parameters.Content);
+            GC.SuppressFinalize(parameters.Content);
+            parameters.Callback?.Invoke(response);
         }
 
         /// <summary>

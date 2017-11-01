@@ -11,6 +11,25 @@ namespace InnSyTech.Standard.Utils
     public static class Extensions
     {
         /// <summary>
+        /// Convierte una secuencia de un tipo a otro a traves de una función convertidora.
+        /// </summary>
+        /// <typeparam name="TSource">Tipo de dato de la secuencia origen.</typeparam>
+        /// <typeparam name="TResult">Tipo de dato de la secuencia destino.</typeparam>
+        /// <param name="converter">Función convertidora.</param>
+        /// <returns>La secuencia convertida al tipo de datos definido por la funcion convertidora.</returns>
+        public static IEnumerable<TResult> Convert<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> converter)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            if (converter == null)
+                throw new ArgumentNullException(nameof(converter));
+
+            foreach (var item in source)
+                yield return converter(item);
+        }
+
+        /// <summary>
         /// Cortar la cadena en 'n' partes iguales.
         /// </summary>
         /// <param name="str">Cadena a partir.</param>

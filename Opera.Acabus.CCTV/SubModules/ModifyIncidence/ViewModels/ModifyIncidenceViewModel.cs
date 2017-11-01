@@ -42,8 +42,9 @@ namespace Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels
         /// </summary>
         public ModifyIncidenceViewModel()
         {
-            _business = AcabusDataContext.ConfigContext["Business"]?
-                .GetSettings("Business")?
+            _business = AcabusDataContext.ConfigContext["Cctv"]?
+                .GetSetting("business")?
+                .GetSettings("business")?
                 .Select(s => s.ToString("value"))
                 .OrderBy(s => s);
 
