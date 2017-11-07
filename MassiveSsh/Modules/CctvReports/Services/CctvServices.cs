@@ -190,7 +190,6 @@ namespace Acabus.Modules.CctvReports.Services
 
         public static void GetAlarms(this ObservableCollection<Alarm> alarms)
         {
-
             alarms.Clear();
             var response = AcabusData.ExecuteQueryInServerDB(String.Format(AcabusData.TrunkAlertQuery, DateTime.Now.AddMinutes(-30)));
             if (response == null || response.Length < 2) return;
@@ -505,16 +504,16 @@ namespace Acabus.Modules.CctvReports.Services
                 {
                     foreach (Incidence incidence in group)
                         openedIncidence.AppendLine(incidence.ToReportString().Split('\n')?[0]
-                            + (String.IsNullOrEmpty(incidence.Observations) ? String.Empty : String.Format("\n*OBSERVACIONES:* {0}", incidence.Observations)));
+                            + (String.IsNullOrEmpty(incidence.Observations) ? String.Empty : String.Format("\n*OBSERVACIONES:* {0}", incidence.Observations))
+                            + (incidence.Priority == Priority.HIGH ? Incidence.CalculateExpiration(incidence) : String.Empty));
                     if (group.Key?.Technician != null)
                         openedIncidence.AppendFormat("*ASIGNADO:* {0}", group.Key.Technician);
                     openedIncidence.AppendLine();
                     openedIncidence.AppendLine();
                 }
 
-
                 System.Windows.Forms.Clipboard.Clear();
-                System.Windows.Forms.Clipboard.SetDataObject(openedIncidence.ToString());
+                System.Windows.Forms.Clipboard.SetDataObject(openedIncidence.ToString().ToUpper());
             }
             catch (Exception ex) { Trace.WriteLine(ex.StackTrace, "ERROR"); }
         }
@@ -524,6 +523,5 @@ namespace Acabus.Modules.CctvReports.Services
             if (incidence != null)
                 ToClipboard(new[] { incidence });
         }
-
     }
 }

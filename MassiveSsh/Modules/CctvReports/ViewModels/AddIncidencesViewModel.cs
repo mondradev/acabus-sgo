@@ -531,7 +531,7 @@ namespace Acabus.Modules.CctvReports
             bool exists = false;
             foreach (var incidence in incidences)
             {
-                if (incidence.Status == IncidenceStatus.CLOSE) continue;
+                if (incidence.Status != IncidenceStatus.OPEN) continue;
 
                 if (exists = (incidence.Description?.ID == SelectedDescription?.ID
                     && incidence.Device == SelectedDevice)) break;

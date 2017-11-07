@@ -74,6 +74,7 @@ namespace Acabus.Models
                 { DeviceType.PGE, "PLANTA ELECTRÓGENA" },
                 { DeviceType.RACK, "RACK DE ESTACIÓN" },
                 { DeviceType.LIGHT, "LUMINARIAS" },
+                { DeviceType.SPEAKER, "BOCINA" },
                 { DeviceType.UNKNOWN, "(TIPO DESCONOCIDO)" }
             })
             {

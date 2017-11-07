@@ -173,7 +173,12 @@ namespace Acabus.Models
         /// <summary>
         /// Luminarias
         /// </summary>
-        LIGHT
+        LIGHT,
+
+        /// <summary>
+        /// Bocina SITI
+        /// </summary>
+        SPEAKER
     }
 
     /// <summary>
@@ -296,7 +301,6 @@ namespace Acabus.Models
     /// </summary>
     public static class StateValueExtension
     {
-
         /// <summary>
         /// Obtiene un estado evaluando ambos estados de conexión devolviendo el de menor valor.
         /// </summary>
@@ -311,7 +315,6 @@ namespace Acabus.Models
                 return state;
             return anotherState;
         }
-
 
         /// <summary>
         /// Obtiene el estado de conexión determinado por la latencia mínima y máxima aceptable.

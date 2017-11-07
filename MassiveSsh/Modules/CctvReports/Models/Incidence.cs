@@ -274,7 +274,7 @@ namespace Acabus.Modules.CctvReports.Models
         /// <returns>Una cadena que representa la incidencia.</returns>
         public String ToReportString()
         {
-            return String.Format("*{0}* {1} {2} {3} {4}",
+            return String.Format("*{0}* {1} {2} {3} {4} {5}",
                 Folio,
                 Device?.Vehicle != null
                     ? String.Format("{0} {1}",
@@ -287,7 +287,23 @@ namespace Acabus.Modules.CctvReports.Models
                 : String.Format("\n*Asignado:* {0}", AssignedAttendance),
                 String.IsNullOrEmpty(Observations?.Trim())
                 ? String.Empty
-                : String.Format("\n*Observaciones:* {0}", Observations?.Trim().ToUpper()));
+                : String.Format("\n*Observaciones:* {0}", Observations?.Trim().ToUpper()),
+                Priority == Priority.HIGH ? CalculateExpiration(this) : String.Empty);
+        }
+
+        /// <summary>
+        /// Calcula y devuelve una cadena con el limite de atención de la incidencia.
+        /// </summary>
+        /// <returns>Cadena con el limite de atencion.</returns>
+        public static string CalculateExpiration(Incidence incidence)
+        {
+            var maxTime = incidence.Device?.Station != null ? TimeSpan.FromHours(2) : incidence.Device?.Vehicle != null ? TimeSpan.FromHours(4) : TimeSpan.Zero;
+            var nowTime = DateTime.Now;
+
+            if ((nowTime - incidence.StartDate) > maxTime)
+                return "\n*Atender urgentemente*";
+            else
+                return "\n*Limite de atención:* " + (incidence.StartDate + maxTime);
         }
 
         /// <summary>
