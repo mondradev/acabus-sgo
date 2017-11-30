@@ -15,11 +15,11 @@ namespace Opera.Acabus.Core.Gui.Converters
         public AssignableAreaSpanishConverter()
             : base(new Dictionary<AssignableArea, string>() {
                 { AssignableArea.EVERYBODY, "CUALQUIER" },
-                { AssignableArea.MANTTO, "MANTENIMIENTO" },
-                { AssignableArea.SUPERVISOR, "SUPERVISOR" },
+                { AssignableArea.MANTTO, "TÉCNICO DE MANTENIMIENTO" },
+                { AssignableArea.SUPERVISOR, "SUPERVISOR DE MANTENIMIENTO" },
                 { AssignableArea.SUPPORT, "SOPORTE TÉCNICO" },
-                { AssignableArea.DATABASE, "ANALISTA ADMINISTRADOR DE BASE DE DATOS" },
-                { AssignableArea.IT_MANAGER, "GERENCIA TI" }
+                { AssignableArea.DATABASE, "ANALISTA ABD" },
+                { AssignableArea.IT_MANAGER, "GERENTE TI" }
         })
         { }
     }

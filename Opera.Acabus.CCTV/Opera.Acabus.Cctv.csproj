@@ -117,7 +117,10 @@
     </Compile>
     <Compile Include="ViewModels\CctvReportsViewModel.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SubModules\AssignableStaff\ViewModels\" />
+    <Folder Include="SubModules\AssignableStaff\Views\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">
       <Project>{F74FEE3D-D536-44DF-9E2C-53540CE78173}</Project>

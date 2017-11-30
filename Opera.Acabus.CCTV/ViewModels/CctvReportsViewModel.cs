@@ -66,7 +66,6 @@ namespace Opera.Acabus.Cctv.ViewModels
                         if (incidence.RequireReassign())
                             if (incidence.AssignStaff())
                                 AcabusDataContext.DbContext.Update(incidence);
-
                     ShowMessage("Reasignación completada.");
                 });
             });

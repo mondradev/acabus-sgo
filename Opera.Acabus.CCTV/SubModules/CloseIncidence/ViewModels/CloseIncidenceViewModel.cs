@@ -2,6 +2,7 @@
 using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Cctv.Models;
 using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Gui.Modules;
 using Opera.Acabus.Core.Models;
 using System;
@@ -343,12 +344,21 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                     refundOfMoney.Incidence.Status = IncidenceStatus.CLOSE;
 
                     if (AcabusDataContext.DbContext.Update(refundOfMoney, 1))
+                    {
+                        Dispatcher.CloseDialog();
                         ShowMessage(String.Format("Devolución correcta: F-{0:D5}", SelectedIncidence.Folio));
+                    }
                     else
+                    {
+                        Dispatcher.CloseDialog();
                         ShowMessage(String.Format("No se confirmó la devolución de dinero F-{0:D5}", SelectedIncidence.Folio));
+                    }
                 }
                 else
+                {
+                    Dispatcher.CloseDialog();
                     ShowMessage("Existe un problema con la devolución, contacte a soporte técnico.");
+                }
             }
             else if (IsRefundOfMoney)
             {
@@ -376,17 +386,27 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
 
                 if (AcabusDataContext.DbContext.Create(refundOfMoney))
                     if (AcabusDataContext.DbContext.Update(SelectedIncidence))
+                    {
+                        Dispatcher.CloseDialog();
                         ShowMessage(String.Format("Incidencia cerrada correctamente: F-{0:D5}", SelectedIncidence.Folio));
+                    }
                     else
                     {
                         AcabusDataContext.DbContext.Delete(refundOfMoney);
+                        Dispatcher.CloseDialog();
                         ShowMessage("Error al cerrar la incidencia, intentelo de nuevo.");
                     }
             }
             else if (AcabusDataContext.DbContext.Update(SelectedIncidence))
+            {
+                Dispatcher.CloseDialog();
                 ShowMessage(String.Format("Incidencia cerrada correctamente: F-{0:D5}", SelectedIncidence.Folio));
+            }
             else
+            {
+                Dispatcher.CloseDialog();
                 ShowMessage("Error al cerrar la incidencia, intentelo de nuevo.");
+            }
         }
 
         /// <summary>

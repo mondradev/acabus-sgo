@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -70,11 +71,15 @@ namespace Opera.Acabus.Sgo
                     switch (arg.SendType)
                     {
                         case Dispatcher.RequestSendMessageArg.RequestSendType.MESSAGE:
-                            Dispatcher.OpenDialogCommand
-                            .Execute(new Dispatcher.RequestShowContentArg(new DialogTemplateView()
-                            {
-                                Message = arg.Message
-                            }));
+
+                            if (!_view.DialogHost.IsOpen)
+                                OpenDialg(new Dispatcher.RequestShowContentArg(new DialogTemplateView()
+                                {
+                                    Message = arg.Message
+                                }));
+                            else
+                                Trace.WriteLine(arg.Message?.ToUpper(), "NOTIFY");
+
                             break;
 
                         case Dispatcher.RequestSendMessageArg.RequestSendType.NOTIFY:
@@ -187,9 +192,19 @@ namespace Opera.Acabus.Sgo
             if (dialogHost.IsOpen)
                 DialogHost.CloseDialogCommand.Execute(null, null);
 
-            Object response = await DialogHost.Show(parameters.Content);
-            GC.SuppressFinalize(parameters.Content);
-            parameters.Callback?.Invoke(response);
+            while (true)
+            {
+                if (dialogHost.IsOpen)
+                    Thread.Sleep(100);
+                else
+                    break;
+            }
+
+            await DialogHost.Show(parameters.Content, ((sender, arg) =>
+            {
+                GC.SuppressFinalize(parameters.Content);
+                parameters.Callback?.Invoke(arg.Parameter);
+            }));
         }
 
         /// <summary>

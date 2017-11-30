@@ -78,6 +78,15 @@ namespace Opera.Acabus.Cctv
         public override Type ViewType => typeof(CctvReportsView);
 
         /// <summary>
+        /// Obtiene la lista de asignaciones disponibles por el sistema de Cctv.
+        /// </summary>
+        /// <returns> Una secuencia de personal asignable. </returns>
+        public IEnumerable<AssignableStaff> GetStaff()
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Invoca el cuadro de dialogo para la apertura de uno o multiples folios.
         /// </summary>
         /// <param name="callback">

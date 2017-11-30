@@ -339,13 +339,17 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
                 };
 
                 if (AcabusDataContext.DbContext.Create(refundOfMoney, 1))
+                {
+                    Dispatcher.CloseDialog();
                     ShowMessage(String.Format("Devolución de dinero generada con folio: F-{0:D5}", incidence.Folio));
+                }
                 else
                     throw new InvalidOperationException("No se logró generar la devolución de dinero.");
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
+                Dispatcher.CloseDialog();
                 ShowMessage("No se generó la devolución, intentelo nuevamente. Si el problema persiste contacte a soporte técnico.");
             }
         }

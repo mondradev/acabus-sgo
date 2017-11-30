@@ -158,6 +158,7 @@ namespace Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels
                 SelectedIncidence.WhoReporting = oldWhoReporting;
 
                 Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
+                Dispatcher.CloseDialog();
                 ShowMessage($"No se logró modificar la incidencia {SelectedIncidence.Folio}");
             }
         }

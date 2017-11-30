@@ -67,7 +67,7 @@ namespace Opera.Acabus.Cctv.Helpers
         /// Obtiene el número de incidencias abiertas asignadas.
         /// </summary>
         /// <param name="staff">Elemento del personal a obtener sus incidencias.</param>
-        /// <returns>El número de incidencias asignadas abiertas.</returns>
+        /// <returns>El número de incidencias asignadas abiertas o -1 en caso de no tener acceso al módulo.</returns>
         public static int GetCountAssignedIncidences(this Staff staff)
         {
             if (AcabusDataContext.GetService("Cctv_Manager", out dynamic cctvManager))
@@ -79,7 +79,7 @@ namespace Opera.Acabus.Cctv.Helpers
                     return openIncidences.Count();
                 }
                 catch (MethodAccessException) { }
-            return 0;
+            return -1;
         }
 
         /// <summary>
@@ -140,10 +140,8 @@ namespace Opera.Acabus.Cctv.Helpers
                     openedIncidence.AppendLine();
                 }
 
-                openedIncidence.Remove(openedIncidence.Length - 1, 1);
-
                 Clipboard.Clear();
-                Clipboard.SetDataObject(openedIncidence.ToString());
+                Clipboard.SetDataObject(openedIncidence.ToString().Trim());
             }
             catch (ExternalException ex)
             {

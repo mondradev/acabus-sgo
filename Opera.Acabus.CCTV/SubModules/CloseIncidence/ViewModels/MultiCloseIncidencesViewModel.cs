@@ -66,12 +66,14 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
 
                             if (!AcabusDataContext.DbContext.Update(refundOfMoney, 1))
                             {
+                                Dispatcher.CloseDialog();
                                 ShowMessage(String.Format("No se confirmó la devolución de dinero F-{0:D5}", incidence.Folio));
                                 return;
                             }
                         }
                         else
                         {
+                            Dispatcher.CloseDialog();
                             ShowMessage("Existe un problema con la devolución, contacte a soporte técnico.");
                             return;
                         }
@@ -80,11 +82,13 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                     {
                         if (!AcabusDataContext.DbContext.Update(incidence))
                         {
+                            Dispatcher.CloseDialog();
                             ShowMessage(String.Format("No se cerró la incidencia: F-{0:D5}", incidence.Folio));
                             return;
                         }
                     }
                 }
+                Dispatcher.CloseDialog();
                 ShowMessage("Se cerraron las incidencias satisfactoriamente");
             }, parameter =>
             {
