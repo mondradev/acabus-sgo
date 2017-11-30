@@ -626,74 +626,95 @@ namespace Acabus.Modules.CctvReports
             {
                 if (_busUpdating) return;
                 _busUpdating = true;
-                
-                    if (DateTime.Now.TimeOfDay.Between(TimeSpan.Parse(AcabusData.GetProperty("MinBusDisconnect", "CCTV_Setting") ?? "03:00:00"),
-                        TimeSpan.Parse(AcabusData.GetProperty("MaxBusDisconnect", "CCTV_Setting") ?? "21:00:00")))
+
+                if (DateTime.Now.TimeOfDay.Between(TimeSpan.Parse(AcabusData.GetProperty("MinBusDisconnect", "CCTV_Setting") ?? "03:00:00"),
+                    TimeSpan.Parse(AcabusData.GetProperty("MaxBusDisconnect", "CCTV_Setting") ?? "21:00:00")))
+                {
+                    Trace.WriteLine("Actualizando autobuses sin conexión", "DEBUG");
+                    BusDisconnectedAlarms.GetBusDisconnectedAlarms();
+
+                    Incidence[] incidences;
+
+                    lock (Incidences)
                     {
-                        Trace.WriteLine("Actualizando autobuses sin conexión", "DEBUG");
-                        BusDisconnectedAlarms.GetBusDisconnectedAlarms();
+                        incidences = new Incidence[Incidences.Count];
+                        Incidences.CopyTo(incidences, 0);
+                    }
 
-                        Incidence[] incidences;
+                    DeviceFault disconnectionBus = Core.DataAccess.AcabusData.AllFaults
+                              .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
+                               .FirstOrDefault(fault => (fault as DeviceFault).Description.Contains("UNIDAD DESCONECTADA"));
 
-                        lock (Incidences)
+                    foreach (var incidence in incidences)
+                    {
+                        bool exists = false;
+
+                        /// Verificar desconexiones de autobuses reconectados
+
+                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Device.Vehicle != null)
                         {
-                            incidences = new Incidence[Incidences.Count];
-                            Incidences.CopyTo(incidences, 0);
-                        }
+                            exists = BusDisconnectedAlarms.Any(b => CctvService.Equals(b, incidence));
 
-                        DeviceFault disconnectionBus = Core.DataAccess.AcabusData.AllFaults
-                                  .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.PCA)
-                                   .FirstOrDefault(fault => (fault as DeviceFault).Description.Contains("UNIDAD DESCONECTADA"));
-
-                        foreach (var incidence in incidences)
-                        {
-                            /// Verificación de las incidencias de SIN CONEXIÓN DE DATOS por confirmar
-
-                            if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description.Equals(disconnectionBus) && incidence.Device.Vehicle != null)
-                                /// A pasado el tiempo para cerrar automáticamente ? 10 MIN
-                                if ((DateTime.Now - incidence.FinishDate) > TimeSpan.Parse(AcabusData.GetProperty("CloseByReconnection", "CCTV_Setting") ?? "10:00"))
-                                {
-                                    incidence.Status = IncidenceStatus.CLOSE;
-                                    if (Core.DataAccess.AcabusData.OffDutyVehicles.Where(vehicle
-                                        => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count() > 0)
-                                        incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
-                                    else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMÁTICAMENTE";
-                                    incidence.Update();
-                                    UpdateData();
-                                    continue;
-                                }
-
-                            /// Verificación de las incidencias ABIERTAS
-
-                            if (incidence.Status != IncidenceStatus.OPEN
-                                    || (incidence.Description != null && !incidence.Description.Equals(disconnectionBus))
-                                        || incidence.Device?.Vehicle is null) continue;
-
-                            bool exists = false;
-
-                            foreach (var bus in BusDisconnectedAlarms)
-                                if (CctvService.Equals(bus, incidence))
-                                {
-                                    exists = true;
-                                    break;
-                                }
-
-                            if (!exists)
+                            if (exists)
                             {
-                                incidence.Status = IncidenceStatus.UNCOMMIT;
-                                if (Core.DataAccess.AcabusData.OffDutyVehicles.Where(vehicle
-                                         => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count() > 0)
-                                    incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
-                                else
-                                    incidence.Observations = "RECONEXIÓN DE LA UNIDAD";
-                                incidence.Priority = Priority.NONE;
-                                incidence.FinishDate = DateTime.Now;
-                                incidence.Technician = Core.DataAccess.AcabusData.AllTechnicians
-                                                        .FirstOrDefault(technician => technician.Name == "SISTEMA");
+                                incidence.Status = IncidenceStatus.OPEN;
+                                incidence.Technician = null;
+                                incidence.FinishDate = null;
+                                incidence.Priority = Priority.HIGH;
+                                incidence.Observations = "DESCONEXIONES RECURRENTES";
                                 incidence.Update();
+                                UpdateData();
+                                continue;
                             }
                         }
+
+                        /// Verificación de las incidencias de SIN CONEXIÓN DE DATOS por confirmar
+
+                        if (incidence.Status == IncidenceStatus.UNCOMMIT && incidence.Description.Equals(disconnectionBus) && incidence.Device.Vehicle != null)
+                            /// A pasado el tiempo para cerrar automáticamente ? 10 MIN
+                            if ((DateTime.Now - incidence.FinishDate) > TimeSpan.Parse(AcabusData.GetProperty("CloseByReconnection", "CCTV_Setting") ?? "10:00"))
+                            {
+                                incidence.Status = IncidenceStatus.CLOSE;
+                                if (Core.DataAccess.AcabusData.OffDutyVehicles.Where(vehicle
+                                    => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count() > 0)
+                                    incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
+                                else incidence.Observations = "SE REESTABLECE CONEXIÓN AUTOMÁTICAMENTE";
+                                incidence.Update();
+                                UpdateData();
+                                continue;
+                            }
+
+                        /// Verificación de las incidencias ABIERTAS
+
+                        if (incidence.Status != IncidenceStatus.OPEN
+                                || (incidence.Description != null && !incidence.Description.Equals(disconnectionBus))
+                                    || incidence.Device?.Vehicle is null) continue;
+
+                        exists = false;
+
+                        foreach (var bus in BusDisconnectedAlarms)
+                            if (CctvService.Equals(bus, incidence))
+                            {
+                                exists = true;
+                                break;
+                            }
+
+                        if (!exists)
+                        {
+                            incidence.Status = IncidenceStatus.UNCOMMIT;
+                            if (Core.DataAccess.AcabusData.OffDutyVehicles.Where(vehicle
+                                     => vehicle.EconomicNumber == incidence.Device.Vehicle.EconomicNumber).Count() > 0)
+                                incidence.Observations = "UNIDAD EN TALLER O SIN ENERGÍA";
+                            else
+                                incidence.Observations = "RECONEXIÓN DE LA UNIDAD";
+                            incidence.Priority = Priority.NONE;
+                            incidence.FinishDate = DateTime.Now;
+                            incidence.Technician = Core.DataAccess.AcabusData.AllTechnicians
+                                                    .FirstOrDefault(technician => technician.Name == "SISTEMA");
+                            incidence.Update();
+                        }
                     }
+                }
 
                 _busUpdating = false;
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
