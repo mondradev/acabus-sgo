@@ -1,4 +1,4 @@
-锘縰sing InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.Models;
@@ -6,8 +6,11 @@ using System;
 
 namespace Opera.Acabus.Cctv.Models
 {
-    [Entity(TableName = "Faults")]
-    public sealed class DeviceFault : NotifyPropertyChanged, IComparable<DeviceFault>, IComparable
+    /// <summary>
+    /// Representa una actividad aplicada a un equipo del BRT.
+    /// </summary>
+    [Entity(TableName = "Activities")]
+    public sealed class Activity : NotifyPropertyChanged, IComparable<Activity>, IComparable
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Assignable"/>.
@@ -17,7 +20,7 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Category"/>.
         /// </summary>
-        private DeviceFaultCategory _category;
+        private ActivityCategory _category;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Descripcion"/>.
@@ -35,18 +38,18 @@ namespace Opera.Acabus.Cctv.Models
         private Priority _priority;
 
         /// <summary>
-        /// Crea una instancia b谩sica de <see cref="DeviceFault"/>
+        /// Crea una instancia b醩ica de <see cref="Activity"/>
         /// </summary>
-        public DeviceFault() : this(0, String.Empty) { }
+        public Activity() : this(0, String.Empty) { }
 
         /// <summary>
-        /// Crea una instancia de <see cref="DeviceFault"/> definiendo el ID, descripci贸n y el tipo
+        /// Crea una instancia de <see cref="Activity"/> definiendo el ID, descripci髇 y el tipo
         /// de dispositivo.
         /// </summary>
         /// <param name="id">ID de la falla.</param>
-        /// <param name="fault">Descripci贸n de la falla.</param>
+        /// <param name="fault">Descripci髇 de la falla.</param>
         /// <param name="type">Tipo de dispositivo al que afecta.</param>
-        public DeviceFault(UInt64 id, String fault)
+        public Activity(UInt64 id, String fault)
         {
             _id = id;
             _description = fault;
@@ -65,10 +68,10 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
-        /// Obtiene o establece la categor铆a de fallas.
+        /// Obtiene o establece la categor韆 de fallas.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_FaultCategories_ID")]
-        public DeviceFaultCategory Category {
+        [Column(IsForeignKey = true, Name = "Fk_ActivityCategories_ID")]
+        public ActivityCategory Category {
             get => _category;
             set {
                 _category = value;
@@ -77,7 +80,7 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
-        /// Obtiene o establece la descripci贸n de la falla.
+        /// Obtiene o establece la descripci髇 de la falla.
         /// </summary>
         public String Description {
             get => _description;
@@ -100,7 +103,7 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
-        /// Obtiene o establece la prioridad de atenci贸n.
+        /// Obtiene o establece la prioridad de atenci髇.
         /// </summary>
         [Column(Converter = typeof(DbEnumConverter<Priority>))]
         public Priority Priority {
@@ -112,12 +115,12 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
-        /// Compara dos instancias de <see cref="DeviceFault"/> y determina si son diferentes.
+        /// Compara dos instancias de <see cref="Activity"/> y determina si son diferentes.
         /// </summary>
         /// <param name="left">Una falla a comparar.</param>
         /// <param name="right">Otra falla a comparar.</param>
         /// <returns>Un valor true si las fallas son diferentes.</returns>
-        public static bool operator !=(DeviceFault left, DeviceFault right)
+        public static bool operator !=(Activity left, Activity right)
         {
             if (left is null && right is null) return false;
             if (left is null || right is null) return true;
@@ -126,12 +129,12 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
-        /// Compara dos instancias de <see cref="DeviceFault"/> y determina si son iguales.
+        /// Compara dos instancias de <see cref="Activity"/> y determina si son iguales.
         /// </summary>
         /// <param name="left">Una falla a comparar.</param>
         /// <param name="right">Otra falla a comparar.</param>
         /// <returns>Un valor true si las fallas son iguales.</returns>
-        public static bool operator ==(DeviceFault left, DeviceFault right)
+        public static bool operator ==(Activity left, Activity right)
         {
             if (left is null && right is null) return true;
             if (left is null || right is null) return false;
@@ -141,27 +144,27 @@ namespace Opera.Acabus.Cctv.Models
 
         /// <summary>
         /// Compara la instancia actual con otro objeto del mismo tipo y devuelve un entero que
-        /// indica si la posici贸n de la instancia actual es anterior, posterior o igual que la del
-        /// otro objeto en el criterio de ordenaci贸n.
+        /// indica si la posici髇 de la instancia actual es anterior, posterior o igual que la del
+        /// otro objeto en el criterio de ordenaci髇.
         /// </summary>
         /// <param name="obj">Objeto que se va a comparar con esta instancia.</param>
-        /// <returns>Un valor que indica el orden relativo de los objetos que se est谩n comparando.</returns>
+        /// <returns>Un valor que indica el orden relativo de los objetos que se est醤 comparando.</returns>
         public int CompareTo(object obj)
         {
             if (obj == null) return -1;
 
-            if (obj.GetType() != typeof(DeviceFault)) return -1;
+            if (obj.GetType() != typeof(Activity)) return -1;
 
-            return CompareTo(obj as DeviceFault);
+            return CompareTo(obj as Activity);
         }
 
         /// <summary>
-        /// Compara la instancia actual con otra y devuelve un entero que indica si la posici贸n de la
-        /// instancia actual es anterior, posterior o igual que la del otro objeto en el criterio de ordenaci贸n.
+        /// Compara la instancia actual con otra y devuelve un entero que indica si la posici髇 de la
+        /// instancia actual es anterior, posterior o igual que la del otro objeto en el criterio de ordenaci髇.
         /// </summary>
         /// <param name="other">Objeto que se va a comparar con esta instancia.</param>
-        /// <returns>Un valor que indica el orden relativo de los objetos que se est谩n comparando.</returns>
-        public int CompareTo(DeviceFault other)
+        /// <returns>Un valor que indica el orden relativo de los objetos que se est醤 comparando.</returns>
+        public int CompareTo(Activity other)
         {
             if (other == null) return -1;
 
@@ -187,15 +190,15 @@ namespace Opera.Acabus.Cctv.Models
             if (obj.GetType() != GetType())
                 return false;
 
-            DeviceFault anotherInstance = (DeviceFault)obj;
+            Activity anotherInstance = (Activity)obj;
 
             return CompareTo(anotherInstance) == 0;
         }
 
         /// <summary>
-        /// Obtiene el c贸digo hash del objeto actual.
+        /// Obtiene el c骴igo hash del objeto actual.
         /// </summary>
-        /// <returns>C贸digo hash de la instancia.</returns>
+        /// <returns>C骴igo hash de la instancia.</returns>
         public override int GetHashCode()
             => Tuple.Create(Description, Category, Priority).GetHashCode();
 

@@ -81,6 +81,9 @@
     <Compile Include="Database\Utils\DbHelper.cs" />
     <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />
     <Compile Include="Gui\GuiHelper.cs" />
+    <Compile Include="Net\Communication\Iso8583\FieldIso8583.cs" />
+    <Compile Include="Net\Communication\Iso8583\FieldTypeIso8583.cs" />
+    <Compile Include="Net\Communication\Iso8583\MessageIso8583.cs" />
     <Compile Include="Net\Messenger\Iso8583\Client8583.cs" />
     <Compile Include="Net\Messenger\Iso8583\Message8583.cs" />
     <Compile Include="Net\Messenger\Iso8583\Server8583.cs" />

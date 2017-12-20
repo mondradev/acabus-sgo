@@ -189,7 +189,7 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         /// Obtiene el lista de las fallas o actividades que son aplicables a todos los equipos seleccionados.
         /// </summary>
         public IEnumerable<String> DeviceFaults
-                            => FilterByType(AcabusDataContext.DbContext.Read<DeviceFault>())
+                            => FilterByType(AcabusDataContext.DbContext.Read<Activity>())
                             .GroupBy(f => f.Description)
                             .Where(g => g.Count() == GetDevicesTypes().Count())
                             .Select(g => g.FirstOrDefault().Description)
@@ -417,7 +417,7 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
 
             var incidences = cctvModule.Incidences.Where(i => i.Status == IncidenceStatus.OPEN);
 
-            incidences = incidences.Where(i => SelectedDevices.Any(d => d.SelectedDevice == i.Device) && i.Fault.Description == SelectedDescription);
+            incidences = incidences.Where(i => SelectedDevices.Any(d => d.SelectedDevice == i.Device) && i.Activity.Description == SelectedDescription);
             if (incidences.Any())
                 AddError(nameof(SelectedDescription), String.Format("Ya existe una incidencia abierta igual para: F-{0:D5}", incidences.First().Folio));
 
@@ -436,12 +436,12 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
             foreach (var device in SelectedDevices)
             {
                 var incidences = cctvModule.Incidences;
-                var fault = AcabusDataContext.DbContext.Read<DeviceFault>()
+                var fault = AcabusDataContext.DbContext.Read<Activity>()
                     .FirstOrDefault(f => f.Description == SelectedDescription && f.Category.DeviceType == device.SelectedDevice.Type);
                 Incidence incidence = new Incidence
                 {
                     Device = device.SelectedDevice,
-                    Fault = fault,
+                    Activity = fault,
                     Observations = device.Observations ?? GlobalObservations,
                     Priority = Priority.LOW,
                     StartDate = DateTime.Now,
@@ -462,13 +462,13 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         /// </summary>
         /// <param name="source"> Fuente de datos. </param>
         /// <returns> Una secuencia de fallas o actividades aplicables a los equipos. </returns>
-        private IEnumerable<DeviceFault> FilterByType(IQueryable<DeviceFault> source)
+        private IEnumerable<Activity> FilterByType(IQueryable<Activity> source)
         {
             var types = GetDevicesTypes();
 
-            var parameter = Expression.Parameter(typeof(DeviceFault), "f");
-            var categoryProp = Expression.MakeMemberAccess(parameter, typeof(DeviceFault).GetProperty("Category"));
-            var typeProp = Expression.MakeMemberAccess(categoryProp, typeof(DeviceFaultCategory).GetProperty("DeviceType"));
+            var parameter = Expression.Parameter(typeof(Activity), "f");
+            var categoryProp = Expression.MakeMemberAccess(parameter, typeof(Activity).GetProperty("Category"));
+            var typeProp = Expression.MakeMemberAccess(categoryProp, typeof(ActivityCategory).GetProperty("DeviceType"));
 
             List<Expression> filters = new List<Expression>();
 
@@ -486,9 +486,9 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
             else
                 filterExp = Expression.Equal(typeProp, Expression.Constant(DeviceType.NONE, typeof(DeviceType)));
 
-            LambdaExpression lambda = Expression.Lambda<Func<DeviceFault, bool>>(filterExp, parameter);
+            LambdaExpression lambda = Expression.Lambda<Func<Activity, bool>>(filterExp, parameter);
 
-            return source.Where((Expression<Func<DeviceFault, bool>>)lambda).ToList();
+            return source.Where((Expression<Func<Activity, bool>>)lambda).ToList();
         }
 
         /// <summary>

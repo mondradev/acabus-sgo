@@ -206,7 +206,7 @@ namespace Opera.Acabus.Cctv.Helpers
             if (staffList == null || staffList.Count == 0) return null;
 
             // Asignación por area de trabajo.
-            var assignableArea = incidence.Fault?.Assignable;
+            var assignableArea = incidence.Activity?.Assignable;
             var filtered = staffList.Where(s => s.Staff.Area == (s.Staff.Area & assignableArea));
 
             if (filtered.Count() == 0)

@@ -22,7 +22,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
         /// <summary>
         /// Campo que provee a la propiedad 'Descriptión'.
         /// </summary>
-        private DeviceFault _description;
+        private Activity _description;
 
         /// <summary>
         /// Campo que provee a la propiedad 'SelectedDevice'.
@@ -147,10 +147,10 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
         /// <summary>
         /// Obtiene el listado de las fallas disponibles.
         /// </summary>
-        public IEnumerable<DeviceFault> AllFaults
+        public IEnumerable<Activity> AllFaults
             => (SelectedDevice != null
-                ? AcabusDataContext.DbContext.Read<DeviceFault>().Where(df => df.Category.DeviceType == SelectedDevice.Type).ToList()
-                : AcabusDataContext.DbContext.Read<DeviceFault>().ToList().GroupBy(df => df.Description).Select(g => g.FirstOrDefault()))
+                ? AcabusDataContext.DbContext.Read<Activity>().Where(df => df.Category.DeviceType == SelectedDevice.Type).ToList()
+                : AcabusDataContext.DbContext.Read<Activity>().ToList().GroupBy(df => df.Description).Select(g => g.FirstOrDefault()))
             .OrderBy(f => f.Description);
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
         /// <summary>
         /// Obtiene o establece la descripción de la falla para la búsqueda.
         /// </summary>
-        public DeviceFault SelectedDescription {
+        public Activity SelectedDescription {
             get => _description;
             set {
                 _description = value;
@@ -435,7 +435,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
                     query = query.Where(i => i.Technician.ID == SelectedTechnician.ID);
 
                 if (SelectedDescription != null)
-                    query = query.Where(i => i.Fault.Description == SelectedDescription.Description);
+                    query = query.Where(i => i.Activity.Description == SelectedDescription.Description);
 
                 if (SelectedStatus != null)
                     query = query.Where(i => i.Status == SelectedStatus);
@@ -480,7 +480,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
                     query = query.Where(r => r.Incidence.Technician.ID == SelectedTechnician.ID);
 
                 if (SelectedDescription != null)
-                    query = query.Where(r => r.Incidence.Fault.Description == SelectedDescription.Description);
+                    query = query.Where(r => r.Incidence.Activity.Description == SelectedDescription.Description);
 
                 if (SelectedStatus != null)
                     query = query.Where(r => r.Incidence.Status == SelectedStatus);

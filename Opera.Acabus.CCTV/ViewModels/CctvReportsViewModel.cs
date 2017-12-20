@@ -132,7 +132,7 @@ namespace Opera.Acabus.Cctv.ViewModels
                     Boolean isClosed = i.Status == IncidenceStatus.CLOSE;
                     Boolean isMatch = String.IsNullOrEmpty(KeywordToSearchIncidence)
                         || (i.Technician != null && i.Technician.Name.ToUpper().Contains(KeywordToSearchIncidence.ToUpper()))
-                        || i.Fault.ToString().ToUpper().Contains(KeywordToSearchIncidence.ToUpper());
+                        || i.Activity.ToString().ToUpper().Contains(KeywordToSearchIncidence.ToUpper());
 
                     return isClosed && isMatch;
                 }).OrderByDescending(i => i.FinishDate));
@@ -185,7 +185,7 @@ namespace Opera.Acabus.Cctv.ViewModels
                         || String.Format("F-{0:D5", i.Folio).ToUpper().Contains(OpenedFolioToSearch.ToUpper());
 
                     return isOpen && isMatch;
-                }).OrderByDescending(i => i.Fault.Priority)
+                }).OrderByDescending(i => i.Activity.Priority)
                     .ThenByDescending(i => i.Priority)
                     .ThenBy(i => i.StartDate));
 

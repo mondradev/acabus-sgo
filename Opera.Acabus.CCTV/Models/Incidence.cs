@@ -53,7 +53,7 @@ namespace Opera.Acabus.Cctv.Models
     /// Define la estructura de la incidencias de la operación de Acabus.
     /// </summary>
     [Entity(TableName = "Incidences")]
-    public class Incidence : NotifyPropertyChanged, IComparable, IComparable<Incidence>
+    public sealed class Incidence : NotifyPropertyChanged, IComparable, IComparable<Incidence>
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AssignedStaff"/>.
@@ -66,9 +66,9 @@ namespace Opera.Acabus.Cctv.Models
         private Device _device;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Fault"/>
+        /// Campo que provee a la propiedad <see cref="Activity"/>
         /// </summary>
-        private DeviceFault _fault;
+        private Activity _activity;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="FinishDate"/>
@@ -163,12 +163,12 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece la descripción de la incidencia.
         /// </summary>
-        [Column(Name = "Fk_Fault_ID", IsForeignKey = true)]
-        public DeviceFault Fault {
-            get => _fault;
+        [Column(Name = "Fk_Activity_ID", IsForeignKey = true)]
+        public Activity Activity {
+            get => _activity;
             set {
-                _fault = value;
-                OnPropertyChanged(nameof(Fault));
+                _activity = value;
+                OnPropertyChanged(nameof(Activity));
             }
         }
 
@@ -336,10 +336,10 @@ namespace Opera.Acabus.Cctv.Models
             if (other == null) return -1;
 
             if (Device == other.Device)
-                if (Fault == other.Fault)
+                if (Activity == other.Activity)
                     return StartDate.CompareTo(other.StartDate);
                 else
-                    return Fault.CompareTo(other.Fault);
+                    return Activity.CompareTo(other.Activity);
 
             return Device.CompareTo(other.Device);
         }
@@ -384,7 +384,7 @@ namespace Opera.Acabus.Cctv.Models
         /// </summary>
         /// <returns>Código hash de la instancia.</returns>
         public override int GetHashCode()
-            => Tuple.Create(Device, Fault, StartDate).GetHashCode();
+            => Tuple.Create(Device, Activity, StartDate).GetHashCode();
 
         /// <summary>
         /// Indica si la incidencia tiene una devolución de dinero.
@@ -406,7 +406,7 @@ namespace Opera.Acabus.Cctv.Models
                         Device?.Bus.EconomicNumber,
                         Device)
                     : Device?.SerialNumber ?? "(No definido)",
-                String.Format("*{0}*, {1}", Fault?.Category?.Name, Fault),
+                String.Format("*{0}*, {1}", Activity?.Category?.Name, Activity),
                 AssignedStaff is null
                 ? String.Empty
                 : String.Format("\n*Asignado:* {0}", AssignedStaff),

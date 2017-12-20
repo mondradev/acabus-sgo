@@ -64,10 +64,10 @@
     <Compile Include="Converters\CashTypeSpanishConverter.cs" />
     <Compile Include="Converters\IncidenceStatusSpanishConverter.cs" />
     <Compile Include="Helpers\IncidenceExtension.cs" />
+    <Compile Include="Models\Activity.cs" />
+    <Compile Include="Models\ActivityCategory.cs" />
     <Compile Include="Models\AssignableStaff.cs" />
     <Compile Include="Models\CashDestiny.cs" />
-    <Compile Include="Models\DeviceFault.cs" />
-    <Compile Include="Models\DeviceFaultCategory.cs" />
     <Compile Include="Models\Incidence.cs" />
     <Compile Include="Models\RefundOfMoney.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -312,7 +312,7 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
                         "Añada la configuración --> <Cctv> <refundOfMoney Money=\"id_fault\" Bill=\"id_fault\" /> </Cctv>");
 
                 IncidenceStatus status = SelectedDestiny.RequiresMoving ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
-                DeviceFault refundFault = AcabusDataContext.DbContext.Read<DeviceFault>().FirstOrDefault(df => df.ID == idFault);
+                Activity refundFault = AcabusDataContext.DbContext.Read<Activity>().FirstOrDefault(df => df.ID == idFault);
 
                 if (refundFault == null)
                     throw new ArgumentException("No existe la actividad de devolución especificada en la configuración.");
@@ -326,7 +326,7 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
                     WhoReporting = AcabusDataContext.ConfigContext["Owner"]?.ToString("name"),
                     Observations = Observations ?? String.Format("DEVOLUCIÓN {0} {1:C} A {2}", SelectedDestiny.CashType.Translate(), Single.Parse(Quantity), SelectedDestiny),
                     Priority = Priority.NONE,
-                    Fault = refundFault,
+                    Activity = refundFault,
                     Status = status
                 };
 

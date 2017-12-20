@@ -55,14 +55,16 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
     }
 
     /// <summary>
-    /// Define la estructura de un mensaje ISO8583 para la comunicación de equipos remotos. Para su utilización requiere de una plantilla que indique el tipo de cada campo que se desea implementar en los mensajes.
+    /// Define la estructura de un mensaje ISO8583 para la comunicación de equipos remotos. Para su
+    /// utilización requiere de una plantilla que indique el tipo de cada campo que se desea
+    /// implementar en los mensajes.
     /// </summary>
     public sealed class Message8583 : IDisposable, IEnumerable
     {
         /// <summary>
         /// Plantilla de campos para el codificado y decodificado de mensajes.
         /// </summary>
-        private static XmlDocument _template;
+        private XmlDocument _template;
 
         /// <summary>
         /// Lista de campos agregados al mensaje.
@@ -86,7 +88,9 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// Obtiene o establece el campo especificado, si el campo no está disponible, este será agregado.
         /// </summary>
         public Object this[UInt16 id] {
-            get => GetField(id);
+            get {
+				return GetField(id);
+			}
             set {
                 if (_fields.Where(f => f.ID == id).Any())
                     Remove(id);
@@ -97,7 +101,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <summary>
         ///  Obtiene el mensaje a partir de un secuencia de bytes.
         /// </summary>
-        public static Message8583 FromBytes(byte[] bytes)
+        public Message8583 FromBytes(byte[] bytes)
             => Parse(Encoding.UTF8.GetString(bytes));
 
         /// <summary>
@@ -106,7 +110,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <param name="iso8583str">Cadena de un mensaje ISO8583.</param>
         /// <returns>Una instancia <see cref="Message8583"/>.</returns>
         /// <exception cref="InvalidOperationException">No se ha establecido una plantilla.</exception>
-        public static Message8583 Parse(String iso8583str)
+        public Message8583 Parse(String iso8583str)
         {
             if (_template is null)
                 throw new InvalidOperationException("No hay una plantilla definida para la creación de la cadena ISO8583, utilice la función Message.SetTemplate");
@@ -143,7 +147,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// Carga y establece la plantilla utilizada para la interpretación de los mensajes.
         /// </summary>
         /// <param name="path">Ruta de la plantilla.</param>
-        public static void SetTemplate(string path)
+        public void SetTemplate(string path)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(path);
@@ -154,7 +158,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// Establece la plantilla que se usará en la aplicación.
         /// </summary>
         /// <param name="xmlDoc">Plantilla de campos para el mensaje.</param>
-        public static void SetTemplate(XmlDocument xmlDoc)
+        public void SetTemplate(XmlDocument xmlDoc)
             => _template = xmlDoc;
 
         /// <summary>
@@ -332,7 +336,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <param name="length">Longitud total del campo decodificado.</param>
         /// <returns>Valor del campo decodificado.</returns>
         /// <exception cref="InvalidOperationException">La plantilla no se puede aplicar al mensaje.</exception>
-        private static object Decode(int field, string body, out int length)
+        private object Decode(int field, string body, out int length)
         {
             GetAttributes(_template, field, out FieldType fieldType, out int lengthField);
             switch (fieldType)
@@ -381,7 +385,7 @@ namespace InnSyTech.Standard.Net.Messenger.Iso8583
         /// <param name="field">Identificador del campo.</param>
         /// <returns>Cadena que representa el campo codificado.</returns>
         /// <exception cref="InvalidOperationException">La plantilla no se puede aplicar al campo.</exception>
-        private static String EncodeField(Field field)
+        private String EncodeField(Field field)
         {
             GetAttributes(_template, field.ID, out FieldType type, out int length);
             String encoded;

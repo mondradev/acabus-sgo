@@ -14,7 +14,9 @@ namespace InnSyTech.Standard.Translates
         /// </summary>
         /// <param name="dictionary">Diccionario para la traducción.</param>
         public EnumTranslator(Dictionary<T, String> dictionary)
-            => Dictionary = dictionary;
+		{
+			Dictionary = dictionary;
+		}
 
         /// <summary>
         /// Obtiene el diccionario de palabras para la traducción de la enumeración.

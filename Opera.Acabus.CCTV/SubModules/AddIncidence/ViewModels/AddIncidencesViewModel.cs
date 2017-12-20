@@ -41,7 +41,7 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         /// <summary>
         /// Campo que provee a la propiedad <see cref="SelectedFault" />
         /// </summary>
-        private DeviceFault _selectedFault;
+        private Activity _selectedFault;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="SelectedLocation" />
@@ -101,12 +101,12 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         /// <summary>
         /// Obtiene una lista de todas las fallas disponibles.
         /// </summary>
-        public IEnumerable<DeviceFault> DeviceFaults {
+        public IEnumerable<Activity> DeviceFaults {
             get {
                 if (SelectedDevice is null)
                     return null;
 
-                return AcabusDataContext.DbContext.Read<DeviceFault>()
+                return AcabusDataContext.DbContext.Read<Activity>()
                     .Where(f => f.Category.DeviceType == SelectedDevice.Type);
             }
         }
@@ -222,7 +222,7 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         /// <summary>
         /// Obtiene o establece la falla del equipo.
         /// </summary>
-        public DeviceFault SelectedFault {
+        public Activity SelectedFault {
             get => _selectedFault;
             set {
                 _selectedFault = value;
@@ -317,7 +317,7 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
 
             var incidences = cctvModule.Incidences;
 
-            if (incidences.Any(i => i.Device == SelectedDevice && i.Fault == SelectedFault && i.Status == IncidenceStatus.OPEN))
+            if (incidences.Any(i => i.Device == SelectedDevice && i.Activity == SelectedFault && i.Status == IncidenceStatus.OPEN))
                 AddError(nameof(SelectedFault), "Ya existe una incidencia abierta igual para el equipo");
 
             return !HasErrors;
@@ -336,7 +336,7 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
             Incidence incidence = new Incidence
             {
                 Device = SelectedDevice,
-                Fault = SelectedFault,
+                Activity = SelectedFault,
                 Observations = Observations,
                 Priority = Priority.LOW,
                 StartDate = StartTime,
