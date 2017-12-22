@@ -13,24 +13,24 @@ using System.Xml;
 
 namespace InnSyTech.Standard.Net.Communication.Iso8583
 {
-    public class MessageIso8583 : IDisposable, IEnumerable
+    public class Message : IDisposable, IEnumerable
     {
         /// <summary>
         /// Indica si el mensaje a sido desechado
         /// </summary>
         private bool _disposed;
 
-        private Dictionary<int, FieldIso8583> _fields;
+        private Dictionary<int, Field> _fields;
         private int[] _mti = new int[4];
         private XmlDocument _template;
 
         ///
         /// <param name="template"></param>
-        public MessageIso8583(XmlDocument template)
+        public Message(XmlDocument template)
         {
         }
 
-        ~MessageIso8583()
+        ~Message()
         {
         }
 
@@ -42,7 +42,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
         ///
         /// <param name="message"></param>
-        public static MessageIso8583 Parse(string message)
+        public static Message Parse(string message)
         {
             return null;
         }
@@ -143,7 +143,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
         ///
         /// <param name="data"></param>
-        public MessageIso8583 FromBytes(byte[] data)
+        public Message FromBytes(byte[] data)
         {
             return null;
         }
@@ -258,21 +258,21 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// <param name="bitmap"></param>
         /// <param name="data"></param>
         /// <param name="template"></param>
-        private static MessageIso8583 Decode(byte[] bitmap, byte[] data, XmlDocument template)
+        private static Message Decode(byte[] bitmap, byte[] data, XmlDocument template)
         {
             return null;
         }
 
         ///
         /// <param name="message"></param>
-        private static byte[] Encode(MessageIso8583 message)
+        private static byte[] Encode(Message message)
         {
             return null;
         }
 
         ///
         /// <param name="index"></param>
-        private FieldIso8583 GetField(int index)
+        private Field GetField(int index)
         {
             return null;
         }
@@ -286,9 +286,9 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
         ///
         /// <param name="index"></param>
-        private FieldTypeIso8583 GetFieldType(int index)
+        private FieldType GetFieldType(int index)
         {
-            return default(FieldTypeIso8583);
+            return default(FieldType);
         }
     }
 }
