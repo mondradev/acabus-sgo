@@ -59,36 +59,46 @@ namespace Acabus.Modules.CctvReports.Services
                 case "FALLA LECTOR RECARGA":
                 case "FALLA EN LECTOR RECARGA":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "SIN LECTURA DE TARJETAS");
+                        => (fault as DeviceFault).Description.Contains("SIN LECTURA DE TARJETAS"));
 
                 case "ALCANCIA LLENA":
                 case "ALCANCÍA LLENA":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "MONEDAS ATASCADAS, NOTIFICAR EL TOTAL E INTRODUCIRLO A LA ALCANCÍA");
+                        => (fault as DeviceFault).Description.Contains("MONEDAS ATASCADAS, NOTIFICAR EL TOTAL E INTRODUCIRLO A LA ALCANCÍA"));
 
                 case "FALLA EN IMPRESORA":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "NO IMPRIMIÓ TICKET E IMPRIMIR TICKET DE PRUEBA");
+                        => (fault as DeviceFault).Description.Contains("NO IMPRIMIÓ TICKET E IMPRIMIR TICKET DE PRUEBA"));
 
                 case "FALLA EN VALIDADOR DE BILLETES":
                 case "FALLA BILLETERO":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "NO ACEPTA BILLETES");
+                        => (fault as DeviceFault).Description.Contains("NO ACEPTA BILLETES"));
 
                 case "FUERA DE SERVICIO":
+                case "ALARMA SONORA ACTIVADA":
                     return faults.FirstOrDefault(fault
                         => (fault as DeviceFault).Description.Contains("FUERA DE SERVICIO"));
 
-                case "FALLA SAM AV2 VENTA":
-                case "FALLA LECTOR VENTA":
                 case "FALLA EN EXPENDEDOR":
                 case "FALLA EN EL DISPENSADOR":
                     return (DeviceFault)faults.FirstOrDefault(fault
                         => (fault as DeviceFault).Description.Contains("TARJETA ATASCADA"));
 
+                case "TARJETAS POR AGOTARSE":
+                    return faults.FirstOrDefault(f => f.Description.Contains("TARJETAS POR AGOTARSE"));
+
+                case "FALLA SAM AV2 VENTA":
+                case "FALLA LECTOR VENTA":
+                    alarm.Comments = "FALLA LECTORA DE VENTA";
+                    return faults.FirstOrDefault(f => f.Description.Contains("SIN VENTA"));
+
+                case "SIN TARJETAS PARA VENTA":
+                    return faults.FirstOrDefault(f => f.Description.Contains("SIN VENTA"));
+
                 case "BILLETERA LLENA":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "BILLETE ATASCADO, NOTIFICAR EL TOTAL Y CANALIZAR EL DINERO A CAU");
+                        => (fault as DeviceFault).Description.Contains("BILLETE ATASCADO, NOTIFICAR EL TOTAL Y CANALIZAR EL DINERO A CAU"));
 
                 case "FALLA ENERGIA":
                     return (DeviceFault)faults.FirstOrDefault(fault
@@ -97,18 +107,19 @@ namespace Acabus.Modules.CctvReports.Services
                 case "FALLA EN VALIDADOR DE MONEDAS":
                 case "FALLA MONEDERO":
                     return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description == "NO ACEPTA MONEDAS");
+                        => (fault as DeviceFault).Description.Contains("NO ACEPTA MONEDAS"));
 
                 case "FALLA CONTADOR EN CERO":
-                    return faults.FirstOrDefault(fault => fault.Description == "NO SE TIENE CONTEO DE PASAJEROS");
+                    return faults.FirstOrDefault(fault => fault.Description.Contains("NO SE TIENE CONTEO DE PASAJEROS"));
 
                 case "FALLA CONTADOR":
-                    return faults.FirstOrDefault(fault => fault.Description == "EL CONTEO DE PASAJEROS ES MENOR A LAS VALIDACIONES");
+                    return faults.FirstOrDefault(fault => fault.Description.Contains("EL CONTEO DE PASAJEROS ES MENOR A LAS VALIDACIONES"));
 
                 case NEED_BACKUP:
                     return faults.FirstOrDefault(fault => fault.Description.Contains("INFORMACIÓN DE LAS OPERACIONES"));
 
-                default: return faults.FirstOrDefault(fault => fault.Description.Contains(description));
+                default:
+                    return null;
             }
         }
 
@@ -490,9 +501,6 @@ namespace Acabus.Modules.CctvReports.Services
             }
         }
 
-        public static Boolean Update(this Incidence incidence)
-                                            => AcabusData.Session.Update(ref incidence);
-
         public static void ToClipboard(IEnumerable<Incidence> incidences)
         {
             try
@@ -523,5 +531,8 @@ namespace Acabus.Modules.CctvReports.Services
             if (incidence != null)
                 ToClipboard(new[] { incidence });
         }
+
+        public static Boolean Update(this Incidence incidence)
+                                                            => AcabusData.Session.Update(ref incidence);
     }
 }

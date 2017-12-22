@@ -109,21 +109,21 @@ namespace Acabus.Modules.CctvReports
                 if (IsRefundOfMoney)
                     return SelectedLocation is null
                         ? Core.DataAccess.AcabusData.AllDevices
-                                    .Where(device => (device as Device).Type == DeviceType.KVR)
+                                    .Where(device => (device as Device).Type == DeviceType.KVR && device.Enabled)
                         : Core.DataAccess.AcabusData.AllDevices
-                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID)
+                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID && device.Enabled)
                                     .Where(device => (device as Device).Type == DeviceType.KVR);
                 if (IsBusIncidences)
                     return SelectedVehicle is null
                         ? null
                         : Core.DataAccess.AcabusData.AllDevices
-                                    .Where(device => (device as Device).Vehicle?.EconomicNumber == SelectedVehicle?.EconomicNumber);
+                                    .Where(device => (device as Device).Vehicle?.EconomicNumber == SelectedVehicle?.EconomicNumber && device.Enabled);
                 else
                     return SelectedLocation is null
                         ? Core.DataAccess.AcabusData.AllDevices
-                                    .Where(device => (device as Device).Vehicle is null)
+                                    .Where(device => (device as Device).Vehicle is null && device.Enabled)
                         : Core.DataAccess.AcabusData.AllDevices
-                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID);
+                                    .Where(device => (device as Device).Station?.ID == (SelectedLocation as Station).ID && device.Enabled);
             }
         }
 

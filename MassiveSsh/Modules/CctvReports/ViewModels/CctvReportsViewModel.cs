@@ -33,6 +33,11 @@ namespace Acabus.Modules.CctvReports
         private ObservableCollection<Alarm> _alarms;
 
         /// <summary>
+        /// Campo que provee a la propiedad 'Alarms'.
+        /// </summary>
+        private ObservableCollection<Alarm> _alarmsShown = new ObservableCollection<Alarm>();
+
+        /// <summary>
         ///
         /// </summary>
         private Timer _alarmsMonitor;
@@ -499,7 +504,15 @@ namespace Acabus.Modules.CctvReports
                         {
                             DeviceFault deviceFault = CctvService.CreateDeviceFault(alarm);
                             if (deviceFault is null)
+                            {
+                                if (!_alarmsShown.Any(a => a.Device == alarm.Device && a.Description == alarm.Description && a.DateTime == alarm.DateTime)
+                                    && (DateTime.Now - alarm.DateTime) <= TimeSpan.FromMinutes(10))
+                                {
+                                    AcabusControlCenterViewModel.ShowDialog(String.Format("{0}\n{1}\n{2}", alarm.Device, alarm.Description, alarm.DateTime));
+                                    _alarmsShown.Add(alarm);
+                                }
                                 continue;
+                            }
 
                             if (alarm.IsHistorial)
                                 Incidences.CreateIncidence(
@@ -559,7 +572,8 @@ namespace Acabus.Modules.CctvReports
                                     && deviceBus.Vehicle.EconomicNumber == alarm.EconomicNumber),
                             DateTime.Now,
                             alarm.Priority,
-                            "SISTEMA"
+                            "SISTEMA",
+                            alarm.LastSentLocation.Year <= 2012 ? $"POSIBLE FECHA/HORA DESCONFIGURADA; ULTIMA CONEXIÓN {alarm.LastSentLocation}" : ""
                         );
                 }
             }

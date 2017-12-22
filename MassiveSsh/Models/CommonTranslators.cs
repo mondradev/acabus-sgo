@@ -54,7 +54,7 @@ namespace Acabus.Models
                 { DeviceType.TA, "TORNIQUETE ABORDO" },
                 { DeviceType.MRV, "GRABADOR DE VIDEO MÓVIL" },
                 { DeviceType.PCA, "PC ABORDO" },
-                { DeviceType.CAM, "CAMARA" },
+                { DeviceType.CAM, "CAMARA OJO DE PEZ" },
                 { DeviceType.MON, "MONITOR" },
                 { DeviceType.CONT, "CONTADOR DE PASAJEROS" },
                 { DeviceType.DSPB, "DISPLAY BUS" },
@@ -75,6 +75,7 @@ namespace Acabus.Models
                 { DeviceType.RACK, "RACK DE ESTACIÓN" },
                 { DeviceType.LIGHT, "LUMINARIAS" },
                 { DeviceType.SPEAKER, "BOCINA" },
+                { DeviceType.WALLCAM, "CAMARA DE BALA" },
                 { DeviceType.UNKNOWN, "(TIPO DESCONOCIDO)" }
             })
             {

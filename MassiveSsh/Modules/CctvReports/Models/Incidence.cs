@@ -26,7 +26,12 @@ namespace Acabus.Modules.CctvReports.Models
         /// <summary>
         /// Por confirmar.
         /// </summary>
-        UNCOMMIT
+        UNCOMMIT,
+
+        /// <summary>
+        /// Pendientes
+        /// </summary>
+        PENDING
     }
 
     /// <summary>
@@ -280,7 +285,9 @@ namespace Acabus.Modules.CctvReports.Models
                     ? String.Format("{0} {1}",
                         Device?.Vehicle.Description,
                         Device)
-                    : Device?.NumeSeri,
+                    : String.IsNullOrEmpty(Device.NumeSeri)
+                        ? String.Format("{0} {1}", Device.Station, Device)
+                        : Device.ToString(),
                 String.Format("*{0}*, {1}", Description?.Category?.Description, Description),
                 AssignedAttendance is null
                 ? String.Empty

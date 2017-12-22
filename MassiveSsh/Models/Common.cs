@@ -178,7 +178,12 @@ namespace Acabus.Models
         /// <summary>
         /// Bocina SITI
         /// </summary>
-        SPEAKER
+        SPEAKER,
+
+        /// <summary>
+        /// Camara de bala
+        /// </summary>
+        WALLCAM
     }
 
     /// <summary>

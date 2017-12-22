@@ -171,6 +171,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
         /// </summary>
         public IEnumerable<MultiIncidenceItem> SelectedDevices
             => (_selectedDevices ?? (_selectedDevices = new ObservableCollection<MultiIncidenceItem>()))
+            .Where(m => m.SelectedDevice.Enabled)
             .OrderBy(m => m.SelectedDevice.Type.Translate());
 
         /// <summary>
@@ -345,7 +346,6 @@ namespace Acabus.Modules.CctvReports.ViewModels
             }
             finally
             {
-
                 OnPropertyChanged(nameof(SelectedDevices));
                 OnPropertyChanged(nameof(DeviceFaults));
             }

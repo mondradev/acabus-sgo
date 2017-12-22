@@ -16,7 +16,8 @@ namespace Acabus.Modules.CctvReports.Converters
         {
             { IncidenceStatus.OPEN, "ABIERTA" },
             { IncidenceStatus.CLOSE, "CERRADA" },
-            { IncidenceStatus.UNCOMMIT, "POR CONFIRMAR" }
+            { IncidenceStatus.UNCOMMIT, "POR CONFIRMAR" },
+            { IncidenceStatus.PENDING, "PENDIENTE" }
         })
         { }
     }
