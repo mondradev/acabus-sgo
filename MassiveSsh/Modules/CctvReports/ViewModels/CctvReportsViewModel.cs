@@ -503,6 +503,13 @@ namespace Acabus.Modules.CctvReports
                         if (!exists)
                         {
                             DeviceFault deviceFault = CctvService.CreateDeviceFault(alarm);
+
+                            if (deviceFault.Description.Contains("AUTENTICA"))
+                            {
+                                alarm.IsHistorial = true;
+                                AcabusControlCenterViewModel.ShowDialog(String.Format("{0}\n{1}\n{2}", alarm.Device, alarm.Description, alarm.DateTime));
+                            }
+
                             if (deviceFault is null)
                             {
                                 if (!_alarmsShown.Any(a => a.Device == alarm.Device && a.Description == alarm.Description && a.DateTime == alarm.DateTime)

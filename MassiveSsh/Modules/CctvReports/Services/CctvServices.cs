@@ -55,6 +55,12 @@ namespace Acabus.Modules.CctvReports.Services
                     return (DeviceFault)faults.FirstOrDefault(fault
                         => (fault as DeviceFault).Description.Contains("FUERA DE SERVICIO"));
 
+                case "AUTENTICACION USUARIO MANTENIMIENTO":
+                    return faults.FirstOrDefault(f => f.Description.Contains("AUTENTICACION USUARIO MANTENIMIENTO"));
+
+                case "AUTENTICACION USUARIO RECAUDADOR":
+                    return faults.FirstOrDefault(f => f.Description.Contains("AUTENTICACION USUARIO RECAUDADOR"));
+
                 case "FALLA SAM AV RECARGA":
                 case "FALLA LECTOR RECARGA":
                 case "FALLA EN LECTOR RECARGA":
