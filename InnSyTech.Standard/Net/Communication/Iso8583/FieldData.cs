@@ -64,7 +64,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// <summary>
         /// Campo tipo alfanumérico.
         /// </summary>
-        Alphanumeric = 2,
+        Alpha = 2,
 
         /// <summary>
         /// Campo tipo caracteres especiales.
