@@ -147,11 +147,12 @@ namespace Opera.Acabus.Core.Services
                 responsing = true;
             }
 
-            Message8583 response = readBytes.Count > 0 ? Message8583.FromBytes(readBytes.ToArray()) : null;
+            //Message8583 response = readBytes.Count > 0 ? Message8583.FromBytes(readBytes.ToArray()) : null;
 
-            client.Close();
+            //client.Close();
 
-            return response;
+            //return response;
+            return null;
         }
     }
 }

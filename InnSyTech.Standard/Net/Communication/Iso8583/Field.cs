@@ -4,6 +4,8 @@
 ///////////////////////////////////////////////////////////
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -65,9 +67,10 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// <param name="type"> Tipo del campo a decodificar. </param>
         /// <param name="length"> Tipo de longitud del campo. </param>
         /// <param name="format"> Formato de contenido del campo. </param>
-        /// <param name="padding"> Valor utilizado para rellenar el espacio del campo. </param>
+        /// <param name="padding">Caracter de relleno.</param>
         /// <returns> El campo decodificado. </returns>
-        public static Field Decode(int id, ref byte[] data, int size, FieldType type, FieldLength length = FieldLength.Fixed, FieldFormat format = FieldFormat.Hexadecimal, byte padding = 0)
+        public static Field Decode(int id, ref byte[] data, int size, FieldType type, FieldLength length = FieldLength.Fixed,
+            FieldFormat format = FieldFormat.Hexadecimal, char padding = 'F')
         {
             int minSize = size;
 
@@ -99,7 +102,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                     break;
 
                 case FieldFormat.BinaryCodedDecimal:
-                    if (type != FieldType.Numeric)
+                    if (type == FieldType.Special)
                         throw new ArgumentOutOfRangeException(nameof(format), "El formato no es compatible con el tipo especificado para los mensajes ISO8583.");
                     break;
 
@@ -127,9 +130,11 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                         {
                             byte[] vli = data.Take(minSize - 1).ToArray();
                             int realSize = GetSize(vli, FieldFormat.BinaryCodedDecimal);
-                            int numeric = Int32.Parse(BitConverter.ToString(data.Skip(minSize - 1).Take(realSize).ToArray()).Replace("-", ""));
+                            int nBytes = (realSize / 2) % 2 == 0 ? realSize / 2 : realSize / 2 + 1;
+                            nBytes = nBytes == 0 ? nBytes + 1 : nBytes;
+                            int numeric = Int32.Parse(BitConverter.ToString(data.Skip(minSize - 1).Take(nBytes).ToArray()).Replace("-", ""));
 
-                            data = data.Skip(minSize - 1 + realSize).ToArray();
+                            data = data.Skip(minSize - 1 + nBytes).ToArray();
 
                             return new Field(id, numeric);
                         }
@@ -175,9 +180,11 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                         {
                             byte[] vli = data.Take(minSize - 1).ToArray();
                             int realSize = GetSize(vli, FieldFormat.BinaryCodedDecimal);
-                            string alpha = BitConverter.ToString(data.Skip(minSize - 1).Take(realSize).ToArray()).Replace("-", "");
+                            int nBytes = (realSize / 2) % 2 == 0 ? realSize / 2 : realSize / 2 + 1;
+                            nBytes = nBytes == 0 ? nBytes + 1 : nBytes;
+                            string alpha = BitConverter.ToString(data.Skip(minSize - 1).Take(nBytes).ToArray()).Replace("-", "").Substring(0, realSize);
 
-                            data = data.Skip(minSize - 1 + realSize).ToArray();
+                            data = data.Skip(minSize - 1 + nBytes).ToArray();
 
                             return new Field(id, alpha);
                         }
@@ -190,7 +197,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(size).ToArray();
 
-                            if ((HasSpecial(alpha) || HasNumeric(alpha)) && !HasAlpha(alpha))
+                            if (HasSpecial(alpha) || HasNumeric(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres alfa.");
 
                             return new Field(id, alpha);
@@ -203,7 +210,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(minSize - 1 + realSize).ToArray();
 
-                            if ((HasSpecial(alpha) || HasNumeric(alpha)) && !HasAlpha(alpha))
+                            if (HasSpecial(alpha) || HasNumeric(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres alfa.");
 
                             return new Field(id, alpha);
@@ -223,7 +230,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(size).ToArray();
 
-                            if ((HasAlpha(special) || HasNumeric(special)) && !HasSpecial(special))
+                            if (HasAlpha(special) || HasNumeric(special))
                                 throw new FormatException("Los datos no contienen unicamente caracteres especiales.");
 
                             return new Field(id, special);
@@ -236,7 +243,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(minSize - 1 + realSize).ToArray();
 
-                            if ((HasAlpha(special) || HasNumeric(special)) && !HasSpecial(special))
+                            if (HasAlpha(special) || HasNumeric(special))
                                 throw new FormatException("Los datos no contienen unicamente caracteres especiales.");
 
                             return new Field(id, special);
@@ -280,7 +287,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(size).ToArray();
 
-                            if ((HasNumeric(alpha)) && !HasSpecial(alpha) && !HasAlpha(alpha))
+                            if (HasNumeric(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres alfa y especiales.");
 
                             return new Field(id, alpha);
@@ -293,7 +300,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(minSize - 1 + realSize).ToArray();
 
-                            if ((HasNumeric(alpha)) && !HasSpecial(alpha) && !HasAlpha(alpha))
+                            if (HasNumeric(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres alfa y especiales.");
 
                             return new Field(id, alpha);
@@ -313,7 +320,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(size).ToArray();
 
-                            if ((HasAlpha(alpha)) && !HasNumeric(alpha) && !HasSpecial(alpha))
+                            if (HasAlpha(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres especiales y numéricos.");
 
                             return new Field(id, alpha);
@@ -326,7 +333,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(minSize - 1 + realSize).ToArray();
 
-                            if ((HasSpecial(alpha)) && !HasNumeric(alpha) && !HasAlpha(alpha))
+                            if (HasAlpha(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres especiales y numéricos.");
 
                             return new Field(id, alpha);
@@ -337,39 +344,6 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                 case FieldType.Alpha | FieldType.Numeric:
 
                     /** Convesión de un campo alfanumérico **/
-
-                    if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
-                    {
-                        if (length == FieldLength.Fixed)
-                        {
-                            string alpha = Encoding.ASCII.GetString(data.Take(size).ToArray());
-
-                            data = data.Skip(size).ToArray();
-
-                            if ((HasSpecial(alpha)) && !HasNumeric(alpha) && !HasAlpha(alpha))
-                                throw new FormatException("Los datos no contienen unicamente caracteres alfa y numéricos.");
-
-                            return new Field(id, alpha);
-                        }
-                        else
-                        {
-                            byte[] vli = data.Take(minSize - 1).ToArray();
-                            int realSize = GetSize(vli, format);
-                            string alpha = Encoding.ASCII.GetString(data.Skip(minSize - 1).Take(realSize).ToArray());
-
-                            data = data.Skip(minSize - 1 + realSize).ToArray();
-
-                            if ((HasSpecial(alpha)) && !HasNumeric(alpha) && !HasAlpha(alpha))
-                                throw new FormatException("Los datos no contienen unicamente caracteres alfa y numéricos.");
-
-                            return new Field(id, alpha);
-                        }
-                    }
-                    break;
-
-                case FieldType.Alpha | FieldType.Numeric | FieldType.Special:
-
-                    /** Convesión de un campo alfanumérico y especial **/
 
                     if (format == FieldFormat.BinaryCodedDecimal)
                     {
@@ -385,14 +359,49 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                         {
                             byte[] vli = data.Take(minSize - 1).ToArray();
                             int realSize = GetSize(vli, FieldFormat.BinaryCodedDecimal);
-                            string alpha = BitConverter.ToString(data.Skip(minSize - 1).Take(realSize).ToArray()).Replace("-", "");
+                            int nBytes = (realSize / 2) % 2 == 0 ? realSize / 2 : realSize / 2 + 1;
+                            nBytes = nBytes == 0 ? nBytes + 1 : nBytes;
+                            string alpha = BitConverter.ToString(data.Skip(minSize - 1).Take(nBytes).ToArray()).Replace("-", "").Substring(0, realSize);
 
-                            data = data.Skip(minSize - 1 + realSize).ToArray();
+                            data = data.Skip(minSize - 1 + nBytes).ToArray();
 
                             return new Field(id, alpha);
                         }
                     }
                     else if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                            string alpha = Encoding.ASCII.GetString(data.Take(size).ToArray());
+
+                            data = data.Skip(size).ToArray();
+
+                            if (HasSpecial(alpha))
+                                throw new FormatException("Los datos no contienen unicamente caracteres alfa y numéricos.");
+
+                            return new Field(id, alpha);
+                        }
+                        else
+                        {
+                            byte[] vli = data.Take(minSize - 1).ToArray();
+                            int realSize = GetSize(vli, format);
+                            string alpha = Encoding.ASCII.GetString(data.Skip(minSize - 1).Take(realSize).ToArray());
+
+                            data = data.Skip(minSize - 1 + realSize).ToArray();
+
+                            if (HasSpecial(alpha))
+                                throw new FormatException("Los datos no contienen unicamente caracteres alfa y numéricos.");
+
+                            return new Field(id, alpha);
+                        }
+                    }
+                    break;
+
+                case FieldType.Alpha | FieldType.Numeric | FieldType.Special:
+
+                    /** Convesión de un campo alfanumérico y especial **/
+
+                    if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
                     {
                         if (length == FieldLength.Fixed)
                         {
@@ -416,9 +425,9 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type), "El tipo de campo no es valido para los mensajes ISO8583.");
+                    break;
             }
-            return null;
+            throw new ArgumentOutOfRangeException(nameof(type), "El tipo de campo no es valido para los mensajes ISO8583.");
         }
 
         /// <summary>
@@ -427,10 +436,232 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// </summary>
         /// <param name="size"> Longitud máxima o fija del campo. </param>
         /// <param name="type"> Tipo del campo a codificar. </param>
+        /// <param name="length"> Tipo de longitud que maneja el campo. </param>
+        /// <param name="format"> Formato del campo. </param>
+        /// <param name="padding"> Valor utilizado para rellenar el espacio del campo. </param>
         /// <returns> Un vector de bytes que representan al campo. </returns>
-        public byte[] Encode(int size, FieldType type)
+        public byte[] Encode(int size, FieldType type, FieldLength length, FieldFormat format, char padding = '0')
         {
-            return null;
+            int minSize = size;
+            int maxSize = size;
+            int realSize = Value.ToString()?.Length ?? 0;
+            object value = Value;
+
+            if (value == null)
+                throw new InvalidOperationException("No se puede enviar campos nulos a través de mensajes ISO 8583, para ello no lo incluya en el mensaje.");
+
+            switch (length)
+            {
+                case FieldLength.Fixed:
+                    minSize = size;
+                    break;
+
+                case FieldLength.Lvar:
+                    minSize = 2;
+                    break;
+
+                case FieldLength.Llvar:
+                    minSize = (format & FieldFormat.BinaryCodedDecimal) == FieldFormat.BinaryCodedDecimal ? 2 : 3;
+                    break;
+
+                case FieldLength.Lllvar:
+                    minSize = (format & FieldFormat.BinaryCodedDecimal) == FieldFormat.BinaryCodedDecimal ? 3 : 4;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(length), "El tipo de longitud del campo no es valida para los mensajes ISO8583.");
+            }
+
+            switch (format)
+            {
+                case FieldFormat.Hexadecimal:
+                    break;
+
+                case FieldFormat.BinaryCodedDecimal:
+                    if (type == FieldType.Special)
+                        throw new ArgumentOutOfRangeException(nameof(format), "El formato no es compatible con el tipo especificado para los mensajes ISO8583.");
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), "El formato del campo no es valido para los mensajes ISO8583.");
+            }
+
+            switch (type)
+            {
+                case FieldType.Numeric:
+
+                    /** Convesión de un campo numérico **/
+
+                    if (format == FieldFormat.BinaryCodedDecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                            List<byte> bytes = new List<byte>();
+                            var content = value.ToString().PadLeft(size * 2, '0').Substring(0, size * 2);
+
+                            for (int i = 0; i < content.Length; i += 2)
+                                bytes.Add(byte.Parse(content.Substring(i, 2)));
+
+                            return bytes.ToArray();
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+
+                    break;
+
+                case FieldType.Alpha:
+
+                    /** Convesión de un campo alfa **/
+
+                    if (format == FieldFormat.BinaryCodedDecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                            List<byte> bytes = new List<byte>();
+                            var content = value.ToString().PadRight(size * 2, padding).Substring(0, size * 2);
+
+                            for (int i = 0; i < content.Length; i += 2)
+                                bytes.Add(byte.Parse(content.Substring(i, 2), NumberStyles.AllowHexSpecifier));
+
+                            return bytes.ToArray();
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+
+                    break;
+
+                case FieldType.Special:
+
+                    /** Convesión de un campo especial **/
+
+                    if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+
+                    break;
+
+                case FieldType.Binary:
+
+                    /** Conversión a un campo de binario **/
+
+                    if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+
+                    break;
+
+                case FieldType.Alpha | FieldType.Special:
+
+                    /** Convesión de un campo alfa y especial **/
+
+                    if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                    }
+
+                    break;
+
+                case FieldType.Numeric | FieldType.Special:
+
+                    /** Convesión de un campo numérico y especial **/
+
+                    if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+
+                    break;
+
+                case FieldType.Alpha | FieldType.Numeric:
+
+                    /** Convesión de un campo alfanumérico **/
+
+                    if (format == FieldFormat.BinaryCodedDecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                            List<byte> bytes = new List<byte>();
+                            var content = value.ToString().PadRight(size * 2, padding).Substring(0, size * 2);
+
+                            for (int i = 0; i < content.Length; i += 2)
+                                bytes.Add(byte.Parse(content.Substring(i, 2), NumberStyles.AllowHexSpecifier));
+
+                            return bytes.ToArray();
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+
+                    break;
+
+                case FieldType.Alpha | FieldType.Numeric | FieldType.Special:
+
+                    /** Convesión de un campo alfanumérico y especial **/
+
+                    if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
+                    {
+                        if (length == FieldLength.Fixed)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+            throw new ArgumentOutOfRangeException(nameof(type), "El tipo de campo no es valido para los mensajes ISO8583.");
         }
 
         /// <summary>
@@ -453,7 +684,10 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// <returns> Un valor true si la cadena cumple la condición. </returns>
         private static bool HasAlpha(string text)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < text.Length; i++)
+                if ((text[i] > 39 || text[i] < 30) && text[i] < 128)
+                    return true;
+            return false;
         }
 
         /// <summary>
@@ -463,7 +697,10 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// <returns> Un valor true si la cadena cumple la condición. </returns>
         private static bool HasNumeric(string text)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < text.Length; i++)
+                if (text[i] >= 30 && text[i] <= 39)
+                    return true;
+            return false;
         }
 
         /// <summary>
@@ -473,7 +710,10 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// <returns>Un valor true si la cadena cumple la condición.</returns>
         private static bool HasSpecial(string text)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < text.Length; i++)
+                if (text[i] >= 128)
+                    return true;
+            return false;
         }
     }
 }
