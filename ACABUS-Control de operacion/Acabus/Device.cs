@@ -20,38 +20,52 @@ namespace ACABUS_Control_de_operacion.Acabus
             /// Kiosko de venta y recarga.
             /// </summary>
             KVR,
+
             /// <summary>
             /// Torniquete de E/S.
             /// </summary>
             TOR,
+
             /// <summary>
             /// Torniquete Doble E/S.
             /// </summary>
             TD,
+
             /// <summary>
             /// Torniquete Simple de E/S.
             /// </summary>
             TS,
+
             /// <summary>
             /// Puerta para personas de movilidad reducida.
             /// </summary>
             PMR,
+
             /// <summary>
             /// Grabador de video en red
             /// </summary>
             NVR,
+
             /// <summary>
             /// Switch de estación
             /// </summary>
             SW,
+
             /// <summary>
             /// Concentrador de estación
             /// </summary>
-            CDE
+            CDE,
+
+            /// <summary>
+            /// PC Abordo
+            /// </summary>
+            PCA,
+
+            RN
         }
 
         /// <summary>
-        /// Hace la conversión de una cadena valida a una 
+        /// Hace la conversión de una cadena valida a una
         /// instancia tipo de equipo.
         /// </summary>
         /// <param name="value">Cadena a convertir</param>
@@ -62,20 +76,33 @@ namespace ACABUS_Control_de_operacion.Acabus
             {
                 case "KVR":
                     return DeviceType.KVR;
+
                 case "PMR":
                     return DeviceType.PMR;
+
                 case "TOR":
                     return DeviceType.TOR;
+
                 case "TS":
                     return DeviceType.TS;
+
                 case "TD":
                     return DeviceType.TD;
+
                 case "NVR":
                     return DeviceType.NVR;
+
                 case "SW":
                     return DeviceType.SW;
+
                 case "CDE":
                     return DeviceType.CDE;
+
+                case "PCA":
+                    return DeviceType.PCA;
+
+                case "RN":
+                    return DeviceType.RN;
             }
             return null;
         }
@@ -119,7 +146,7 @@ namespace ACABUS_Control_de_operacion.Acabus
         }
 
         /// <summary>
-        /// Obtiene el identificador del equipo en la 
+        /// Obtiene el identificador del equipo en la
         /// estación.
         /// </summary>
         public Int16 ID { get; protected set; }
@@ -145,7 +172,7 @@ namespace ACABUS_Control_de_operacion.Acabus
         public Boolean HasDataBase { get; set; }
 
         /// <summary>
-        /// Obtiene la estación a la que pertenece el 
+        /// Obtiene la estación a la que pertenece el
         /// equipo.
         /// </summary>
         [XmlAnnotation(Ignore = true)] public Station Station { get; protected set; }
@@ -186,7 +213,5 @@ namespace ACABUS_Control_de_operacion.Acabus
             var deviceID = ID.ToString("D2");
             return String.Format("{0}{1}{2}{3}", type, trunkID, stationID, deviceID);
         }
-
-
     }
 }

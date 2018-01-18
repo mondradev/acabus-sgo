@@ -95,6 +95,8 @@ namespace ACABUS_Control_de_operacion
 
                     String query = device.Type == Device.DeviceType.KVR
                                                         ? AcabusData.PENDING_INFO_TO_SEND_DEVICE_R_S
+                                                        : device.Type == Device.DeviceType.RN
+                                                        ? AcabusData.PENDING_INFO_TO_SEND_DEVICE_RN
                                                         : AcabusData.PENDING_INFO_TO_SEND_DEVICE_I_O;
                     if (!device.Station.Connected)
                         continue;
@@ -148,7 +150,6 @@ namespace ACABUS_Control_de_operacion
             }
         }
 
-
         private Device[] GetDevice()
         {
             List<Device> devices = new List<Device>();
@@ -168,6 +169,8 @@ namespace ACABUS_Control_de_operacion
                             if (device.Type == Device.DeviceType.PMR && pmrCheck.Checked)
                                 devices.Add(device);
                             if (device.Type == Device.DeviceType.TOR && toresCheck.Checked)
+                                devices.Add(device);
+                            if ((device.Type == Device.DeviceType.RN || device.Type == Device.DeviceType.PCA) && pcaCheck.Checked)
                                 devices.Add(device);
                         }
                         else
@@ -265,7 +268,6 @@ namespace ACABUS_Control_de_operacion
             stopTaskButton.Enabled = false;
         }
 
-
         private void LoadDevices()
         {
             deviceList.Items.Clear();
@@ -280,7 +282,6 @@ namespace ACABUS_Control_de_operacion
                             deviceList.Items.Add(device.GetNumeSeri());
                         }
                     }
-
                 }
             deviceList.SelectedIndex = 0;
         }

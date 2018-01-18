@@ -48,6 +48,7 @@
             this.runQueryButton = new System.Windows.Forms.Button();
             this.checkReplicaButton = new System.Windows.Forms.Button();
             this.stopTaskButton = new System.Windows.Forms.Button();
+            this.pcaCheck = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.resultTable)).BeginInit();
             this.statusBarra.SuspendLayout();
             this.SuspendLayout();
@@ -125,17 +126,17 @@
             // 
             this.queryBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.queryBox.Location = new System.Drawing.Point(12, 196);
+            this.queryBox.Location = new System.Drawing.Point(12, 216);
             this.queryBox.Multiline = true;
             this.queryBox.Name = "queryBox";
             this.queryBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.queryBox.Size = new System.Drawing.Size(535, 323);
+            this.queryBox.Size = new System.Drawing.Size(535, 303);
             this.queryBox.TabIndex = 9;
             // 
             // queryLabel
             // 
             this.queryLabel.AutoSize = true;
-            this.queryLabel.Location = new System.Drawing.Point(11, 157);
+            this.queryLabel.Location = new System.Drawing.Point(8, 189);
             this.queryLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.queryLabel.Name = "queryLabel";
             this.queryLabel.Size = new System.Drawing.Size(119, 24);
@@ -229,11 +230,24 @@
             this.stopTaskButton.UseVisualStyleBackColor = true;
             this.stopTaskButton.Click += new System.EventHandler(this.StopTaskButtonOnClick);
             // 
+            // pcaCheck
+            // 
+            this.pcaCheck.AutoSize = true;
+            this.pcaCheck.Checked = true;
+            this.pcaCheck.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.pcaCheck.Location = new System.Drawing.Point(15, 148);
+            this.pcaCheck.Name = "pcaCheck";
+            this.pcaCheck.Size = new System.Drawing.Size(65, 28);
+            this.pcaCheck.TabIndex = 20;
+            this.pcaCheck.Text = "PCA";
+            this.pcaCheck.UseVisualStyleBackColor = true;
+            // 
             // SQLModule
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1182, 553);
+            this.Controls.Add(this.pcaCheck);
             this.Controls.Add(this.stopTaskButton);
             this.Controls.Add(this.checkReplicaButton);
             this.Controls.Add(this.runQueryButton);
@@ -280,5 +294,6 @@
         private System.Windows.Forms.Button runQueryButton;
         private System.Windows.Forms.Button checkReplicaButton;
         private System.Windows.Forms.Button stopTaskButton;
+        private System.Windows.Forms.CheckBox pcaCheck;
     }
 }

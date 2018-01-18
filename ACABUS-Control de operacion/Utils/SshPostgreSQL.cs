@@ -29,7 +29,9 @@ namespace ACABUS_Control_de_operacion.Utils
             };
         }
 
-        private SshPostgreSQL() { }
+        private SshPostgreSQL()
+        {
+        }
 
         public String[][] ExecuteQuerySsh(String query)
         {
@@ -55,9 +57,9 @@ namespace ACABUS_Control_de_operacion.Utils
                             if (String.IsNullOrEmpty(response))
                                 throw new Exception(String.Format("El host {0} no respondió", this.Host));
                             break;
-
                         }
                     }
+                    attempts++;
                 }
                 catch (Exception ex)
                 {
