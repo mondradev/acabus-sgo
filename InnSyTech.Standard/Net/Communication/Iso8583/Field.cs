@@ -67,10 +67,9 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// <param name="type"> Tipo del campo a decodificar. </param>
         /// <param name="length"> Tipo de longitud del campo. </param>
         /// <param name="format"> Formato de contenido del campo. </param>
-        /// <param name="padding">Caracter de relleno.</param>
         /// <returns> El campo decodificado. </returns>
         public static Field Decode(int id, ref byte[] data, int size, FieldType type, FieldLength length = FieldLength.Fixed,
-            FieldFormat format = FieldFormat.Hexadecimal, char padding = 'F')
+            FieldFormat format = FieldFormat.Hexadecimal)
         {
             int minSize = size;
 
@@ -200,7 +199,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                             if (HasSpecial(alpha) || HasNumeric(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres alfa.");
 
-                            return new Field(id, alpha);
+                            return new Field(id, alpha.Trim());
                         }
                         else
                         {
@@ -213,7 +212,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                             if (HasSpecial(alpha) || HasNumeric(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres alfa.");
 
-                            return new Field(id, alpha);
+                            return new Field(id, alpha.Trim());
                         }
                     }
                     break;
@@ -233,7 +232,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                             if (HasAlpha(special) || HasNumeric(special))
                                 throw new FormatException("Los datos no contienen unicamente caracteres especiales.");
 
-                            return new Field(id, special);
+                            return new Field(id, special.Trim());
                         }
                         else
                         {
@@ -246,7 +245,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                             if (HasAlpha(special) || HasNumeric(special))
                                 throw new FormatException("Los datos no contienen unicamente caracteres especiales.");
 
-                            return new Field(id, special);
+                            return new Field(id, special.Trim());
                         }
                     }
                     break;
@@ -260,9 +259,13 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                     if (length == FieldLength.Fixed)
                     {
+                        byte[] content = data.Take(size).ToArray();
+
                         data = data.Skip(size).ToArray();
 
-                        return new Field(id, data.Take(size));
+                        var padding = content.Reverse().TakeWhile(b => b == 0).Count();
+
+                        return new Field(id, content.Take(content.Length - padding));
                     }
                     else
                     {
@@ -290,7 +293,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                             if (HasNumeric(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres alfa y especiales.");
 
-                            return new Field(id, alpha);
+                            return new Field(id, alpha.Trim());
                         }
                         else
                         {
@@ -323,7 +326,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                             if (HasAlpha(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres especiales y numéricos.");
 
-                            return new Field(id, alpha);
+                            return new Field(id, alpha.Trim());
                         }
                         else
                         {
@@ -353,7 +356,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(size).ToArray();
 
-                            return new Field(id, alpha);
+                            return new Field(id, alpha.Trim());
                         }
                         else
                         {
@@ -379,7 +382,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                             if (HasSpecial(alpha))
                                 throw new FormatException("Los datos no contienen unicamente caracteres alfa y numéricos.");
 
-                            return new Field(id, alpha);
+                            return new Field(id, alpha.Trim());
                         }
                         else
                         {
@@ -409,7 +412,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
 
                             data = data.Skip(size).ToArray();
 
-                            return new Field(id, alpha);
+                            return new Field(id, alpha.Trim());
                         }
                         else
                         {
@@ -438,9 +441,9 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
         /// <param name="type"> Tipo del campo a codificar. </param>
         /// <param name="length"> Tipo de longitud que maneja el campo. </param>
         /// <param name="format"> Formato del campo. </param>
-        /// <param name="padding"> Valor utilizado para rellenar el espacio del campo. </param>
+        /// <param name="spaceChar">Caracter utilizado para reprensentar los espacios (default: ~).</param>
         /// <returns> Un vector de bytes que representan al campo. </returns>
-        public byte[] Encode(int size, FieldType type, FieldLength length, FieldFormat format, char padding = '0')
+        public byte[] Encode(int size, FieldType type, FieldLength length, FieldFormat format, Char spaceChar = '~')
         {
             int minSize = size;
             int maxSize = size;
@@ -506,6 +509,21 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                         }
                         else
                         {
+                            List<byte> bytes = new List<byte>();
+
+                            var text = value.ToString();
+                            int totalWidth = text.Length + (text.Length % 2);
+                            var content = text.PadLeft(totalWidth, '0').Substring(
+                                totalWidth > maxSize ? totalWidth - maxSize : 0,
+                                totalWidth > maxSize ? maxSize : totalWidth);
+                            var sizeVli = content.Length.ToString().PadLeft(minSize - 1, '0');
+
+                            content = sizeVli + content;
+
+                            for (int i = 0; i < content.Length; i += 2)
+                                bytes.Add(byte.Parse(content.Substring(i, 2)));
+
+                            return bytes.ToArray();
                         }
                     }
                     else if ((format & FieldFormat.Hexadecimal) == FieldFormat.Hexadecimal)
@@ -529,7 +547,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                         if (length == FieldLength.Fixed)
                         {
                             List<byte> bytes = new List<byte>();
-                            var content = value.ToString().PadRight(size * 2, padding).Substring(0, size * 2);
+                            var content = value.ToString().PadRight(size * 2, '0').Substring(0, size * 2);
 
                             for (int i = 0; i < content.Length; i += 2)
                                 bytes.Add(byte.Parse(content.Substring(i, 2), NumberStyles.AllowHexSpecifier));
@@ -619,7 +637,7 @@ namespace InnSyTech.Standard.Net.Communication.Iso8583
                         if (length == FieldLength.Fixed)
                         {
                             List<byte> bytes = new List<byte>();
-                            var content = value.ToString().PadRight(size * 2, padding).Substring(0, size * 2);
+                            var content = value.ToString().PadRight(size * 2, spaceChar).Substring(0, size * 2);
 
                             for (int i = 0; i < content.Length; i += 2)
                                 bytes.Add(byte.Parse(content.Substring(i, 2), NumberStyles.AllowHexSpecifier));
