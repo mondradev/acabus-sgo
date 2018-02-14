@@ -101,22 +101,19 @@ namespace Acabus.Modules.CctvReports.ViewModels
 
         public IEnumerable<DeviceType> AllDeviceTypes
             => Enum.GetValues(typeof(DeviceType)).Cast<DeviceType>()
-            .Where(dt => !SelectedDeviceTypes.Contains(dt)
+            .Where(dt => !SelectedDeviceTypes.Any(sdt => (sdt | dt) == sdt)
                 && !new[] {
                     DeviceType.TS,
                     DeviceType.TSI,
                     DeviceType.TD,
-                    DeviceType.APP,
                     DeviceType.CONT,
-                    DeviceType.DB,
                     DeviceType.DSPB,
                     DeviceType.MON,
                     DeviceType.MRV,
                     DeviceType.PCA,
-                    DeviceType.PDE,
                     DeviceType.TA,
                     DeviceType.UNKNOWN
-                }.Contains(dt))
+                }.Any(sdt => (sdt | dt) == sdt))
             .OrderBy(dt => dt.Translate());
 
         public IEnumerable<Station> AllStations => Core.DataAccess.AcabusData.AllStations
@@ -128,7 +125,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
         public ICommand CloseCommand { get; }
 
         public IEnumerable<String> DeviceFaults
-                            => Core.DataAccess.AcabusData.AllFaults.Where(f => GetDevicesTypes().Contains(f.Category.DeviceType))
+                            => Core.DataAccess.AcabusData.AllFaults.Where(f => GetDevicesTypes().Any(sdt => (sdt | f.Category.DeviceType) == f.Category.DeviceType))
                             .GroupBy(f => f.Description)
                             .Where(g => g.Count() == GetDevicesTypes().Count())
                             .Select(g => g.FirstOrDefault().Description)
@@ -183,7 +180,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 _selectedDeviceType = value;
                 OnPropertyChanged(nameof(SelectedDeviceType));
 
-                if (value != null && value != DeviceType.UNKNOWN && !SelectedDeviceTypes.Contains(value.Value))
+                if (value != null && value != DeviceType.UNKNOWN && !SelectedDeviceTypes.Any(sdt => (sdt | value.Value) == sdt))
                 {
                     (_selectedDeviceTypes as ObservableCollection<DeviceType>).Add(value.Value);
 
@@ -326,7 +323,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
         }
 
         private DeviceFault GetDeviceFault(string selectedDescription, DeviceType type)
-            => Core.DataAccess.AcabusData.AllFaults.FirstOrDefault(f => f.Description == selectedDescription && f.Category?.DeviceType == type);
+            => Core.DataAccess.AcabusData.AllFaults.FirstOrDefault(f => f.Description == selectedDescription && (f.Category?.DeviceType | type) == f.Category?.DeviceType);
 
         private IEnumerable<DeviceType> GetDevicesTypes()
                                             => SelectedDevices.Select(m => m.SelectedDevice.Type).Distinct();
@@ -341,7 +338,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
                 if (SelectedStations.Count == 0) return;
 
                 foreach (var item in _selectedStations.Select(s => s.Devices).Merge()
-                    .Where(d => SelectedDeviceTypes.Contains(d.Type) || (SelectedDeviceTypes.Contains(DeviceType.TOR) && new[] { DeviceType.TD, DeviceType.TS, DeviceType.TSI }.Contains(d.Type))))
+                    .Where(d => SelectedDeviceTypes.Any(sdt => (d.Type | sdt) == sdt)))
                     _selectedDevices.Add(new MultiIncidenceItem() { SelectedDevice = item, Observations = "" });
             }
             finally

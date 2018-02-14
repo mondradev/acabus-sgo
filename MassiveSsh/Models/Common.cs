@@ -7,47 +7,27 @@ namespace Acabus.Models
         /// <summary>
         ///
         /// </summary>
-        MANTTO,
+        MANTTO = 1,
 
         /// <summary>
         ///
         /// </summary>
-        MANTTO_SUPERVISOR,
+        SUPERVISOR = 2,
 
         /// <summary>
         ///
         /// </summary>
-        SUPERVISOR,
+        SUPPORT = 4,
 
         /// <summary>
         ///
         /// </summary>
-        SUPERVISOR_SUPPORT,
+        DATABASE = 8,
 
         /// <summary>
         ///
         /// </summary>
-        SUPPORT,
-
-        /// <summary>
-        ///
-        /// </summary>
-        SUPPORT_DATABASE,
-
-        /// <summary>
-        ///
-        /// </summary>
-        DATABASE,
-
-        /// <summary>
-        ///
-        /// </summary>
-        DATABASE_IT_MANAGER,
-
-        /// <summary>
-        ///
-        /// </summary>
-        IT_MANAGER
+        IT_MANAGER = 16
     }
 
     /// <summary>
@@ -63,127 +43,107 @@ namespace Acabus.Models
         /// <summary>
         /// Kiosko de venta y recarga.
         /// </summary>
-        KVR,
-
-        /// <summary>
-        /// Torniquete de E/S.
-        /// </summary>
-        TOR,
+        KVR = 1,
 
         /// <summary>
         /// Torniquete Doble E/S.
         /// </summary>
-        TD,
+        TD = 2,
 
         /// <summary>
-        /// Torniquete Simple de E/S.
+        /// Torniquete de salida.
         /// </summary>
-        TS,
+        TS = 4,
 
         /// <summary>
-        /// Torniquete de Salida.
+        /// Torniquete simple.
         /// </summary>
-        TSI,
+        TSI = 8,
 
         /// <summary>
         /// Paso de movilidad reducida.
         /// </summary>
-        PMR,
+        PMR = 16,
 
         /// <summary>
         /// Grabador de video en red.
         /// </summary>
-        NVR,
+        NVR = 32,
 
         /// <summary>
         /// Switch de estación.
         /// </summary>
-        SW,
+        SW = 64,
 
         /// <summary>
         /// Concentrador de estación.
         /// </summary>
-        CDE,
-
-        /// <summary>
-        /// Servidor de aplicación.
-        /// </summary>
-        APP,
-
-        /// <summary>
-        /// Servidor de patio de encierro.
-        /// </summary>
-        PDE,
-
-        /// <summary>
-        /// Servidor base de datos.
-        /// </summary>
-        DB,
+        CDE = 128,
 
         /// <summary>
         /// Display Bus
         /// </summary>
-        DSPB,
+        DSPB = 256,
 
         /// <summary>
         /// Display
         /// </summary>
-        DSPL,
+        DSPL = 512,
 
         /// <summary>
         /// Contador de pasajeros.
         /// </summary>
-        CONT,
+        CONT = 1024,
 
         /// <summary>
         /// Grabador de video móvil.
         /// </summary>
-        MRV,
+        MRV = 2048,
 
         /// <summary>
         /// Torniquete abordo.
         /// </summary>
-        TA,
-
-        /// <summary>
-        /// Camara.
-        /// </summary>
-        CAM,
+        TA = 4096,
 
         /// <summary>
         /// Monitor.
         /// </summary>
-        MON,
+        MON = 8192,
 
         /// <summary>
         /// PC Abordo.
         /// </summary>
-        PCA,
+        PCA = 16384,
 
         /// <summary>
         /// Planta electrógena de estación.
         /// </summary>
-        PGE,
+        PGE = 32768,
 
         /// <summary>
         /// Rack de estación.
         /// </summary>
-        RACK,
+        RACK = 65536,
 
         /// <summary>
         /// Luminarias
         /// </summary>
-        LIGHT,
+        LIGHT = 131072,
 
         /// <summary>
         /// Bocina SITI
         /// </summary>
-        SPEAKER,
+        SPEAKER = 262144,
 
         /// <summary>
-        /// Camara de bala
+        /// Torniquetes de estación
         /// </summary>
-        WALLCAM
+        TOR = TD | TS | TSI,
+
+        /// <summary>
+        /// Display SITI
+        /// </summary>
+        DSP = DSPB | DSPL
     }
 
     /// <summary>

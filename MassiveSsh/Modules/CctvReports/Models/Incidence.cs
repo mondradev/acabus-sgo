@@ -288,14 +288,15 @@ namespace Acabus.Modules.CctvReports.Models
                     : String.IsNullOrEmpty(Device.NumeSeri)
                         ? String.Format("{0} {1}", Device.Station, Device)
                         : Device.ToString(),
-                String.Format("*{0}*, {1}", Description?.Category?.Description, Description),
+                Description,
                 AssignedAttendance is null
                 ? String.Empty
                 : String.Format("\n*Asignado:* {0}", AssignedAttendance),
                 String.IsNullOrEmpty(Observations?.Trim())
                 ? String.Empty
                 : String.Format("\n*Observaciones:* {0}", Observations?.Trim().ToUpper()),
-                Priority == Priority.HIGH ? CalculateExpiration(this) : String.Empty);
+                Priority == Priority.HIGH ? CalculateExpiration(this) : String.Empty)
+                .ToUpper();
         }
 
         /// <summary>

@@ -121,7 +121,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
                         .GroupBy(fault => fault.Description)
                         .Select(group => group.FirstOrDefault())
                     : Core.DataAccess.AcabusData.AllFaults
-                        .Where(fault => fault.Category.DeviceType == SelectedDevice.Type))
+                        .Where(fault => (fault.Category.DeviceType | SelectedDevice.Type) == fault.Category.DeviceType))
             .OrderBy(fault => fault.Description);
 
         public IEnumerable<AssignableSection> AllLocations => IsBusIncidences

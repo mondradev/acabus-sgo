@@ -20,7 +20,6 @@ namespace Acabus.Modules.CctvReports.Services
 {
     public static class CctvService
     {
-        private const string NEED_BACKUP = "SE REQUIERE BACKUP";
         private const string SEARCH_FILL_STOCK = "select fch_oper, uid_tarj, tarj_sumi from sitm_disp.sbop_sum_tarj where date(fch_oper)=date(now())-1 and upper(tipo_oper)='S'";
         private const string SEARCH_PICKUP_MONEY = "SELECT min(FCH_RECA) fch_oper, UID_TARJ FROM SITM_DISP.SBOP_RECA WHERE DATE(FCH_RECA)=DATE(NOW())-1 GROUP BY UID_TARJ";
 
@@ -41,10 +40,10 @@ namespace Acabus.Modules.CctvReports.Services
         {
             if (alarm is null) return null;
 
-            var deviceType = alarm?.Device?.Type;
+            var deviceType = alarm.Device?.Type ?? DeviceType.UNKNOWN;
             var description = alarm?.Description;
 
-            var faults = Core.DataAccess.AcabusData.AllFaults.Where(fault => (fault as DeviceFault).Category?.DeviceType == deviceType);
+            var faults = Core.DataAccess.AcabusData.AllFaults.Where(fault => (fault.Category.DeviceType | deviceType) == fault.Category.DeviceType);
 
             switch (description)
             {
@@ -52,77 +51,84 @@ namespace Acabus.Modules.CctvReports.Services
                 case "FALLA TARJETA IO":
                 case "COMUNICACIÓN CON VALIDADOR TARJETA ADR":
                 case "NO SE PUDO ESTABLECER COMUNICACIÓN CON LA TARJETA ES (ADR)":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("FUERA DE SERVICIO"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("FUERA DE SERVICIO") || fault.Description.ToUpper().Contains("PASMADO"));
 
                 case "AUTENTICACION USUARIO MANTENIMIENTO":
-                    return faults.FirstOrDefault(f => f.Description.Contains("AUTENTICACION USUARIO MANTENIMIENTO"));
+                    return faults.FirstOrDefault(f => f.Description.ToUpper().Contains("AUTENTICACIÓN DE TARJETA DE MANTENIMIENTO"));
 
                 case "AUTENTICACION USUARIO RECAUDADOR":
-                    return faults.FirstOrDefault(f => f.Description.Contains("AUTENTICACION USUARIO RECAUDADOR"));
+                    return faults.FirstOrDefault(f => f.Description.ToUpper().Contains("AUTENTICACIÓN DE TARJETA DE RECAUDO"));
 
                 case "FALLA SAM AV RECARGA":
                 case "FALLA LECTOR RECARGA":
                 case "FALLA EN LECTOR RECARGA":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("SIN LECTURA DE TARJETAS"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("NO LEE TARJETAS"));
 
                 case "ALCANCIA LLENA":
                 case "ALCANCÍA LLENA":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("MONEDAS ATASCADAS, NOTIFICAR EL TOTAL E INTRODUCIRLO A LA ALCANCÍA"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("MONEDA ATASCADA"));
 
                 case "FALLA EN IMPRESORA":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("NO IMPRIMIÓ TICKET E IMPRIMIR TICKET DE PRUEBA"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("PAPEL DE IMPRESORA AGOTADO"));
 
                 case "FALLA EN VALIDADOR DE BILLETES":
                 case "FALLA BILLETERO":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("NO ACEPTA BILLETES"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("NO ACEPTA BILLETES"));
 
                 case "FUERA DE SERVICIO":
                 case "ALARMA SONORA ACTIVADA":
                     return faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("FUERA DE SERVICIO"));
+                        => fault.Description.ToUpper().Contains("EQUIPO PASMADO"));
 
                 case "FALLA EN EXPENDEDOR":
                 case "FALLA EN EL DISPENSADOR":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("TARJETA ATASCADA"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("NO HAY VENTA"));
 
                 case "TARJETAS POR AGOTARSE":
-                    return faults.FirstOrDefault(f => f.Description.Contains("TARJETAS POR AGOTARSE"));
+                    return faults.FirstOrDefault(f => f.Description.ToUpper().Contains("TARJETAS PARA VENTA"));
 
                 case "FALLA SAM AV2 VENTA":
                 case "FALLA LECTOR VENTA":
                     alarm.Comments = "FALLA LECTORA DE VENTA";
-                    return faults.FirstOrDefault(f => f.Description.Contains("SIN VENTA"));
+                    return faults.FirstOrDefault(f => f.Description.ToUpper().Contains("NO HAY VENTA"));
 
                 case "SIN TARJETAS PARA VENTA":
-                    return faults.FirstOrDefault(f => f.Description.Contains("SIN VENTA"));
+                    alarm.Comments = "SUMINISTRO ACTUAL: 0";
+                    return faults.FirstOrDefault(f => f.Description.ToUpper().Contains("TARJETAS PARA VENTA"));
 
                 case "BILLETERA LLENA":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("BILLETE ATASCADO, NOTIFICAR EL TOTAL Y CANALIZAR EL DINERO A CAU"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("BILLETE ATASCADO"));
 
                 case "FALLA ENERGIA":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("APAGADO"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("APAGADO"));
 
                 case "FALLA EN VALIDADOR DE MONEDAS":
                 case "FALLA MONEDERO":
-                    return (DeviceFault)faults.FirstOrDefault(fault
-                        => (fault as DeviceFault).Description.Contains("NO ACEPTA MONEDAS"));
+                    return faults.FirstOrDefault(fault
+                        => fault.Description.ToUpper().Contains("NO ACEPTA MONEDAS"));
 
-                case "FALLA CONTADOR EN CERO":
-                    return faults.FirstOrDefault(fault => fault.Description.Contains("NO SE TIENE CONTEO DE PASAJEROS"));
+                case "FALLA CONTADOR SUB/BAJ":
+                    return faults.FirstOrDefault(fault => fault.Description.ToUpper().Contains("NO SE TIENE CONTEO DE SUBIDA, NI DE BAJADA"));
 
-                case "FALLA CONTADOR":
-                    return faults.FirstOrDefault(fault => fault.Description.Contains("EL CONTEO DE PASAJEROS ES MENOR A LAS VALIDACIONES"));
+                case "FALLA CONTADOR EN SUBIDA":
+                    return faults.FirstOrDefault(fault => fault.Description.ToUpper().Contains("NO SE TIENE CONTEO DE SUBIDA,"));
 
-                case NEED_BACKUP:
-                    return faults.FirstOrDefault(fault => fault.Description.Contains("INFORMACIÓN DE LAS OPERACIONES"));
+                case "SE REQUIERE BACKUP":
+                    return faults.FirstOrDefault(fault => fault.Description.ToUpper().Contains("NO SE TIENE INFORMACIÓN"));
+
+                case "RECAUDO DE VALORES":
+                    return faults.FirstOrDefault(f => f.Description.ToUpper().Contains("RECAUDO DE VALORES"));
+
+                case "SUMINISTRO DE TARJETAS":
+                    return faults.FirstOrDefault(f => f.Description.ToUpper().Equals("EXPENDEDOR DE TARJETAS."));
 
                 default:
                     return null;
@@ -182,6 +188,11 @@ namespace Acabus.Modules.CctvReports.Services
                     var incidenceDatetime = incidence.StartDate;
                     alarmDatetime = alarmDatetime.AddMilliseconds(alarmDatetime.Millisecond * -1);
                     incidenceDatetime = incidenceDatetime.AddMilliseconds(incidenceDatetime.Millisecond * -1);
+
+                    if (incidence.Description.IsMulti && alarm.DateTime.Equals(incidence.StartDate))
+                        return true;
+                    else if (incidence.Description.IsMulti)
+                        return false;
 
                     if (alarmDatetime.Equals(incidenceDatetime) || incidence.Status != IncidenceStatus.CLOSE
                         || (incidence.Status == IncidenceStatus.CLOSE && alarm.DateTime < incidence.StartDate))
@@ -308,7 +319,7 @@ namespace Acabus.Modules.CctvReports.Services
                                                           && device.Vehicle.EconomicNumber == economicNumber);
                     if (alarmDevice == null)
                     {
-                        Trace.WriteLine($"ALARMA [{row[3]}] DE CONTADOR DE PASAJEROS DEL VEHÍCULO DESCONOCIDO DESCONOCIDO ({economicNumber}) FUE IGNORADA", "NOTIFY");
+                        Trace.WriteLine($"ALARMA [{row[4]}] DE CONTADOR DE PASAJEROS DEL VEHÍCULO DESCONOCIDO DESCONOCIDO ({economicNumber}) FUE IGNORADA", "NOTIFY");
                         continue;
                     }
 
@@ -316,9 +327,9 @@ namespace Acabus.Modules.CctvReports.Services
                         => alarms.Add(new Alarm(0)
                         {
                             DateTime = DateTime.Now,
-                            Description = row[3],
+                            Description = row[4],
                             Device = alarmDevice,
-                            Priority = row[3].Contains("CERO") ? Priority.HIGH : Priority.MEDIUM
+                            Priority = row[4].Contains("SUB/BAJ") ? Priority.HIGH : Priority.MEDIUM
                         }));
                 }
             }
@@ -370,7 +381,7 @@ namespace Acabus.Modules.CctvReports.Services
                                         "SUMINISTRO DE TARJETAS",
                                         operationDate,
                                         Priority.NONE,
-                                        String.Format("TOTAL SUMINISTRADAS: {0}, UID MANTTO: {1}", totalStock, uid),
+                                        String.Format("TARJETAS SUMINISTRADAS: {0}, UID MANTTO: {1}", totalStock, uid),
                                         true));
                                 });
                         }
@@ -408,7 +419,7 @@ namespace Acabus.Modules.CctvReports.Services
                     foreach (var alert in alarms.Where(alarm => alarm.Device != null
                                                     && (alarm.Device.NumeSeri == serie || (alarm.Device.Vehicle != null
                                                     && alarm.Device.Vehicle.EconomicNumber == serie))))
-                        if (alert.Description == NEED_BACKUP)
+                        if (alert.Description == "SE REQUIERE BACKUP")
                             exists = true;
                     if (!exists)
                     {
@@ -420,7 +431,7 @@ namespace Acabus.Modules.CctvReports.Services
                                                                   && device.NumeSeri == serie));
                         if (alarmDevice == null)
                         {
-                            Trace.WriteLine($"ALARMA [{NEED_BACKUP}] DE EQUIPO DESCONOCIDO ({serie}) FUE IGNORADA", "NOTIFY");
+                            Trace.WriteLine($"ALARMA [{"SE REQUIERE BACKUP"}] DE EQUIPO DESCONOCIDO ({serie}) FUE IGNORADA", "NOTIFY");
                             continue;
                         }
 
@@ -428,7 +439,7 @@ namespace Acabus.Modules.CctvReports.Services
                             => alarms.Add(new Alarm(0)
                             {
                                 DateTime = DateTime.Now,
-                                Description = NEED_BACKUP,
+                                Description = "SE REQUIERE BACKUP",
                                 Device = alarmDevice,
                                 Priority = Priority.HIGH
                             }));

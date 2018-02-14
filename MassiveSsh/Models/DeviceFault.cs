@@ -28,6 +28,11 @@ namespace Acabus.Models
         private UInt64 _id;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="IsMulti" />.
+        /// </summary>
+        private bool _isMulti;
+
+        /// <summary>
         /// Crea una instancia básica de <see cref="DeviceFault"/>
         /// </summary>
         public DeviceFault()
@@ -94,12 +99,15 @@ namespace Acabus.Models
         }
 
         /// <summary>
-        /// Representa en una cadena la falla actual.
+        /// Obtiene o establece si la falla se puede reportar varias veces.
         /// </summary>
-        /// <returns>Una cadena que representa la instancia.</returns>
-        public override string ToString() => Description;
-
-        public override int GetHashCode() => base.GetHashCode();
+        public bool IsMulti {
+            get => _isMulti;
+            set {
+                _isMulti = value;
+                OnPropertyChanged(nameof(IsMulti));
+            }
+        }
 
         public override bool Equals(object obj)
         {
@@ -111,5 +119,13 @@ namespace Acabus.Models
 
             return Description == ((DeviceFault)obj).Description && Assignable == ((DeviceFault)obj).Assignable;
         }
+
+        public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
+        /// Representa en una cadena la falla actual.
+        /// </summary>
+        /// <returns>Una cadena que representa la instancia.</returns>
+        public override string ToString() => Description;
     }
 }

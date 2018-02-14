@@ -147,7 +147,7 @@ namespace Acabus.Modules.Attendances.ViewModels
 
             if (device.Type == DeviceType.PCA && DateTime.Now.GetWorkShift() != WorkShift.NIGHT_SHIFT
                 && fault.ID == Core.DataAccess.AcabusData.AllFaults
-                    .FirstOrDefault(f => f.Description.Contains("INFORMACIÓN") && f.Category?.DeviceType == DeviceType.PCA)?.ID
+                    .FirstOrDefault(f => f.Description.ToUpper().Contains("INFORMACIÓN") && f.Category?.DeviceType == DeviceType.PCA)?.ID
                 && DateTime.Now.DayOfWeek.Between(DayOfWeek.Monday, DayOfWeek.Friday))
                 return null;
 
@@ -159,7 +159,7 @@ namespace Acabus.Modules.Attendances.ViewModels
 
             /// Asignación por area
             attendances = attendances.Where(attendance
-               => fault.Assignable <= attendance.Technician.Area);
+               => (fault.Assignable | attendance.Technician.Area) == fault.Assignable);
 
             if (attendances.Count() == 1)
                 return attendances.First();

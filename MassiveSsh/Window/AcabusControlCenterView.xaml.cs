@@ -20,7 +20,6 @@ namespace Acabus.Window
         /// </summary>
         private Queue<String> _messages = new Queue<String>();
 
-
         /// <summary>
         /// Crea una instancia de la ventana principal.
         /// </summary>
@@ -95,8 +94,6 @@ namespace Acabus.Window
                     _messages.Dequeue();
                 }).Start();
             });
-
-
         }
     }
 }

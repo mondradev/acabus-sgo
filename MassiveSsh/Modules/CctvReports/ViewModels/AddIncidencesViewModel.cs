@@ -97,7 +97,7 @@ namespace Acabus.Modules.CctvReports
                     return null;
 
                 return Core.DataAccess.AcabusData.AllFaults
-                    .Where(fault => (fault as DeviceFault).Category.DeviceType == SelectedDevice.Type);
+                    .Where(fault => (fault.Category.DeviceType | SelectedDevice.Type) == fault.Category.DeviceType);
             }
         }
 
@@ -452,11 +452,9 @@ namespace Acabus.Modules.CctvReports
                      .Where(fault => (fault as DeviceFault).Category?.DeviceType == DeviceType.KVR);
 
                 SelectedDescription = IsMoney
-                     ? faults.Where(fault => (fault as DeviceFault).Description
-                     .Equals("MONEDAS ENCONTRADAS EN TOLVA, NOTIFICAR EL TOTAL E INTRODUCIR A LA ALCANCÍA"))
+                     ? faults.Where(fault => (fault as DeviceFault).Description.ToUpper().Contains("MONEDAS ENCONTRADAS"))
                      .FirstOrDefault() as DeviceFault
-                     : faults.Where(fault => (fault as DeviceFault).Description
-                     .Equals("BILLETE ATASCADO, NOTIFICAR EL TOTAL Y CANALIZAR EL DINERO A CAU"))
+                     : faults.Where(fault => (fault as DeviceFault).Description.ToUpper().Contains("BILLETE ATASCADO"))
                      .FirstOrDefault() as DeviceFault;
 
                 Observations = String.Format("DEVOLUCIÓN DE {0} (${1:F2}) A {2}", IsMoney ? "MONEDAS" : "BILLETE",
