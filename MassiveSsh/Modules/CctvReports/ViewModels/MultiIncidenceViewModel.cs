@@ -127,7 +127,7 @@ namespace Acabus.Modules.CctvReports.ViewModels
         public IEnumerable<String> DeviceFaults
                             => Core.DataAccess.AcabusData.AllFaults.Where(f => GetDevicesTypes().Any(sdt => (sdt | f.Category.DeviceType) == f.Category.DeviceType))
                             .GroupBy(f => f.Description)
-                            .Where(g => g.Count() == GetDevicesTypes().Count())
+                            .Where(g => g.Count() >= SelectedDeviceTypes.Count())
                             .Select(g => g.FirstOrDefault().Description)
                             .OrderBy(d => d);
 
