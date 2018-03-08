@@ -9,7 +9,6 @@ namespace ACABUS_Control_de_operacion
 {
     public partial class WeekReport : Form
     {
-
         private String weekFirstDay = "2017-04-08";
 
         public WeekReport()
@@ -17,7 +16,7 @@ namespace ACABUS_Control_de_operacion
             InitializeComponent();
         }
 
-        private void FillReport()
+        private void FillReport(String fileName = null)
         {
             Excel excel = Excel.Open(AcabusData.TEMPLATE_WEEK_REPORT);
 
@@ -43,6 +42,7 @@ namespace ACABUS_Control_de_operacion
                 foreach (String[] row in sqlResponse)
                 {
                     if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Información_Troncal-Anexo\"A\"");
                     excel.SetValue(row[1], "E" + (12 + i));
                     excel.SetValue(row[2], "F" + (12 + i));
@@ -60,9 +60,10 @@ namespace ACABUS_Control_de_operacion
                 foreach (String[] row in sqlResponse)
                 {
                     if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Información_Troncal-Anexo\"A\"");
-                    excel.SetValue(row[1], "AE" + (12 + i));
-                    excel.SetValue(row[2], "AF" + (12 + i));
+                    excel.SetValue(row[1], "AG" + (12 + i));
+                    excel.SetValue(row[2], "AH" + (12 + i));
                     i++;
                 }
                 Trace.WriteLine("Accesos con monedero electrónico ¡Listo!", "INFO");
@@ -74,9 +75,10 @@ namespace ACABUS_Control_de_operacion
                 foreach (String[] row in sqlResponse)
                 {
                     if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Información_Troncal-Anexo\"A\"");
-                    excel.SetValue(row[1], "AG" + (12 + i));
-                    excel.SetValue(row[2], "AH" + (12 + i));
+                    excel.SetValue(row[1], "AI" + (12 + i));
+                    excel.SetValue(row[2], "AJ" + (12 + i));
                     i++;
                 }
                 Trace.WriteLine("Recargas de tarjetas ¡Listo!", "INFO");
@@ -88,12 +90,13 @@ namespace ACABUS_Control_de_operacion
                 foreach (String[] row in sqlResponse)
                 {
                     if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("DetalleValidacion");
-                    excel.SetValue(row[1], "P" + (9 + i));
-                    excel.SetValue(row[2], "Q" + (9 + i));
-                    excel.SetValue(row[3], "R" + (9 + i));
-                    excel.SetValue(row[4], "S" + (9 + i));
-                    excel.SetValue(row[5], "T" + (9 + i));
+                    excel.SetValue(row[1], "R" + (9 + i));
+                    excel.SetValue(row[2], "S" + (9 + i));
+                    excel.SetValue(row[3], "T" + (9 + i));
+                    excel.SetValue(row[4], "U" + (9 + i));
+                    excel.SetValue(row[5], "V" + (9 + i));
                     i++;
                 }
                 Trace.WriteLine("Detalle Validación - Vehículos ¡Listo!", "INFO");
@@ -105,12 +108,13 @@ namespace ACABUS_Control_de_operacion
                 foreach (String[] row in sqlResponse)
                 {
                     if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("DetalleValidacion");
-                    excel.SetValue(row[1], "H" + (9 + i));
-                    excel.SetValue(row[2], "I" + (9 + i));
-                    excel.SetValue(row[3], "J" + (9 + i));
-                    excel.SetValue(row[4], "K" + (9 + i));
-                    excel.SetValue(row[5], "L" + (9 + i));
+                    excel.SetValue(row[1], "I" + (9 + i));
+                    excel.SetValue(row[2], "J" + (9 + i));
+                    excel.SetValue(row[3], "K" + (9 + i));
+                    excel.SetValue(row[4], "L" + (9 + i));
+                    excel.SetValue(row[5], "W" + (9 + i));
                     i++;
                 }
                 Trace.WriteLine("Detalle Validación - Estaciones ¡Listo!", "INFO");
@@ -122,6 +126,7 @@ namespace ACABUS_Control_de_operacion
                 foreach (String[] row in sqlResponse)
                 {
                     if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
                     excel.SetValue(row[1], "C" + (9 + i));
                     excel.SetValue(row[2], "D" + (9 + i));
@@ -136,6 +141,7 @@ namespace ACABUS_Control_de_operacion
                 foreach (String[] row in sqlResponse)
                 {
                     if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
                     excel.SetValue(row[1], "E" + (9 + i));
                     excel.SetValue(row[2], "F" + (9 + i));
@@ -158,6 +164,7 @@ namespace ACABUS_Control_de_operacion
                 foreach (String[] row in sqlResponse)
                 {
                     if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
                     excel.SetValue(row[1], "O" + (9 + i));
                     excel.SetValue(row[2], "P" + (9 + i));
@@ -178,12 +185,75 @@ namespace ACABUS_Control_de_operacion
 
                 excel.SetWorksheetActive("Contraprestación Anexo\"C\"");
                 excel.SetValue(timeLapse, "D5");
+
+                // --- Nuevos campos
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_MANTTO_TRUNK)
+                                                                               .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+                    excel.SetWorksheetActive("DetalleValidacion");
+                    excel.SetValue(row[1], "Y" + (9 + i));
+                    i++;
+                }
+                Trace.WriteLine("Detalle Validación - Mantenimiento en estaciones ¡Listo!", "INFO");
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_MANTTO_VEHI)
+                                                                             .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+                    excel.SetWorksheetActive("DetalleValidacion");
+                    excel.SetValue(row[1], "X" + (9 + i));
+                    i++;
+                }
+                Trace.WriteLine("Detalle Validación - Mantenimiento en vehiculo ¡Listo!", "INFO");
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_TPV)
+                                                                               .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+
+                    excel.SetWorksheetActive("Información_Troncal-Anexo\"A\"");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("I" + (12 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
+                    excel.SetValue(row[1], "N" + (12 + i));
+                    excel.SetValue(row[2], "O" + (12 + i));
+                    i++;
+                }
+                Trace.WriteLine("Recargas y abonos en TPV ¡Listo!", "INFO");
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex.Message, "ERROR");
                 MessageBox.Show("Ocurrió un error al generar el reporte, verifique que la comunicación a la base de datos exista.",
                                                                         "Error en reporte", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                excel.SaveAs(fileName);
+
+                excel.Close();
+                Excel.Quit();
+
+                return;
             }
 
             SaveFileDialog saveReport = new SaveFileDialog()
@@ -202,10 +272,36 @@ namespace ACABUS_Control_de_operacion
             Excel.Quit();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
             weekFirstDay = String.Format("{0:yyyy-MM-dd}", dateTimePicker1.Value);
             FillReport();
+        }
+
+        private void GenerateBtn_Click(object sender, EventArgs e)
+        {
+            var reports = Int32.Parse(cantTxt.Text);
+            var cont = 0;
+
+            if (reports <= 0)
+                return;
+
+            var ofd = new FolderBrowserDialog();
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            while (cont < reports)
+            {
+                weekFirstDay = String.Format("{0:yyyy-MM-dd}", dateTimePicker1.Value.AddDays(cont * 7));
+                var name = String.Format("Reporte_Semana_{0}_Acabus.xlsx", weekFirstDay);
+                name = Path.Combine(ofd.SelectedPath, name);
+
+                FillReport(name);
+                Trace.WriteLine("Reporte: " + name + " completado!", "INFO");
+                cont++;
+            }
+
+            Trace.WriteLine("Fin del trabajo", "INFO");
         }
     }
 }

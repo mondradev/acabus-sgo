@@ -9,7 +9,7 @@ namespace ACABUS_Control_de_operacion
 {
     public class PostgreSQL
     {
-        private const String _CONNECTION = "Server={0};Port={1};User Id={2};Password={3};Database={4};";
+        private const String _CONNECTION = "Server={0};Port={1};User Id={2};Password={3};Database={4};CommandTimeout=0";
 
         public String Username { get; protected set; }
         public String Passoword { get; protected set; }
@@ -29,7 +29,9 @@ namespace ACABUS_Control_de_operacion
             };
         }
 
-        protected PostgreSQL() { }
+        protected PostgreSQL()
+        {
+        }
 
         public virtual String[][] ExecuteQuery(String statement)
         {
