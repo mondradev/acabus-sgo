@@ -12,9 +12,9 @@ namespace Acabus
         {
             var data = new byte[] { 0xAF, 0xFC, 0xEB, 0xDE, 0xFF, 0xFF };
 
-            var field = Field.Decode(10, ref data, 6, FieldType.Alpha, FieldLength.Fixed, FieldFormat.BinaryCodedDecimal);
+            var field = new Field(20, "3B21DF");
 
-            var dataR = field.Encode(6, FieldType.Alpha, FieldLength.Fixed, FieldFormat.BinaryCodedDecimal, 'F');
+            var dataR = field.Encode(8, FieldType.Alpha, FieldLength.Fixed, FieldFormat.BinaryCodedDecimal, 'F');
         }
     }
 }

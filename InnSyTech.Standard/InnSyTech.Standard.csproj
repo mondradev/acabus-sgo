@@ -81,12 +81,14 @@
     <Compile Include="Database\Utils\DbHelper.cs" />
     <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />
     <Compile Include="Gui\GuiHelper.cs" />
-    <Compile Include="Net\Communication\Iso8583\Field.cs" />
-    <Compile Include="Net\Communication\Iso8583\FieldData.cs" />
-    <Compile Include="Net\Communication\Iso8583\Message.cs" />
-    <Compile Include="Net\Messenger\Iso8583\Client8583.cs" />
-    <Compile Include="Net\Messenger\Iso8583\Message8583.cs" />
-    <Compile Include="Net\Messenger\Iso8583\Server8583.cs" />
+    <Compile Include="Net\Communications\AdaptativeMessages\DefinitionLoader.cs" />
+    <Compile Include="Net\Communications\AdaptativeMessages\Field.cs" />
+    <Compile Include="Net\Communications\AdaptativeMessages\FieldDefinition.cs" />
+    <Compile Include="Net\Communications\AdaptativeMessages\Converters\BinaryConverter.cs" />
+    <Compile Include="Net\Communications\AdaptativeMessages\Converters\IAdaptativeConverter.cs" />
+    <Compile Include="Net\Communications\AdaptativeMessages\Converters\NumericConverter.cs" />
+    <Compile Include="Net\Communications\AdaptativeMessages\Converters\TextConverter.cs" />
+    <Compile Include="Net\Communications\AdaptativeMessages\Message.cs" />
     <Compile Include="Net\Notifications\Push\ClientPush.cs" />
     <Compile Include="Net\Notifications\Push\NotificationPush.cs" />
     <Compile Include="Net\Notifications\Push\ServerPush.cs" />
@@ -103,11 +105,6 @@
     <Compile Include="Security\Credential.cs" />
     <Compile Include="Translates\EnumTranslate.cs" />
     <Compile Include="Utils\Extension.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Net\Messenger\Iso8583\MessageTemplateSchema.xsd">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Database\PostgreSql\" />

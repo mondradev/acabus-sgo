@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InnSyTech.Standard.Net.Messenger.Iso8583
+namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages
 {
-    class Server8583
+    internal class DefinitionLoader
     {
     }
 }
