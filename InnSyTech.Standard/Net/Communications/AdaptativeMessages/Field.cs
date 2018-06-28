@@ -7,12 +7,8 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages
     /// cref="Message" />. El campo está compuesto por un identificador que lo diferencia dentro del
     /// mensaje y su valor almacenado.
     /// </summary>
-    internal sealed class Field
+    public sealed class Field
     {
-        /// <summary>
-        /// Identificador del campo.
-        /// </summary>
-        private int _id;
 
         /// <summary>
         /// Valor almacenado del campo.
@@ -26,14 +22,14 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages
         /// <param name="value"> Valor del campo. </param>
         public Field(int id, object value)
         {
-            _id = id;
+            ID = id;
             Value = value;
         }
 
         /// <summary>
         /// Obtiene el identificador del campo. Este valor lo permite diferenciar dentro del mensaje.
         /// </summary>
-        public int ID => _id;
+        public int ID { get; }
 
         /// <summary>
         /// Obtiene o establece el valor del campo. Este valor no es permitido ser nulo, de ser
@@ -42,9 +38,11 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages
         /// <exception cref="ArgumentNullException">
         /// En caso de que el valor a asignar sea nulo.
         /// </exception>
-        public object Value {
+        public object Value
+        {
             get => _value;
-            set {
+            set
+            {
                 _value = value ?? throw new ArgumentNullException("value", "El campo no puede ser asignado con un valor nulo.");
             }
         }

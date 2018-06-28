@@ -66,9 +66,6 @@ namespace InnSyTech.Standard.Net
         /// <param name="host">Dirección IPv4 a evaluar.</param>
         /// <returns>Un valor verdadero si la cadena es una dirección IPv4 válida.</returns>
         public static Boolean IsIPv4(String host)
-        {
-            return IPAddress.TryParse(host, out IPAddress ipAddr);
-        }
-
+            => IPAddress.TryParse(host, out IPAddress ipAddr);
     }
 }

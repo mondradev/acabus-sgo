@@ -13,7 +13,7 @@
     ///     }
     /// </code>
     /// </summary>
-    internal class FieldDefinition
+    public sealed class FieldDefinition
     {
         /// <summary>
         /// Crea una nueva instancia definiendo las propiedades del campo a manipular.
@@ -27,7 +27,7 @@
             ID = id;
             Type = type;
             MaxLength = maxLength;
-            IsVarLength = IsVarLength;
+            IsVarLength = isVarLength;
             Length = maxLength;
         }
 
