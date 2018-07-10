@@ -36,121 +36,6 @@ namespace Opera.Acabus.Core.DataAccess
         }
 
         /// <summary>
-        /// Obtiene los bytes que conforman una instancia <see cref="Staff"/>.
-        /// </summary>
-        /// <param name="staff">Instancia a convertir a bytes.</param>
-        /// <returns>Un vector de bytes que representan la instancia <see cref="Staff"/></returns>
-        public static Byte[] GetBytes(this Staff staff)
-        {
-            var id = staff.ID; // 8 bytes
-            var type = (byte)staff.Area;
-            var name = staff.Name;
-
-            var bid = BitConverter.GetBytes(id);
-            var bname = GetBytesFromString(name);
-            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
-
-            return new[] { bid, new[] { type }, bnameLength, bname }.Merge().ToArray();
-        }
-
-        /// <summary>
-        /// Obtiene los bytes que conforman una instancia <see cref="Bus"/>.
-        /// </summary>
-        /// <param name="bus">Instancia a convertir a bytes.</param>
-        /// <returns>Un vector de bytes que representan la instancia <see cref="Bus"/></returns>
-        public static Byte[] GetBytes(this Bus bus)
-        {
-            var id = bus.ID; // 8 bytes
-            var route = bus.Route?.ID;
-            var status = (byte)bus.Status;
-            var type = (byte)bus.Type;
-            var economic = bus.EconomicNumber;
-
-            var bid = BitConverter.GetBytes(id);
-            var broute = BitConverter.GetBytes(route ?? 0L);
-            var beconomic = GetBytesFromString(economic);
-            var beconomicLength = BitConverter.GetBytes((UInt16)beconomic.Length);
-
-            return new[] { bid, new[] { type, status }, beconomicLength, beconomic, broute }.Merge().ToArray();
-        }
-
-        /// <summary>
-        /// Obtiene los bytes que conforman una instancia <see cref="Device"/>.
-        /// </summary>
-        /// <param name="device">Instancia a convertir a bytes.</param>
-        /// <returns>Un vector de bytes que representan la instancia <see cref="Device"/></returns>
-        public static Byte[] GetBytes(this Device device)
-        {
-            var id = device.ID; // 8 bytes
-            var serial = device.SerialNumber; // n bytes
-            var ip = device.IPAddress; // 4 bytes
-            var type = (byte)device.Type; // 1 byte
-            var station = device.Station?.ID; // 8 bytes
-            var bus = device.Bus?.ID;  // 8 bytes
-
-            var bid = BitConverter.GetBytes(id);
-            var bstation = BitConverter.GetBytes(station ?? 0L);
-            var bbus = BitConverter.GetBytes(bus ?? 0L);
-            var bip = ip.GetAddressBytes();
-            var bserial = GetBytesFromString(serial);
-
-            return new[] { bid, bstation, bbus, bip, new byte[] { type }, bserial }.Merge().ToArray();
-        }
-
-        /// <summary>
-        /// Obtiene los bytes que conforman una instancia <see cref="Route"/>.
-        /// </summary>
-        /// <param name="route">Instancia a convertir a bytes.</param>
-        /// <returns>Un vector de bytes que representan la instancia <see cref="Route"/></returns>
-        public static Byte[] GetBytes(this Route route)
-        {
-            var id = route.ID; // 8 bytes
-            var name = route.Name; // n bytes
-            var assignedSection = route.AssignedSection; // n bytes
-            var type = (byte)route.Type; // 1 byte
-            var number = route.RouteNumber; // 2 bytes
-
-            if (!String.IsNullOrEmpty(assignedSection) && assignedSection.Length > 255)
-                assignedSection = assignedSection?.Substring(0, 255);
-
-            if (!String.IsNullOrEmpty(name) && name.Length > 255)
-                name = name?.Substring(0, 255);
-
-            var bid = BitConverter.GetBytes(id);
-            var bnumber = BitConverter.GetBytes(number);
-            var bassigned = GetBytesFromString(assignedSection);
-            var bname = GetBytesFromString(name);
-            var bassignedLength = BitConverter.GetBytes((UInt16)bassigned.Length);
-            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
-
-            return new[] { bid, bnumber, new[] { type }, bnameLength, bname, bassignedLength, bassigned }.Merge().ToArray();
-        }
-
-        /// <summary>
-        /// Obtiene los bytes que conforman una instancia <see cref="Station"/>.
-        /// </summary>
-        /// <param name="station">Instancia a convertir a bytes.</param>
-        /// <returns>Un vector de bytes que representan la instancia <see cref="Station"/></returns>
-        public static Byte[] GetBytes(this Station station)
-        {
-            var id = station.ID; // 8 bytes
-            var name = station.Name; // n bytes
-            var assignedSection = station.AssignedSection; // n bytes
-            var number = station.StationNumber; // 2 bytes
-            var route = station.Route?.ID;
-
-            var bid = BitConverter.GetBytes(id);
-            var bnumber = BitConverter.GetBytes(number);
-            var bassigned = GetBytesFromString(assignedSection);
-            var bname = GetBytesFromString(name);
-            var bassignedLength = BitConverter.GetBytes((UInt16)bassigned.Length);
-            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
-            var broute = BitConverter.GetBytes(route ?? 0L);
-
-            return new[] { bid, bnumber, bnameLength, bname, bassignedLength, bassigned, broute }.Merge().ToArray();
-        }
-
-        /// <summary>
         /// Obtiene una instancia <see cref="Device"/> desde un vector de bytes.
         /// </summary>
         /// <param name="bytes">Vector de bytes que contiene la instancia <see cref="Device"/>.</param>
@@ -233,12 +118,129 @@ namespace Opera.Acabus.Core.DataAccess
 
             var routeID = BitConverter.ToUInt64(bytes, 12 + nameLenght + 2 + assignationLength);
 
+            Route route = AcabusDataContext.AllRoutes?.SingleOrDefault(r => r.ID == routeID);
+
             return new Station(id, number)
             {
                 Name = name,
                 AssignedSection = assignation,
-                Route = AcabusDataContext.AllRoutes?.SingleOrDefault(r => r.ID == routeID)
+                Route = route
             };
+        }
+
+        /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Staff"/>.
+        /// </summary>
+        /// <param name="staff">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Staff"/></returns>
+        public static Byte[] Serialize(this Staff staff)
+        {
+            var id = staff.ID; // 8 bytes
+            var type = (byte)staff.Area;
+            var name = staff.Name;
+
+            var bid = BitConverter.GetBytes(id);
+            var bname = GetBytesFromString(name);
+            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
+
+            return new[] { bid, new[] { type }, bnameLength, bname }.Merge().ToArray();
+        }
+
+        /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Bus"/>.
+        /// </summary>
+        /// <param name="bus">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Bus"/></returns>
+        public static Byte[] Serialize(this Bus bus)
+        {
+            var id = bus.ID; // 8 bytes
+            var route = bus.Route?.ID;
+            var status = (byte)bus.Status;
+            var type = (byte)bus.Type;
+            var economic = bus.EconomicNumber;
+
+            var bid = BitConverter.GetBytes(id);
+            var broute = BitConverter.GetBytes(route ?? 0L);
+            var beconomic = GetBytesFromString(economic);
+            var beconomicLength = BitConverter.GetBytes((UInt16)beconomic.Length);
+
+            return new[] { bid, new[] { type, status }, beconomicLength, beconomic, broute }.Merge().ToArray();
+        }
+
+        /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Device"/>.
+        /// </summary>
+        /// <param name="device">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Device"/></returns>
+        public static Byte[] Serialize(this Device device)
+        {
+            var id = device.ID; // 8 bytes
+            var serial = device.SerialNumber; // n bytes
+            var ip = device.IPAddress; // 4 bytes
+            var type = (byte)device.Type; // 1 byte
+            var station = device.Station?.ID; // 8 bytes
+            var bus = device.Bus?.ID;  // 8 bytes
+
+            var bid = BitConverter.GetBytes(id);
+            var bstation = BitConverter.GetBytes(station ?? 0L);
+            var bbus = BitConverter.GetBytes(bus ?? 0L);
+            var bip = ip.GetAddressBytes();
+            var bserial = GetBytesFromString(serial);
+
+            return new[] { bid, bstation, bbus, bip, new byte[] { type }, bserial }.Merge().ToArray();
+        }
+
+        /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Route"/>.
+        /// </summary>
+        /// <param name="route">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Route"/></returns>
+        public static Byte[] Serialize(this Route route)
+        {
+            var id = route.ID; // 8 bytes
+            var name = route.Name; // n bytes
+            var assignedSection = route.AssignedSection; // n bytes
+            var type = (byte)route.Type; // 1 byte
+            var number = route.RouteNumber; // 2 bytes
+
+            if (!String.IsNullOrEmpty(assignedSection) && assignedSection.Length > 255)
+                assignedSection = assignedSection?.Substring(0, 255);
+
+            if (!String.IsNullOrEmpty(name) && name.Length > 255)
+                name = name?.Substring(0, 255);
+
+            var bid = BitConverter.GetBytes(id);
+            var bnumber = BitConverter.GetBytes(number);
+            var bassigned = GetBytesFromString(assignedSection);
+            var bname = GetBytesFromString(name);
+            var bassignedLength = BitConverter.GetBytes((UInt16)bassigned.Length);
+            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
+
+            return new[] { bid, bnumber, new[] { type }, bnameLength, bname, bassignedLength, bassigned }.Merge().ToArray();
+        }
+
+        /// <summary>
+        /// Obtiene los bytes que conforman una instancia <see cref="Station"/>.
+        /// </summary>
+        /// <param name="station">Instancia a convertir a bytes.</param>
+        /// <returns>Un vector de bytes que representan la instancia <see cref="Station"/></returns>
+        public static Byte[] Serialize(this Station station)
+        {
+            var id = station.ID; // 8 bytes
+            var name = station.Name; // n bytes
+            var assignedSection = station.AssignedSection; // n bytes
+            var number = station.StationNumber; // 2 bytes
+            var route = station.Route?.ID;
+
+            var bid = BitConverter.GetBytes(id);
+            var bnumber = BitConverter.GetBytes(number);
+            var bassigned = GetBytesFromString(assignedSection);
+            var bname = GetBytesFromString(name);
+            var bassignedLength = BitConverter.GetBytes((UInt16)bassigned.Length);
+            var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
+            var broute = BitConverter.GetBytes(route ?? 0L);
+
+            return new[] { bid, bnumber, bnameLength, bname, bassignedLength, bassigned, broute }.Merge().ToArray();
         }
 
         /// <summary>

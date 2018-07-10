@@ -1,11 +1,8 @@
-﻿using InnSyTech.Standard.Net.Messenger.Iso8583;
+﻿using InnSyTech.Standard.Net.Communications.AdaptativeMessages;
+using InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 
 namespace Opera.Acabus.Core.Services
@@ -16,35 +13,6 @@ namespace Opera.Acabus.Core.Services
     /// </summary>
     public sealed class AppClient
     {
-        /// <summary>
-        /// La longitud de tamaño del buffer de lectura.
-        /// </summary>
-        private readonly int BUFFER_SIZE = 1024;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="AppID" />.
-        /// </summary>
-        private Int64 _appID;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="ClientIP" />.
-        /// </summary>
-        private IPAddress _clientIP;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="ServerID" />.
-        /// </summary>
-        private Int64 _serverID;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="ServerIP" />.
-        /// </summary>
-        private IPAddress _serverIP;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="ServerPort" />.
-        /// </summary>
-        private Int32 _serverPort;
 
         /// <summary>
         /// Señala el token de cancelación.
@@ -56,37 +24,37 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         public AppClient()
         {
-            _appID = AcabusDataContext.ConfigContext.Read("App")?.ToInteger("ID") ?? 0;
-            _serverID = AcabusDataContext.ConfigContext.Read("Server")?.ToInteger("ID") ?? 0;
-            _serverPort = (Int32)(AcabusDataContext.ConfigContext.Read("Server")?.ToInteger("Port") ?? 9000);
-            _serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext.Read("Server")?.ToString("IP") ?? "127.0.0.1");
-            _clientIP = IPAddress.Any;
+            AppID = AcabusDataContext.ConfigContext.Read("App")?.ToInteger("ID") ?? 0;
+            ServerID = AcabusDataContext.ConfigContext.Read("Server")?.ToInteger("ID") ?? 0;
+            ServerPort = (Int32)(AcabusDataContext.ConfigContext.Read("Server")?.ToInteger("Port") ?? 9000);
+            ServerIP = IPAddress.Parse(AcabusDataContext.ConfigContext.Read("Server")?.ToString("IP") ?? "127.0.0.1");
+            Rules = MessageRules.Load(AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules"));
         }
+
+        /// <summary>
+        /// Obtiene las reglas de composición de los mensajes.
+        /// </summary>
+        public MessageRules Rules { get; }
 
         /// <summary>
         /// Obtiene el identificador de aplicación especificado en la configuración.
         /// </summary>
-        public Int64 AppID => _appID;
-
-        /// <summary>
-        /// Obtiene la dirección IP del cliente.
-        /// </summary>
-        public IPAddress ClientIP => _clientIP;
+        public Int64 AppID { get; }
 
         /// <summary>
         /// Obtiene el identificador del servidor a conectarse.
         /// </summary>
-        public Int64 ServerID => _serverID;
+        public Int64 ServerID { get; }
 
         /// <summary>
         /// Obtiene la dirección IP del servidor.
         /// </summary>
-        public IPAddress ServerIP => _serverIP;
+        public IPAddress ServerIP { get; }
 
         /// <summary>
         /// Obtiene el puerto TCP con el cual se realiza la conexión al servidor.
         /// </summary>
-        public Int32 ServerPort => _serverPort;
+        public Int32 ServerPort { get; }
 
         /// <summary>
         /// Obiente o establece el token de cancelación de la instancia.
@@ -101,58 +69,10 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="message">Mensaje a envíar.</param>
         /// <returns>Mensaje con el cual ha respondido el servidor.</returns>
-        public Message8583 SendRequest(Message8583 message)
+        public Message SendRequest(Message message)
         {
-            TcpClient client = new TcpClient(ServerIP.ToString(), ServerPort);
-
-            _clientIP = (client.Client.LocalEndPoint as IPEndPoint).Address;
-
-            Byte[] buffer = message.ToBytes();
-
-            NetworkStream stream = client.GetStream();
-
-            stream.WriteAsync(buffer, 0, buffer.Length, TokenSource.Token);
-
-            if (_tokenSource.IsCancellationRequested)
-                return null;
-
-            buffer = new byte[BUFFER_SIZE];
-
-            List<Byte> readBytes = new List<byte>();
-
-            bool responsing = false;
-
-            while (!_tokenSource.IsCancellationRequested)
-            {
-                Thread.Sleep(10);
-
-                if (_tokenSource.IsCancellationRequested)
-                    return null;
-
-                if (!stream.DataAvailable && responsing)
-                    break;
-
-                var task = stream.ReadAsync(buffer, 0, BUFFER_SIZE, _tokenSource.Token);
-
-                int countReadBytes = task.Result;
-
-                if (countReadBytes == 0)
-                    break;
-
-                if (countReadBytes < 0)
-                    throw new IOException("Error al leer desde el socket de conexión.", countReadBytes);
-
-                readBytes.AddRange(buffer.Take(countReadBytes));
-
-                responsing = true;
-            }
-
-            //Message8583 response = readBytes.Count > 0 ? Message8583.FromBytes(readBytes.ToArray()) : null;
-
-            //client.Close();
-
-            //return response;
-            return null;
+            AdaptativeMsgRequest request = new AdaptativeMsgRequest(Rules, ServerIP, ServerPort);
+            return request.DoRequest(message);
         }
     }
 }
