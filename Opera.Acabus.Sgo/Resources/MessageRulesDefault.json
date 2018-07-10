@@ -1,0 +1,37 @@
+﻿[
+	{
+		"ID" : 1,
+		"MaxLength" : 10,
+		"IsVarLength" : true,
+		"Type" : 1,
+		"Description" : "Versión de la plantilla"
+	},
+	{
+		"ID" : 20,
+		"MaxLength" : 5,
+		"IsVarLength" : true,
+		"Type" : 0,
+		"Description" : "Código de la petición."
+	},
+	{
+		"ID" : 21,
+		"MaxLength" : 255,
+		"IsVarLength" : true,
+		"Type" : 1,
+		"Description" : "Mensajes de la petición."
+	},
+	{
+		"ID" : 62,
+		"MaxLength" : 1024,
+		"IsVarLength" : true,
+		"Type" : 2,
+		"Description" : "Campo reservado de 1K"
+	},
+	{
+		"ID" : 63,
+		"MaxLength" : 2048,
+		"IsVarLength" : true,
+		"Type" : 2,
+		"Description" : "Campo reservado de 2K"
+	}
+]

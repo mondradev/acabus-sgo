@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="Opera.Acabus.Server.Core.Views.ServerCoreView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Opera.Acabus.Server.Core.Views"
+             xmlns:dragablz="http://dragablz.net/winfx/xaml/dragablz"
+             xmlns:materialDesignMahApps="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:ViewModels="clr-namespace:Opera.Acabus.Server.Core.ViewModels"
+             xmlns:converters="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Card.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.CheckBox.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Flipper.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Popupbox.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:PriorityToColorConverter x:Key="PriorityToColorConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <UserControl.DataContext>
+        <ViewModels:ServerCoreViewModel/>
+    </UserControl.DataContext>
+    <Grid>
+        <WrapPanel Margin="24,16">
+            <materialDesignMahApps:Card Width="300" MinHeight="100">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="54" />
+                        <RowDefinition Height="16"/>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource MaterialDesignTitleTextBlock}" Text="Servicios" Margin="0" Padding="24,16" Background="{DynamicResource AccentColorBrush}" UseLayoutRounding="False" />
+                    <StackPanel x:Name="serviceContainer" Grid.Row="3" VerticalAlignment="Bottom" Margin="24,0,24,16">
+                        <Grid Grid.Row="1" Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="25.6"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Server Core v0.1.0" />
+                            <Ellipse Grid.Column="2" Margin="2" Fill="#FF4CAF50"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </materialDesignMahApps:Card>
+        </WrapPanel>
+    </Grid>
+</UserControl>

@@ -8,13 +8,14 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>Opera.Acabus.Sgo</RootNamespace>
     <AssemblyName>Opera.Acabus.Sgo</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
@@ -148,6 +149,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Resources\MessageRulesDefault.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\opera.acabus.data.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -169,6 +173,11 @@
     <ProjectReference Include="..\Opera.Acabus.Core\Opera.Acabus.Core.csproj">
       <Project>{5870b3e0-a665-4014-94d1-4ed21ceb442f}</Project>
       <Name>Opera.Acabus.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Opera.Acabus.Server.Core\Opera.Acabus.Server.Core.csproj">
+      <Project>{ef04233d-7433-4650-9b15-608811df7439}</Project>
+      <Name>Opera.Acabus.Server.Core</Name>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

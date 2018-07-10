@@ -1,0 +1,28 @@
+﻿[
+	{
+		"ID" : 1,
+		"MaxLength": 10,
+		"IsVarLength" : true,
+		"Type" : 1,
+		"Description" : "Versión de la plantilla"
+	},
+	{
+		"ID" : 2,
+		"Length" : 10,
+		"MaxLength" : 10,
+		"Type" : 0,
+		"Description" : "Identificador del equipo"
+	},
+	{
+		"ID" : 3,
+		"MaxLength" : 1024,
+		"Type" : 2,
+		"Description" : "Campo de uso binario 1KB"
+	},
+	{
+		"ID" : 20,
+		"MaxLength" : 255,
+		"Type" : 1,
+		"Description" : "Mensajes de respuesta desde servidor"
+	}
+]
