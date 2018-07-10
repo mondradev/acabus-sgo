@@ -233,11 +233,35 @@ namespace ACABUS_Control_de_operacion
                     if (i > 6)
                         break;
 
-                    excel.SetValue(row[1], "N" + (12 + i));
-                    excel.SetValue(row[2], "O" + (12 + i));
+                    excel.SetValue(row[1], "AK" + (12 + i));
+                    excel.SetValue(row[2], "AL" + (12 + i));
                     i++;
                 }
                 Trace.WriteLine("Recargas y abonos en TPV ¡Listo!", "INFO");
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_TPV_CRED)
+                                                                              .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+
+                    excel.SetWorksheetActive("Otros");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
+                    excel.SetValue(row[1], "Q" + (9 + i));
+                    excel.SetValue(row[2], "R" + (9 + i));
+                    i++;
+                }
+                Trace.WriteLine("Recargas y abonos a créditos en TPV ¡Listo!", "INFO");
+
             }
             catch (Exception ex)
             {

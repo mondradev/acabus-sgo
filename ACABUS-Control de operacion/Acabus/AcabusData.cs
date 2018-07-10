@@ -64,6 +64,7 @@ namespace ACABUS_Control_de_operacion.Acabus
         internal const string QUERY_FILE_MANTTO_TRUNK = "Queries\\Mantto_Estaciones_Semana.sql";
         internal const string QUERY_FILE_MANTTO_VEHI = "Queries\\Mantto_Vehi_Semana.sql";
         internal const string QUERY_FILE_TPV = "Queries\\Reca_TPV_Semana.sql";
+        internal const string QUERY_FILE_TPV_CRED = "Queries\\Reca_TPV_Cred_Semana.sql";
 
         /// <summary>
         /// Obtiene la lista de rutas troncales.
