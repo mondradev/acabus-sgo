@@ -317,6 +317,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages
             foreach (var field in message)
             {
                 FieldDefinition definition = rules.FirstOrDefault(x => x.ID == field.ID);
+
+                if (definition == null)
+                    continue;
+
                 IAdaptativeSerializer converter = GetSerializer(definition);
 
                 field.Value = converter.Deserialize(ref body, definition)?.Value;

@@ -22,13 +22,15 @@
         /// <param name="type"> Tipo de campo. </param>
         /// <param name="maxLength"> Longitud máxima del campo. </param>
         /// <param name="isVarLength"> Indicador si el campo es de longitud variable. </param>
-        public FieldDefinition(int id, FieldType type, int maxLength, bool isVarLength = false)
+        /// <param name="description"> Descripción del campo. </param>
+        public FieldDefinition(int id, FieldType type, int maxLength, bool isVarLength = false, string description = null)
         {
             ID = id;
             Type = type;
             MaxLength = maxLength;
             IsVarLength = isVarLength;
             Length = maxLength;
+            Description = description;
         }
 
         /// <summary>
@@ -51,6 +53,11 @@
             /// </summary>
             Binary
         }
+
+        /// <summary>
+        /// Obtiene la descripción del campo.
+        /// </summary>
+        public string Description { get; }
 
         /// <summary>
         /// Obtiene el identificador del campo.

@@ -44,8 +44,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
 
             string value = Encoding.UTF8.GetString(dest);
 
-            if (!definition.IsVarLength)
-                value = value.Trim();
+            value = value.Trim();
 
             src = src.Skip(lvarSize + length).ToArray();
 

@@ -60,14 +60,19 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
         public int MaxConnections { get; set; } = 100;
 
         /// <summary>
+        /// Obtiene o establece el puerto TCP por el cual escucha el servidor.
+        /// </summary>
+        public int Port { get; set; } = 5500;
+
+        /// <summary>
         /// Obtiene o establece las reglas que permiten serializar y deserializar los mensajes.
         /// </summary>
         public MessageRules Rules { get; set; }
 
         /// <summary>
-        /// Obtiene o establece el puerto TCP por el cual escucha el servidor.
+        /// Indica si el servidor actualmente está iniciado.
         /// </summary>
-        public int Port { get; set; } = 5500;
+        public bool Started { get; private set; }
 
         /// <summary>
         /// Libera los recursos no administrador por el servidor.
@@ -87,6 +92,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
         /// </summary>
         public void Shutdown()
         {
+            if (!Started)
+                return;
+
             CancellationTokenSource.Cancel();
 
             if (_server.Connected)
@@ -105,8 +113,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
             if (Rules == null)
                 throw new InvalidOperationException("Se requiere establecer las reglas de mensaje para interpretar las peticiones y respuestas correctamente.");
 
+            if (Started)
+                return;
+
             _server.Bind(new IPEndPoint(IPAddress, Port));
             _server.Listen(MaxConnections);
+
+            Started = true;
 
             while (true)
             {
@@ -121,11 +134,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
 
                     if (CancellationTokenSource.IsCancellationRequested)
                         break;
-                    
+
                     ListenerRequest(client);
                 }
                 catch (SocketException) { break; }
             }
+
+            Started = false;
         }
 
         /// <summary>

@@ -24,9 +24,17 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
         /// <param name="buffer">Buffer de datos de la respuesta.</param>
         public AdaptativeMsgArgs(Socket connection, MessageRules rules, Byte[] buffer = null)
         {
-            Request = buffer != null ? Message.Deserialize(buffer, rules) : null;
-            Connection = connection;
             _rules = rules;
+            Connection = connection;
+
+            try
+            {
+                Request = buffer != null ? Message.Deserialize(buffer, rules) : null;
+            }
+            catch
+            {
+                Request = null;
+            }
         }
 
         /// <summary>
