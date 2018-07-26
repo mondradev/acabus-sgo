@@ -92,6 +92,13 @@ namespace ACABUS_Control_de_operacion
                     if (!readHeader) { readHeader = true; continue; }
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("DetalleValidacion");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
                     excel.SetValue(row[1], "R" + (9 + i));
                     excel.SetValue(row[2], "S" + (9 + i));
                     excel.SetValue(row[3], "T" + (9 + i));
@@ -110,6 +117,13 @@ namespace ACABUS_Control_de_operacion
                     if (!readHeader) { readHeader = true; continue; }
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("DetalleValidacion");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
                     excel.SetValue(row[1], "I" + (9 + i));
                     excel.SetValue(row[2], "J" + (9 + i));
                     excel.SetValue(row[3], "K" + (9 + i));
@@ -128,6 +142,13 @@ namespace ACABUS_Control_de_operacion
                     if (!readHeader) { readHeader = true; continue; }
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
                     excel.SetValue(row[1], "C" + (9 + i));
                     excel.SetValue(row[2], "D" + (9 + i));
                     i++;
@@ -143,6 +164,13 @@ namespace ACABUS_Control_de_operacion
                     if (!readHeader) { readHeader = true; continue; }
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
                     excel.SetValue(row[1], "E" + (9 + i));
                     excel.SetValue(row[2], "F" + (9 + i));
                     excel.SetValue(row[3], "G" + (9 + i));
@@ -166,6 +194,13 @@ namespace ACABUS_Control_de_operacion
                     if (!readHeader) { readHeader = true; continue; }
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
                     excel.SetValue(row[1], "O" + (9 + i));
                     excel.SetValue(row[2], "P" + (9 + i));
                     i++;
@@ -197,6 +232,13 @@ namespace ACABUS_Control_de_operacion
                     if (!readHeader) { readHeader = true; continue; }
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("DetalleValidacion");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
                     excel.SetValue(row[1], "Y" + (9 + i));
                     i++;
                 }
@@ -211,6 +253,13 @@ namespace ACABUS_Control_de_operacion
                     if (!readHeader) { readHeader = true; continue; }
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("DetalleValidacion");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
                     excel.SetValue(row[1], "X" + (9 + i));
                     i++;
                 }
