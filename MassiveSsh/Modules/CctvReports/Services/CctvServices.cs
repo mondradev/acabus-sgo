@@ -227,12 +227,25 @@ namespace Acabus.Modules.CctvReports.Services
                 if (row.Length < 2) break;
                 var numeseri = row[1];
                 var exists = false;
-                foreach (var alert in alarms)
+                try
                 {
-                    if (alert.ID == 0) continue;
-                    if (alert.ID == UInt32.Parse(row[0]) && alert.Device.NumeSeri == numeseri)
-                        exists = true;
+                    while (true)
+                    {
+
+                        foreach (var alert in alarms)
+                        {
+                            if (alert.ID == 0) continue;
+                            if (alert.ID == UInt32.Parse(row[0]) && alert.Device.NumeSeri == numeseri)
+                                exists = true;
+                        }
+                        break;
+                    }
                 }
+                catch (Exception e)
+                {
+                    Trace.WriteLine($"Ocurrió un error al validar las alarmas: {e.Message}", "ERROR");
+                }
+
                 if (!exists)
                     Application.Current.Dispatcher.Invoke(() =>
                         {
@@ -279,7 +292,7 @@ namespace Acabus.Modules.CctvReports.Services
 
             ICollection<Incidence> incidencesFromDb = AcabusData.Session.GetObjects<Incidence>(new DbFilter(new List<DbFilterValue>() {
                 new DbFilterValue(new DbFilterExpression(nameof(Incidence.Status), (Int16)IncidenceStatus.CLOSE, WhereOperator.NO_EQUALS), WhereType.AND)
-            }));
+            })).OrderBy(i => i.Status).ToList();
 
             foreach (var incidenceData in incidencesFromDb)
                 incidences.Add(incidenceData as Incidence);

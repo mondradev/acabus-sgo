@@ -185,7 +185,9 @@ namespace Acabus.Modules.Attendances.ViewModels
                 /// Asignación por tramo.
                 attendances = attendances.Where(attendance
                    => attendance.DateTimeDeparture is null
-                       && attendance.Section == location.Section);
+                       && attendance.Section == location.Section
+                       || (attendance.Section == "ESTACIONES" && attendance.HasKvrKey && location is Station)
+                       || (attendance.Section == "AUTOBUSES" && attendance.HasNemaKey && location is Route));
 
                 if (attendances.Count() == 1)
                     return attendances.First();
@@ -206,12 +208,11 @@ namespace Acabus.Modules.Attendances.ViewModels
                     attendancesPrevious = attendances;
 
                 /// Asignación por llave.
-                if (location is Route)
-                    attendances = attendances.Where(attendance
-                          => attendance.HasNemaKey || attendance.Section.Contains("AUTOBUSES"));
+                if (incidence?.Device.Type == DeviceType.KVR)
+                    attendances = attendances.Where(attendance => attendance.HasKvrKey);
                 else
-                    attendances = attendances.Where(attendance
-                          => attendance.HasKvrKey || attendance.Section.Contains("ESTACIONES"));
+                    attendances = attendances.Where(attendance => attendance.HasNemaKey);
+
 
                 if (attendances.Count() == 1)
                     return attendances.First();

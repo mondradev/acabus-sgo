@@ -30,6 +30,8 @@ namespace Acabus.Converters
                         return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9800"));
                     case Priority.HIGH:
                         return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+                    case Priority.VERY_LOW:
+                        return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9E9E9E"));
                     case Priority.NONE:
                         return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
                 }

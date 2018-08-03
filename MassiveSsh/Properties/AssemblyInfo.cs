@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("AcabusCC")]
-[assembly: AssemblyCopyright("Copyright © AcabusCC 2017")]
+[assembly: AssemblyCopyright("Copyright © AcabusCC 2018")]
 [assembly: AssemblyTrademark("Acabus Centro de control")]
 [assembly: AssemblyCulture("")]
 

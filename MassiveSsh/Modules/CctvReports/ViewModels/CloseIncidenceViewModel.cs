@@ -90,6 +90,7 @@ namespace Acabus.Modules.CctvReports
             }
 
             CloseIncidenceCommand = new CommandBase(CloseIncidenceCommandExecute, CloseIncidenceCommandCanExec);
+            PendingIncidenceCommand = new CommandBase(PendingIncidenceCommandExecute, PendingIncidenceCommandCanExec);
         }
 
         /// <summary>
@@ -101,6 +102,7 @@ namespace Acabus.Modules.CctvReports
         ///
         /// </summary>
         public ICommand CloseIncidenceCommand { get; }
+        public ICommand PendingIncidenceCommand { get; }
 
         /// <summary>
         /// Obtiene una lista de destinos posibles para devolución de dinero.
@@ -300,7 +302,21 @@ namespace Acabus.Modules.CctvReports
             return true;
         }
 
+        private bool PendingIncidenceCommandCanExec(object parameter)
+        {
+            if (!Validate() || SelectedIncidence.Status == IncidenceStatus.PENDING 
+                || SelectedIncidence.Status != IncidenceStatus.OPEN) return false;
+
+            return true;
+        }
+
         private void CloseIncidenceCommandExecute(object parameter)
+            => CloseIncidence(parameter, false);
+
+        private void PendingIncidenceCommandExecute(object parameter)
+            => CloseIncidence(parameter, true);
+
+        private void CloseIncidence(object parameter, bool pending)
         {
             var previousStatus = SelectedIncidence.Status;
             SelectedIncidence.Technician = SelectedTechnician;
@@ -314,7 +330,11 @@ namespace Acabus.Modules.CctvReports
                     ViewModelService.GetViewModel<CctvReportsViewModel>().ReloadData();
                     return;
                 }
-            SelectedIncidence.Status = IncidenceStatus.CLOSE;
+
+            SelectedIncidence.Status = !pending ? IncidenceStatus.CLOSE : IncidenceStatus.PENDING;
+
+            if (pending)
+                SelectedIncidence.Priority = Priority.VERY_LOW;
 
             bool isDone = false;
 
@@ -348,7 +368,12 @@ namespace Acabus.Modules.CctvReports
                 ViewModelService.GetViewModel<CctvReportsViewModel>().ReloadData();
             }
             else
-                AcabusControlCenterViewModel.ShowDialog($"Incidencia '{SelectedIncidence.Folio}' cerrada correctamente");
+            {
+                if (!pending)
+                    AcabusControlCenterViewModel.ShowDialog($"Incidencia '{SelectedIncidence.Folio}' cerrada correctamente");
+                else
+                    AcabusControlCenterViewModel.ShowDialog($"Incidencia '{SelectedIncidence.Folio}' establecida como pendiente correctamente");
+            }
             ViewModelService.GetViewModel<AttendanceViewModel>()?.UpdateCounters();
         }
 

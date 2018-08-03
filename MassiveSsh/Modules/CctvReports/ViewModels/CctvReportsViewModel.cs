@@ -102,6 +102,8 @@ namespace Acabus.Modules.CctvReports
 
         private bool searching = false;
 
+        public int IncidencesOpenedCount => IncidencesOpened.Where(i => i.Status != IncidenceStatus.PENDING).Count();
+
         /// <summary>
         ///
         /// </summary>
@@ -125,7 +127,8 @@ namespace Acabus.Modules.CctvReports
 
             UpdateDataCommand = new CommandBase(parameter =>
             {
-                if ((parameter as Incidence).Status != IncidenceStatus.CLOSE) return;
+                var incidence = (parameter as Incidence);
+                if (incidence.Status != IncidenceStatus.CLOSE && incidence.Status != IncidenceStatus.PENDING) return;
                 UpdateData();
             });
 
@@ -347,7 +350,7 @@ namespace Acabus.Modules.CctvReports
                              || incidence.Description.ToString().ToUpper().Contains(ToSearchClosed.ToUpper());
 
                              return isClosed && isMatch;
-                         }).OrderByDescending(incidence => incidence.FinishDate));
+                         }).OrderByDescending(i => i.FinishDate));
                 }
                 catch
                 {
@@ -364,13 +367,13 @@ namespace Acabus.Modules.CctvReports
                 try
                 {
                     return new ObservableCollection<Incidence>(Incidences.Where((incidence)
-                         =>
-                     {
-                         Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
-                         Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.ToUpper().Contains(FolioToSearch.ToUpper());
+                            =>
+                    {
+                        Boolean isOpen = incidence.Status != IncidenceStatus.CLOSE;
+                        Boolean isMatch = String.IsNullOrEmpty(FolioToSearch) || incidence.Folio.ToUpper().Contains(FolioToSearch.ToUpper());
 
-                         return isOpen && isMatch;
-                     }).OrderByDescending(incidence => incidence.StartDate));
+                        return isOpen && isMatch;
+                    }).OrderBy(i => i.Status).ThenByDescending(i => i.StartDate));
                 }
                 catch
                 {
@@ -466,6 +469,7 @@ namespace Acabus.Modules.CctvReports
         public void UpdateData()
         {
             OnPropertyChanged("IncidencesOpened");
+            OnPropertyChanged("IncidencesOpenedCount");
             OnPropertyChanged("IncidencesClosed");
         }
 
@@ -825,6 +829,9 @@ namespace Acabus.Modules.CctvReports
                 foreach (var item in IncidencesOpened)
                 {
                     if (_inLoad) break;
+
+                    if (item.Status == IncidenceStatus.PENDING)
+                        continue;
 
                     if (item.Status == IncidenceStatus.UNCOMMIT && item.Priority != Priority.NONE)
                     {

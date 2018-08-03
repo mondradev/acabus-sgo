@@ -143,7 +143,12 @@ namespace Acabus.Models
         /// <summary>
         /// Display SITI
         /// </summary>
-        DSP = DSPB | DSPL
+        DSP = DSPB | DSPL,
+
+        /// <summary>
+        /// Almacén
+        /// </summary>
+        STORAGE = 524288
     }
 
     /// <summary>
@@ -169,7 +174,12 @@ namespace Acabus.Models
         /// <summary>
         /// Sin prioridad.
         /// </summary>
-        NONE
+        NONE,
+
+        /// <summary>
+        /// Prioridad muy baja.
+        /// </summary>
+        VERY_LOW
     }
 
     /// <summary>

@@ -18,6 +18,7 @@
         <converters:PriorityToColorConverter x:Key="ConverterPriorityToColor" />
         <CollectionViewSource x:Key="OpenedIncidencesCollection" Source="{Binding IncidencesOpened}">
             <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Status" Direction="Ascending" />
                 <scm:SortDescription PropertyName="StartDate" Direction="Descending" />
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
@@ -57,7 +58,7 @@
                 </Grid.ColumnDefinitions>
                 <materialDesign:PackIcon Kind="Magnify" Width="24" Height="24" VerticalAlignment="Center" Margin="8" />
                 <TextBox materialDesign:HintAssist.Hint="Buscar folio"  Margin="0,0,16,0" Grid.Column="1" Text="{Binding FolioToSearch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="{Binding IncidencesOpened.Count, Mode=OneWay, StringFormat=Incidencias abiertas: \{0\}}" Grid.Column="2" Padding="16"/>
+                <TextBlock Text="{Binding IncidencesOpenedCount, Mode=OneWay, StringFormat=Incidencias abiertas: \{0\}}" Grid.Column="2" Padding="16"/>
             </Grid>
             <DataGrid Margin="0" AutoGenerateColumns="False" ItemsSource="{Binding Source={StaticResource OpenedIncidencesCollection}}" IsReadOnly="True"
                 SelectedItem="{Binding SelectedIncidence}" SelectionMode="Extended" CanUserResizeRows="False" Grid.Row="1" FrozenColumnCount="1">
