@@ -35,6 +35,22 @@ namespace ACABUS_Control_de_operacion
             );
             try
             {
+                DateTime iniDate = DateTime.Parse(weekFirstDay);
+                DateTime endDate = iniDate.AddDays(6);
+                String timeLapse = "";
+                if (iniDate.Year.Equals(endDate.Year))
+                    if (iniDate.Month.Equals(endDate.Month))
+                        timeLapse = String.Format("{0:dd} al {1:dd} de {0:MMMM} del {0:yyyy}", iniDate, endDate);
+                    else
+                        timeLapse = String.Format("{0:dd} de {0:MMMM} al {1:dd} de {1:MMMM} del {0:yyyy}", iniDate, endDate);
+                else
+                    timeLapse = String.Format("{0:dd} de {0:MMMM} del {0:yyyy} al {1:dd} de {1:MMMM} del {1:yyyy}", iniDate, endDate);
+
+                excel.SetWorksheetActive("Contraprestación Anexo\"C\"");
+                excel.SetValue(timeLapse, "D5");
+
+                Trace.WriteLine("Periodo {0}", timeLapse);
+
                 String[][] sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_SALES)
                                                                                 .Replace("{paramFchIni}", weekFirstDay));
                 Boolean readHeader = false;
@@ -47,11 +63,11 @@ namespace ACABUS_Control_de_operacion
                     excel.SetValue(row[1], "E" + (12 + i));
                     excel.SetValue(row[2], "F" + (12 + i));
                     excel.SetWorksheetActive("Otros");
-                    excel.SetValue(row[3], "Q" + (9 + i));
-                    excel.SetValue(row[4], "R" + (9 + i));
+                    excel.SetValue(row[3], "S" + (9 + i));
+                    excel.SetValue(row[4], "T" + (9 + i));
                     i++;
                 }
-                Trace.WriteLine("Ventas de tarjetas ¡Listo!", "INFO");
+                Trace.WriteLine("Ventas de tarjetas ¡Listo!", "INFO");                
 
                 sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILES_ACCESS)
                                                                                 .Replace("{paramFchIni}", weekFirstDay));
@@ -205,21 +221,7 @@ namespace ACABUS_Control_de_operacion
                     excel.SetValue(row[2], "P" + (9 + i));
                     i++;
                 }
-                Trace.WriteLine("Otros - Recargas a crédito ¡Listo!", "INFO");
-
-                DateTime iniDate = DateTime.Parse(weekFirstDay);
-                DateTime endDate = iniDate.AddDays(6);
-                String timeLapse = "";
-                if (iniDate.Year.Equals(endDate.Year))
-                    if (iniDate.Month.Equals(endDate.Month))
-                        timeLapse = String.Format("{0:dd} al {1:dd} de {0:MMMM} del {0:yyyy}", iniDate, endDate);
-                    else
-                        timeLapse = String.Format("{0:dd} de {0:MMMM} al {1:dd} de {1:MMMM} del {0:yyyy}", iniDate, endDate);
-                else
-                    timeLapse = String.Format("{0:dd} de {0:MMMM} del {0:yyyy} al {1:dd} de {1:MMMM} del {1:yyyy}", iniDate, endDate);
-
-                excel.SetWorksheetActive("Contraprestación Anexo\"C\"");
-                excel.SetValue(timeLapse, "D5");
+                Trace.WriteLine("Otros - Recargas a crédito ¡Listo!", "INFO");                
 
                 // --- Nuevos campos
 
