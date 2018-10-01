@@ -2,13 +2,14 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
+namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
 {
     /// <summary>
     /// Representa una petición de mensaje adaptativo.
     /// </summary>
-    public sealed class AdaptativeMsgRequest
+    public sealed class AdaptiveMsgRequest
     {
         /// <summary>
         /// Gestiona la conexión de la petición.
@@ -19,9 +20,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
         /// Crea una instancia nueva para realizar una petición con el servidor.
         /// </summary>
         /// <param name="rules">Reglas de composición de mensajes.</param>
-        public AdaptativeMsgRequest(MessageRules rules, IPAddress ipAddress, int port)
+        public AdaptiveMsgRequest(String rulesPath, IPAddress ipAddress, int port)
         {
-            Rules = rules;
+            Rules = MessageRules.Load(rulesPath);
             Port = port;
             IPAddress = ipAddress;
 
@@ -42,19 +43,39 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
         /// <summary>
         /// Obtiene las reglas que permiten serializar y deserializar los mensajes.
         /// </summary>
-        public MessageRules Rules { get; }
+        internal MessageRules Rules { get; }
 
         /// <summary>
-        /// Realiza una petición sincrónica al servidor.
+        /// Crea un mensaje vacío a partir de las reglas especificadas en la petición.
+        /// </summary>
+        /// <returns>Un mensaje nuevo.</returns>
+        public IMessage CreateMessage() => new Message(this.Rules);
+
+        /// <summary>
+        /// Realiza una petición asincrónica al servidor.
         /// </summary>
         /// <param name="message">Mensaje que representa la petición.</param>
-        /// <returns>Mensaje que representa la respuesta del servidor.</returns>
-        public Message DoRequest(Message message)
+        /// <param name="callback">Función que se ejecuta al recibir la respuesta.</param>
+        public Task DoRequest(IMessage message, Action<IMessage> callback)
         {
-            int bytesTransferred = _socket.Send(message.Serialize());
+            return Task.Run(() =>
+            {
+                int bytesTransferred = _socket.Send(message.Serialize());
 
-            if (bytesTransferred <= 0)
-                return null;
+                if (bytesTransferred <= 0)
+                    callback?.Invoke(null);
+
+                callback?.Invoke(ReadBuffer());
+            });
+        }
+
+        /// <summary>
+        /// Lee el buffer y los convierte en un mensaje compatible.
+        /// </summary>
+        /// <returns>Mensaje leido del buffer.</returns>
+        private IMessage ReadBuffer()
+        {
+            int bytesTransferred = 0;
 
             while (true)
             {

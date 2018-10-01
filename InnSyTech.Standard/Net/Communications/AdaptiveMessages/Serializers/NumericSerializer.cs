@@ -4,13 +4,13 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
+namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
 {
     /// <summary>
     /// Provee de un convertidor de campos tipo <see cref="FieldDefinition.FieldType.Numeric"/> para
     /// mensajes adaptativos. El convetidor utiliza valores enteros sin signos.
     /// </summary>
-    internal class NumericSerializer : IAdaptativeSerializer
+    internal class NumericSerializer : IAdaptiveSerializer
     {
         /// <summary>
         /// Convierte un vector unidimensional en una instancia de campo del tipo numerico a partir
@@ -36,7 +36,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
                 throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo numérico");
 
             if (src.Length == 0)
-                throw new ArgumentException("src", "El vector no contiene elementos");
+                throw new ArgumentException("El vector no contiene elementos", nameof(src));
 
             ulong length = (ulong)src.Length;
             byte[] dest = src;

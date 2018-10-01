@@ -1,4 +1,4 @@
-﻿namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages
+﻿namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 {
     /// <summary>
     /// Representa un conjunto de caracteristicas que permiten definir el tipo de campo a manipular.
@@ -13,7 +13,7 @@
     ///     }
     /// </code>
     /// </summary>
-    public sealed class FieldDefinition
+    internal sealed class FieldDefinition
     {
         /// <summary>
         /// Crea una nueva instancia definiendo las propiedades del campo a manipular.

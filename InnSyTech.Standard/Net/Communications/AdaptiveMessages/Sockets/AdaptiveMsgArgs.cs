@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Net.Sockets;
 
-namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
+namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
 {
     /// <summary>
-    /// Contiene los datos del evento ocurrido dentro de la comunicación de sockets con mensajes adaptativos.
+    /// Implementa las funciones para capturar los argumentos de los eventos <seealso cref="AdaptiveMsgServer.Received"/>
     /// </summary>
-    /// <seealso cref="AdaptativeMsgServer"/>
-    /// <seealso cref="Message"/>
-    /// <seealso cref="AdaptativeMsgRequest"/>
-    public sealed class AdaptativeMsgArgs
+    internal sealed class AdaptiveMsgArgs : IAdaptiveMsgArgs
     {
         /// <summary>
         /// Reglas de composición de mensajes.
@@ -22,18 +19,18 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
         /// <param name="connection">Conexión que generó el evento.</param>
         /// <param name="rules">Reglas que establece como se componen los mensajes.</param>
         /// <param name="buffer">Buffer de datos de la respuesta.</param>
-        public AdaptativeMsgArgs(Socket connection, MessageRules rules, Byte[] buffer = null)
+        public AdaptiveMsgArgs(Socket connection, MessageRules rules, Byte[] buffer = null)
         {
             _rules = rules;
             Connection = connection;
 
             try
             {
-                Request = buffer != null ? Message.Deserialize(buffer, rules) : null;
+                Data = buffer != null ? Message.Deserialize(buffer, rules) : null;
             }
             catch
             {
-                Request = null;
+                Data = null;
             }
         }
 
@@ -43,18 +40,22 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets
         public Socket Connection { get; }
 
         /// <summary>
-        /// Obtiene la petición realizada del evento.
+        /// Obtiene la información captura en el evento.
         /// </summary>
-        public Message Request { get; }
+        public IMessage Data { get; }
 
-        public Message CreateMessage()
+        /// <summary>
+        /// Crea un mensaje nuevo.
+        /// </summary>
+        /// <returns>Obtiene un mensaje totalmente nuevo.</returns>
+        public IMessage CreateMessage()
                             => new Message(_rules);
 
         /// <summary>
-        /// Envía un mensaje de respuesta al otro extremo de la conexión.
+        /// Envía un mensaje al otro extremo de la conexión.
         /// </summary>
         /// <param name="response">Mensaje de respuesta.</param>
-        public void Response(Message response)
+        public void Send(IMessage response)
         {
             byte[] buffer = response.Serialize();
             Connection?.Send(buffer);

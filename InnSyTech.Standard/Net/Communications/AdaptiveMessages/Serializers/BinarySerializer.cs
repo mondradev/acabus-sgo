@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 
-namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
+namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
 {
     /// <summary>
-    /// Provee de un convertidor de campos tipo <see cref="FieldDefinition.FieldType.Text"/> para
-    /// mensajes adaptativos. El convetidor utiliza la función <see cref="object.ToString()"/> para
-    /// la conversión del valor a texto y una codificación UTF-8.
+    /// Provee de un convertidor de campos tipo <see cref="FieldDefinition.FieldType.Binary"/> para
+    /// mensajes adaptativos.
     /// </summary>
-    internal class TextSerializer : HexaSerializer
+    internal class BinarySerializer : HexaSerializer
     {
         /// <summary>
-        /// Convierte un vector unidimensional en una instancia de campo del tipo Text a partir de la
+        /// Convierte una vector de bytes en una instancia de campo del tipo binario a partir de la
         /// definición especificada. Al finalizar el proceso, el vector de bytes le serán extraidos
         /// los bytes utilizados.
         /// </summary>
@@ -20,7 +18,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
         /// <param name="definition">Caracteristicas que definen el campo.</param>
         /// <returns>Un campo generado a partir del vector de bytes y la definición especificada.</returns>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// La definición no expresa las caracteristicas para un campo texto.
+        /// La definición no expresa las caracteristicas para un campo binario.
         /// </exception>
         /// <exception cref="ArgumentNullException">Ningun argumento puede ser nulo.</exception>
         public override Field Deserialize(ref byte[] src, FieldDefinition definition)
@@ -31,28 +29,28 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
             if (src == null)
                 throw new ArgumentNullException("src");
 
-            if (definition.Type != FieldDefinition.FieldType.Text)
-                throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo texto");
+            if (definition.Type != FieldDefinition.FieldType.Binary)
+                throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo binario");
 
             if (src.Length == 0)
-                throw new ArgumentException("src", "El vector no contiene elementos");
+                throw new ArgumentException("El vector no contiene elementos", nameof(src));
 
             int length = GetLengthFromBytes(src, definition, out int lvarSize);
+
             byte[] dest = src;
 
             dest = dest.Skip(lvarSize).Take(length).ToArray();
 
-            string value = Encoding.UTF8.GetString(dest);
-
-            value = value.Trim();
+            if (!definition.IsVarLength)
+                dest = dest.TrimEnd();
 
             src = src.Skip(lvarSize + length).ToArray();
 
-            return new Field(definition.ID, value);
+            return new Field(definition.ID, dest);
         }
 
         /// <summary>
-        /// Obtiene los bytes del campo del tipo texto especificado a partir de la definición proporcionada.
+        /// Obtiene los bytes del campo del tipo binario especificado a partir de la definición proporcionada.
         /// </summary>
         /// <param name="src">Campo a obtener los bytes.</param>
         /// <param name="definition">
@@ -60,7 +58,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
         /// </param>
         /// <returns>Un vector de bytes que representan al campo.</returns>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// La definición no expresa las caracteristicas para un campo texto.
+        /// La definición no expresa las caracteristicas para un campo binario.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// El valor del campo no es un vector unidimensional del tipo Byte.
         /// </exception>
         /// <exception cref="ArgumentNullException">Ningun argumento puede ser nulo.</exception>
         /// <exception cref="InvalidOperationException">
@@ -74,43 +75,35 @@ namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
             if (src == null)
                 throw new ArgumentNullException("src");
 
-            if (definition.Type != FieldDefinition.FieldType.Text)
-                throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo texto");
+            if (definition.Type != FieldDefinition.FieldType.Binary)
+                throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo binario");
 
             if (src.ID != definition.ID)
                 throw new InvalidOperationException("No es posible utilizar la definición para este campo. Los ID no coinciden");
 
-            string dest = src.Value?.ToString();
+            if (!(src.Value is byte[]))
+                throw new ArgumentException("El valor del campo no es un vector de bytes.", nameof(src));
 
-            if (String.IsNullOrEmpty(dest))
-                throw new ArgumentException("No es permitido enviar valores nulos o cadenas vacias.");
-
-            int length = 0;
+            byte[] dest = src.Value as byte[];
+            int length = dest.Length;
 
             if (definition.IsVarLength)
             {
                 int lvarSize = GetLVarSize(definition);
                 int maxLength = definition.MaxLength - lvarSize;
+                length = length > maxLength ? maxLength : length;
 
-                byte[] bodyBin = Encoding.UTF8.GetBytes(dest);
-
-                length = bodyBin.Length > maxLength ? maxLength : bodyBin.Length;
-
-                definition.Length = length;
-
-                return BitConverter.GetBytes(length).Reverse().ToArray().PadLeft(lvarSize).Concat(bodyBin).ToArray();
+                dest = BitConverter.GetBytes(length).Reverse().ToArray().PadLeft(lvarSize).Concat(dest.Take(length)).ToArray();
+            }
+            else
+            {
+                length = length > definition.MaxLength ? definition.MaxLength : length;
+                dest = dest.Take(length).ToArray();
             }
 
-            byte[] destBin = Encoding.UTF8.GetBytes(dest);
+            definition.Length = dest.Length;
 
-            if (destBin.Length > definition.MaxLength)
-                destBin = destBin.Take(definition.MaxLength).ToArray();
-            else
-                destBin = destBin.PadLeft(definition.MaxLength, 0x20);
-
-            definition.Length = destBin.Length;
-
-            return destBin;
+            return dest;
         }
     }
 }

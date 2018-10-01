@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages
+namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 {
     /// <summary>
     /// Representa la estructura de un campo contenido en los mensajes adaptativos <seealso

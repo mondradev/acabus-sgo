@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages
+namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 {
     /// <summary>
-    /// Prove de funciolidad extra a los vectores de byte.
+    /// Provee de funcionalidad extra a los vectores de byte.
     /// </summary>
     internal static class BinaryExtension
     {

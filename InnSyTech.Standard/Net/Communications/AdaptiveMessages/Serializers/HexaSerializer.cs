@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
+namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
 {
     /// <summary>
     /// Provee de un convertidor de campos tipos que se almacenan en bytes para mensajes adaptativos.
     /// </summary>
-    internal abstract class HexaSerializer : IAdaptativeSerializer
+    internal abstract class HexaSerializer : IAdaptiveSerializer
     {
         /// <summary>
         /// Convierte una vector de bytes en una instancia de campo a partir de la definición

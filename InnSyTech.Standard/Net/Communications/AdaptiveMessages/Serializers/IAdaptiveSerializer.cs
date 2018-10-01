@@ -1,9 +1,9 @@
-﻿namespace InnSyTech.Standard.Net.Communications.AdaptativeMessages.Serializers
+﻿namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
 {
     /// <summary>
     /// Provee de una interfaz para definir un tipo de convertidor de campos para mensajes adaptativos.
     /// </summary>
-    internal interface IAdaptativeSerializer
+    internal interface IAdaptiveSerializer
     {
         /// <summary>
         /// Convierte una vector de bytes en una instancia de campo a partir de la definición
