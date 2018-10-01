@@ -1,9 +1,9 @@
-﻿using InnSyTech.Standard.Net.Communications.AdaptativeMessages;
-using InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets;
+﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
+using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
 using System;
 using System.Net;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.Services
 {
@@ -13,28 +13,30 @@ namespace Opera.Acabus.Core.Services
     /// </summary>
     public sealed class AppClient
     {
+        /// <summary>
+        /// Identificador único de equipo.
+        /// </summary>
+        private readonly String _token;
 
         /// <summary>
-        /// Señala el token de cancelación.
+        /// Controlador de peticiones al servidor.
         /// </summary>
-        private CancellationTokenSource _tokenSource;
+        private AdaptiveMsgRequest _request;
 
         /// <summary>
         /// Crea una instancia nueva de <see cref="AppClient"/>.
         /// </summary>
         public AppClient()
         {
-            AppID = AcabusDataContext.ConfigContext.Read("App")?.ToInteger("ID") ?? 0;
-            ServerID = AcabusDataContext.ConfigContext.Read("Server")?.ToInteger("ID") ?? 0;
-            ServerPort = (Int32)(AcabusDataContext.ConfigContext.Read("Server")?.ToInteger("Port") ?? 9000);
-            ServerIP = IPAddress.Parse(AcabusDataContext.ConfigContext.Read("Server")?.ToString("IP") ?? "127.0.0.1");
-            Rules = MessageRules.Load(AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules"));
-        }
+            AppID = AcabusDataContext.ConfigContext["App"]?.ToInteger("Token") ?? 0;
+            MsgRulesVersion = Version.Parse(AcabusDataContext.ConfigContext["App"]?.ToString("Version"));
+            ServerPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Port") ?? 9000);
+            ServerIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("IP") ?? "127.0.0.1");
+            RulesMsgPath = AcabusDataContext.ConfigContext["Message"]?.ToString("Rules");
 
-        /// <summary>
-        /// Obtiene las reglas de composición de los mensajes.
-        /// </summary>
-        public MessageRules Rules { get; }
+            _request = new AdaptiveMsgRequest(RulesMsgPath, ServerIP, ServerPort);
+            _token = AcabusDataContext.ConfigContext["App"]?.ToString("DeviceKey");
+        }
 
         /// <summary>
         /// Obtiene el identificador de aplicación especificado en la configuración.
@@ -42,9 +44,14 @@ namespace Opera.Acabus.Core.Services
         public Int64 AppID { get; }
 
         /// <summary>
-        /// Obtiene el identificador del servidor a conectarse.
+        /// Versión de las reglas de mensajes.
         /// </summary>
-        public Int64 ServerID { get; }
+        public Version MsgRulesVersion { get; }
+
+        /// <summary>
+        /// Obtiene la ubicación de las reglas utilizada para generar los mensajes.
+        /// </summary>
+        public String RulesMsgPath { get; }
 
         /// <summary>
         /// Obtiene la dirección IP del servidor.
@@ -57,22 +64,27 @@ namespace Opera.Acabus.Core.Services
         public Int32 ServerPort { get; }
 
         /// <summary>
-        /// Obiente o establece el token de cancelación de la instancia.
+        /// Crea un nuevo mensaje con los campos predeterminados.
         /// </summary>
-        public CancellationTokenSource TokenSource {
-            get => _tokenSource ?? (_tokenSource = new CancellationTokenSource());
-            set => _tokenSource = value;
+        /// <returns>Un mensaje vacío.</returns>
+        public IMessage CreateMessage()
+        {
+            IMessage message = _request.CreateMessage();
+
+            message[0] = AppID;
+            message[1] = MsgRulesVersion.ToString();
+            message[10] = _token;
+
+            return message;
         }
 
         /// <summary>
-        /// Envía un mensaje al servidor y espera una respuesta.
+        /// Envía un mensaje nuevo al servidor.
         /// </summary>
         /// <param name="message">Mensaje a envíar.</param>
-        /// <returns>Mensaje con el cual ha respondido el servidor.</returns>
-        public Message SendRequest(Message message)
-        {
-            AdaptativeMsgRequest request = new AdaptativeMsgRequest(Rules, ServerIP, ServerPort);
-            return request.DoRequest(message);
-        }
+        /// <param name="callback">Función a realizar al recibir la respuesta.</param>
+        /// <returns>Un instancia Task.</returns>
+        public Task SendMessage(IMessage message, Action<IMessage> callback)
+            => _request.DoRequest(message, callback);
     }
 }
