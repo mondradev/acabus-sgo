@@ -7,7 +7,7 @@
              xmlns:dragablz="http://dragablz.net/winfx/xaml/dragablz"
              xmlns:materialDesignMahApps="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:ViewModels="clr-namespace:Opera.Acabus.Server.Core.ViewModels"
-             xmlns:converters="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
+             xmlns:converters="clr-namespace:Opera.Acabus.Server.Core.Utils"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
@@ -20,7 +20,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Flipper.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Popupbox.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <converters:PriorityToColorConverter x:Key="PriorityToColorConverter"/>
+            <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <UserControl.DataContext>
@@ -43,8 +43,8 @@
                                 <ColumnDefinition Width="8"/>
                                 <ColumnDefinition Width="25.6"/>
                             </Grid.ColumnDefinitions>
-                            <Label Content="Server Core v0.1.0" />
-                            <Ellipse Grid.Column="2" Margin="2" Fill="#FF4CAF50"/>
+                            <Label Content="{Binding ServiceName, Mode=OneWay}" Height="26" />
+                            <Ellipse Grid.Column="2" Margin="2" Fill="{Binding Status, Converter={StaticResource StatusToColorConverter}, Mode=OneWay}"/>
                         </Grid>
                     </StackPanel>
                 </Grid>

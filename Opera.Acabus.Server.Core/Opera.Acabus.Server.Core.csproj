@@ -74,6 +74,8 @@
     </Compile>
     <Compile Include="ServerController.cs" />
     <Compile Include="ServerCoreModule.cs" />
+    <Compile Include="Utils\ServiceStatus.cs" />
+    <Compile Include="Utils\StatusToColorConverter.cs" />
     <Compile Include="ViewModels\ServerCoreViewModel.cs" />
     <Compile Include="Views\ServerCoreView.xaml.cs">
       <DependentUpon>ServerCoreView.xaml</DependentUpon>

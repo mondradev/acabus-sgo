@@ -1,65 +1,85 @@
-﻿using InnSyTech.Standard.Net.Communications.AdaptativeMessages;
-using InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets;
+﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
+using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Server.Core.Utils;
 using System;
+using System.Diagnostics;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Opera.Acabus.Server.Core
 {
     public static class ServerController
     {
-        private static readonly AdaptativeMsgServer _msgServer;
+        private static readonly AdaptiveMsgServer _msgServer;
 
         static ServerController()
         {
-
             string path = AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules")
                 ?? throw new InvalidOperationException("No existe una ruta válida para cargar las reglas de mensajes.");
 
-            MessageRules rules = MessageRules.Load(path)
-                ?? throw new InvalidOperationException("No se logró cargar las reglas de composición de mensajes.");
+            _msgServer = new AdaptiveMsgServer(path);
 
-            _msgServer = new AdaptativeMsgServer(rules);
-
-            _msgServer.Received += ReceiveHandle;
-
+            _msgServer.Accepted += AcceptedHandle;
+            _msgServer.Received += ReceivedHandle;
         }
 
-        public static void Start() => Task.Run(() => _msgServer.Startup(), _msgServer.CancellationTokenSource.Token);
+        public static event EventHandler<ServiceStatus> StatusChanged;
 
-        public static void Stop() => _msgServer.Shutdown();
-        
-        private static Message ProcessRequest(Message message)
+        public static bool Running => _msgServer.Started;
+
+        public static void Start() => Task.Run(() =>
+        {
+            _msgServer.Startup();
+            StatusChanged?.Invoke(_msgServer, _msgServer.Started ? ServiceStatus.ON : ServiceStatus.OFF);
+        }, _msgServer.CancellationTokenSource.Token);
+
+        public static void Stop()
+        {
+            _msgServer.Shutdown();
+            StatusChanged?.Invoke(_msgServer, ServiceStatus.OFF);
+        }
+
+        private static void AcceptedHandle(object sender, IAdaptiveMsgClientArgs e)
+        {
+            Trace.WriteLine("Cliente aceptado: " + (e.Connection.RemoteEndPoint as IPEndPoint).Address);
+        }
+
+        private static IMessage CreateError(string text, int code, IMessage message)
+        {
+            message[3] = text;
+            message[2] = code;
+
+            return message;
+        }
+
+        private static bool Login(IMessage message)
+        {
+
+            return false;
+        }
+
+        private static IMessage ProcessRequest(IMessage message)
         {
             return null;
         }
 
-        private static void ReceiveHandle(object sender, AdaptativeMsgArgs e)
+        private static void ReceivedHandle(object sender, IAdaptiveMsgArgs e)
         {
-            switch (e.Request)
+            switch (e.Data)
             {
-                case Message m when !Validate(m):
-                    e.Response(CreateError("Mensaje no valido", 403));
+                case IMessage m when !Login(m):
+                    e.Send(CreateError("Mensaje no valido", 403, m));
                     break;
+
                 case null:
-                    e.Response(CreateError("Petición incorrecta", 403));
+                    e.Send(CreateError("Petición incorrecta", 403, e.CreateMessage()));
                     break;
+
                 default:
-                    e.Response(ProcessRequest(e.Request));
+                    e.Send(ProcessRequest(e.Data));
                     break;
             }
         }
-
-        private static bool Validate(Message message)
-        {
-            return false;
-        }
-
-        private static Message CreateError(string message, int code)
-            => new Message(_msgServer.Rules)
-            {
-                { 20, code },
-                { 21, message }
-            };
     }
 }
