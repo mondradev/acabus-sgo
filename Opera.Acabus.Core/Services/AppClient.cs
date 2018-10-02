@@ -3,6 +3,7 @@ using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
 using System;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.Services
@@ -28,7 +29,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         public AppClient()
         {
-            AppID = AcabusDataContext.ConfigContext["App"]?.ToInteger("Token") ?? 0;
+            AppToken = AcabusDataContext.ConfigContext["App"]?.ToString("Token");
             MsgRulesVersion = Version.Parse(AcabusDataContext.ConfigContext["App"]?.ToString("Version"));
             ServerPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Port") ?? 9000);
             ServerIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("IP") ?? "127.0.0.1");
@@ -41,7 +42,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Obtiene el identificador de aplicación especificado en la configuración.
         /// </summary>
-        public Int64 AppID { get; }
+        public String AppToken { get; }
 
         /// <summary>
         /// Versión de las reglas de mensajes.
@@ -71,9 +72,9 @@ namespace Opera.Acabus.Core.Services
         {
             IMessage message = _request.CreateMessage();
 
-            message[0] = AppID;
+            message[0] = Encoding.UTF8.GetBytes(AppToken);
             message[1] = MsgRulesVersion.ToString();
-            message[10] = _token;
+            message[10] = Encoding.UTF8.GetBytes(_token);
 
             return message;
         }
