@@ -1,4 +1,4 @@
-﻿namespace Opera.Acabus.Server.Core.Utils
+﻿namespace Opera.Acabus.Server.Core.Models
 {
     /// <summary>
     /// Especifica los posibles estados de algún servicio del servidor de aplicación.

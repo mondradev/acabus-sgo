@@ -1,8 +1,8 @@
 ﻿using InnSyTech.Standard.Mvvm;
-using Opera.Acabus.Server.Core.Utils;
+using Opera.Acabus.Server.Core.Models;
 using System;
 
-namespace Opera.Acabus.Server.Core.ViewModels
+namespace Opera.Acabus.Server.Gui.ViewModels
 {
     /// <summary>
     /// Modelo de la vista <see cref="Views.ServerCoreView"/> el cual controla todas las interacciones con el resto del sistema.

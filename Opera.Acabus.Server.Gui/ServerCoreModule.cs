@@ -3,7 +3,7 @@ using Opera.Acabus.Core.Gui.Modules;
 using System;
 using System.Windows;
 
-namespace Opera.Acabus.Server.Core
+namespace Opera.Acabus.Server.Gui
 {
     /// <summary>
     /// Define el módulo del nucleo del servidor.

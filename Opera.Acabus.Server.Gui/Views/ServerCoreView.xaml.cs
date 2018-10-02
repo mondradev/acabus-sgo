@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Opera.Acabus.Server.Core.Views
+namespace Opera.Acabus.Server.Gui.Views
 {
     /// <summary>
     /// Lógica de interacción para ServerCoreView.xaml

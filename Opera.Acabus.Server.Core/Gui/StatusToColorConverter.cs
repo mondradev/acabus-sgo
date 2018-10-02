@@ -1,9 +1,10 @@
 ﻿using Opera.Acabus.Core.Gui.Converters;
+using Opera.Acabus.Server.Core.Models;
 using System.Collections.Generic;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace Opera.Acabus.Server.Core.Utils
+namespace Opera.Acabus.Server.Core.Gui
 {
     /// <summary>
     /// Representa un convertir de la enumeración <see cref="ServiceStatus"/> a colores según el valor.
