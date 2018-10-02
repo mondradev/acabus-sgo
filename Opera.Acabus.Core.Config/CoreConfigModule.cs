@@ -6,7 +6,7 @@ using System.Windows;
 namespace Opera.Acabus.Core.Config
 {
     /// <summary>
-    /// Define la configuración del nucleo del SGO.
+    /// Define el módulo de la configuración del nucleo del SGO.
     /// </summary>
     public class CoreConfigModule : ModuleInfoGui
     {
