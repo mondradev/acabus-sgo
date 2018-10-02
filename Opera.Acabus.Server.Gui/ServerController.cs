@@ -2,7 +2,9 @@
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.Models;
 using Opera.Acabus.Server.Core.Models;
+using Opera.Acabus.Server.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -119,7 +121,27 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="callback">Funcción de llamada de vuelta.</param>
         private static void Functions(IMessage message, Action<IMessage> callback)
         {
+            if (Helpers.ValidateRequest(message, typeof(ServerController)))
+                Helpers.CallFunc(message, typeof(ServerController));
+            else
+                CreateError("Error al realizar la petición: opera.acabus.server.core", 403, message);
+
+            callback?.Invoke(message);
         }
+
+        #region ApiFunctions
+
+        /// <summary>
+        /// Obtiene la estación con el ID especificado.
+        /// </summary>
+        /// <param name="IDStation">ID de la estación.</param>
+        /// <param name="message">Mensaje de la petición.</param>
+        public static void GetStation([ParameterField(11)] UInt64 IDStation, IMessage message)
+        {
+            message[12] = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == IDStation).Serialize();
+        }
+
+        #endregion
 
         /// <summary>
         /// Carga todos los módulos.

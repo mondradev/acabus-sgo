@@ -67,7 +67,7 @@
     </Compile>
     <Compile Include="Models\ServiceStatus.cs" />
     <Compile Include="Gui\StatusToColorConverter.cs" />
-    <Compile Include="Utils\Helper.cs" />
+    <Compile Include="Utils\Helpers.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
