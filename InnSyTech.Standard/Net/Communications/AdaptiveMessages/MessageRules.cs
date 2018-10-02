@@ -19,7 +19,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Campos básicos necesarios para el manejo de mensajes.
         /// </summary>
         private static readonly FieldDefinition[] _staticFields = new FieldDefinition[] {
-            new FieldDefinition(0, FieldType.Text, 128, true, "Token de aplicación"), // Token de aplicación gestionados por el servidor
+            new FieldDefinition(0, FieldType.Binary, 32, true, "Token de aplicación"), // Token de aplicación gestionados por el servidor
             new FieldDefinition(1, FieldType.Text, 20, true, "Versión de las reglas"), // Versión de la regla
             new FieldDefinition(2, FieldType.Numeric, 3, false, "Código de respuesta"), // Código de respuesta de la petición
             new FieldDefinition(3, FieldType.Text, 255, true, "Mensaje de respuesta"), // Mensaje de respuesta de la petición

@@ -11,7 +11,7 @@ namespace InnSyTech.Standard.Mvvm
     /// Define la base de una modelo de la vista implementando las interfaces <see
     /// cref="INotifyPropertyChanged"/> y <see cref="INotifyDataErrorInfo"/>.
     /// </summary>
-    public class ViewModelBase : INotifyPropertyChanged, INotifyDataErrorInfo
+    public abstract class ViewModelBase : INotifyPropertyChanged, INotifyDataErrorInfo
     {
         /// <summary>
         /// Collección de los errores actualmente surgieron.
