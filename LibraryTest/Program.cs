@@ -1,74 +1,35 @@
-﻿using InnSyTech.Standard.Net.Communications.AdaptativeMessages;
-using InnSyTech.Standard.Net.Communications.AdaptativeMessages.Sockets;
-using Newtonsoft.Json;
+﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
+using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
+using System.Text;
+using System.Threading;
 
 namespace LibraryTest
 {
     public class Program
     {
-
         public static void Main(string[] args)
         {
-            string version = "0.1.0";
-            AdaptativeMsgServer server = new AdaptativeMsgServer(MessageRules.Load(AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules")));
+            String path = AcabusDataContext.ConfigContext["Message"]["Rules"].ToString();
+            AdaptiveMsgRequest request = new AdaptiveMsgRequest(path, IPAddress.Loopback, 5500);
 
-            server.Received += (sender, e) =>
-            {
-                var msg = e.Request ?? e.CreateMessage();
+            IMessage data = request.CreateMessage();
+            data[1] = Encoding.UTF8.GetBytes("n3crg3q6grmq3grcqbq73bbcqqmymgc7");
+            data[2] = "0.0.0.00000";
+            data[6] = "GetStation";
+            data[11] = Encoding.UTF8.GetBytes("8c3nqrg73q6rq36qgctggeqg7mhqyh8q");
+            data[12] = 1;
 
-                if (!msg.ContainsID(1))
-                {
-                    msg[20] = "No es posible identificar el mensaje, reglas de composición de mensajes incorrectas.";
-                    e.Response(msg);
-
-                    return;
-                }
-
-                if (!version.Equals(msg[1]))
-                {
-                    msg[20] = String.Format("La versión de las reglas de mensajes no coinciden con la del servidor.\nServidor: v{0}\nCliente: v{1}", version, msg[1]);
-                    e.Response(msg);
-
-                    return;
-                }
-
-                List<Station> response = AcabusDataContext.AllStations.Where(x => !x.IsExternal).ToList();
-
-                msg[3] = response.FirstOrDefault()?.Serialize();
-
-                e.Response(msg);
-
-            };
-
-            Task.Run(() => server.Startup());
-
-            AdaptativeMsgRequest request = new AdaptativeMsgRequest(new MessageRules() {
-                { new FieldDefinition (1, FieldDefinition.FieldType.Text, 10, true) },
-                { new FieldDefinition (10, FieldDefinition.FieldType.Text, 10) },
-                { new FieldDefinition (11, FieldDefinition.FieldType.Text, 10) },
-                { new FieldDefinition(3, FieldDefinition.FieldType.Binary, 1024) },
-                { new FieldDefinition (20, FieldDefinition.FieldType.Text, 255) }
-            }, IPAddress.Loopback, server.Port);
-
-            var res = request.DoRequest(new Message(request.Rules) {
-                { 1, "0.1.0" }
-            });
-
-            var station = res.GetValue(3, x => ModelHelper.GetStation(x as byte[]));
-
-            Console.WriteLine(res[20]);
-            Console.WriteLine(JsonConvert.SerializeObject(station));
+            request.DoRequest(data, x => {
+                Console.WriteLine(String.Format("Cod: {0}\nMessage: {1}\nResponse: {2}", x[3], x[4], ModelHelper.GetStation(x[13] as byte[])));
+                Console.WriteLine(String.Format("API Key: " + Encoding.UTF8.GetString(x[1] as byte[])));
+                Console.WriteLine(String.Format("Device Key: " + Encoding.UTF8.GetString(x[11] as byte[])));
+            }
+            );
 
             Console.ReadLine();
-
-            server.Shutdown();
 
         }
     }

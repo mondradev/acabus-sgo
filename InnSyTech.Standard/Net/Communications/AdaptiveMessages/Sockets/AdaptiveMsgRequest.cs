@@ -49,7 +49,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// Crea un mensaje vacío a partir de las reglas especificadas en la petición.
         /// </summary>
         /// <returns>Un mensaje nuevo.</returns>
-        public IMessage CreateMessage() => new Message(this.Rules);
+        public IMessage CreateMessage() => new Message(Rules);
 
         /// <summary>
         /// Realiza una petición asincrónica al servidor.

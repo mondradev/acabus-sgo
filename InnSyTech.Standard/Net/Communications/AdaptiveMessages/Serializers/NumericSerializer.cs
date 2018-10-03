@@ -171,7 +171,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
         /// <param name="width">Longitud minima del vector.</param>
         /// <param name="padding">Caracter de relleno.</param>
         /// <returns>Un vector que representa al número especificado.</returns>
-        private byte[] ToBCD(UInt64 number, int width = 1, char padding = '0')
+        private byte[] ToBCD(UInt64 number, int width = 2, char padding = '0')
         {
             List<Byte> dest = new List<byte>();
             string numberText = number.ToString().PadLeft(width, padding);

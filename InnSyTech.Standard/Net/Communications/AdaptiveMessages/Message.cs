@@ -331,5 +331,12 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 throw new AdaptiveMsgException("No se logró generar el mensaje desde los datos recibidos", ex);
             }
         }
+
+        /// <summary>
+        /// Representa en una cadena a la instancia actual.
+        /// </summary>
+        /// <returns>Una cadena Hex que representa al mensaje.</returns>
+        public override string ToString()
+            => BitConverter.ToString(Serialize()).Replace("-", "");
     }
 }

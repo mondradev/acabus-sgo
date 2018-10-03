@@ -19,16 +19,16 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Campos básicos necesarios para el manejo de mensajes.
         /// </summary>
         private static readonly FieldDefinition[] _staticFields = new FieldDefinition[] {
-            new FieldDefinition(0, FieldType.Binary, 32, true, "Token de aplicación"), // Token de aplicación gestionados por el servidor
-            new FieldDefinition(1, FieldType.Text, 20, true, "Versión de las reglas"), // Versión de la regla
-            new FieldDefinition(2, FieldType.Numeric, 3, false, "Código de respuesta"), // Código de respuesta de la petición
-            new FieldDefinition(3, FieldType.Text, 255, true, "Mensaje de respuesta"), // Mensaje de respuesta de la petición
-            new FieldDefinition(4, FieldType.Text, 50, true, "Nombre del módulo"), // Nombre del módulo
-            new FieldDefinition(5, FieldType.Text, 20, true, "Nombre de la función"), // Nombre de la función
-            new FieldDefinition(6, FieldType.Binary, 1, false, "Es enumerable"), // La respuesta es enumerable
-            new FieldDefinition(7, FieldType.Numeric, 100, true, "Registros totales del enumerable"), // Número total de registros
-            new FieldDefinition(8, FieldType.Numeric, 100, true, "Posición del enumerable"), // Posición actual del enumerable
-            new FieldDefinition(9, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)") // Operación del enumerador
+            new FieldDefinition(1, FieldType.Binary, 32, false, "Token de aplicación"), // Token de aplicación gestionados por el servidor
+            new FieldDefinition(2, FieldType.Text, 20, true, "Versión de las reglas"), // Versión de la regla
+            new FieldDefinition(3, FieldType.Numeric, 3, false, "Código de respuesta"), // Código de respuesta de la petición
+            new FieldDefinition(4, FieldType.Text, 255, true, "Mensaje de respuesta"), // Mensaje de respuesta de la petición
+            new FieldDefinition(5, FieldType.Text, 50, true, "Nombre del módulo"), // Nombre del módulo
+            new FieldDefinition(6, FieldType.Text, 20, true, "Nombre de la función"), // Nombre de la función
+            new FieldDefinition(7, FieldType.Binary, 1, false, "Es enumerable"), // La respuesta es enumerable
+            new FieldDefinition(8, FieldType.Numeric, 100, true, "Registros totales del enumerable"), // Número total de registros
+            new FieldDefinition(9, FieldType.Numeric, 100, true, "Posición del enumerable"), // Posición actual del enumerable
+            new FieldDefinition(10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)") // Operación del enumerador
         };
 
         /// <summary>

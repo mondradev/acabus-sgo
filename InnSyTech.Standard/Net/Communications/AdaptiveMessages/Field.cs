@@ -46,5 +46,12 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 _value = value ?? throw new ArgumentNullException("value", "El campo no puede ser asignado con un valor nulo.");
             }
         }
+
+        /// <summary>
+        /// Representa el campo actual a través de una cadena.
+        /// </summary>
+        /// <returns>Un cadena que representa al campo.</returns>
+        public override string ToString()
+            => String.Format("Field{{ID={0}, Value={1}}}", ID, Value);
     }
 }

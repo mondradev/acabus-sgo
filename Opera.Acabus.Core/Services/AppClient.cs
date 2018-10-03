@@ -72,9 +72,9 @@ namespace Opera.Acabus.Core.Services
         {
             IMessage message = _request.CreateMessage();
 
-            message[0] = Encoding.UTF8.GetBytes(AppToken);
-            message[1] = MsgRulesVersion.ToString();
-            message[10] = Encoding.UTF8.GetBytes(_token);
+            message[1] = Encoding.UTF8.GetBytes(AppToken);
+            message[2] = MsgRulesVersion.ToString();
+            message[11] = Encoding.UTF8.GetBytes(_token);
 
             return message;
         }

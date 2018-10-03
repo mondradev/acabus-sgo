@@ -94,12 +94,14 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="text">Mensaje a indicar al cliente.</param>
         /// <param name="code">Código de respuesta al cliente.</param>
-        /// <param name="message">Instancia IMessage a devolver al cliente.</param>
+        /// <param name="e">Instancia que controla el evento de la petición.</param>
         /// <returns>Una instancia de mensaje.</returns>
-        private static IMessage CreateError(string text, int code, IMessage message)
+        private static IMessage CreateError(string text, int code, IAdaptiveMsgArgs e)
         {
-            message[3] = text;
-            message[2] = code;
+            IMessage message = e.CreateMessage();
+
+            message[4] = text;
+            message[3] = code;
 
             return message;
         }
@@ -119,12 +121,13 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="message">Mensaje con la petición.</param>
         /// <param name="callback">Funcción de llamada de vuelta.</param>
-        private static void Functions(IMessage message, Action<IMessage> callback)
+        /// <param name="e">Instancia que controla el evento de la petición.</param>
+        private static void Functions(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e)
         {
             if (Helpers.ValidateRequest(message, typeof(ServerController)))
                 Helpers.CallFunc(message, typeof(ServerController));
             else
-                CreateError("Error al realizar la petición: opera.acabus.server.core", 403, message);
+                CreateError("Error al realizar la petición: opera.acabus.server.core", 403, e);
 
             callback?.Invoke(message);
         }
@@ -136,9 +139,9 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="IDStation">ID de la estación.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStation([ParameterField(11)] UInt64 IDStation, IMessage message)
+        public static void GetStation([ParameterField(12)] UInt64 IDStation, IMessage message)
         {
-            message[12] = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == IDStation).Serialize();
+            message[13] = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == IDStation).Serialize();
         }
 
         #endregion
@@ -186,24 +189,24 @@ namespace Opera.Acabus.Server.Gui
         private static bool Login(IMessage message)
         {
             /***
-             *  0, FieldType.Binary, 32, true, "Token de aplicación"
-                1, FieldType.Text, 20, true, "Versión de las reglas"
-                10, FIeldType.Binary, 32, true, "Token de equipo"
+             *  1, FieldType.Binary, 32, true, "Token de aplicación"
+                2, FieldType.Text, 20, true, "Versión de las reglas"
+                11, FIeldType.Binary, 32, true, "Token de equipo"
             */
 
-            if (!message.IsSet(0) || !message.IsSet(1) || !message.IsSet(10))
+            if (!message.IsSet(1) || !message.IsSet(2) || !message.IsSet(11))
                 return false;
 
-            if (!ValidateToken(message.GetValue(0, x => x as byte[])))
+            if (!ValidateToken(message.GetValue(1, x => x as byte[])))
                 return false;
 
-            Version rulesVersion = Version.Parse(AcabusDataContext.ConfigContext["App"]?.ToString("Version"));
-            Version rulesVersionClient = message.GetValue(1, x => Version.Parse(x.ToString()));
+            Version rulesVersion = Version.Parse(AcabusDataContext.ConfigContext["App"]?.ToString("Version") ?? "0.0.0.00000");
+            Version rulesVersionClient = message.GetValue(2, x => Version.Parse(x.ToString()));
 
             if (!rulesVersion.Equals(rulesVersionClient))
                 return false;
 
-            if (!ValidateTokenDevice(message.GetValue(10, x => x as byte[])))
+            if (!ValidateTokenDevice(message.GetValue(11, x => x as byte[])))
                 return false;
 
             return true;
@@ -216,40 +219,50 @@ namespace Opera.Acabus.Server.Gui
         private static void ProcessRequest(IMessage message, IAdaptiveMsgArgs e)
         {
             /***
-             *  0, FieldType.Binary, 32, true, "Token de aplicación"
-                1, FieldType.Text, 20, true, "Versión de las reglas"
-                2, FieldType.Numeric, 3, false, "Código de respuesta"
-                3, FieldType.Text, 255, true, "Mensaje de respuesta"
-                4, FieldType.Text, 50, true, "Nombre del módulo"
-                5, FieldType.Text, 20, true, "Nombre de la función"
-                6, FieldType.Binary, 1, false, "Es enumerable"
-                7, FieldType.Numeric, 100, true, "Registros totales del enumerable"
-                8, FieldType.Numeric, 100, true, "Posición del enumerable"
-                9, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
+             *  1, FieldType.Binary, 32, true, "Token de aplicación"
+                2, FieldType.Text, 20, true, "Versión de las reglas"
+                3, FieldType.Numeric, 3, false, "Código de respuesta"
+                4, FieldType.Text, 255, true, "Mensaje de respuesta"
+                5, FieldType.Text, 50, true, "Nombre del módulo"
+                6, FieldType.Text, 20, true, "Nombre de la función"
+                7, FieldType.Binary, 1, false, "Es enumerable"
+                8, FieldType.Numeric, 100, true, "Registros totales del enumerable"
+                9, FieldType.Numeric, 100, true, "Posición del enumerable"
+                10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
              */
-
-            if (!message.IsSet(5))
+            try
             {
-                e.Send(CreateError("Error al realizar la petición, no especificó la función a llamar", 403, message));
-                return;
-            }
 
-            if (message.IsSet(4))
-            {
-                String modName = message[4].ToString();
-                IServerModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
-
-                if (module is null)
+                if (!message.IsSet(6))
                 {
-                    e.Send(CreateError("Error al realizar la petición, no existe el módulo: " + modName, 403, message));
+                    e.Send(CreateError("Error al realizar la petición, no especificó la función a llamar", 403, e));
                     return;
                 }
 
-                module.Request(message, e.Send);
-                return;
-            }
+                message[3] = 200;
+                message[4] = "OK";
 
-            Functions(message, e.Send);
+                if (message.IsSet(5))
+                {
+                    String modName = message[5].ToString();
+                    IServerModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
+
+                    if (module is null)
+                    {
+                        e.Send(CreateError("Error al realizar la petición, no existe el módulo: " + modName, 403, e));
+                        return;
+                    }
+
+                    module.Request(message, e.Send);
+                    return;
+                }
+
+                Functions(message, e.Send, e);
+            }
+            catch (Exception ex)
+            {
+                e.Send(CreateError(ex.Message, 500, e));
+            }
         }
 
         /// <summary>
@@ -262,11 +275,11 @@ namespace Opera.Acabus.Server.Gui
             switch (e.Data)
             {
                 case IMessage m when !Login(m):
-                    e.Send(CreateError("Mensaje no valido", 403, m));
+                    e.Send(CreateError("Mensaje no valido", 403, e));
                     break;
 
                 case null:
-                    e.Send(CreateError("Petición incorrecta", 403, e.CreateMessage()));
+                    e.Send(CreateError("Petición incorrecta", 403, e));
                     break;
 
                 default:

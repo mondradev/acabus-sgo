@@ -1,37 +1,26 @@
 ﻿[
 	{
-		"ID" : 1,
-		"MaxLength" : 10,
-		"IsVarLength" : true,
-		"Type" : 1,
-		"Description" : "Versión de la plantilla"
+		"ID" : 11,
+		"Length" : 32,
+		"MaxLength" : 32,
+		"IsVarLength": false,
+		"Type" : 2,
+		"Description" : "Identificador del equipo"
 	},
 	{
-		"ID" : 20,
-		"MaxLength" : 5,
-		"IsVarLength" : true,
+		"ID" : 12,
+		"Length" : 1,
+		"MaxLength" : 36,
+		"IsVarLength": true,
 		"Type" : 0,
-		"Description" : "Código de la petición."
+		"Description" : "Integer de 256 bits"
 	},
 	{
-		"ID" : 21,
-		"MaxLength" : 255,
-		"IsVarLength" : true,
-		"Type" : 1,
-		"Description" : "Mensajes de la petición."
-	},
-	{
-		"ID" : 62,
-		"MaxLength" : 1024,
-		"IsVarLength" : true,
+		"ID" : 13,
+		"Length" : 1,
+		"MaxLength" : 132,
+		"IsVarLength": true,
 		"Type" : 2,
-		"Description" : "Campo reservado de 1K"
-	},
-	{
-		"ID" : 63,
-		"MaxLength" : 2048,
-		"IsVarLength" : true,
-		"Type" : 2,
-		"Description" : "Campo reservado de 2K"
+		"Description" : "Binario de 128 bytes"
 	}
 ]

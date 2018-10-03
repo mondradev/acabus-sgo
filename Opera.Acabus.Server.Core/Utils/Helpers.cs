@@ -18,9 +18,9 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <param name="functionsClass">Clase de las funciones.</param>
         public static void CallFunc(IMessage message, Type functionsClass)
         {
-            String funcName = message[5]?.ToString();
+            String funcName = message[6]?.ToString();
 
-            if (!String.IsNullOrEmpty(funcName))
+            if (String.IsNullOrEmpty(funcName))
                 return;
 
             MethodInfo[] methods = functionsClass.GetMethods(BindingFlags.Static | BindingFlags.Public);
@@ -51,9 +51,9 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <returns>Un valor true si la petición es compatible con la función.</returns>
         public static bool ValidateRequest(IMessage message, Type functionsClass)
         {
-            String funcName = message[5]?.ToString();
+            String funcName = message[6]?.ToString();
 
-            if (!String.IsNullOrEmpty(funcName))
+            if (String.IsNullOrEmpty(funcName))
                 return false;
 
             MethodInfo[] methods = functionsClass.GetMethods(BindingFlags.Static | BindingFlags.Public);
@@ -65,7 +65,8 @@ namespace Opera.Acabus.Server.Core.Utils
             bool valid = true;
 
             ParameterInfo[] parameters = method.GetParameters();
-            IEnumerable<Int32> fields = parameters.Select(x => x.GetCustomAttribute<ParameterFieldAttribute>().ID);
+            IEnumerable<Int32> fields = parameters.Where(x=> x.GetCustomAttribute<ParameterFieldAttribute>() != null)
+                .Select(x => x.GetCustomAttribute<ParameterFieldAttribute>().ID);
 
             foreach (Int32 field in fields)
                 valid &= message.IsSet(field);
