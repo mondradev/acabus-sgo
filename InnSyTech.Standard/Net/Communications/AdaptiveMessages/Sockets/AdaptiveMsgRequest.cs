@@ -36,6 +36,39 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         public IPAddress IPAddress { get; }
 
         /// <summary>
+        /// Realiza una petición asincrónica con una secuencia de datos como respuesta.
+        /// </summary>
+        /// <param name="message">Mensaje que representa la petición.</param>
+        /// <param name="enumerator">Controlador del recorrido de la secuencia.</param>
+        public Task DoRequestToList(IMessage message, Action<IAdaptiveMsgEnumerator> enumerator)
+        {
+            return Task.Run(() =>
+            {
+                while (true)
+                {
+                    int bytesTransferred = _socket.Send(message.Serialize());
+
+                    if (bytesTransferred <= 0)
+                        break; ;
+
+                    message = ReadBuffer();
+
+                    if (!message.IsSet(7))
+                        throw new AdaptiveMsgException("El mensaje no es una enumeración, utilice DoRequest()");
+
+                    AdaptiveMsgEnumerator msgEnumerator= new AdaptiveMsgEnumerator(message);
+                    enumerator?.Invoke(msgEnumerator);
+
+                    if (msgEnumerator.Breaking)
+                        break;
+
+                    if (!message.IsSet(10) || message.GetValue(10, x => Convert.ToInt32(x)) != 1)
+                        message[10] = 0;
+                }
+            });
+        }
+
+        /// <summary>
         /// Obtiene o establece el puerto TCP por el cual escucha el servidor.
         /// </summary>
         public int Port { get; }

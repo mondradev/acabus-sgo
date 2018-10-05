@@ -98,10 +98,12 @@
     <Compile Include="Net\Communications\AdaptiveMessages\Message.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\AdaptiveMsgAcceptArgs.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\AdaptiveMsgArgs.cs" />
+    <Compile Include="Net\Communications\AdaptiveMessages\Sockets\AdaptiveMsgEnumerator.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\AdaptiveMsgRequest.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\AdaptiveMsgServer.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\IAdaptiveMsgAcceptArgs.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\IAdaptiveMsgArgs.cs" />
+    <Compile Include="Net\Communications\AdaptiveMessages\Sockets\IAdaptiveMsgEnumerator.cs" />
     <Compile Include="Net\Notifications\Push\ClientPush.cs" />
     <Compile Include="Net\Notifications\Push\NotificationPush.cs" />
     <Compile Include="Net\Notifications\Push\ServerPush.cs" />

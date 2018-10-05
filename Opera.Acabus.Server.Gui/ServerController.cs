@@ -1,4 +1,5 @@
 ﻿using InnSyTech.Standard.Configuration;
+using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
@@ -142,6 +143,39 @@ namespace Opera.Acabus.Server.Gui
         public static void GetStation([ParameterField(12)] UInt64 IDStation, IMessage message)
         {
             message[13] = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == IDStation).Serialize();
+        }
+
+        /// <summary>
+        /// Obtiene las estaciones de la ruta especificada.
+        /// </summary>
+        /// <param name="IDRoute">ID de la ruta.</param>
+        /// <param name="message">Mensaje de la petición.</param>
+        public static void GetStations([ParameterField(12)] UInt64 IDRoute, IMessage message)
+        {
+            /***
+                7, FieldType.Binary, 1, false, "Es enumerable"
+                8, FieldType.Numeric, 100, true, "Registros totales del enumerable"
+                9, FieldType.Numeric, 100, true, "Posición del enumerable"
+                10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
+             */
+
+            IQueryable<Station> stationsQuery = AcabusDataContext.AllStations.LoadReference(1).Where(x => x.Route.ID == IDRoute);
+
+            if (!message.IsSet(7))
+            {
+                message[7] = BitConverter.GetBytes(true);
+                message[8] = stationsQuery.ToList().Count();
+                message[9] = 0;
+            }
+            else if (message.GetValue(10, x => Convert.ToInt32(x)) == 0)
+                message[9] = message.GetValue(9, x => Convert.ToInt32(x)) + 1;
+            else if (message.GetValue(10, x => Convert.ToInt32(x)) == 1)
+            {
+                message[9] = 0;
+                message[10] = 0;
+            }
+
+            message[13] = stationsQuery.ToList()[message.GetValue(9, x => Convert.ToInt32(x))].Serialize();
         }
 
         #endregion

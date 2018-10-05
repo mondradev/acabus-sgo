@@ -174,6 +174,12 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
         private byte[] ToBCD(UInt64 number, int width = 2, char padding = '0')
         {
             List<Byte> dest = new List<byte>();
+
+            width = width > number.ToString().Length ? width : number.ToString().Length;
+
+            if (width % 2 != 0)
+                width += 1;
+
             string numberText = number.ToString().PadLeft(width, padding);
 
             for (int i = 0; i < numberText.Length; i += 2)

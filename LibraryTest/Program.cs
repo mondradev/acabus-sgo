@@ -22,12 +22,26 @@ namespace LibraryTest
             data[11] = Encoding.UTF8.GetBytes("8c3nqrg73q6rq36qgctggeqg7mhqyh8q");
             data[12] = 1;
 
-            request.DoRequest(data, x => {
+            request.DoRequest(data, x =>
+            {
+                Console.WriteLine("Simple Request");
                 Console.WriteLine(String.Format("Cod: {0}\nMessage: {1}\nResponse: {2}", x[3], x[4], ModelHelper.GetStation(x[13] as byte[])));
                 Console.WriteLine(String.Format("API Key: " + Encoding.UTF8.GetString(x[1] as byte[])));
                 Console.WriteLine(String.Format("Device Key: " + Encoding.UTF8.GetString(x[11] as byte[])));
-            }
-            );
+                Console.WriteLine();
+
+            }).Wait();
+
+            data[6] = "GetStations";
+            data[12] = 2;
+
+            Console.WriteLine("Enumerable Request");
+
+            request.DoRequestToList(data, e =>
+            {
+                IMessage x = e.Current;
+                Console.WriteLine(String.Format("Pos: {0}, Cod: {1}\nMessage: {2}\nResponse: {3}", x[9], x[3], x[4], ModelHelper.GetStation(x[13] as byte[])));
+            });
 
             Console.ReadLine();
 
