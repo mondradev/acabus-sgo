@@ -56,7 +56,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
                     if (!message.IsSet(7))
                         throw new AdaptiveMsgException("El mensaje no es una enumeración, utilice DoRequest()");
 
-                    AdaptiveMsgEnumerator msgEnumerator= new AdaptiveMsgEnumerator(message);
+                    AdaptiveMsgEnumerator msgEnumerator = new AdaptiveMsgEnumerator(message);
                     enumerator?.Invoke(msgEnumerator);
 
                     if (msgEnumerator.Breaking)
@@ -64,6 +64,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
 
                     if (!message.IsSet(10) || message.GetValue(10, x => Convert.ToInt32(x)) != 1)
                         message[10] = 0;
+
+                    if (message.GetValue(9, x => Convert.ToInt32(x)) >= message.GetValue(8, x => Convert.ToInt32(x)) - 1)
+                        break;
                 }
             });
         }

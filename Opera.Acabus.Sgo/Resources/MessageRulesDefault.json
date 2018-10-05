@@ -22,5 +22,29 @@
 		"IsVarLength": true,
 		"Type" : 2,
 		"Description" : "Binario de 128 bytes"
+	},	
+	{
+		"ID" : 14,
+		"Length" : 1,
+		"MaxLength" : 52,
+		"IsVarLength": true,
+		"Type" : 1,
+		"Description" : "Campo de texto de longitud variable"
+	},	
+	{
+		"ID" : 15,
+		"Length" : 1,
+		"MaxLength" : 132,
+		"IsVarLength": true,
+		"Type" : 0,
+		"Description" : "Integer de longitud variable"
+	},
+	{
+		"ID" : 16,
+		"Length" : 34,
+		"MaxLength" : 34,
+		"IsVarLength": false,
+		"Type" : 1,
+		"Description" : "Campo de texto de longitud fija"
 	}
 ]

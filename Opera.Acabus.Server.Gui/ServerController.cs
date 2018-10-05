@@ -178,6 +178,58 @@ namespace Opera.Acabus.Server.Gui
             message[13] = stationsQuery.ToList()[message.GetValue(9, x => Convert.ToInt32(x))].Serialize();
         }
 
+
+        /// <summary>
+        /// Obtiene la ruta con el ID especificado.
+        /// </summary>
+        /// <param name="IDRoute">ID de la estación.</param>
+        /// <param name="message">Mensaje de la petición.</param>
+        public static void GetRoute([ParameterField(12)] UInt64 IDRoute, IMessage message)
+        {
+            message[13] = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == IDRoute).Serialize();
+        }
+
+        /// <summary>
+        /// Crea una ruta nueva.
+        /// </summary>
+        /// <param name="number">Numero de la ruta.</param>
+        /// <param name="name">Nombre de la ruta.</param>
+        /// <param name="type">Tipo de la ruta. ALIM = 1 o TRUNK = 2.</param>
+        public static void CreateRoute([ParameterField(12)] UInt64 number,
+            [ParameterField(14)] String name, [ParameterField(15)] UInt64 type,
+            [ParameterField(16)] String assignedSection, IMessage message)
+        {
+            Route route = new Route(0, Convert.ToUInt16(number), (RouteType)type) { Name = name, AssignedSection = assignedSection };
+            bool res = AcabusDataContext.DbContext.Create(route);
+
+            message[13] = BitConverter.GetBytes(true);
+        }
+
+        /// <summary>
+        /// Obtiene las rutas.
+        /// </summary>
+        /// <param name="message">Mensaje de la petición.</param>
+        public static void GetRoutes(IMessage message)
+        {
+            IQueryable<Route> routeQuery = AcabusDataContext.AllRoutes;
+
+            if (!message.IsSet(7))
+            {
+                message[7] = BitConverter.GetBytes(true);
+                message[8] = routeQuery.ToList().Count();
+                message[9] = 0;
+            }
+            else if (message.GetValue(10, x => Convert.ToInt32(x)) == 0)
+                message[9] = message.GetValue(9, x => Convert.ToInt32(x)) + 1;
+            else if (message.GetValue(10, x => Convert.ToInt32(x)) == 1)
+            {
+                message[9] = 0;
+                message[10] = 0;
+            }
+
+            message[13] = routeQuery.ToList()[message.GetValue(9, x => Convert.ToInt32(x))].Serialize();
+        }
+
         #endregion
 
         /// <summary>
