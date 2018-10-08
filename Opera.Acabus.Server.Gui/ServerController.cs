@@ -1,9 +1,9 @@
 ﻿using InnSyTech.Standard.Configuration;
-using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
+using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core.Models;
 using Opera.Acabus.Server.Core.Utils;
 using System;
@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Opera.Acabus.Server.Gui
@@ -101,8 +102,8 @@ namespace Opera.Acabus.Server.Gui
         {
             IMessage message = e.CreateMessage();
 
-            message[4] = text;
-            message[3] = code;
+            message[AdaptiveMessageFieldID.ResponseMessage.ToInt32()] = text;
+            message[AdaptiveMessageFieldID.ResponseCode.ToInt32()] = code;
 
             return message;
         }
@@ -125,112 +126,13 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="e">Instancia que controla el evento de la petición.</param>
         private static void Functions(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e)
         {
-            if (Helpers.ValidateRequest(message, typeof(ServerController)))
-                Helpers.CallFunc(message, typeof(ServerController));
+            if (Helpers.ValidateRequest(message, typeof(ServerCoreFunctions)))
+                Helpers.CallFunc(message, typeof(ServerCoreFunctions));
             else
                 CreateError("Error al realizar la petición: opera.acabus.server.core", 403, e);
 
             callback?.Invoke(message);
         }
-
-        #region ApiFunctions
-
-        /// <summary>
-        /// Obtiene la estación con el ID especificado.
-        /// </summary>
-        /// <param name="IDStation">ID de la estación.</param>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStation([ParameterField(12)] UInt64 IDStation, IMessage message)
-        {
-            message[13] = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == IDStation).Serialize();
-        }
-
-        /// <summary>
-        /// Obtiene las estaciones de la ruta especificada.
-        /// </summary>
-        /// <param name="IDRoute">ID de la ruta.</param>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStations([ParameterField(12)] UInt64 IDRoute, IMessage message)
-        {
-            /***
-                7, FieldType.Binary, 1, false, "Es enumerable"
-                8, FieldType.Numeric, 100, true, "Registros totales del enumerable"
-                9, FieldType.Numeric, 100, true, "Posición del enumerable"
-                10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
-             */
-
-            IQueryable<Station> stationsQuery = AcabusDataContext.AllStations.LoadReference(1).Where(x => x.Route.ID == IDRoute);
-
-            if (!message.IsSet(7))
-            {
-                message[7] = BitConverter.GetBytes(true);
-                message[8] = stationsQuery.ToList().Count();
-                message[9] = 0;
-            }
-            else if (message.GetValue(10, x => Convert.ToInt32(x)) == 0)
-                message[9] = message.GetValue(9, x => Convert.ToInt32(x)) + 1;
-            else if (message.GetValue(10, x => Convert.ToInt32(x)) == 1)
-            {
-                message[9] = 0;
-                message[10] = 0;
-            }
-
-            message[13] = stationsQuery.ToList()[message.GetValue(9, x => Convert.ToInt32(x))].Serialize();
-        }
-
-
-        /// <summary>
-        /// Obtiene la ruta con el ID especificado.
-        /// </summary>
-        /// <param name="IDRoute">ID de la estación.</param>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetRoute([ParameterField(12)] UInt64 IDRoute, IMessage message)
-        {
-            message[13] = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == IDRoute).Serialize();
-        }
-
-        /// <summary>
-        /// Crea una ruta nueva.
-        /// </summary>
-        /// <param name="number">Numero de la ruta.</param>
-        /// <param name="name">Nombre de la ruta.</param>
-        /// <param name="type">Tipo de la ruta. ALIM = 1 o TRUNK = 2.</param>
-        public static void CreateRoute([ParameterField(12)] UInt64 number,
-            [ParameterField(14)] String name, [ParameterField(15)] UInt64 type,
-            [ParameterField(16)] String assignedSection, IMessage message)
-        {
-            Route route = new Route(0, Convert.ToUInt16(number), (RouteType)type) { Name = name, AssignedSection = assignedSection };
-            bool res = AcabusDataContext.DbContext.Create(route);
-
-            message[13] = BitConverter.GetBytes(true);
-        }
-
-        /// <summary>
-        /// Obtiene las rutas.
-        /// </summary>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetRoutes(IMessage message)
-        {
-            IQueryable<Route> routeQuery = AcabusDataContext.AllRoutes;
-
-            if (!message.IsSet(7))
-            {
-                message[7] = BitConverter.GetBytes(true);
-                message[8] = routeQuery.ToList().Count();
-                message[9] = 0;
-            }
-            else if (message.GetValue(10, x => Convert.ToInt32(x)) == 0)
-                message[9] = message.GetValue(9, x => Convert.ToInt32(x)) + 1;
-            else if (message.GetValue(10, x => Convert.ToInt32(x)) == 1)
-            {
-                message[9] = 0;
-                message[10] = 0;
-            }
-
-            message[13] = routeQuery.ToList()[message.GetValue(9, x => Convert.ToInt32(x))].Serialize();
-        }
-
-        #endregion
 
         /// <summary>
         /// Carga todos los módulos.
@@ -280,19 +182,25 @@ namespace Opera.Acabus.Server.Gui
                 11, FIeldType.Binary, 32, true, "Token de equipo"
             */
 
-            if (!message.IsSet(1) || !message.IsSet(2) || !message.IsSet(11))
+            if (!message.IsSet(AdaptiveMessageFieldID.APIToken.ToInt32())
+                || !message.IsSet(AdaptiveMessageFieldID.HashRules.ToInt32())
+                || !message.IsSet(AdaptiveMessageFieldID.DeviceToken.ToInt32()))
                 return false;
 
-            if (!ValidateToken(message.GetValue(1, x => x as byte[])))
+            if (!ValidateToken(message.GetValue(AdaptiveMessageFieldID.APIToken.ToInt32(), x => x as byte[])))
                 return false;
 
-            Version rulesVersion = Version.Parse(AcabusDataContext.ConfigContext["App"]?.ToString("Version") ?? "0.0.0.00000");
-            Version rulesVersionClient = message.GetValue(2, x => Version.Parse(x.ToString()));
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                String hashRules = sha256.ComputeHash(File.ReadAllBytes(AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules"))).ToTextPlain();
+                String HashRulesClients = message.GetValue(AdaptiveMessageFieldID.HashRules.ToInt32(), x => (x as byte[]).ToTextPlain());
+                
+                if (!hashRules.Equals(HashRulesClients))
+                    return false;
 
-            if (!rulesVersion.Equals(rulesVersionClient))
-                return false;
+            }
 
-            if (!ValidateTokenDevice(message.GetValue(11, x => x as byte[])))
+            if (!ValidateTokenDevice(message.GetValue(AdaptiveMessageFieldID.DeviceToken.ToInt32(), x => x as byte[])))
                 return false;
 
             return true;
@@ -318,19 +226,18 @@ namespace Opera.Acabus.Server.Gui
              */
             try
             {
-
                 if (!message.IsSet(6))
                 {
                     e.Send(CreateError("Error al realizar la petición, no especificó la función a llamar", 403, e));
                     return;
                 }
 
-                message[3] = 200;
-                message[4] = "OK";
+                message[AdaptiveMessageFieldID.ResponseCode.ToInt32()] = 200;
+                message[AdaptiveMessageFieldID.ResponseMessage.ToInt32()] = "OK";
 
-                if (message.IsSet(5))
+                if (message.IsSet(AdaptiveMessageFieldID.ModuleName.ToInt32()))
                 {
-                    String modName = message[5].ToString();
+                    String modName = message[AdaptiveMessageFieldID.ModuleName.ToInt32()].ToString();
                     IServerModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
 
                     if (module is null)

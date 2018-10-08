@@ -70,6 +70,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="ServerController.cs" />
+    <Compile Include="ServerCoreFunctions.cs" />
     <Compile Include="ServerCoreModule.cs" />
     <Compile Include="ViewModels\ServerCoreViewModel.cs" />
     <Compile Include="Views\ServerCoreView.xaml.cs">

@@ -2,12 +2,46 @@
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
 using System;
+using System.IO;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.Services
 {
+    /// <summary>
+    /// Identificadores de los campos básicos del mensaje.
+    /// </summary>
+    public enum AdaptiveMessageFieldID
+    {
+        APIToken = 1,
+        HashRules,
+        ResponseCode,
+        ResponseMessage,
+        ModuleName,
+        FunctionName,
+        IsEnumerable,
+        EnumerableCount,
+        CurrentPosition,
+        EnumerableOperation,
+        DeviceToken
+    }
+
+    /// <summary>
+    /// Extensión de la clase <see cref="AdaptiveMessageFieldID"/>.
+    /// </summary>
+    public static class AdaptiveMessageFieldIDExtension
+    {
+        /// <summary>
+        /// Convierte el valor de la enumeración en <see cref="Int32"/>.
+        /// </summary>
+        /// <param name="fieldID">Campo de la enumeración.</param>
+        /// <returns>Valor númerico que representa el campo de la enumeración.</returns>
+        public static Int32 ToInt32(this AdaptiveMessageFieldID fieldID)
+            => (Int32)fieldID;
+    }
+
     /// <summary>
     /// Gestiona las conexiones al servidor de aplicación y provee de toda la funcionalidad que su
     /// identificador de aplicación le permite.
@@ -30,10 +64,14 @@ namespace Opera.Acabus.Core.Services
         public AppClient()
         {
             AppToken = AcabusDataContext.ConfigContext["App"]?.ToString("Token");
-            MsgRulesVersion = Version.Parse(AcabusDataContext.ConfigContext["App"]?.ToString("Version"));
             ServerPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Port") ?? 9000);
             ServerIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("IP") ?? "127.0.0.1");
             RulesMsgPath = AcabusDataContext.ConfigContext["Message"]?.ToString("Rules");
+
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                HashRules = sha256.ComputeHash(File.ReadAllBytes(RulesMsgPath));
+            }
 
             _request = new AdaptiveMsgRequest(RulesMsgPath, ServerIP, ServerPort);
             _token = AcabusDataContext.ConfigContext["App"]?.ToString("DeviceKey");
@@ -47,7 +85,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Versión de las reglas de mensajes.
         /// </summary>
-        public Version MsgRulesVersion { get; }
+        public Byte[] HashRules { get; }
 
         /// <summary>
         /// Obtiene la ubicación de las reglas utilizada para generar los mensajes.
@@ -72,9 +110,9 @@ namespace Opera.Acabus.Core.Services
         {
             IMessage message = _request.CreateMessage();
 
-            message[1] = Encoding.UTF8.GetBytes(AppToken);
-            message[2] = MsgRulesVersion.ToString();
-            message[11] = Encoding.UTF8.GetBytes(_token);
+            message[AdaptiveMessageFieldID.APIToken.ToInt32()] = Encoding.UTF8.GetBytes(AppToken);
+            message[AdaptiveMessageFieldID.HashRules.ToInt32()] = HashRules;
+            message[AdaptiveMessageFieldID.DeviceToken.ToInt32()] = Encoding.UTF8.GetBytes(_token);
 
             return message;
         }
