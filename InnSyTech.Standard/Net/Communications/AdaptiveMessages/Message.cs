@@ -75,7 +75,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (src.Length < 8)
                 throw new AdaptiveMsgException("El vector debe contener al menos 8 elementos que correspondan al cabecera del mensaje", src);
 
-            Int64 headerRead = BitConverter.ToInt64(src.Take(8)?.Reverse().ToArray(), 0);
+            UInt64 headerRead = BitConverter.ToUInt64(src.Take(8)?.Reverse().ToArray(), 0);
             byte[] body = src.Skip(8)?.ToArray();
 
             if (headerRead == 0)
@@ -87,7 +87,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
             while (headerRead > 1)
             {
-                Int64 res = headerRead % 2;
+                UInt64 res = headerRead % 2;
                 headerRead = headerRead / 2;
 
                 if (res == 1)
@@ -238,7 +238,8 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns>Una secuencia de bytes que representa al mensaje.</returns>
         public byte[] Serialize()
         {
-            int header = 0;
+            ///9223372036854775808
+            ulong header = 0;
             byte[] body = new byte[] { };
 
             foreach (Field field in this)
@@ -246,7 +247,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 FieldDefinition definition = _messageRules.FirstOrDefault(x => x.ID == field.ID);
                 IAdaptiveSerializer serializer = GetSerializer(definition);
 
-                header += (int)Math.Pow(2, definition.ID - 1);
+                header += (ulong)Math.Pow(2, definition.ID - 1);
                 body = body.Concat(serializer.Serialize(field, definition)).ToArray();
             }
 

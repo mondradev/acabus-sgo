@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace InnSyTech.Standard.Utils
@@ -45,6 +46,21 @@ namespace InnSyTech.Standard.Utils
                 partsStr.Add(str.Substring(i * lengthPart, lengthPart));
 
             return partsStr.ToArray();
+        }
+
+        /// <summary>
+        /// Recorre toda la secuencia llamando a la función proporcionada como parametro por cada uno
+        /// de los elementos de la misma.
+        /// </summary>
+        /// <typeparam name="T">Tipo de la secuencia.</typeparam>
+        /// <param name="src">Secuencia origen.</param>
+        /// <param name="action">Acción a realizar por cada uno de los elementos.</param>
+        public static void Foreach<T>(this IEnumerable<T> src, Action<T> action)
+        {
+            IEnumerator<T> enumerator = src.GetEnumerator();
+
+            while (enumerator.MoveNext())
+                action?.Invoke(enumerator.Current);
         }
 
         /// <summary>
@@ -103,6 +119,19 @@ namespace InnSyTech.Standard.Utils
                 exception = exception.InnerException;
 
             return exception.Message + "\n" + exception.StackTrace.Trim();
+        }
+
+        /// <summary>
+        /// Convierte una secuencia de caracteres a texto plano.
+        /// </summary>
+        /// <param name="src">Secuencia de datos origen.</param>
+        /// <returns>Una cadena que representa a la cadena.</returns>
+        public static String ToTextPlain(this byte[] src)
+        {
+            StringBuilder builder = new StringBuilder();
+            src.Select(x => x.ToString("x2")).Foreach(x => builder.Append(x));
+
+            return builder.ToString();
         }
     }
 }

@@ -20,7 +20,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         private static readonly FieldDefinition[] _staticFields = new FieldDefinition[] {
             new FieldDefinition(1, FieldType.Binary, 32, false, "Token de aplicación"), // Token de aplicación gestionados por el servidor
-            new FieldDefinition(2, FieldType.Text, 20, true, "Versión de las reglas"), // Versión de la regla
+            new FieldDefinition(2, FieldType.Binary, 32, false, "Hash de reglas"), // Versión de la regla
             new FieldDefinition(3, FieldType.Numeric, 3, false, "Código de respuesta"), // Código de respuesta de la petición
             new FieldDefinition(4, FieldType.Text, 255, true, "Mensaje de respuesta"), // Mensaje de respuesta de la petición
             new FieldDefinition(5, FieldType.Text, 50, true, "Nombre del módulo"), // Nombre del módulo
