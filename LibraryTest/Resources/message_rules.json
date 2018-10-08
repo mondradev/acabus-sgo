@@ -1,50 +1,289 @@
 ﻿[
-	{
-		"ID" : 11,
-		"Length" : 32,
-		"MaxLength" : 32,
-		"IsVarLength": false,
-		"Type" : 2,
-		"Description" : "Identificador del equipo"
-	},
-	{
-		"ID" : 12,
-		"Length" : 1,
-		"MaxLength" : 36,
-		"IsVarLength": true,
-		"Type" : 0,
-		"Description" : "Integer de 256 bits"
-	},
-	{
-		"ID" : 13,
-		"Length" : 1,
-		"MaxLength" : 132,
-		"IsVarLength": true,
-		"Type" : 2,
-		"Description" : "Binario de 128 bytes"
-	},	
-	{
-		"ID" : 14,
-		"Length" : 1,
-		"MaxLength" : 52,
-		"IsVarLength": true,
-		"Type" : 1,
-		"Description" : "Campo de texto de longitud variable"
-	},	
-	{
-		"ID" : 15,
-		"Length" : 1,
-		"MaxLength" : 132,
-		"IsVarLength": true,
-		"Type" : 0,
-		"Description" : "Integer de longitud variable"
-	},
-	{
-		"ID" : 16,
-		"Length" : 34,
-		"MaxLength" : 34,
-		"IsVarLength": false,
-		"Type" : 1,
-		"Description" : "Campo de texto de longitud fija"
-	}
+  {
+    "ID": 11,
+    "Length": 32,
+    "MaxLength": 32,
+    "IsVarLength": false,
+    "Type": 2,
+    "Description": "Token del equipo"
+  },
+
+  // Campos de longitud estática para valores numéricos
+  {
+    "ID": 12,
+    "Length": 2,
+    "MaxLength": 2,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Numérico sin signo de 16 bits"
+  },
+  {
+    "ID": 13,
+    "Length": 4,
+    "MaxLength": 4,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Numérico sin signo de 32 bits"
+  },
+  {
+    "ID": 14,
+    "Length": 8,
+    "MaxLength": 8,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Numérico sin signo de 64 bits"
+  },
+  {
+    "ID": 15,
+    "Length": 16,
+    "MaxLength": 16,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Numérico sin signo de 128 bits"
+  },
+
+  // Campos de longitud estática para valores de texto
+
+  {
+    "ID": 16,
+    "Length": 20,
+    "MaxLength": 20,
+    "IsVarLength": false,
+    "Type": 1,
+    "Description": "Texto para 20 caracteres"
+  },
+  {
+    "ID": 17,
+    "Length": 50,
+    "MaxLength": 50,
+    "IsVarLength": false,
+    "Type": 1,
+    "Description": "Texto para 50 caracteres"
+  },
+  {
+    "ID": 18,
+    "Length": 100,
+    "MaxLength": 100,
+    "IsVarLength": false,
+    "Type": 1,
+    "Description": "Texto para 100 caracteres"
+  },
+  {
+    "ID": 19,
+    "Length": 255,
+    "MaxLength": 255,
+    "IsVarLength": false,
+    "Type": 1,
+    "Description": "Texto para 255 caracteres"
+  },
+  {
+    "ID": 20,
+    "Length": 255,
+    "MaxLength": 255,
+    "IsVarLength": false,
+    "Type": 1,
+    "Description": "Texto para 255 caracteres"
+  },
+  {
+    "ID": 21,
+    "Length": 255,
+    "MaxLength": 255,
+    "IsVarLength": false,
+    "Type": 1,
+    "Description": "Texto para 255 caracteres"
+  },
+
+  // Campos para tipos de datos especiales
+  {
+    "ID": 22,
+    "Length": 1,
+    "MaxLength": 1,
+    "IsVarLength": false,
+    "Type": 2,
+    "Description": "Campo para valores lógicos (true/false)"
+  },
+  {
+    "ID": 23,
+    "Length": 1,
+    "MaxLength": 1,
+    "IsVarLength": false,
+    "Type": 2,
+    "Description": "Campo para valores lógicos (true/false)"
+  },
+  {
+    "ID": 24,
+    "Length": 1,
+    "MaxLength": 1,
+    "IsVarLength": false,
+    "Type": 2,
+    "Description": "Campo para valores lógicos (true/false)"
+  },
+  {
+    "ID": 25,
+    "Length": 8,
+    "MaxLength": 8,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Campo para valores de solo fecha. Ej. 2018-01-01 -> 20180101"
+  },
+  {
+    "ID": 26,
+    "Length": 6,
+    "MaxLength": 6,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Campo para valores de solo tiempo. Ej. 02:10:52 -> 021052"
+  },
+  {
+    "ID": 27,
+    "Length": 6,
+    "MaxLength": 6,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Campo para valores de solo tiempo. Ej. 02:10:52 -> 021052"
+  },
+  {
+    "ID": 28,
+    "Length": 6,
+    "MaxLength": 6,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Campo para valores de solo tiempo. Ej. 02:10:52 -> 021052"
+  },
+  {
+    "ID": 29,
+    "Length": 14,
+    "MaxLength": 14,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Campo para valores de solo fecha y hora. Ej. 2018-01-05 02:10:52 -> 20180105021052"
+  },
+  {
+    "ID": 30,
+    "Length": 14,
+    "MaxLength": 14,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Campo para valores de solo fecha y hora. Ej. 2018-01-05 02:10:52 -> 20180105021052"
+  },
+  {
+    "ID": 31,
+    "Length": 14,
+    "MaxLength": 14,
+    "IsVarLength": false,
+    "Type": 0,
+    "Description": "Campo para valores de solo fecha y hora. Ej. 2018-01-05 02:10:52 -> 20180105021052"
+  },
+
+  // Campos de longitud variable para valores numéricos
+  {
+    "ID": 36,
+    "Length": 2,
+    "MaxLength": 4,
+    "IsVarLength": true,
+    "Type": 0,
+    "Description": "Numérico sin signo de 16 bits de longitud variable"
+  },
+  {
+    "ID": 37,
+    "Length": 4,
+    "MaxLength": 6,
+    "IsVarLength": true,
+    "Type": 0,
+    "Description": "Numérico sin signo de 32 bits de longitud variable"
+  },
+  {
+    "ID": 38,
+    "Length": 8,
+    "MaxLength": 10,
+    "IsVarLength": true,
+    "Type": 0,
+    "Description": "Numérico sin signo de 64 bits de longitud variable"
+  },
+  {
+    "ID": 39,
+    "Length": 16,
+    "MaxLength": 18,
+    "IsVarLength": true,
+    "Type": 0,
+    "Description": "Numérico sin signo de 128 bits de longitud variable"
+  },
+
+  // Campo de longitud variable para valores de texto
+  {
+    "ID": 40,
+    "Length": 1,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1,
+    "Description": "Texto para 255 caracteres"
+  },
+  {
+    "ID": 41,
+    "Length": 1,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1,
+    "Description": "Texto para 255 caracteres"
+  },
+  {
+    "ID": 42,
+    "Length": 1,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1,
+    "Description": "Texto para 255 caracteres"
+  },
+
+  // Hash de sesión del usuario
+  {
+    "ID": 59,
+    "Length": 1,
+    "MaxLength": 32,
+    "IsVarLength": false,
+    "Type": 2,
+    "Description": "Token de sesión de usuario"
+  },
+
+  // Campos binarios de longitud variable
+  {
+    "ID": 60,
+    "Length": 1,
+    "MaxLength": 64,
+    "IsVarLength": true,
+    "Type": 2,
+    "Description": "Campo de 64 bytes"
+  },
+  {
+    "ID": 61,
+    "Length": 1,
+    "MaxLength": 128,
+    "IsVarLength": true,
+    "Type": 2,
+    "Description": "Campo de 128 bytes"
+  },
+  {
+    "ID": 62,
+    "Length": 1,
+    "MaxLength": 256,
+    "IsVarLength": true,
+    "Type": 2,
+    "Description": "Campo de 256 bytes"
+  },
+  {
+    "ID": 63,
+    "Length": 1,
+    "MaxLength": 512,
+    "IsVarLength": true,
+    "Type": 2,
+    "Description": "Campo de 512 bytes"
+  },
+  {
+    "ID": 64,
+    "Length": 1,
+    "MaxLength": 1024,
+    "IsVarLength": true,
+    "Type": 2,
+    "Description": "Campo de 1024 bytes"
+  }
 ]
