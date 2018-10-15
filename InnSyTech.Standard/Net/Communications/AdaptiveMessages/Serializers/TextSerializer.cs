@@ -98,7 +98,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
 
                 definition.Length = length;
 
-                return BitConverter.GetBytes(length).Reverse().ToArray().PadLeft(lvarSize).Concat(bodyBin).ToArray();
+                return BitConverter.GetBytes(length).Reverse().ToArray().PadLeft(lvarSize).Concat(bodyBin.Take(length)).ToArray();
             }
 
             byte[] destBin = Encoding.UTF8.GetBytes(dest);

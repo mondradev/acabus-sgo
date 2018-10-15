@@ -267,7 +267,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         {
             value = default(TResult);
 
-            if (_fields.Any(x => x.ID == id))
+            if (!_fields.Any(x => x.ID == id))
                 return false;
 
             try

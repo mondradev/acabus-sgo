@@ -85,6 +85,7 @@
     <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />
     <Compile Include="Gui\GuiHelper.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\AdaptiveMsgException.cs" />
+    <Compile Include="Net\Communications\AdaptiveMessages\AdaptiveMsgExtension.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\BinaryExtension.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\IMessage.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\MessageRules.cs" />

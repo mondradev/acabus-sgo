@@ -99,6 +99,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
             {
                 length = length > definition.MaxLength ? definition.MaxLength : length;
                 dest = dest.Take(length).ToArray();
+                dest = dest.PadLeft(definition.MaxLength);
             }
 
             definition.Length = dest.Length;

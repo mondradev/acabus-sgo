@@ -17,7 +17,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="id">ID del campo a manipular.</param>
         /// <returns>El valor del campo.</returns>
         object this[int id] { get; set; }
-
+        
         /// <summary>
         /// Devuelve el valor del campo especificado y realiza la conversión al tipo de dato
         /// <typeparamref name="T"/>

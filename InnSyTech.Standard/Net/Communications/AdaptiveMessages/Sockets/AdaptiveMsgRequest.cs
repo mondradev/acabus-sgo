@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -39,33 +40,57 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// Realiza una petición asincrónica con una secuencia de datos como respuesta.
         /// </summary>
         /// <param name="message">Mensaje que representa la petición.</param>
-        /// <param name="enumerator">Controlador del recorrido de la secuencia.</param>
-        public Task DoRequestToList(IMessage message, Action<IAdaptiveMsgEnumerator> enumerator)
+        /// <param name="onSuccess">Controlador del recorrido de la secuencia.</param>
+        public Task DoRequestToList(IMessage message, Action<IAdaptiveMsgEnumerator> onSuccess, Action<Int32, String> onFail = null)
         {
             return Task.Run(() =>
             {
+                var response = message;
+
                 while (true)
                 {
-                    int bytesTransferred = _socket.Send(message.Serialize());
+                    int bytesTransferred = _socket.Send(response.Serialize());
 
                     if (bytesTransferred <= 0)
-                        break; ;
+                        break;
 
-                    message = ReadBuffer();
+                    Trace.WriteLine("Bytes enviados: " + bytesTransferred, "DEBUG");
 
-                    if (!message.IsSet(7))
-                        throw new AdaptiveMsgException("El mensaje no es una enumeración, utilice DoRequest()");
+                    response = ReadBuffer();
 
-                    AdaptiveMsgEnumerator msgEnumerator = new AdaptiveMsgEnumerator(message);
-                    enumerator?.Invoke(msgEnumerator);
+                    if (!response.IsSet(3))
+                    {
+                        onFail?.Invoke(0, "No se logró recibir correctamente el mensaje");
+                        break;
+                    }
+
+                    if (response.GetInt32(3) != 200)
+                    {
+                        onFail?.Invoke(response.GetInt32(3), response.GetString(4));
+                        break;
+                    }
+
+                    if (!response.IsSet(7))
+                    {
+                        onFail?.Invoke(response.GetInt32(3), "El mensaje no es una enumeración, utilice DoRequest()");
+                        break;
+                    }
+
+                    int count = response.GetInt32(8);
+
+                    if (count == 0)
+                        break;
+
+                    AdaptiveMsgEnumerator msgEnumerator = new AdaptiveMsgEnumerator(response);
+                    onSuccess?.Invoke(msgEnumerator);
 
                     if (msgEnumerator.Breaking)
                         break;
 
-                    if (!message.IsSet(10) || message.GetValue(10, x => Convert.ToInt32(x)) != 1)
-                        message[10] = 0;
+                    if (!response.IsSet(10) || response.GetValue(10, x => Convert.ToInt32(x)) != 1)
+                        response[10] = 0;
 
-                    if (message.GetValue(9, x => Convert.ToInt32(x)) >= message.GetValue(8, x => Convert.ToInt32(x)) - 1)
+                    if (response.GetValue(9, x => Convert.ToInt32(x)) >= response.GetValue(8, x => Convert.ToInt32(x)) - 1)
                         break;
                 }
             });
@@ -91,17 +116,28 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// Realiza una petición asincrónica al servidor.
         /// </summary>
         /// <param name="message">Mensaje que representa la petición.</param>
-        /// <param name="callback">Función que se ejecuta al recibir la respuesta.</param>
-        public Task DoRequest(IMessage message, Action<IMessage> callback)
+        /// <param name="onSuccess">Función que se ejecuta al recibir la respuesta.</param>
+        public Task DoRequest(IMessage message, Action<IMessage> onSuccess, Action<int, string> onFail = null)
         {
             return Task.Run(() =>
             {
                 int bytesTransferred = _socket.Send(message.Serialize());
 
                 if (bytesTransferred <= 0)
-                    callback?.Invoke(null);
+                    onSuccess?.Invoke(null);
 
-                callback?.Invoke(ReadBuffer());
+                var response = ReadBuffer();
+
+                if (!response.IsSet(3))
+                {
+                    onFail?.Invoke(0, "No se logró recibir correctamente el mensaje");
+                    return;
+                }
+
+                if (response.GetInt32(3) != 200)
+                    onFail?.Invoke(response.GetInt32(3), response.GetString(4));
+
+                onSuccess?.Invoke(response);
             });
         }
 
@@ -123,6 +159,11 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
                 Byte[] buffer = new Byte[_socket.Available];
 
                 bytesTransferred = _socket.Receive(buffer);
+
+                if (bytesTransferred <= 0)
+                    continue;
+
+                Trace.WriteLine("Bytes recibidos: " + bytesTransferred, "DEBUG");
 
                 return Message.Deserialize(buffer, Rules);
             }
