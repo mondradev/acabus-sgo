@@ -56,6 +56,7 @@
     <Compile Include="DataAccess\CsvDump.cs" />
     <Compile Include="DataAccess\DbConverters\DbIPAddressConverter.cs" />
     <Compile Include="DataAccess\ModelHelper.cs" />
+    <Compile Include="DataAccess\ServerContext.cs" />
     <Compile Include="Models\AssignableArea.cs" />
     <Compile Include="Models\Bus.cs" />
     <Compile Include="Models\Device.cs" />

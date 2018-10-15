@@ -2,6 +2,8 @@
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
@@ -64,7 +66,7 @@ namespace Opera.Acabus.Core.Services
         public AppClient()
         {
             AppToken = AcabusDataContext.ConfigContext["App"]?.ToString("Token");
-            ServerPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Port") ?? 9000);
+            ServerPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Port") ?? 5500);
             ServerIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("IP") ?? "127.0.0.1");
             RulesMsgPath = AcabusDataContext.ConfigContext["Message"]?.ToString("Rules");
 
@@ -125,5 +127,16 @@ namespace Opera.Acabus.Core.Services
         /// <returns>Un instancia Task.</returns>
         public Task SendMessage(IMessage message, Action<IMessage> callback)
             => _request.DoRequest(message, callback);
+
+        /// <summary>
+        /// Envía un mensaje nuevo al servidor con una secuencia como respuesta.
+        /// </summary>
+        /// <param name="message">Mensaje a envíar.</param>
+        /// <param name="callback">Función a realizar al recibir la respuesta.</param>
+        /// <returns>Un instancia Task.</returns>
+        public Task SendMessage(IMessage message, Action<IAdaptiveMsgEnumerator> callback)
+            => _request.DoRequestToList(message, callback);
+
+
     }
 }
