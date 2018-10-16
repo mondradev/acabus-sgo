@@ -55,7 +55,7 @@ namespace InnSyTech.Standard.Utils
         /// <typeparam name="T">Tipo de la secuencia.</typeparam>
         /// <param name="src">Secuencia origen.</param>
         /// <param name="action">Acción a realizar por cada uno de los elementos.</param>
-        public static void Foreach<T>(this IEnumerable<T> src, Action<T> action)
+        public static void ForEach<T>(this IEnumerable<T> src, Action<T> action)
         {
             IEnumerator<T> enumerator = src.GetEnumerator();
 
@@ -129,7 +129,7 @@ namespace InnSyTech.Standard.Utils
         public static String ToTextPlain(this byte[] src)
         {
             StringBuilder builder = new StringBuilder();
-            src.Select(x => x.ToString("x2")).Foreach(x => builder.Append(x));
+            src.Select(x => x.ToString("x2")).ForEach(x => builder.Append(x));
 
             return builder.ToString();
         }

@@ -387,12 +387,12 @@ namespace InnSyTech.Standard.Database
                 foreach (var foreignKey in fields.Where(f => f.IsForeignKey))
                     CreateInternal(foreignKey.GetValue(instance), referenceDepth - 1, command);
 
-            if (primaryKey.IsAutonumerical && primaryKey.GetValue(instance)?.ToString() != "0")
+            if (!primaryKey.IsAutonumerical && primaryKey.GetValue(instance)?.ToString() == "0")
                 return;
 
             StringBuilder statement = new StringBuilder();
 
-            if (!primaryKey.IsAutonumerical)
+            if (!primaryKey.IsAutonumerical || primaryKey.GetValue(instance)?.ToString() != "0")
                 statement.AppendFormat("INSERT INTO {0} ({1}) SELECT * FROM (SELECT {2}) WHERE @{3} NOT IN (SELECT {3} FROM {0})",
                     DbHelper.GetEntityName(instance.GetType()),
                     "{{fields}}",
@@ -407,7 +407,7 @@ namespace InnSyTech.Standard.Database
 
             foreach (var field in fields)
             {
-                if (field.IsAutonumerical && field.IsPrimaryKey)
+                if (field.IsAutonumerical && field.IsPrimaryKey && primaryKey.GetValue(instance)?.ToString() == "0")
                     continue;
 
                 var parameter = command.CreateParameter();
