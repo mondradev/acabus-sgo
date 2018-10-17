@@ -35,7 +35,7 @@ namespace Opera.Acabus.Core.DataAccess
         {
             IMessage message = _client.CreateMessage();
 
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(CreateStation);
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(CreateBus);
             message[12] = bus.Type;
             message[17] = bus.EconomicNumber;
             message[13] = bus.Route?.ID ?? 0;
@@ -73,7 +73,7 @@ namespace Opera.Acabus.Core.DataAccess
         {
             IMessage message = _client.CreateMessage();
 
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(CreateStation);
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(CreateDevice);
             message[12] = device.Type;
             message[17] = device.SerialNumber;
             message[13] = device.Station?.ID ?? 0;
@@ -88,18 +88,13 @@ namespace Opera.Acabus.Core.DataAccess
                 if (x.GetInt32(3) == 200)
                 {
                     res = x.GetBoolean(22);
-                    if (res)
-                        deviceRes = new Device(x.GetUInt64(14), deviceRes.SerialNumber, deviceRes.Type)
-                        {
-                            Bus = deviceRes.Bus,
-                            Station = deviceRes.Station,
-                            IPAddress = deviceRes.IPAddress
-                        };
+                    if (res && x.IsSet(61))
+                        deviceRes = ModelHelper.GetDevice(x.GetBytes(61));
                 }
             }).Wait();
 
             device = deviceRes;
-
+            
             return res;
         }
 
@@ -183,8 +178,9 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Sincroniza los autobuses con la base de datos local.
         /// </summary>
-        public static void SyncBus()
+        public static void SyncBus(IProgress<float> guiProgress = null)
         {
+            float currentProgress = 0;
             List<Bus> buses = new List<Bus>();
             IMessage message = _client.CreateMessage();
 
@@ -193,8 +189,14 @@ namespace Opera.Acabus.Core.DataAccess
             _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(3) == 200)
+                {
                     buses.Add(ModelHelper.GetBus(x.Current.GetBytes(61)));
+                    currentProgress++;
+                    guiProgress?.Report((float)currentProgress / (float)x.Current.GetInt32(AdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
+                }
             }).Wait();
+
+            currentProgress = 0;
 
             buses.ForEach(x =>
             {
@@ -207,14 +209,18 @@ namespace Opera.Acabus.Core.DataAccess
 
                 if (!r)
                     throw new Exception("No se logró guardar el autobus " + x);
+
+                currentProgress++;
+                guiProgress?.Report(50f + (float)currentProgress / (float)buses.Count / 2f * 100f);
             });
         }
 
         /// <summary>
         /// Sincroniza los autobuses con la base de datos local.
         /// </summary>
-        public static void SyncDevices()
+        public static void SyncDevices(IProgress<float> guiProgress = null)
         {
+            float currentProgress = 0;
             List<Device> devices = new List<Device>();
             IMessage message = _client.CreateMessage();
 
@@ -223,8 +229,14 @@ namespace Opera.Acabus.Core.DataAccess
             _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(3) == 200)
+                {
                     devices.Add(ModelHelper.GetDevice(x.Current.GetBytes(61)));
+                    currentProgress++;
+                    guiProgress?.Report((float)currentProgress / (float)x.Current.GetInt32(AdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
+                }
             }).Wait();
+
+            currentProgress = 0;
 
             devices.ForEach(x =>
             {
@@ -237,14 +249,18 @@ namespace Opera.Acabus.Core.DataAccess
 
                 if (!r)
                     throw new Exception("No se logró guardar el equipo " + x);
+
+                currentProgress++;
+                guiProgress?.Report(50f + (float)currentProgress / (float)devices.Count / 2f * 100f);
             });
         }
 
         /// <summary>
         /// Sincroniza las rutas con la base de datos local.
         /// </summary>
-        public static void SyncRoutes()
+        public static void SyncRoutes(IProgress<float> guiProgress = null)
         {
+            float currentProgress = 0;
             List<Route> routes = new List<Route>();
             IMessage message = _client.CreateMessage();
 
@@ -253,8 +269,14 @@ namespace Opera.Acabus.Core.DataAccess
             _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(3) == 200)
+                {
                     routes.Add(ModelHelper.GetRoute(x.Current.GetBytes(61)));
+                    currentProgress++;
+                    guiProgress?.Report((float)currentProgress / (float)x.Current.GetInt32(AdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
+                }
             }).Wait();
+
+            currentProgress = 0;
 
             routes.ForEach(x =>
             {
@@ -267,14 +289,18 @@ namespace Opera.Acabus.Core.DataAccess
 
                 if (!r)
                     throw new Exception("No se logró guardar la ruta " + x);
+
+                currentProgress++;
+                guiProgress?.Report(50f + (float)currentProgress / (float)routes.Count / 2f * 100f);
             });
         }
 
         /// <summary>
         /// Sincroniza el personal con la base de datos local.
         /// </summary>
-        public static void SyncStaff()
+        public static void SyncStaff(IProgress<float> guiProgress = null)
         {
+            float currentProgress = 0;
             List<Staff> staff = new List<Staff>();
             IMessage message = _client.CreateMessage();
 
@@ -283,8 +309,14 @@ namespace Opera.Acabus.Core.DataAccess
             _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(3) == 200)
+                {
                     staff.Add(ModelHelper.GetStaff(x.Current.GetBytes(61)));
+                    currentProgress++;
+                    guiProgress?.Report((float)currentProgress / (float)x.Current.GetInt32(AdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
+                }
             }).Wait();
+
+            currentProgress = 0;
 
             staff.ForEach(x =>
             {
@@ -297,14 +329,18 @@ namespace Opera.Acabus.Core.DataAccess
 
                 if (!r)
                     throw new Exception("No se logró guardar el miembro del personal " + x);
+
+                currentProgress++;
+                guiProgress?.Report(50f + (float)currentProgress / (float)staff.Count / 2f * 100f);
             });
         }
 
         /// <summary>
         /// Sincroniza las estaciones con la base de datos local.
         /// </summary>
-        public static void SyncStations()
+        public static void SyncStations(IProgress<float> guiProgress = null)
         {
+            float currentProgress = 0;
             List<Station> stations = new List<Station>();
             IMessage message = _client.CreateMessage();
 
@@ -313,8 +349,14 @@ namespace Opera.Acabus.Core.DataAccess
             _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(3) == 200)
+                {
                     stations.Add(ModelHelper.GetStation(x.Current.GetBytes(61)));
+                    currentProgress++;
+                    guiProgress?.Report((float)currentProgress / (float)x.Current.GetInt32(AdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
+                }
             }).Wait();
+
+            currentProgress = 0;
 
             stations.ForEach(x =>
             {
@@ -327,6 +369,9 @@ namespace Opera.Acabus.Core.DataAccess
 
                 if (!r)
                     throw new Exception("No se logró guardar la estación " + x);
+
+                currentProgress++;
+                guiProgress?.Report(50f + (float)currentProgress / (float)stations.Count / 2f * 100f);
             });
         }
     }
