@@ -1,7 +1,9 @@
 ﻿using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core.Utils;
 using System;
 using System.Linq;
@@ -48,10 +50,24 @@ namespace Opera.Acabus.Server.Gui
                 Station = idStation == 0 ? null : AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == idStation)
             };
 
-            bool res = AcabusDataContext.DbContext.Create(device);
+            bool res = true;
+
+            if (AcabusDataContext.AllDevices.Where(x => x.Type == type)
+                .ToList().Any(x => x.SerialNumber.Equals(device.SerialNumber)))
+            {
+                message[61] = AcabusDataContext.AllDevices.FirstOrDefault(x => x.SerialNumber.Equals(device.SerialNumber)).Serialize();
+                message[AdaptiveMessageFieldID.ResponseMessage.ToInt32()] = String.Format("SERVIDOR: El número de serie {0} ya existe", serialNumber);
+            }
+            else
+            {
+                res = AcabusDataContext.DbContext.Create(device);
+                message[61] = device.Serialize();
+            }
+
+            if (res)
+                Dispatcher.SendNotify("CORE: Se registró un nuevo equipo: " + device);
 
             message.SetBoolean(22, res);
-            message[14] = device.ID;
         }
 
         /// <summary>
