@@ -72,7 +72,7 @@ namespace Opera.Acabus.Server.Core.Utils
                 else if (type.IsEnum)
                     parametersValues[i] = Enum.Parse(parameters[i].ParameterType, message[id].ToString());
                 else if (type == typeof(bool))
-                    parametersValues[i] = BitConverter.ToBoolean(message[id] as byte[], 0);
+                    parametersValues[i] = BitConverter.ToBoolean(message[id] as byte[] ?? BitConverter.GetBytes(default(bool)), 0);
                 else
                     parametersValues[i] = Convert.ChangeType(message[id], parameters[i].ParameterType);
             }

@@ -5,6 +5,7 @@ using Opera.Acabus.Core.Models;
 using Opera.Acabus.Server.Core.Utils;
 using System;
 using System.Linq;
+using System.Net;
 
 namespace Opera.Acabus.Server.Gui
 {
@@ -13,6 +14,46 @@ namespace Opera.Acabus.Server.Gui
     /// </summary>
     public static class ServerCoreFunctions
     {
+        /// <summary>
+        /// Crea un autobus nuevo.
+        /// </summary>
+        public static void CreateBus([ParameterField(12)] BusType type,
+            [ParameterField(17)] String economicNumber, [ParameterField(13)] UInt16 idRoute,
+            [ParameterField(36)] BusStatus status, IMessage message)
+        {
+            Bus bus = new Bus(0, economicNumber)
+            {
+                Route = idRoute == 0 ? null : AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == idRoute),
+                Status = status,
+                Type = type
+            };
+
+            bool res = AcabusDataContext.DbContext.Create(bus);
+
+            message.SetBoolean(22, res);
+            message[14] = bus.ID;
+        }
+
+        /// <summary>
+        /// Crea un equipo.
+        /// </summary>
+        public static void CreateDevice([ParameterField(12)] DeviceType type,
+            [ParameterField(17)] String serialNumber, [ParameterField(13)] UInt16 idStation,
+            [ParameterField(36)] UInt16 idBus, [ParameterField(18)] String ipAddress, IMessage message)
+        {
+            Device device = new Device(0, serialNumber, type)
+            {
+                IPAddress = IPAddress.Parse(ipAddress),
+                Bus = idBus == 0 ? null : AcabusDataContext.AllBuses.FirstOrDefault(x => x.ID == idBus),
+                Station = idStation == 0 ? null : AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == idStation)
+            };
+
+            bool res = AcabusDataContext.DbContext.Create(device);
+
+            message.SetBoolean(22, res);
+            message[14] = device.ID;
+        }
+
         /// <summary>
         /// Crea una ruta nueva.
         /// </summary>
@@ -28,6 +69,26 @@ namespace Opera.Acabus.Server.Gui
 
             message.SetBoolean(22, res);
             message[14] = route.ID;
+        }
+
+        /// <summary>
+        /// Crea un personal nuevo.
+        /// </summary>
+        public static void CreateStaff([ParameterField(12)] AssignableArea area,
+            [ParameterField(17)] String name, [ParameterField(23)] Boolean active,
+            IMessage message)
+        {
+            Staff staff = new Staff(0)
+            {
+                Active = active,
+                Name = name,
+                Area = area
+            };
+
+            bool res = AcabusDataContext.DbContext.Create(staff);
+
+            message.SetBoolean(22, res);
+            message[14] = staff.ID;
         }
 
         /// <summary>
@@ -55,13 +116,15 @@ namespace Opera.Acabus.Server.Gui
         }
 
         /// <summary>
-        /// Obtiene el equipo que corresponde al ID especificado
+        /// Obtiene los autobuses.
         /// </summary>
-        /// <param name="id">Identificador del equipo.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetDeviceByID([ParameterField(12)] UInt16 id, IMessage message)
+        public static void GetBus(IMessage message)
         {
-            message[60] = AcabusDataContext.AllDevices.FirstOrDefault(x => x.ID == id)?.Serialize();
+            IQueryable<Bus> busQuery = AcabusDataContext.AllBuses.LoadReference(1);
+
+            Helpers.Enumerating(message, busQuery.ToList().Count,
+                  i => message[61] = busQuery.ToList()[i].Serialize());
         }
 
         /// <summary>
@@ -71,48 +134,10 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="message">Mensaje de la petición.</param>
         public static void GetDevices(IMessage message)
         {
-            IQueryable<Device> devices = AcabusDataContext.AllDevices;
+            IQueryable<Device> devices = AcabusDataContext.AllDevices.LoadReference(1);
 
             Helpers.Enumerating(message, devices.ToList().Count,
-                i => message[60] = devices.ToList()[i].Serialize());
-        }
-
-        /// <summary>
-        /// Obtiene los equipos que corresponden a la estación especificada.
-        /// </summary>
-        /// <param name="id">Identificador de la estación.</param>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetDevicesByStation([ParameterField(12)] UInt16 idStation, IMessage message)
-        {
-            IQueryable<Device> devices = AcabusDataContext.AllDevices
-                 .LoadReference(1).Where(x => x.Station.ID == idStation);
-
-            Helpers.Enumerating(message, devices.ToList().Count,
-                i => message[60] = devices.ToList()[i].Serialize());
-        }
-
-        /// <summary>
-        /// Obtiene el equipo que corresponden al tipo especificado
-        /// </summary>
-        /// <param name="type">Tipo del equipo.</param>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetDevicesByType([ParameterField(12)] DeviceType type, IMessage message)
-        {
-            IQueryable<Device> devices = AcabusDataContext.AllDevices
-                .LoadReference(1).Where(x => x.Type == type);
-
-            Helpers.Enumerating(message, devices.ToList().Count,
-                i => message[60] = devices.ToList()[i].Serialize());
-        }
-
-        /// <summary>
-        /// Obtiene la ruta con el ID especificado.
-        /// </summary>
-        /// <param name="IDRoute">ID de la estación.</param>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetRouteByID([ParameterField(12)] UInt16 IDRoute, IMessage message)
-        {
-            message[60] = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == IDRoute)?.Serialize();
+                i => message[61] = devices.ToList()[i].Serialize());
         }
 
         /// <summary>
@@ -124,17 +149,19 @@ namespace Opera.Acabus.Server.Gui
             IQueryable<Route> routeQuery = AcabusDataContext.AllRoutes;
 
             Helpers.Enumerating(message, routeQuery.ToList().Count,
-                  i => message[60] = routeQuery.ToList()[i].Serialize());
+                  i => message[61] = routeQuery.ToList()[i].Serialize());
         }
 
         /// <summary>
-        /// Obtiene la estación con el ID especificado.
+        /// Obtiene el personal.
         /// </summary>
-        /// <param name="IDStation">ID de la estación.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStationByID([ParameterField(12)] UInt16 IDStation, IMessage message)
+        public static void GetStaff(IMessage message)
         {
-            message[60] = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == IDStation)?.Serialize();
+            IQueryable<Staff> staffQuery = AcabusDataContext.AllStaff;
+
+            Helpers.Enumerating(message, staffQuery.ToList().Count,
+                  i => message[61] = staffQuery.ToList()[i].Serialize());
         }
 
         /// <summary>
@@ -150,31 +177,10 @@ namespace Opera.Acabus.Server.Gui
                 10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
              */
 
-            IQueryable<Station> stationsQuery = AcabusDataContext.AllStations;
+            IQueryable<Station> stationsQuery = AcabusDataContext.AllStations.LoadReference(1);
 
             Helpers.Enumerating(message, stationsQuery.ToList().Count,
-                i => message[60] = stationsQuery.ToList()[i].Serialize());
-        }
-
-        /// <summary>
-        /// Obtiene las estaciones de la ruta especificada.
-        /// </summary>
-        /// <param name="idRoute">ID de la ruta.</param>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStationsByRoute([ParameterField(12)] UInt16 idRoute, IMessage message)
-        {
-            /***
-                7, FieldType.Binary, 1, false, "Es enumerable"
-                8, FieldType.Numeric, 100, true, "Registros totales del enumerable"
-                9, FieldType.Numeric, 100, true, "Posición del enumerable"
-                10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
-             */
-
-            IQueryable<Station> stationsQuery = AcabusDataContext.AllStations
-                .LoadReference(1).Where(x => x.Route.ID == idRoute);
-
-            Helpers.Enumerating(message, stationsQuery.ToList().Count,
-                i => message[60] = stationsQuery.ToList()[i].Serialize());
+                i => message[61] = stationsQuery.ToList()[i].Serialize());
         }
     }
 }

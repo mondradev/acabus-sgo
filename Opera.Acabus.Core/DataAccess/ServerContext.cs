@@ -4,6 +4,7 @@ using Opera.Acabus.Core.Models;
 using Opera.Acabus.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Opera.Acabus.Core.DataAccess
 {
@@ -23,6 +24,83 @@ namespace Opera.Acabus.Core.DataAccess
         static ServerContext()
         {
             _client = new AppClient();
+        }
+
+        /// <summary>
+        /// Crea un autobus en el lado del servidor.
+        /// </summary>
+        /// <param name="bus">Instancia del autobus a crear.</param>
+        /// <returns>Un valor true si el autobus fue creado.</returns>
+        public static bool CreateBus(ref Bus bus)
+        {
+            IMessage message = _client.CreateMessage();
+
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(CreateStation);
+            message[12] = bus.Type;
+            message[17] = bus.EconomicNumber;
+            message[13] = bus.Route?.ID ?? 0;
+            message[36] = bus.Status;
+
+            Boolean res = false;
+            Bus busRes = bus;
+
+            _client.SendMessage(message, x =>
+            {
+                if (x.GetInt32(3) == 200)
+                {
+                    res = x.GetBoolean(22);
+                    if (res)
+                        busRes = new Bus(x.GetUInt64(14), busRes.EconomicNumber)
+                        {
+                            Status = busRes.Status,
+                            Type = busRes.Type,
+                            Route = busRes.Route
+                        };
+                }
+            }).Wait();
+
+            bus = busRes;
+
+            return res;
+        }
+
+        /// <summary>
+        /// Crea un equipo en el lado del servidor.
+        /// </summary>
+        /// <param name="device">Instancia del equipo a crear.</param>
+        /// <returns>Un valor true si el equipo fue creado.</returns>
+        public static bool CreateDevice(ref Device device)
+        {
+            IMessage message = _client.CreateMessage();
+
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(CreateStation);
+            message[12] = device.Type;
+            message[17] = device.SerialNumber;
+            message[13] = device.Station?.ID ?? 0;
+            message[36] = device.Bus?.ID ?? 0;
+            message[18] = device.IPAddress.ToString();
+
+            Boolean res = false;
+            Device deviceRes = device;
+
+            _client.SendMessage(message, x =>
+            {
+                if (x.GetInt32(3) == 200)
+                {
+                    res = x.GetBoolean(22);
+                    if (res)
+                        deviceRes = new Device(x.GetUInt64(14), deviceRes.SerialNumber, deviceRes.Type)
+                        {
+                            Bus = deviceRes.Bus,
+                            Station = deviceRes.Station,
+                            IPAddress = deviceRes.IPAddress
+                        };
+                }
+            }).Wait();
+
+            device = deviceRes;
+
+            return res;
         }
 
         /// <summary>
@@ -77,6 +155,8 @@ namespace Opera.Acabus.Core.DataAccess
             message[13] = station.Route?.ID ?? 0;
             message[18] = station.AssignedSection;
 
+            message.SetBoolean(23, station.IsExternal);
+
             Boolean res = false;
             Station stationRes = station;
 
@@ -101,205 +181,153 @@ namespace Opera.Acabus.Core.DataAccess
         }
 
         /// <summary>
-        /// Obtiene el equipo correspondiente al ID especificado.
+        /// Sincroniza los autobuses con la base de datos local.
         /// </summary>
-        /// <param name="id">Identificador del equipo.</param>
-        public static Device GetDeviceByID(UInt16 id)
+        public static void SyncBus()
         {
+            List<Bus> buses = new List<Bus>();
             IMessage message = _client.CreateMessage();
 
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetDeviceByID);
-            message[12] = id;
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = "GetBus";
 
-            Device response = null;
-
-            _client.SendMessage(message, x =>
+            _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
-                if (x.GetInt32(3) == 200)
-                    response = ModelHelper.GetDevice(x.GetBytes(60));
+                if (x.Current.GetInt32(3) == 200)
+                    buses.Add(ModelHelper.GetBus(x.Current.GetBytes(61)));
+            }).Wait();
+
+            buses.ForEach(x =>
+            {
+                bool r = AcabusDataContext.AllBuses.ToList().Any(y => y.ID == x.ID);
+
+                if (r)
+                    return;
+
+                r = AcabusDataContext.DbContext.Create(x);
+
+                if (!r)
+                    throw new Exception("No se logró guardar el autobus " + x);
             });
-
-            return response;
         }
 
         /// <summary>
-        /// Obtiene todos los equipos.
+        /// Sincroniza los autobuses con la base de datos local.
         /// </summary>
-        /// <param name="type">Tipo del equipo.</param>
-        public static List<Device> GetDevices()
+        public static void SyncDevices()
         {
+            List<Device> devices = new List<Device>();
             IMessage message = _client.CreateMessage();
 
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetDevices);
-
-            List<Device> devices = new List<Device>();
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = "GetDevices";
 
             _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(3) == 200)
-                    devices.Add(ModelHelper.GetDevice(x.Current.GetBytes(60)));
+                    devices.Add(ModelHelper.GetDevice(x.Current.GetBytes(61)));
             }).Wait();
 
-            return devices;
-        }
-
-        /// <summary>
-        /// Obtiene los equipos que corresponden a la estación especificada.
-        /// </summary>
-        /// <param name="id">Identificador de la estación.</param>
-        public static List<Device> GetDevicesByStation(UInt16 idStation)
-        {
-            IMessage message = _client.CreateMessage();
-
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetDevicesByStation);
-            message[12] = idStation;
-
-            List<Device> devices = new List<Device>();
-
-            _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
+            devices.ForEach(x =>
             {
-                if (x.Current.GetInt32(3) == 200)
-                    devices.Add(ModelHelper.GetDevice(x.Current.GetBytes(60)));
-            }).Wait();
+                bool r = AcabusDataContext.AllDevices.ToList().Any(y => y.ID == x.ID);
 
-            return devices;
+                if (r)
+                    return;
+
+                r = AcabusDataContext.DbContext.Create(x);
+
+                if (!r)
+                    throw new Exception("No se logró guardar el equipo " + x);
+            });
         }
 
         /// <summary>
-        /// Obtiene los equipos que corresponden al tipo especificado
+        /// Sincroniza las rutas con la base de datos local.
         /// </summary>
-        /// <param name="type">Tipo del equipo.</param>
-        public static List<Device> GetDevicesByType(DeviceType type)
+        public static void SyncRoutes()
         {
-            IMessage message = _client.CreateMessage();
-
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetDevicesByType);
-            message[12] = (int)type;
-
-            List<Device> devices = new List<Device>();
-
-            _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
-            {
-                if (x.Current.GetInt32(3) == 200)
-                    devices.Add(ModelHelper.GetDevice(x.Current.GetBytes(60)));
-            }).Wait();
-
-            return devices;
-        }
-
-        /// <summary>
-        /// Obtiene la ruta especificada por el ID.
-        /// </summary>
-        /// <param name="id">Identificador de la ruta.</param>
-        /// <returns>La ruta obtenida desde servidor.</returns>
-        public static Route GetRouteByID(UInt16 id)
-        {
-            IMessage message = _client.CreateMessage();
-
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetRouteByID);
-            message[12] = id;
-
-            Route resRoute = null;
-
-            _client.SendMessage(message, x =>
-            {
-                if (x.GetInt32(3) == 200)
-                {
-                    resRoute = ModelHelper.GetRoute(x.GetBytes(60));
-                }
-            }).Wait();
-
-            return resRoute;
-        }
-
-        /// <summary>
-        /// Obtiene las rutas registradas en el servidor.
-        /// </summary>
-        /// <returns>Una secuencia de rutas.</returns>
-        public static List<Route> GetRoutes()
-        {
-            IMessage message = _client.CreateMessage();
-
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetRoutes);
-
             List<Route> routes = new List<Route>();
+            IMessage message = _client.CreateMessage();
+
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = "GetRoutes";
 
             _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(3) == 200)
-                    routes.Add(ModelHelper.GetRoute(x.Current.GetBytes(60)));
+                    routes.Add(ModelHelper.GetRoute(x.Current.GetBytes(61)));
             }).Wait();
 
-            return routes;
-        }
-
-        /// <summary>
-        /// Obtiene una estación que coincida con el ID especificado.
-        /// </summary>
-        /// <param name="id">Identificador de la estación.</param>
-        /// <returns>Una instancia de estación.</returns>
-        public static Station GetStationByID(UInt16 id)
-        {
-            IMessage message = _client.CreateMessage();
-
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetStationByID);
-            message[12] = id;
-
-            Station resStation = null;
-
-            _client.SendMessage(message, x =>
+            routes.ForEach(x =>
             {
-                if (x.GetInt32(3) == 200)
-                {
-                    resStation = ModelHelper.GetStation(x.GetBytes(60));
-                }
-            }).Wait();
+                bool r = AcabusDataContext.AllRoutes.ToList().Any(y => y.ID == x.ID);
 
-            return resStation;
+                if (r)
+                    return;
+
+                r = AcabusDataContext.DbContext.Create(x);
+
+                if (!r)
+                    throw new Exception("No se logró guardar la ruta " + x);
+            });
         }
 
         /// <summary>
-        /// Obtiene una secuencia de las estaciones registras en el servidor.
+        /// Sincroniza el personal con la base de datos local.
         /// </summary>
-        /// <returns>Una secuencia de estaciones.</returns>
-        public static List<Station> GetStations()
+        public static void SyncStaff()
         {
+            List<Staff> staff = new List<Staff>();
             IMessage message = _client.CreateMessage();
 
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetStations);
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = "GetStaff";
 
+            _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
+            {
+                if (x.Current.GetInt32(3) == 200)
+                    staff.Add(ModelHelper.GetStaff(x.Current.GetBytes(61)));
+            }).Wait();
+
+            staff.ForEach(x =>
+            {
+                bool r = AcabusDataContext.AllStaff.ToList().Any(y => y.ID == x.ID);
+
+                if (r)
+                    return;
+
+                r = AcabusDataContext.DbContext.Create(x);
+
+                if (!r)
+                    throw new Exception("No se logró guardar el miembro del personal " + x);
+            });
+        }
+
+        /// <summary>
+        /// Sincroniza las estaciones con la base de datos local.
+        /// </summary>
+        public static void SyncStations()
+        {
             List<Station> stations = new List<Station>();
-
-            _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
-            {
-                if (x.Current.GetInt32(3) == 200)
-                    stations.Add(ModelHelper.GetStation(x.Current.GetBytes(60)));
-            }).Wait();
-
-            return stations;
-        }
-
-        /// <summary>
-        /// Obtiene una secuencia de las estaciones que pertecen a la ruta especificada por el ID.
-        /// </summary>
-        /// <param name="id">Identificador de la ruta.</param>
-        /// <returns>Secuencia de estaciones.</returns>
-        public static List<Station> GetStationsByRoute(UInt16 id)
-        {
             IMessage message = _client.CreateMessage();
 
-            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = nameof(GetStationsByRoute);
-            message[12] = id;
-
-            List<Station> stations = new List<Station>();
+            message[AdaptiveMessageFieldID.FunctionName.ToInt32()] = "GetStations";
 
             _client.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(3) == 200)
-                    stations.Add(ModelHelper.GetStation(x.Current.GetBytes(60)));
+                    stations.Add(ModelHelper.GetStation(x.Current.GetBytes(61)));
             }).Wait();
 
-            return stations;
+            stations.ForEach(x =>
+            {
+                bool r = AcabusDataContext.AllStations.ToList().Any(y => y.ID == x.ID);
+
+                if (r)
+                    return;
+
+                r = AcabusDataContext.DbContext.Create(x);
+
+                if (!r)
+                    throw new Exception("No se logró guardar la estación " + x);
+            });
         }
     }
 }
