@@ -28,7 +28,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
             IPAddress = ipAddress;
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _socket.Connect(IPAddress, Port);
         }
 
         /// <summary>
@@ -43,6 +42,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <param name="onSuccess">Controlador del recorrido de la secuencia.</param>
         public Task DoRequestToList(IMessage message, Action<IAdaptiveMsgEnumerator> onSuccess, Action<Int32, String> onFail = null)
         {
+            if (!_socket.Connected)
+                _socket.Connect(IPAddress, Port);
+
             return Task.Run(() =>
             {
                 var response = message;
@@ -119,6 +121,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <param name="onSuccess">Función que se ejecuta al recibir la respuesta.</param>
         public Task DoRequest(IMessage message, Action<IMessage> onSuccess, Action<int, string> onFail = null)
         {
+            if (!_socket.Connected)
+                _socket.Connect(IPAddress, Port);
+
             return Task.Run(() =>
             {
                 int bytesTransferred = _socket.Send(message.Serialize());
