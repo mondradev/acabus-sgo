@@ -2,14 +2,12 @@
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Windows.UI.Notifications;
 
 namespace Opera.Acabus.Sgo
 {
@@ -48,6 +46,7 @@ namespace Opera.Acabus.Sgo
 
             _dialogHost.SnackbarMessageQueue = _snackBar.MessageQueue;
             _notificationMessageMonitor = new Timer(DropExpiredMessage, null, TimeSpan.Zero, EXPIRE_MESSAGE_TIME);
+            
         }
 
         /// <summary>
@@ -72,14 +71,13 @@ namespace Opera.Acabus.Sgo
             {
                 var mainWindow = Application.Current.MainWindow;
 
-                if (mainWindow.IsActive && mainWindow.WindowState != WindowState.Minimized)
+                //if (mainWindow.IsActive && mainWindow.WindowState != WindowState.Minimized)
                     _snackBar.MessageQueue.Enqueue(message.ToUpper(), actionName, action, true);
-                else
-                    SendToastNotification(message);
+                /*else
+                    SendToastNotification(message);*/
             });
 
             _messages.Enqueue(new ToastMessage(message));
-
         }
 
         /// <summary>
@@ -189,22 +187,7 @@ namespace Opera.Acabus.Sgo
         /// <param name="message">Mensaje a notificar.</param>
         private void SendToastNotification(string message)
         {
-            var toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastImageAndText01);
-            var stringElements = toastXml.GetElementsByTagName("text");
-            var imageElement = toastXml.GetElementsByTagName("image");
 
-            stringElements[0].AppendChild(toastXml.CreateTextNode(message));
-            imageElement[0].Attributes.GetNamedItem("src").NodeValue = String.Format("file:///{0}", Path.GetFullPath("Resources/AppNotificationTile.png"));
-
-            var toast = new ToastNotification(toastXml);
-
-            toast.Dismissed += (sender, arg) =>
-            {
-                if (arg.Reason == ToastDismissalReason.UserCanceled)
-                    messageSkiped.Add(message);
-            };
-
-            ToastNotificationManager.CreateToastNotifier(Application.Current.MainWindow.Title).Show(toast);
         }
 
         /// <summary>
