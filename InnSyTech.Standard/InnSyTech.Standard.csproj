@@ -105,9 +105,11 @@
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\IAdaptiveMsgAcceptArgs.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\IAdaptiveMsgArgs.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Sockets\IAdaptiveMsgEnumerator.cs" />
-    <Compile Include="Net\Notifications\Push\ClientPush.cs" />
-    <Compile Include="Net\Notifications\Push\NotificationPush.cs" />
-    <Compile Include="Net\Notifications\Push\ServerPush.cs" />
+    <Compile Include="Net\Notifications\Push\IPushData.cs" />
+    <Compile Include="Net\Notifications\Push\PushArgs.cs" />
+    <Compile Include="Net\Notifications\Push\PushNotification.cs" />
+    <Compile Include="Net\Notifications\Push\PushNotifier.cs" />
+    <Compile Include="Net\Notifications\Push\PushService.cs" />
     <Compile Include="Utils\TypeHelper.cs" />
     <Compile Include="Mvvm\Command.cs" />
     <Compile Include="Mvvm\Converters\TranslateEnumConverter.cs" />
