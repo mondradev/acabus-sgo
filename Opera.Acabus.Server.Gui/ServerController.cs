@@ -1,9 +1,11 @@
 ﻿using InnSyTech.Standard.Configuration;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
+using InnSyTech.Standard.Net.Notifications.Push;
 using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Services;
+using Opera.Acabus.Server.Core;
 using Opera.Acabus.Server.Core.Models;
 using Opera.Acabus.Server.Core.Utils;
 using System;
@@ -34,6 +36,12 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         private static readonly AdaptiveMsgServer _msgServer;
 
+
+        /// <summary>
+        /// Notificador de actualizaciones.
+        /// </summary>
+        private static readonly PushNotifier<PushAcabus> _notifier;
+
         /// <summary>
         /// Crea una nueva instancia de controlador.
         /// </summary>
@@ -50,6 +58,9 @@ namespace Opera.Acabus.Server.Gui
             _msgServer.Received += ReceivedHandle;
             _msgServer.Disconnected += DisconnectedHandle;
 
+            _notifier = new PushNotifier<PushAcabus>();
+            ServerService.Notified += (sender, data) => { _notifier.Notify(data); };
+                        
             LoadModules();
         }
 
@@ -69,6 +80,7 @@ namespace Opera.Acabus.Server.Gui
         public static void Start() => Task.Run(() =>
         {
             _msgServer.Startup();
+            _notifier.Start();
             StatusChanged?.Invoke(_msgServer, _msgServer.Started ? ServiceStatus.ON : ServiceStatus.OFF);
         }, _msgServer.CancellationTokenSource.Token);
 

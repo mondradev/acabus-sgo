@@ -56,6 +56,7 @@
     <Compile Include="DataAccess\CsvDump.cs" />
     <Compile Include="DataAccess\DbConverters\DbIPAddressConverter.cs" />
     <Compile Include="DataAccess\ModelHelper.cs" />
+    <Compile Include="Services\PushAcabus.cs" />
     <Compile Include="DataAccess\ServerContext.cs" />
     <Compile Include="Models\AssignableArea.cs" />
     <Compile Include="Models\Bus.cs" />
@@ -69,6 +70,17 @@
     <Compile Include="Modules\IModuleInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AppClient.cs" />
+    <Compile Include="Services\EntityLocalSyncBase.cs" />
+    <Compile Include="Services\IEntityLocalSync.cs" />
+    <Compile Include="Services\LocalSyncArgs.cs" />
+    <Compile Include="Services\LocalSyncException.cs" />
+    <Compile Include="Services\LocalSyncHandler.cs" />
+    <Compile Include="Services\LocalSyncOperation.cs" />
+    <Compile Include="Services\ModelServices\BusLocalSync.cs" />
+    <Compile Include="Services\ModelServices\DeviceLocalSync.cs" />
+    <Compile Include="Services\ModelServices\RouteLocalSync.cs" />
+    <Compile Include="Services\ModelServices\StaffLocalSync.cs" />
+    <Compile Include="Services\ModelServices\StationLocalSync.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InnSyTech.Standard\InnSyTech.Standard.csproj">

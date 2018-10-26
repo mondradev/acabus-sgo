@@ -4,6 +4,7 @@ using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
 using Opera.Acabus.Core.Services;
+using Opera.Acabus.Server.Core;
 using Opera.Acabus.Server.Core.Utils;
 using System;
 using System.Linq;
@@ -31,9 +32,10 @@ namespace Opera.Acabus.Server.Gui
             };
 
             bool res = AcabusDataContext.DbContext.Create(bus);
+            ServerService.Notify(new PushAcabus("Bus", bus.ID.ToString(), LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
-            message[14] = bus.ID;
+            message[61] = bus.Serialize();
         }
 
         /// <summary>
@@ -61,6 +63,8 @@ namespace Opera.Acabus.Server.Gui
             else
             {
                 res = AcabusDataContext.DbContext.Create(device);
+                ServerService.Notify(new PushAcabus("Device", device.ID.ToString(), LocalSyncOperation.CREATE));
+
                 message[61] = device.Serialize();
             }
 
@@ -82,9 +86,10 @@ namespace Opera.Acabus.Server.Gui
         {
             Route route = new Route(0, number, type) { Name = name, AssignedSection = assignedSection };
             bool res = AcabusDataContext.DbContext.Create(route);
+            ServerService.Notify(new PushAcabus("Route", route.ID.ToString(), LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
-            message[14] = route.ID;
+            message[61] = route.Serialize();
         }
 
         /// <summary>
@@ -102,9 +107,10 @@ namespace Opera.Acabus.Server.Gui
             };
 
             bool res = AcabusDataContext.DbContext.Create(staff);
+            ServerService.Notify(new PushAcabus("Staff", staff.ID.ToString(), LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
-            message[14] = staff.ID;
+            message[61] = staff.Serialize();
         }
 
         /// <summary>
@@ -126,9 +132,10 @@ namespace Opera.Acabus.Server.Gui
             };
 
             bool res = AcabusDataContext.DbContext.Create(station);
+            ServerService.Notify(new PushAcabus("Station", station.ID.ToString(), LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
-            message[14] = station.ID;
+            message[61] = station.Serialize();
         }
 
         /// <summary>

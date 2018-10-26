@@ -6,6 +6,7 @@ using Opera.Acabus.Core.Config.Views;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -118,6 +119,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
             });
 
             ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), RefreshCommand.Execute));
+
+            RegisterHandlers(ServerContext.GetLocalSync("Bus"), RefreshBus);
+            RegisterHandlers(ServerContext.GetLocalSync("Station"), RefreshStation);
+            RegisterHandlers(ServerContext.GetLocalSync("Device"), RefreshDevice);
+            RegisterHandlers(ServerContext.GetLocalSync("Route"), RefreshRoutes);
+            RegisterHandlers(ServerContext.GetLocalSync("Staff"), RefreshStaff);
         }
 
         /// <summary>
@@ -527,15 +534,155 @@ namespace Opera.Acabus.Core.Config.ViewModels
             }
 
             Application.Current.Dispatcher.Invoke(() =>
+            {
+                _isActive = true;
+                OnPropertyChanged(nameof(IsActive));
+                OnPropertyChanged(nameof(AllBuses));
+                OnPropertyChanged(nameof(AllDevices));
+                OnPropertyChanged(nameof(AllRoutes));
+                OnPropertyChanged(nameof(AllStaff));
+                OnPropertyChanged(nameof(AllStations));
+            });
+        }
+
+        /// <summary>
+        /// Actualiza la tabla de autobuses.
+        /// </summary>
+        private void RefreshBus(object sender, LocalSyncArgs args)
         {
-            _isActive = true;
-            OnPropertyChanged(nameof(IsActive));
-            OnPropertyChanged(nameof(AllBuses));
-            OnPropertyChanged(nameof(AllDevices));
-            OnPropertyChanged(nameof(AllRoutes));
-            OnPropertyChanged(nameof(AllStaff));
-            OnPropertyChanged(nameof(AllStations));
-        });
+            _isActive = false;
+            Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
+
+            _allBuses = AcabusDataContext.AllBuses.LoadReference(1).ToList();
+
+            if (_allDevices != null)
+                foreach (var b in _allBuses)
+                    AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), _allDevices);
+
+            if (_allRoutes != null)
+                foreach (var r in _allRoutes)
+                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), _allBuses);
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _isActive = true;
+                OnPropertyChanged(nameof(IsActive));
+                OnPropertyChanged(nameof(AllBuses));
+                OnPropertyChanged(nameof(AllRoutes));
+            });
+        }
+
+        /// <summary>
+        /// Actualiza la tabla de equipos.
+        /// </summary>
+        private void RefreshDevice(object sender, LocalSyncArgs args)
+        {
+            _isActive = false;
+            Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
+
+            _allDevices = AcabusDataContext.AllDevices.LoadReference(1).ToList();
+
+            if (_allStations != null)
+                foreach (var s in _allStations)
+                    AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), _allDevices);
+
+            if (_allBuses != null)
+                foreach (var b in _allBuses)
+                    AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), _allDevices);
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _isActive = true;
+                OnPropertyChanged(nameof(IsActive));
+                OnPropertyChanged(nameof(AllDevices));
+                OnPropertyChanged(nameof(AllStations));
+            });
+        }
+
+        /// <summary>
+        /// Actualiza la tabla de rutas.
+        /// </summary>
+        private void RefreshRoutes(object sender, LocalSyncArgs args)
+        {
+            _isActive = false;
+            Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
+
+            _allRoutes = AcabusDataContext.AllRoutes.LoadReference(1).ToList();
+
+            if (_allStations != null && _allBuses != null)
+                foreach (var r in _allRoutes)
+                {
+                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), _allStations);
+                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), _allBuses);
+                }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _isActive = true;
+                OnPropertyChanged(nameof(IsActive));
+                OnPropertyChanged(nameof(AllBuses));
+                OnPropertyChanged(nameof(AllStations));
+                OnPropertyChanged(nameof(AllRoutes));
+            });
+        }
+
+        /// <summary>
+        /// Actualiza la tabla de personal.
+        /// </summary>
+        private void RefreshStaff(object sender, LocalSyncArgs args)
+        {
+            _isActive = false;
+            Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
+
+            _allStaff = AcabusDataContext.AllStaff.Where(s => s.Active == true).ToList();
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _isActive = true;
+                OnPropertyChanged(nameof(IsActive));
+                OnPropertyChanged(nameof(AllStaff));
+            });
+        }
+
+        /// <summary>
+        /// Actualiza la tabla de estaciones.
+        /// </summary>
+        private void RefreshStation(object sender, LocalSyncArgs args)
+        {
+            _isActive = false;
+            Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
+
+            _allStations = AcabusDataContext.AllStations.LoadReference(1).ToList();
+
+            if (_allDevices != null)
+                foreach (var s in _allStations)
+                    AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), _allDevices);
+
+            if (_allRoutes != null)
+                foreach (var r in _allRoutes)
+                {
+                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), _allStations);
+                }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _isActive = true;
+                OnPropertyChanged(nameof(IsActive));
+                OnPropertyChanged(nameof(AllStations));
+                OnPropertyChanged(nameof(AllRoutes));
+            });
+        }
+
+        /// <summary>
+        /// Registra todos los eventos de los diferentes monitores de sincronización.
+        /// </summary>
+        /// <param name="entityLocalSync">Monitor de sincronización de entidad.</param>
+        /// <param name="handler">Método que se ejecuta al desencadenarse algún evento.</param>
+        private void RegisterHandlers(IEntityLocalSync entityLocalSync, LocalSyncHandler handler)
+        {
+            entityLocalSync.Created += handler;
+            entityLocalSync.Updated += handler;
+            entityLocalSync.Deleted += handler;
         }
 
         /// <summary>

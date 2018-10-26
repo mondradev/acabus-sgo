@@ -2,6 +2,7 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Services.ModelServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -191,7 +192,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 IPAddress = IPAddress.Parse(IPString)
             };
 
-            if (ServerContext.CreateDevice(ref device) && AcabusDataContext.DbContext.Create(device))
+            if (ServerContext.GetLocalSync("Device").Create(ref device))
                 Dispatcher.SendMessageToGUI($"Equipo: {device} agregado correctamente.");
             else
                 Dispatcher.SendMessageToGUI("No se pudo guardar el equipo nuevo.");

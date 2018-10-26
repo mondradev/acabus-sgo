@@ -9,6 +9,16 @@ namespace Opera.Acabus.Core.Services
     public sealed class PushAcabus : IPushData
     {
         /// <summary>
+        /// Crea una nueva instancia.
+        /// </summary>
+        public PushAcabus(string entityName, string id, LocalSyncOperation operation)
+        {
+            EntityName = entityName;
+            ID = id;
+            Operation = operation;
+        }
+
+        /// <summary>
         /// Nombre de la entidad del evento.
         /// </summary>
         public string EntityName { get; private set; }
@@ -31,12 +41,11 @@ namespace Opera.Acabus.Core.Services
         public static PushAcabus Parse(string src)
         {
             GroupCollection group = Regex.Match(src, "(.*):(.*):(.*)").Groups;
-            PushAcabus push = new PushAcabus
-            {
-                EntityName = group[1]?.Value,
-                ID = group[2]?.Value,
-                Operation = (LocalSyncOperation)int.Parse(group[3]?.Value)
-            };
+            PushAcabus push = new PushAcabus(
+                group[1]?.Value,
+                group[2]?.Value,
+                (LocalSyncOperation)int.Parse(group[3]?.Value)
+            );
 
             return push;
         }
