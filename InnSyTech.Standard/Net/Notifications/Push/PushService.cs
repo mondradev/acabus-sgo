@@ -39,10 +39,9 @@ namespace InnSyTech.Standard.Net.Notifications.Push
             IPAddress = ip;
             Port = port;
 
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Udp);
-            _socket.Connect(IPAddress, Port);
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            Task.Run((Action)ListenNotifications);
+            Task.Run((Action)ConnectionService);
         }
 
         /// <summary>
@@ -61,25 +60,60 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         public int Port { get; }
 
         /// <summary>
-        /// Escucha todas las notificaciones del servidor.
+        /// Servicio de conexión del Push.
         /// </summary>
-        private void ListenNotifications()
+        private void ConnectionService()
         {
             while (true)
             {
                 Thread.Sleep(10);
 
-                if (_socket.Available <= 0)
-                    continue;
+                try
+                {
+                    if (_socket.Connected)
+                        continue;
 
-                Byte[] buffer = new Byte[_socket.Available];
+                    _socket.Connect(IPAddress, Port);
 
-                int byteTransferred = _socket.Receive(buffer);
+                    Task.Run((Action)ListenNotifications);
+                }
+                catch (Exception ex)
+                {
+                    ex.ToString();
+                }
+            }
+        }
 
-                if (byteTransferred <= 0)
-                    continue;
+        /// <summary>
+        /// Escucha todas las notificaciones del servidor.
+        /// </summary>
+        private void ListenNotifications()
+        {
+            try
+            {
+                while (true)
+                {
+                    Thread.Sleep(10);
 
-                Notified?.Invoke(new PushArgs(PushNotification<T>.FromBytes<T>(buffer)));
+                    if (!_socket.Connected)
+                        break;
+
+                    if (_socket.Available <= 0)
+                        continue;
+
+                    Byte[] buffer = new Byte[_socket.Available];
+
+                    int byteTransferred = _socket.Receive(buffer);
+
+                    if (byteTransferred <= 0)
+                        continue;
+
+                    Notified?.Invoke(new PushArgs(PushNotification<T>.FromBytes<T>(buffer)?.Data));
+                }
+            }
+            catch (Exception)
+            {
+                _socket.Disconnect(true);
             }
         }
     }

@@ -19,6 +19,11 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         }
 
         /// <summary>
+        /// Crea una instancia sin especificar datos.
+        /// </summary>
+        public PushNotification() : this(null) { }
+
+        /// <summary>
         /// Obtiene los datos que representa la notificación.
         /// </summary>
         public T Data { get; private set; }
@@ -41,7 +46,7 @@ namespace InnSyTech.Standard.Net.Notifications.Push
             PushNotification<DataType> push = Activator.CreateInstance<PushNotification<DataType>>();
 
             Type instanceType = typeof(DataType);
-            MethodInfo methodParse = instanceType.GetMethod("Parse", BindingFlags.Static);
+            MethodInfo methodParse = instanceType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static);
 
             if (methodParse == null)
                 throw new InvalidOperationException($"La clase '{typeof(DataType).FullName}' no tiene implementado un método Parse " +

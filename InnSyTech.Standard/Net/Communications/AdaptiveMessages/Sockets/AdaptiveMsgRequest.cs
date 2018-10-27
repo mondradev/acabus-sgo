@@ -129,13 +129,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
                 int bytesTransferred = _socket.Send(message.Serialize());
 
                 if (bytesTransferred <= 0)
-                    onSuccess?.Invoke(null);
+                    onFail?.Invoke(500, "Error al enviar el mensaje.");
 
                 var response = ReadBuffer();
 
                 if (!response.IsSet(3))
                 {
-                    onFail?.Invoke(0, "No se logró recibir correctamente el mensaje");
+                    onFail?.Invoke(500, "No se logró recibir correctamente el mensaje");
                     return;
                 }
 

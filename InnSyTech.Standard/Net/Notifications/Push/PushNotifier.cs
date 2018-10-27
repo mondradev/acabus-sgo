@@ -34,7 +34,7 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         public PushNotifier()
         {
             _clients = new List<Socket>();
-            _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Udp);
+            _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
         /// <summary>

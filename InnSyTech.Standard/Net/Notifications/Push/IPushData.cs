@@ -20,5 +20,6 @@
         /// </summary>
         /// <returns>Una cadena de caracteres.</returns>
         string ToString();
+        
     }
 }
