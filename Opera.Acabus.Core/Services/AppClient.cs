@@ -15,7 +15,7 @@ namespace Opera.Acabus.Core.Services
     /// <summary>
     /// Identificadores de los campos básicos del mensaje.
     /// </summary>
-    public enum AdaptiveMessageFieldID
+    public enum AcabusAdaptiveMessageFieldID
     {
         APIToken = 1,
         HashRules,
@@ -31,7 +31,7 @@ namespace Opera.Acabus.Core.Services
     }
 
     /// <summary>
-    /// Extensión de la clase <see cref="AdaptiveMessageFieldID"/>.
+    /// Extensión de la clase <see cref="AcabusAdaptiveMessageFieldID"/>.
     /// </summary>
     public static class AdaptiveMessageFieldIDExtension
     {
@@ -40,7 +40,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="fieldID">Campo de la enumeración.</param>
         /// <returns>Valor númerico que representa el campo de la enumeración.</returns>
-        public static Int32 ToInt32(this AdaptiveMessageFieldID fieldID)
+        public static Int32 ToInt32(this AcabusAdaptiveMessageFieldID fieldID)
             => (Int32)fieldID;
     }
 
@@ -112,9 +112,9 @@ namespace Opera.Acabus.Core.Services
         {
             IMessage message = _request.CreateMessage();
 
-            message[AdaptiveMessageFieldID.APIToken.ToInt32()] = Encoding.UTF8.GetBytes(AppToken);
-            message[AdaptiveMessageFieldID.HashRules.ToInt32()] = HashRules;
-            message[AdaptiveMessageFieldID.DeviceToken.ToInt32()] = Encoding.UTF8.GetBytes(_token);
+            message[AcabusAdaptiveMessageFieldID.APIToken.ToInt32()] = Encoding.UTF8.GetBytes(AppToken);
+            message[AcabusAdaptiveMessageFieldID.HashRules.ToInt32()] = HashRules;
+            message[AcabusAdaptiveMessageFieldID.DeviceToken.ToInt32()] = Encoding.UTF8.GetBytes(_token);
 
             return message;
         }

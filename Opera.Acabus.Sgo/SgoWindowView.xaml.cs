@@ -113,7 +113,7 @@ namespace Opera.Acabus.Sgo
                 ToolTip = "Configuraciones",
                 PopupContent = new StackPanel(),
                 Name = "System_Config_SGO",
-                Margin = new Thickness(16, 0, 16, 0),
+                Margin = new Thickness(16),
                 ToggleContent = new PackIcon
                 {
                     Kind = PackIconKind.Settings,

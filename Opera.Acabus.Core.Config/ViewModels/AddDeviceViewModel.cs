@@ -191,12 +191,13 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 Bus = SelectedBus,
                 IPAddress = IPAddress.Parse(IPString)
             };
+            
 
             if (ServerContext.GetLocalSync("Device").Create(ref device))
                 Dispatcher.SendMessageToGUI($"Equipo: {device} agregado correctamente.");
             else
                 Dispatcher.SendMessageToGUI("No se pudo guardar el equipo nuevo.");
-
+            
             Dispatcher.CloseDialog();
         }
     }

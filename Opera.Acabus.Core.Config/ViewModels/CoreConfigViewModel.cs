@@ -120,11 +120,6 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
             ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), RefreshCommand.Execute));
 
-            RegisterHandlers(ServerContext.GetLocalSync("Bus"), RefreshBus);
-            RegisterHandlers(ServerContext.GetLocalSync("Station"), RefreshStation);
-            RegisterHandlers(ServerContext.GetLocalSync("Device"), RefreshDevice);
-            RegisterHandlers(ServerContext.GetLocalSync("Route"), RefreshRoutes);
-            RegisterHandlers(ServerContext.GetLocalSync("Staff"), RefreshStaff);
         }
 
         /// <summary>
@@ -183,6 +178,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="parameter">Parametros de carga.</param>
         protected override void OnLoad(object parameter)
         {
+            RegisterHandlers(ServerContext.GetLocalSync("Bus"), RefreshBus);
+            RegisterHandlers(ServerContext.GetLocalSync("Station"), RefreshStation);
+            RegisterHandlers(ServerContext.GetLocalSync("Device"), RefreshDevice);
+            RegisterHandlers(ServerContext.GetLocalSync("Route"), RefreshRoutes);
+            RegisterHandlers(ServerContext.GetLocalSync("Staff"), RefreshStaff);
+
             Task.Run((Action)ReadFromDataBase);
         }
 
@@ -205,6 +206,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
             OnPropertyChanged(nameof(AllRoutes));
             OnPropertyChanged(nameof(AllStaff));
             OnPropertyChanged(nameof(AllStations));
+
+            UnRegisterHandlers(ServerContext.GetLocalSync("Bus"), RefreshBus);
+            UnRegisterHandlers(ServerContext.GetLocalSync("Station"), RefreshStation);
+            UnRegisterHandlers(ServerContext.GetLocalSync("Device"), RefreshDevice);
+            UnRegisterHandlers(ServerContext.GetLocalSync("Route"), RefreshRoutes);
+            UnRegisterHandlers(ServerContext.GetLocalSync("Staff"), RefreshStaff);
         }
 
         /// <summary>
@@ -596,6 +603,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 OnPropertyChanged(nameof(IsActive));
                 OnPropertyChanged(nameof(AllDevices));
                 OnPropertyChanged(nameof(AllStations));
+                OnPropertyChanged(nameof(AllBuses));
             });
         }
 
@@ -683,6 +691,18 @@ namespace Opera.Acabus.Core.Config.ViewModels
             entityLocalSync.Created += handler;
             entityLocalSync.Updated += handler;
             entityLocalSync.Deleted += handler;
+        }
+
+        /// <summary>
+        /// Remueve el registro de todos los eventos de los diferentes monitores de sincronización.
+        /// </summary>
+        /// <param name="entityLocalSync">Monitor de sincronización de entidad.</param>
+        /// <param name="handler">Método que se ejecuta al desencadenarse algún evento.</param>
+        private void UnRegisterHandlers(IEntityLocalSync entityLocalSync, LocalSyncHandler handler)
+        {
+            entityLocalSync.Created -= handler;
+            entityLocalSync.Updated -= handler;
+            entityLocalSync.Deleted -= handler;
         }
 
         /// <summary>

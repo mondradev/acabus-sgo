@@ -59,7 +59,10 @@ namespace Opera.Acabus.Server.Gui
             _msgServer.Disconnected += DisconnectedHandle;
 
             _notifier = new PushNotifier<PushAcabus>();
+
             ServerService.Notified += (sender, data) => { _notifier.Notify(data); };
+
+            _notifier.Start();
                         
             LoadModules();
         }
@@ -114,8 +117,8 @@ namespace Opera.Acabus.Server.Gui
         {
             IMessage message = e.CreateMessage();
 
-            message[AdaptiveMessageFieldID.ResponseMessage.ToInt32()] = text;
-            message[AdaptiveMessageFieldID.ResponseCode.ToInt32()] = code;
+            message[AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32()] = text;
+            message[AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()] = code;
 
             return message;
         }
@@ -194,25 +197,25 @@ namespace Opera.Acabus.Server.Gui
                 11, FIeldType.Binary, 32, true, "Token de equipo"
             */
 
-            if (!message.IsSet(AdaptiveMessageFieldID.APIToken.ToInt32())
-                || !message.IsSet(AdaptiveMessageFieldID.HashRules.ToInt32())
-                || !message.IsSet(AdaptiveMessageFieldID.DeviceToken.ToInt32()))
+            if (!message.IsSet(AcabusAdaptiveMessageFieldID.APIToken.ToInt32())
+                || !message.IsSet(AcabusAdaptiveMessageFieldID.HashRules.ToInt32())
+                || !message.IsSet(AcabusAdaptiveMessageFieldID.DeviceToken.ToInt32()))
                 return false;
 
-            if (!ValidateToken(message.GetValue(AdaptiveMessageFieldID.APIToken.ToInt32(), x => x as byte[])))
+            if (!ValidateToken(message.GetValue(AcabusAdaptiveMessageFieldID.APIToken.ToInt32(), x => x as byte[])))
                 return false;
 
             using (SHA256 sha256 = SHA256.Create())
             {
                 String hashRules = sha256.ComputeHash(File.ReadAllBytes(AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules"))).ToTextPlain();
-                String HashRulesClients = message.GetValue(AdaptiveMessageFieldID.HashRules.ToInt32(), x => (x as byte[]).ToTextPlain());
+                String HashRulesClients = message.GetValue(AcabusAdaptiveMessageFieldID.HashRules.ToInt32(), x => (x as byte[]).ToTextPlain());
                 
                 if (!hashRules.Equals(HashRulesClients))
                     return false;
 
             }
 
-            if (!ValidateTokenDevice(message.GetValue(AdaptiveMessageFieldID.DeviceToken.ToInt32(), x => x as byte[])))
+            if (!ValidateTokenDevice(message.GetValue(AcabusAdaptiveMessageFieldID.DeviceToken.ToInt32(), x => x as byte[])))
                 return false;
 
             return true;
@@ -244,12 +247,12 @@ namespace Opera.Acabus.Server.Gui
                     return;
                 }
 
-                message[AdaptiveMessageFieldID.ResponseCode.ToInt32()] = 200;
-                message[AdaptiveMessageFieldID.ResponseMessage.ToInt32()] = "OK";
+                message[AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()] = 200;
+                message[AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32()] = "OK";
 
-                if (message.IsSet(AdaptiveMessageFieldID.ModuleName.ToInt32()))
+                if (message.IsSet(AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()))
                 {
-                    String modName = message[AdaptiveMessageFieldID.ModuleName.ToInt32()].ToString();
+                    String modName = message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()].ToString();
                     IServerModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
 
                     if (module is null)

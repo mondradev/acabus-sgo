@@ -66,7 +66,7 @@ namespace Opera.Acabus.Sgo
 
             Dispatcher.RequestingSendMessageOrNotify += arg =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     switch (arg.SendType)
                     {

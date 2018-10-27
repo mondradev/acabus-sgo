@@ -72,6 +72,8 @@ namespace Opera.Acabus.Core.DataAccess
                     (DbDialectBase)Activator.CreateInstance(dialectType, ConfigContext["connectionDb"]?["connectionString"]?.ToString())
                 );
             }
+
+            ServerContext.Init();
         }
 
         /// <summary>

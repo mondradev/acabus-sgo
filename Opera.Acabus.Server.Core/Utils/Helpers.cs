@@ -110,21 +110,21 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <param name="enumeratingFunc">Función para procesar el elemento actual.</param>
         public static void Enumerating(IMessage message, Int32 count, Action<Int32> enumeratingFunc)
         {
-            if (!message.IsSet(AdaptiveMessageFieldID.IsEnumerable.ToInt32()))
+            if (!message.IsSet(AcabusAdaptiveMessageFieldID.IsEnumerable.ToInt32()))
             {
-                message[AdaptiveMessageFieldID.IsEnumerable.ToInt32()] = BitConverter.GetBytes(true);
-                message[AdaptiveMessageFieldID.EnumerableCount.ToInt32()] = count;
-                message[AdaptiveMessageFieldID.CurrentPosition.ToInt32()] = 0;
+                message[AcabusAdaptiveMessageFieldID.IsEnumerable.ToInt32()] = BitConverter.GetBytes(true);
+                message[AcabusAdaptiveMessageFieldID.EnumerableCount.ToInt32()] = count;
+                message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()] = 0;
             }
-            else if (message.GetValue(AdaptiveMessageFieldID.EnumerableOperation.ToInt32(), x => Convert.ToInt32(x)) == 0)
-                message[AdaptiveMessageFieldID.CurrentPosition.ToInt32()] = message.GetValue(AdaptiveMessageFieldID.CurrentPosition.ToInt32(), x => Convert.ToInt32(x)) + 1;
-            else if (message.GetValue(AdaptiveMessageFieldID.CurrentPosition.ToInt32(), x => Convert.ToInt32(x)) == 1)
+            else if (message.GetValue(AcabusAdaptiveMessageFieldID.EnumerableOperation.ToInt32(), x => Convert.ToInt32(x)) == 0)
+                message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()] = message.GetValue(AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32(), x => Convert.ToInt32(x)) + 1;
+            else if (message.GetValue(AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32(), x => Convert.ToInt32(x)) == 1)
             {
-                message[AdaptiveMessageFieldID.CurrentPosition.ToInt32()] = 0;
-                message[AdaptiveMessageFieldID.EnumerableOperation.ToInt32()] = 0;
+                message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()] = 0;
+                message[AcabusAdaptiveMessageFieldID.EnumerableOperation.ToInt32()] = 0;
             }
 
-            enumeratingFunc?.Invoke(Convert.ToInt32(message[AdaptiveMessageFieldID.CurrentPosition.ToInt32()]));
+            enumeratingFunc?.Invoke(Convert.ToInt32(message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()]));
         }
 
         /// <summary>

@@ -30,12 +30,6 @@ namespace Opera.Acabus.Core.DataAccess
             _pushService = new PushService<PushAcabus>();
 
             _pushService.Notified += OnNotify;
-
-            RegisterLocalSync(new RouteLocalSync());
-            RegisterLocalSync(new BusLocalSync());
-            RegisterLocalSync(new StationLocalSync());
-            RegisterLocalSync(new DeviceLocalSync());
-            RegisterLocalSync(new StaffLocalSync());
         }
 
         /// <summary>
@@ -45,6 +39,18 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>El monitor de sincronización.</returns>
         public static IEntityLocalSync GetLocalSync(String entityName)
             => _entityLocalSyncs[entityName] ?? throw new ArgumentException("No existe el monitor de sincronización.");
+
+        /// <summary>
+        /// Inicializa los servicios con el servidor.
+        /// </summary>
+        public static void Init()
+        {
+            RegisterLocalSync(new RouteLocalSync());
+            RegisterLocalSync(new BusLocalSync());
+            RegisterLocalSync(new StationLocalSync());
+            RegisterLocalSync(new DeviceLocalSync());
+            RegisterLocalSync(new StaffLocalSync());
+        }
 
         /// <summary>
         /// Registra un monitor de sincronización para recibir las actualizaciones de su entidad.

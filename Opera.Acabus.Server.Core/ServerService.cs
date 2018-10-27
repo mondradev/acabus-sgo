@@ -1,5 +1,6 @@
 ﻿using Opera.Acabus.Core.Services;
 using System;
+using System.Threading.Tasks;
 
 namespace Opera.Acabus.Server.Core
 {
@@ -20,6 +21,6 @@ namespace Opera.Acabus.Server.Core
         /// </summary>
         /// <param name="push">Datos del cambio.</param>
         public static void Notify(PushAcabus push)
-            => Notified?.Invoke(null, push);
+            => Task.Run(()=> Notified?.Invoke(null, push));
     }
 }
