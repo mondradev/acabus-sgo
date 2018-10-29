@@ -36,69 +36,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         public IPAddress IPAddress { get; }
 
         /// <summary>
-        /// Realiza una petición asincrónica con una secuencia de datos como respuesta.
-        /// </summary>
-        /// <param name="message">Mensaje que representa la petición.</param>
-        /// <param name="onSuccess">Controlador del recorrido de la secuencia.</param>
-        public Task DoRequestToList(IMessage message, Action<IAdaptiveMsgEnumerator> onSuccess, Action<Int32, String> onFail = null)
-        {
-            if (!_socket.Connected)
-                _socket.Connect(IPAddress, Port);
-
-            return Task.Run(() =>
-            {
-                var response = message;
-
-                while (true)
-                {
-                    int bytesTransferred = _socket.Send(response.Serialize());
-
-                    if (bytesTransferred <= 0)
-                        break;
-
-                    Trace.WriteLine("Bytes enviados: " + bytesTransferred, "DEBUG");
-
-                    response = ReadBuffer();
-
-                    if (!response.IsSet(3))
-                    {
-                        onFail?.Invoke(0, "No se logró recibir correctamente el mensaje");
-                        break;
-                    }
-
-                    if (response.GetInt32(3) != 200)
-                    {
-                        onFail?.Invoke(response.GetInt32(3), response.GetString(4));
-                        break;
-                    }
-
-                    if (!response.IsSet(7))
-                    {
-                        onFail?.Invoke(response.GetInt32(3), "El mensaje no es una enumeración, utilice DoRequest()");
-                        break;
-                    }
-
-                    int count = response.GetInt32(8);
-
-                    if (count == 0)
-                        break;
-
-                    AdaptiveMsgEnumerator msgEnumerator = new AdaptiveMsgEnumerator(response);
-                    onSuccess?.Invoke(msgEnumerator);
-
-                    if (msgEnumerator.Breaking)
-                        break;
-
-                    if (!response.IsSet(10) || response.GetValue(10, x => Convert.ToInt32(x)) != 1)
-                        response[10] = 0;
-
-                    if (response.GetValue(9, x => Convert.ToInt32(x)) >= response.GetValue(8, x => Convert.ToInt32(x)) - 1)
-                        break;
-                }
-            });
-        }
-
-        /// <summary>
         /// Obtiene o establece el puerto TCP por el cual escucha el servidor.
         /// </summary>
         public int Port { get; }
@@ -119,31 +56,108 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// </summary>
         /// <param name="message">Mensaje que representa la petición.</param>
         /// <param name="onSuccess">Función que se ejecuta al recibir la respuesta.</param>
-        public Task DoRequest(IMessage message, Action<IMessage> onSuccess, Action<int, string> onFail = null)
+        public Task<Boolean> DoRequest(IMessage message, Action<IMessage> onSuccess, Action<int, string> onFail = null)
         {
-            if (!_socket.Connected)
-                _socket.Connect(IPAddress, Port);
-
-            return Task.Run(() =>
+            try
             {
-                int bytesTransferred = _socket.Send(message.Serialize());
+                if (!_socket.Connected)
+                    _socket.Connect(IPAddress, Port);
 
-                if (bytesTransferred <= 0)
-                    onFail?.Invoke(500, "Error al enviar el mensaje.");
-
-                var response = ReadBuffer();
-
-                if (!response.IsSet(3))
+                return Task.Run<Boolean>(() =>
                 {
-                    onFail?.Invoke(500, "No se logró recibir correctamente el mensaje");
-                    return;
-                }
+                    int bytesTransferred = _socket.Send(message.Serialize());
 
-                if (response.GetInt32(3) != 200)
-                    onFail?.Invoke(response.GetInt32(3), response.GetString(4));
+                    if (bytesTransferred <= 0)
+                        onFail?.Invoke(500, "Error al enviar el mensaje.");
 
-                onSuccess?.Invoke(response);
-            });
+                    var response = ReadBuffer();
+
+                    if (!response.IsSet(3))
+                    {
+                        onFail?.Invoke(500, "No se logró recibir correctamente el mensaje");
+                        return false;
+                    }
+
+                    if (response.GetInt32(3) != 200)
+                        onFail?.Invoke(response.GetInt32(3), response.GetString(4));
+
+                    onSuccess?.Invoke(response);
+                    return true;
+                });
+            }
+            catch
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// Realiza una petición asincrónica con una secuencia de datos como respuesta.
+        /// </summary>
+        /// <param name="message">Mensaje que representa la petición.</param>
+        /// <param name="onSuccess">Controlador del recorrido de la secuencia.</param>
+        public Task<Boolean> DoRequestToList(IMessage message, Action<IAdaptiveMsgEnumerator> onSuccess, Action<Int32, String> onFail = null)
+        {
+            try
+            {
+                if (!_socket.Connected)
+                    _socket.Connect(IPAddress, Port);
+
+                return Task.Run<Boolean>(() =>
+                {
+                    var response = message;
+
+                    while (true)
+                    {
+                        int bytesTransferred = _socket.Send(response.Serialize());
+
+                        if (bytesTransferred <= 0)
+                            return false;
+
+                        Trace.WriteLine("Bytes enviados: " + bytesTransferred, "DEBUG");
+
+                        response = ReadBuffer();
+
+                        if (!response.IsSet(3))
+                        {
+                            onFail?.Invoke(0, "No se logró recibir correctamente el mensaje");
+                            return false;
+                        }
+
+                        if (response.GetInt32(3) != 200)
+                        {
+                            onFail?.Invoke(response.GetInt32(3), response.GetString(4));
+                            return false;
+                        }
+
+                        if (!response.IsSet(7))
+                        {
+                            onFail?.Invoke(response.GetInt32(3), "El mensaje no es una enumeración, utilice DoRequest()");
+                            return false;
+                        }
+
+                        int count = response.GetInt32(8);
+
+                        if (count == 0)
+                            return true;
+
+                        AdaptiveMsgEnumerator msgEnumerator = new AdaptiveMsgEnumerator(response);
+                        onSuccess?.Invoke(msgEnumerator);
+
+                        if (msgEnumerator.Breaking)
+                            return true;
+
+                        if (!response.IsSet(10) || response.GetValue(10, x => Convert.ToInt32(x)) != 1)
+                            response[10] = 0;
+
+                        if (response.GetValue(9, x => Convert.ToInt32(x)) >= response.GetValue(8, x => Convert.ToInt32(x)) - 1)
+                            return true;
+                    }
+                });
+            }catch
+            {
+                return Task.FromResult(false);
+            }
         }
 
         /// <summary>

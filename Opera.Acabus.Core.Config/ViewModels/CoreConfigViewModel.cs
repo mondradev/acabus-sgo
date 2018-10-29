@@ -118,7 +118,15 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
             });
 
-            ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), RefreshCommand.Execute));
+            ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), p =>
+            {
+                RefreshDevice(null, null);
+            }));
+
+            ShowAddStationCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStationView(), p =>
+            {
+                RefreshStation(null, null);
+            }));
 
         }
 
@@ -171,6 +179,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// Obtiene el comando para mostrar el formulario para añadir equipos.
         /// </summary>
         public ICommand ShowAddDeviceCommand { get; }
+
+
+        /// <summary>
+        /// Obtiene el comando para mostrar el formulario para añadir estaciones.
+        /// </summary>
+        public ICommand ShowAddStationCommand { get; }
 
         /// <summary>
         /// Carga los valores al momento de mostrar el módulo de configuración.

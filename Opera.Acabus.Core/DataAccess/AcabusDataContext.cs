@@ -23,16 +23,6 @@ namespace Opera.Acabus.Core.DataAccess
         private static readonly string _resourcesDirectory;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="ConfigContext" />.
-        /// </summary>
-        private static Configuration _configContext;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="DbContext" />.
-        /// </summary>
-        private static IDbSession _dbContext;
-
-        /// <summary>
         /// Campo que provee a la propiedad <see cref="ModulesLoaded" />.
         /// </summary>
         private static List<IModuleInfo> _modulesLoaded;
@@ -47,7 +37,7 @@ namespace Opera.Acabus.Core.DataAccess
             if (!Directory.Exists(_resourcesDirectory))
                 Directory.CreateDirectory(_resourcesDirectory);
 
-            _configContext = new Configuration()
+            ConfigContext = new Configuration()
             {
                 Filename = Path.Combine(_resourcesDirectory, "app.conf")
             };
@@ -67,11 +57,14 @@ namespace Opera.Acabus.Core.DataAccess
                 if (!typeof(DbDialectBase).IsAssignableFrom(dialectType))
                     throw new InvalidOperationException($"El tipo '{dialectType.FullName}' no deriva de '{typeof(DbDialectBase).FullName}'");
 
-                _dbContext = DbFactory.CreateSession(
+                DbContext = DbFactory.CreateSession(
                     dbType,
                     (DbDialectBase)Activator.CreateInstance(dialectType, ConfigContext["connectionDb"]?["connectionString"]?.ToString())
                 );
             }
+
+            AssignableSection = ConfigContext["AssignableSections"]
+                .GetSettings("AssignableSection").Select(x => x.ToString("Description"));
 
             ServerContext.Init();
         }
@@ -107,14 +100,19 @@ namespace Opera.Acabus.Core.DataAccess
             => DbContext?.Read<Station>();
 
         /// <summary>
+        /// Obtiene una lista de las secciones que pueden ser asignadas para dar mantenimiento o servicio.
+        /// </summary>
+        public static IEnumerable<string> AssignableSection { get; }
+
+        /// <summary>
         /// Obtiene el controlador de las configuraciones.
         /// </summary>
-        public static Configuration ConfigContext => _configContext;
+        public static Configuration ConfigContext { get; private set; }
 
         /// <summary>
         /// Obtiene la sesión a la base de datos.
         /// </summary>
-        public static IDbSession DbContext => _dbContext;
+        public static IDbSession DbContext { get; private set; }
 
         /// <summary>
         /// Obtiene una lista de los módulos cargados en el sistema.

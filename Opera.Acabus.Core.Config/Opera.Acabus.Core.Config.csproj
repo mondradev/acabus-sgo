@@ -62,10 +62,14 @@
   <ItemGroup>
     <Compile Include="CoreConfigModule.cs" />
     <Compile Include="ViewModels\AddDeviceViewModel.cs" />
+    <Compile Include="ViewModels\AddStationViewModel.cs" />
     <Compile Include="ViewModels\CoreConfigViewModel.cs" />
     <Compile Include="ViewModels\ManualReassignRouteViewModel.cs" />
     <Compile Include="Views\AddDeviceView.xaml.cs">
       <DependentUpon>AddDeviceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AddStationView.xaml.cs">
+      <DependentUpon>AddStationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CoreConfigView.xaml.cs">
       <DependentUpon>CoreConfigView.xaml</DependentUpon>
@@ -76,6 +80,10 @@
     <Page Include="Views\AddDeviceView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AddStationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CoreConfigView.xaml">
       <Generator>MSBuild:Compile</Generator>

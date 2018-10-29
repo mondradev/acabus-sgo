@@ -193,9 +193,6 @@
     <None Include="Libraries\Opera.Acabus.DatabaseController.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Modules\Opera.Acabus.TrunkMonitor.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AppTile.png">
@@ -208,9 +205,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Modules\Opera.Acabus.Core.Config.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <Folder Include="Modules\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

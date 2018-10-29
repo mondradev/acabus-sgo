@@ -3,6 +3,7 @@ using Opera.Acabus.Core.Services;
 using Opera.Acabus.Core.Services.ModelServices;
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace Opera.Acabus.Core.DataAccess
 {
@@ -26,8 +27,12 @@ namespace Opera.Acabus.Core.DataAccess
         /// </summary>
         static ServerContext()
         {
+
+            int serverPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Push_Port") ?? 5501);
+            IPAddress serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("Push_IP") ?? "127.0.0.1");
+
             _entityLocalSyncs = new Dictionary<string, IEntityLocalSync>();
-            _pushService = new PushService<PushAcabus>();
+            _pushService = new PushService<PushAcabus>(serverIP, serverPort);
 
             _pushService.Notified += OnNotify;
         }

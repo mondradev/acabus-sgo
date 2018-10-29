@@ -2,7 +2,6 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
-using Opera.Acabus.Core.Services.ModelServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
