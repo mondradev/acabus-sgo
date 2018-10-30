@@ -38,6 +38,9 @@ namespace Opera.Acabus.Server.Gui
 
             message.SetBoolean(22, res);
             message[61] = bus.Serialize();
+
+            if (res)
+                Dispatcher.SendNotify("CORE: Nuevo autobús agregado " + bus);
         }
 
         /// <summary>
@@ -71,7 +74,7 @@ namespace Opera.Acabus.Server.Gui
 
                 message[61] = device.Serialize();
             }
-           
+
             message.SetBoolean(22, res);
 
             if (res)
@@ -96,6 +99,9 @@ namespace Opera.Acabus.Server.Gui
 
             message.SetBoolean(22, res);
             message[61] = route.Serialize();
+
+            if (res)
+                Dispatcher.SendNotify("CORE: Nueva ruta agregada " + route);
         }
 
         /// <summary>
@@ -119,6 +125,9 @@ namespace Opera.Acabus.Server.Gui
 
             message.SetBoolean(22, res);
             message[61] = staff.Serialize();
+
+            if (res)
+                Dispatcher.SendNotify("CORE: Nuevo personal agregado " + staff);
         }
 
         /// <summary>
@@ -146,6 +155,9 @@ namespace Opera.Acabus.Server.Gui
 
             message.SetBoolean(22, res);
             message[61] = station.Serialize();
+
+            if (res)
+                Dispatcher.SendNotify("CORE: Nueva estación agregada " + station);
         }
 
         /// <summary>
@@ -328,7 +340,7 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="message">Mensaje de la petición.</param>
         public static void GetBusByID([ParameterField(14)] UInt64 id, IMessage message)
         {
-            Bus bus = AcabusDataContext.AllBuses.FirstOrDefault(x => x.ID == id);
+            Bus bus = AcabusDataContext.AllBuses.LoadReference(1).FirstOrDefault(x => x.ID == id);
             message[61] = bus.Serialize();
         }
 
@@ -339,8 +351,7 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="message">Mensaje de la petición.</param>
         public static void GetDeviceByID([ParameterField(14)] UInt64 id, IMessage message)
         {
-            Device device = AcabusDataContext.AllDevices.Where(x => x.ID == id)
-                .LoadReference(1).ToList().FirstOrDefault();
+            Device device = AcabusDataContext.AllDevices.LoadReference(1).FirstOrDefault(x => x.ID == id);
             message[61] = device.Serialize();
         }
 
@@ -364,8 +375,7 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="message">Mensaje de la petición.</param>
         public static void GetRouteByID([ParameterField(14)] UInt64 id, IMessage message)
         {
-            Route route = AcabusDataContext.AllRoutes.Where(x => x.ID == id)
-                .LoadReference(1).ToList().FirstOrDefault();
+            Route route = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == id);
             message[61] = route.Serialize();
         }
 
@@ -400,8 +410,7 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="message">Mensaje de la petición.</param>
         public static void GetStaffByID([ParameterField(14)] UInt64 id, IMessage message)
         {
-            Staff staff = AcabusDataContext.AllStaff.Where(x => x.ID == id)
-                .LoadReference(1).ToList().FirstOrDefault();
+            Staff staff = AcabusDataContext.AllStaff.LoadReference(1).FirstOrDefault(x => x.ID == id);
             message[61] = staff.Serialize();
         }
 
@@ -412,8 +421,7 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="message">Mensaje de la petición.</param>
         public static void GetStationByID([ParameterField(14)] UInt64 id, IMessage message)
         {
-            Station station = AcabusDataContext.AllStations.Where(x => x.ID == id)
-                .LoadReference(1).ToList().FirstOrDefault();
+            Station station = AcabusDataContext.AllStations.LoadReference(1).FirstOrDefault(x => x.ID == id);
             message[61] = station.Serialize();
         }
 
