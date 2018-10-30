@@ -79,6 +79,11 @@ namespace Opera.Acabus.Core.Services
         protected abstract int IDField { get; }
 
         /// <summary>
+        /// Obtiene el nombre del módulo al que se realizan las peticiones.
+        /// </summary>
+        protected virtual string ModuleName { get; }
+
+        /// <summary>
         /// Obtiene el identificador del campo utilizado para almacenar esta entidad en bytes.
         /// </summary>
         protected abstract int SourceField { get; }
@@ -98,6 +103,7 @@ namespace Opera.Acabus.Core.Services
 
             IMessage message = remoteContext.CreateMessage();
 
+            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(CREATE_FUNC_NAME, typeof(T).Name);
             InstanceToMessage(instance, message);
 
@@ -156,6 +162,7 @@ namespace Opera.Acabus.Core.Services
 
             IMessage message = remoteContext.CreateMessage();
 
+            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(DELETE_FUNC_NAME, typeof(T).Name);
             message[IDField] = GetID(instance);
 
@@ -197,6 +204,7 @@ namespace Opera.Acabus.Core.Services
 
             IMessage message = remoteContext.CreateMessage();
 
+            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(GET_BY_ID_FUNC_NAME, typeof(T).Name);
             message[IDField] = id;
 
@@ -217,7 +225,7 @@ namespace Opera.Acabus.Core.Services
                     {
                         downloaded = LocalContext.Update(instance);
 
-                        if(downloaded)
+                        if (downloaded)
                             Updated?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.UPDATE));
                     }
                     else
@@ -249,6 +257,7 @@ namespace Opera.Acabus.Core.Services
             List<T> list = new List<T>();
             IMessage message = remoteContext.CreateMessage();
 
+            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(GET_FUNC_NAME, typeof(T).Name);
 
             remoteContext.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
@@ -290,7 +299,7 @@ namespace Opera.Acabus.Core.Services
                         Created?.Invoke(this, new LocalSyncArgs(x, LocalSyncOperation.CREATE));
                 }
 
-                    if (!createdOrUpdated)
+                if (!createdOrUpdated)
                     throw new LocalSyncException("No se logró guardar o actualizar la instancia descargada: " + x);
 
                 currentProgress++;
@@ -309,7 +318,7 @@ namespace Opera.Acabus.Core.Services
         public bool LocalDeleteByID<TID>(TID id)
         {
             T instance = LocalReadByID(id);
-            bool deleted= LocalContext.Delete(instance);
+            bool deleted = LocalContext.Delete(instance);
 
             if (deleted)
                 Deleted?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.DELETE));
@@ -333,6 +342,7 @@ namespace Opera.Acabus.Core.Services
 
             IMessage message = remoteContext.CreateMessage();
 
+            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(UPDATE_FUNC_NAME, typeof(T).Name);
             message[SourceField] = ToBytes(instance);
 

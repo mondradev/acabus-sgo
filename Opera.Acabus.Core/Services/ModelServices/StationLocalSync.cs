@@ -62,7 +62,9 @@ namespace Opera.Acabus.Core.Services.ModelServices
             message[12] = station.StationNumber;
             message[17] = station.Name;
             message[13] = station.Route?.ID ?? 0;
-            message[18] = station.AssignedSection;
+
+            if (!String.IsNullOrEmpty(station.AssignedSection))
+                message[18] = station.AssignedSection;
         }
 
         /// <summary>

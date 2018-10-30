@@ -59,10 +59,10 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// <param name="message">Mensaje de la petición de creación.</param>
         protected override void InstanceToMessage(Bus bus, IMessage message)
         {
-            message[12] = bus.Type;
+            message[12] = (int)bus.Type;
             message[17] = bus.EconomicNumber;
             message[13] = bus.Route?.ID ?? 0;
-            message[36] = bus.Status;
+            message[36] = (int)bus.Status;
         }
 
         /// <summary>
