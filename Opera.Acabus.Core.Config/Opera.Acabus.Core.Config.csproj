@@ -61,12 +61,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CoreConfigModule.cs" />
+    <Compile Include="ViewModels\AddBusViewModel.cs" />
     <Compile Include="ViewModels\AddDeviceViewModel.cs" />
+    <Compile Include="ViewModels\AddRouteViewModel.cs" />
     <Compile Include="ViewModels\AddStationViewModel.cs" />
     <Compile Include="ViewModels\CoreConfigViewModel.cs" />
     <Compile Include="ViewModels\ManualReassignRouteViewModel.cs" />
+    <Compile Include="Views\AddBusView.xaml.cs">
+      <DependentUpon>AddBusView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\AddDeviceView.xaml.cs">
       <DependentUpon>AddDeviceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AddRouteView.xaml.cs">
+      <DependentUpon>AddRouteView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AddStationView.xaml.cs">
       <DependentUpon>AddStationView.xaml</DependentUpon>
@@ -77,9 +85,17 @@
     <Compile Include="Views\ManualReassignRouteView.xaml.cs">
       <DependentUpon>ManualReassignRouteView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\AddBusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AddDeviceView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AddRouteView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AddStationView.xaml">
       <SubType>Designer</SubType>

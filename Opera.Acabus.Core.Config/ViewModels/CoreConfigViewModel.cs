@@ -128,6 +128,15 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 RefreshStation(null, null);
             }));
 
+            ShowAddRouteCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddRouteView(), p =>
+            {
+                RefreshRoutes(null, null);
+            }));
+
+            ShowAddBusCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddBusView(), p =>
+            {
+                RefreshBus(null, null);
+            }));
         }
 
         /// <summary>
@@ -180,6 +189,15 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// </summary>
         public ICommand ShowAddDeviceCommand { get; }
 
+        /// <summary>
+        /// Obtiene el comando para mostrar el formulario para añadir rutas.
+        /// </summary>
+        public ICommand ShowAddRouteCommand { get; }
+
+        /// <summary>
+        /// Obtiene el comando para mostrar el formulario para añadir autobuses.
+        /// </summary>
+        public ICommand ShowAddBusCommand { get; }
 
         /// <summary>
         /// Obtiene el comando para mostrar el formulario para añadir estaciones.
@@ -611,9 +629,10 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 foreach (var b in _allBuses)
                     AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), _allDevices);
 
+            _isActive = true;
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _isActive = true;
                 OnPropertyChanged(nameof(IsActive));
                 OnPropertyChanged(nameof(AllDevices));
                 OnPropertyChanged(nameof(AllStations));
@@ -638,9 +657,10 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), _allBuses);
                 }
 
+            _isActive = true;
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _isActive = true;
                 OnPropertyChanged(nameof(IsActive));
                 OnPropertyChanged(nameof(AllBuses));
                 OnPropertyChanged(nameof(AllStations));
@@ -658,9 +678,10 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
             _allStaff = AcabusDataContext.AllStaff.Where(s => s.Active == true).ToList();
 
+            _isActive = true;
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _isActive = true;
                 OnPropertyChanged(nameof(IsActive));
                 OnPropertyChanged(nameof(AllStaff));
             });
@@ -686,9 +707,10 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), _allStations);
                 }
 
+            _isActive = true;
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _isActive = true;
                 OnPropertyChanged(nameof(IsActive));
                 OnPropertyChanged(nameof(AllStations));
                 OnPropertyChanged(nameof(AllRoutes));

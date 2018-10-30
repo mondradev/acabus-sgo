@@ -59,7 +59,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de los tipos de equipos disponibles.
         /// </summary>
-        public IEnumerable<DeviceType> DeviceTypes => Enum.GetValues(typeof(DeviceType)).Cast<DeviceType>();
+        public IEnumerable<DeviceType> DeviceTypes => Enum.GetValues(typeof(DeviceType))
+            .Cast<DeviceType>().Where(x => x != DeviceType.NONE);
 
         /// <summary>
         /// Obtiene o establece la dirección IP del equipo.
@@ -190,13 +191,13 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 Bus = SelectedBus,
                 IPAddress = IPAddress.Parse(IPString)
             };
-            
+
 
             if (ServerContext.GetLocalSync("Device").Create(ref device))
                 Dispatcher.SendMessageToGUI($"Equipo: {device} agregado correctamente.");
             else
                 Dispatcher.SendMessageToGUI("No se pudo guardar el equipo nuevo.");
-            
+
             Dispatcher.CloseDialog();
         }
     }

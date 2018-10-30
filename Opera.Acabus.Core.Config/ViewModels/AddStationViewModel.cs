@@ -37,7 +37,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Campo que provee a la propiedad <see cref="StationNumber"/>.
         /// </summary>
-        private UInt16 _stationNumber;
+        private String _stationNumber;
 
         /// <summary>
         /// Crea una instancia nueva de <see cref="AddStationViewModel"/>.
@@ -110,7 +110,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene o establece el número de la estación.
         /// </summary>
-        public UInt16 StationNumber {
+        public String StationNumber {
             get => _stationNumber;
             set {
                 _stationNumber = value;
@@ -147,16 +147,18 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 case nameof(SelectedRoute):
                     if (SelectedRoute == null)
                         AddError(nameof(SelectedRoute), "Especifique la ruta a la que pertenece la estación.");
+                    else if (!Routes.ToList().Any(x => x.ID == SelectedRoute.ID))
+                        AddError(nameof(SelectedRoute), "Especifique una ruta válida.");
                     break;
 
                 case nameof(StationNumber):
-                    if (StationNumber <= 0)
+                    if (!UInt16.TryParse(StationNumber, out ushort result) || result <= 0)
                         AddError(nameof(StationNumber), "Especifique un número de estación válido.");
                     break;
 
                 case nameof(AssignedSection):
-                    if (String.IsNullOrEmpty(AssignedSection))
-                        AddError(nameof(AssignedSection), "Especifique una sección de mantenimiento.");
+                    if (String.IsNullOrEmpty(AssignedSection) || !AssignableSections.Any(x => x == AssignedSection))
+                        AddError(nameof(AssignedSection), "Especifique una sección válida.");
                     break;
             }
         }
@@ -177,7 +179,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddStationExecute(object obj)
         {
-            Station station = new Station(0, StationNumber)
+            Station station = new Station(0, UInt16.Parse(StationNumber))
             {
                 Name = Name,
                 IsExternal = IsExternal,
