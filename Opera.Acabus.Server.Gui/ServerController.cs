@@ -36,7 +36,6 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         private static readonly AdaptiveMsgServer _msgServer;
 
-
         /// <summary>
         /// Notificador de actualizaciones.
         /// </summary>
@@ -63,7 +62,7 @@ namespace Opera.Acabus.Server.Gui
             ServerService.Notified += (sender, data) => { _notifier.Notify(data); };
 
             _notifier.Start();
-                        
+
             LoadModules();
         }
 
@@ -104,6 +103,8 @@ namespace Opera.Acabus.Server.Gui
         private static void AcceptedHandle(object sender, IAdaptiveMsgClientArgs e)
         {
             IPEndPoint ipClient = e.Connection.RemoteEndPoint as IPEndPoint;
+
+            Trace.WriteLine("Petición desde: " + ipClient);
         }
 
         /// <summary>
@@ -141,10 +142,11 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="e">Instancia que controla el evento de la petición.</param>
         private static void Functions(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e)
         {
-            if (Helpers.ValidateRequest(message, typeof(ServerCoreFunctions)))
-                Helpers.CallFunc(message, typeof(ServerCoreFunctions));
+            if (ServerHelper.ValidateRequest(message, typeof(ServerCoreFunctions)))
+                ServerHelper.CallFunc(message, typeof(ServerCoreFunctions));
             else
-                CreateError("Error al realizar la petición: opera.acabus.server.core", 403, e);
+                CreateError("Error al realizar la petición: opera.acabus.server.core."
+                    + message.GetString(AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()), 403, e);
 
             callback?.Invoke(message);
         }
@@ -209,10 +211,9 @@ namespace Opera.Acabus.Server.Gui
             {
                 String hashRules = sha256.ComputeHash(File.ReadAllBytes(AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules"))).ToTextPlain();
                 String HashRulesClients = message.GetValue(AcabusAdaptiveMessageFieldID.HashRules.ToInt32(), x => (x as byte[]).ToTextPlain());
-                
+
                 if (!hashRules.Equals(HashRulesClients))
                     return false;
-
             }
 
             if (!ValidateTokenDevice(message.GetValue(AcabusAdaptiveMessageFieldID.DeviceToken.ToInt32(), x => x as byte[])))

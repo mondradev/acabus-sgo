@@ -3,6 +3,7 @@ using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Models.ModelsBase;
 using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core;
 using Opera.Acabus.Server.Core.Utils;
@@ -21,7 +22,7 @@ namespace Opera.Acabus.Server.Gui
         /// Crea un autobus nuevo.
         /// </summary>
         public static void CreateBus([ParameterField(12)] BusType type,
-            [ParameterField(17)] String economicNumber, [ParameterField(13)] UInt16 idRoute,
+            [ParameterField(17)] String economicNumber, [ParameterField(13, true)] UInt16 idRoute,
             [ParameterField(36)] BusStatus status, IMessage message)
         {
             Bus bus = new Bus(0, economicNumber)
@@ -34,7 +35,7 @@ namespace Opera.Acabus.Server.Gui
             bool res = AcabusDataContext.DbContext.Create(bus);
 
             if (res)
-                ServerService.Notify(new PushAcabus(nameof(Bus), bus.ID.ToString(), LocalSyncOperation.CREATE));
+                ServerService.Notify(new PushAcabus(nameof(Bus), bus.ID, LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
             message[61] = bus.Serialize();
@@ -46,9 +47,9 @@ namespace Opera.Acabus.Server.Gui
         /// <summary>
         /// Crea un equipo.
         /// </summary>
-        public static void CreateDevice([ParameterField(12)] DeviceType type,
-            [ParameterField(17)] String serialNumber, [ParameterField(13)] UInt16 idStation,
-            [ParameterField(36)] UInt16 idBus, [ParameterField(18)] String ipAddress, IMessage message)
+        public static void CreateDevice([ParameterField(14)] DeviceType type,
+            [ParameterField(17, true)] String serialNumber, [ParameterField(13, true)] UInt16 idStation,
+            [ParameterField(36, true)] UInt16 idBus, [ParameterField(18, true)] String ipAddress, IMessage message)
         {
             Device device = new Device(0, serialNumber, type)
             {
@@ -59,7 +60,7 @@ namespace Opera.Acabus.Server.Gui
 
             bool res = true;
 
-            if (AcabusDataContext.AllDevices.Where(x => x.Type == type)
+            if (!String.IsNullOrEmpty(device.SerialNumber) && AcabusDataContext.AllDevices.Where(x => x.Type == type)
                 .ToList().Any(x => x.SerialNumber.Equals(device.SerialNumber)))
             {
                 message[61] = AcabusDataContext.AllDevices.FirstOrDefault(x => x.SerialNumber.Equals(device.SerialNumber)).Serialize();
@@ -70,7 +71,7 @@ namespace Opera.Acabus.Server.Gui
                 res = AcabusDataContext.DbContext.Create(device);
 
                 if (res)
-                    ServerService.Notify(new PushAcabus(nameof(Device), device.ID.ToString(), LocalSyncOperation.CREATE));
+                    ServerService.Notify(new PushAcabus(nameof(Device), device.ID, LocalSyncOperation.CREATE));
 
                 message[61] = device.Serialize();
             }
@@ -89,13 +90,13 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="type">Tipo de la ruta. ALIM = 1 o TRUNK = 2.</param>
         public static void CreateRoute([ParameterField(12)] UInt16 number,
             [ParameterField(17)] String name, [ParameterField(13)] RouteType type,
-            [ParameterField(18)] String assignedSection, IMessage message)
+            [ParameterField(18, true)] String assignedSection, IMessage message)
         {
             Route route = new Route(0, number, type) { Name = name, AssignedSection = assignedSection };
             bool res = AcabusDataContext.DbContext.Create(route);
 
             if (res)
-                ServerService.Notify(new PushAcabus(nameof(Route), route.ID.ToString(), LocalSyncOperation.CREATE));
+                ServerService.Notify(new PushAcabus(nameof(Route), route.ID, LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
             message[61] = route.Serialize();
@@ -108,12 +109,10 @@ namespace Opera.Acabus.Server.Gui
         /// Crea un personal nuevo.
         /// </summary>
         public static void CreateStaff([ParameterField(12)] AssignableArea area,
-            [ParameterField(17)] String name, [ParameterField(23)] Boolean active,
-            IMessage message)
+            [ParameterField(17)] String name, IMessage message)
         {
-            Staff staff = new Staff(0)
+            Staff staff = new Staff()
             {
-                Active = active,
                 Name = name,
                 Area = area
             };
@@ -121,7 +120,7 @@ namespace Opera.Acabus.Server.Gui
             bool res = AcabusDataContext.DbContext.Create(staff);
 
             if (res)
-                ServerService.Notify(new PushAcabus(nameof(Staff), staff.ID.ToString(), LocalSyncOperation.CREATE));
+                ServerService.Notify(new PushAcabus(nameof(Staff), staff.ID, LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
             message[61] = staff.Serialize();
@@ -136,8 +135,8 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="number">Numero de la estación.</param>
         /// <param name="name">Nombre de la estación.</param>
         public static void CreateStation([ParameterField(12)] UInt16 number,
-            [ParameterField(17)] String name, [ParameterField(18)] String assignedSection,
-            [ParameterField(13)] UInt16 routeID, [ParameterField(23)] Boolean isExternal,
+            [ParameterField(17)] String name, [ParameterField(18, true)] String assignedSection,
+            [ParameterField(13, true)] UInt16 routeID, [ParameterField(23)] Boolean isExternal,
             IMessage message)
         {
             Station station = new Station(0, number)
@@ -151,7 +150,7 @@ namespace Opera.Acabus.Server.Gui
             bool res = AcabusDataContext.DbContext.Create(station);
 
             if (res)
-                ServerService.Notify(new PushAcabus(nameof(Station), station.ID.ToString(), LocalSyncOperation.CREATE));
+                ServerService.Notify(new PushAcabus(nameof(Station), station.ID, LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
             message[61] = station.Serialize();
@@ -170,21 +169,17 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Bus bus = AcabusDataContext.AllBuses.FirstOrDefault(x => x.ID == id);
+                bus.Delete();
 
-                if (AcabusDataContext.AllDevices.Where(x => x.Bus.ID == id).ToList().Count > 0)
-                    throw new InvalidOperationException("Existen equipos vinculados al autobus que intentar eliminar.");
-                else
-                {
-                    bool deleted = AcabusDataContext.DbContext.Delete(bus);
+                bool deleted = AcabusDataContext.DbContext.Update(bus);
 
-                    if (!deleted)
-                        throw new InvalidOperationException("Existen entidades vinculadas al autobus que intenta eliminar.");
+                if (!deleted)
+                    throw new InvalidOperationException("Existen entidades vinculadas al autobus que intenta eliminar.");
 
-                    message.SetBoolean(22, deleted);
+                message.SetBoolean(22, deleted);
 
-                    if (deleted)
-                        ServerService.Notify(new PushAcabus(nameof(Bus), id.ToString(), LocalSyncOperation.DELETE));
-                }
+                if (deleted)
+                    ServerService.Notify(new PushAcabus(nameof(Bus), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -204,8 +199,9 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Device device = AcabusDataContext.AllDevices.FirstOrDefault(x => x.ID == id);
+                device.Delete();
 
-                bool deleted = AcabusDataContext.DbContext.Delete(device);
+                bool deleted = AcabusDataContext.DbContext.Update(device);
 
                 if (!deleted)
                     throw new InvalidOperationException("Existen entidades vinculadas al equipo que intenta eliminar.");
@@ -213,7 +209,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, deleted);
 
                 if (deleted)
-                    ServerService.Notify(new PushAcabus(nameof(Device), id.ToString(), LocalSyncOperation.DELETE));
+                    ServerService.Notify(new PushAcabus(nameof(Device), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -233,22 +229,17 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Route route = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == id);
+                route.Delete();
 
-                if (AcabusDataContext.AllStations.Where(x => x.Route.ID == id).ToList().Count > 0
-                    || AcabusDataContext.AllBuses.Where(x => x.Route.ID == id).ToList().Count > 0)
-                    throw new InvalidOperationException("Existen estaciones o autobuses vinculados a la ruta que intentar eliminar.");
-                else
-                {
-                    bool deleted = AcabusDataContext.DbContext.Delete(route);
+                bool deleted = AcabusDataContext.DbContext.Update(route);
 
-                    if (!deleted)
-                        throw new InvalidOperationException("Existen entidades vinculadas a la ruta que intenta eliminar.");
+                if (!deleted)
+                    throw new InvalidOperationException("Existen entidades vinculadas a la ruta que intenta eliminar.");
 
-                    message.SetBoolean(22, deleted);
+                message.SetBoolean(22, deleted);
 
-                    if (deleted)
-                        ServerService.Notify(new PushAcabus(nameof(Route), id.ToString(), LocalSyncOperation.DELETE));
-                }
+                if (deleted)
+                    ServerService.Notify(new PushAcabus(nameof(Route), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -268,8 +259,9 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Staff staff = AcabusDataContext.AllStaff.FirstOrDefault(x => x.ID == id);
+                staff.Delete();
 
-                bool deleted = AcabusDataContext.DbContext.Delete(staff);
+                bool deleted = AcabusDataContext.DbContext.Update(staff);
 
                 if (!deleted)
                     throw new InvalidOperationException("Existen entidades vinculadas al personal que intenta eliminar.");
@@ -277,7 +269,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, deleted);
 
                 if (deleted)
-                    ServerService.Notify(new PushAcabus(nameof(Staff), id.ToString(), LocalSyncOperation.DELETE));
+                    ServerService.Notify(new PushAcabus(nameof(Staff), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -297,21 +289,17 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Station station = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == id);
+                station.Delete();
 
-                if (AcabusDataContext.AllDevices.Where(x => x.Station.ID == id).ToList().Count > 0)
-                    throw new InvalidOperationException("Existen equipos vinculados a la estación que intentar eliminar.");
-                else
-                {
-                    bool deleted = AcabusDataContext.DbContext.Delete(station);
+                bool deleted = AcabusDataContext.DbContext.Update(station);
 
-                    if (!deleted)
-                        throw new InvalidOperationException("Existen entidades vinculadas a la estación que intenta eliminar.");
+                if (!deleted)
+                    throw new InvalidOperationException("Existen entidades vinculadas a la estación que intenta eliminar.");
 
-                    message.SetBoolean(22, deleted);
+                message.SetBoolean(22, deleted);
 
-                    if (deleted)
-                        ServerService.Notify(new PushAcabus(nameof(Station), id.ToString(), LocalSyncOperation.DELETE));
-                }
+                if (deleted)
+                    ServerService.Notify(new PushAcabus(nameof(Station), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -325,12 +313,93 @@ namespace Opera.Acabus.Server.Gui
         /// Obtiene los autobuses.
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetBus(IMessage message)
+        public static void DownloadBus([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
         {
-            IQueryable<Bus> busQuery = AcabusDataContext.AllBuses.LoadReference(1);
+            if (lastDownLoad == null)
+                lastDownLoad = DateTime.MinValue;
 
-            Helpers.Enumerating(message, busQuery.ToList().Count,
+            IQueryable<Bus> busQuery = AcabusDataContext.AllBuses.LoadReference(1)
+                .Where(x => x.ModifyTime > lastDownLoad)
+                .OrderBy(x => x.ModifyTime);
+
+            ServerHelper.Enumerating(message, busQuery.ToList().Count,
                   i => message[61] = busQuery.ToList()[i].Serialize());
+        }
+
+        /// <summary>
+        /// Obtiene todos los equipos.
+        /// </summary>
+        /// <param name="id">Identificador de la estación.</param>
+        /// <param name="message">Mensaje de la petición.</param>
+        public static void DownloadDevice([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        {
+            if (lastDownLoad == null)
+                lastDownLoad = DateTime.MinValue;
+
+            IQueryable<Device> devices = AcabusDataContext.AllDevices.LoadReference(1)
+                .Where(x => x.ModifyTime > lastDownLoad)
+                .OrderBy(x => x.ModifyTime);
+
+            ServerHelper.Enumerating(message, devices.ToList().Count,
+                i => message[61] = devices.ToList()[i].Serialize());
+        }
+
+        /// <summary>
+        /// Obtiene las rutas.
+        /// </summary>
+        /// <param name="message">Mensaje de la petición.</param>
+        public static void DownloadRoute([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        {
+            if (lastDownLoad == null)
+                lastDownLoad = DateTime.MinValue;
+
+            IQueryable<Route> routeQuery = AcabusDataContext.AllRoutes
+                .Where(x => x.ModifyTime > lastDownLoad)
+                .OrderBy(x => x.ModifyTime);
+
+            ServerHelper.Enumerating(message, routeQuery.ToList().Count,
+                  i => message[61] = routeQuery.ToList()[i].Serialize());
+        }
+
+        /// <summary>
+        /// Obtiene el personal.
+        /// </summary>
+        /// <param name="message">Mensaje de la petición.</param>
+        public static void DownloadStaff([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        {
+            if (lastDownLoad == null)
+                lastDownLoad = DateTime.MinValue;
+
+            IQueryable<Staff> staffQuery = AcabusDataContext.AllStaff
+                .Where(x => x.ModifyTime > lastDownLoad)
+                .OrderBy(x => x.ModifyTime);
+
+            ServerHelper.Enumerating(message, staffQuery.ToList().Count,
+                  i => message[61] = staffQuery.ToList()[i].Serialize());
+        }
+
+        /// <summary>
+        /// Obtiene las estaciones.
+        /// </summary>
+        /// <param name="message">Mensaje de la petición.</param>
+        public static void DownloadStation([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        {
+            /***
+                7, FieldType.Binary, 1, false, "Es enumerable"
+                8, FieldType.Numeric, 100, true, "Registros totales del enumerable"
+                9, FieldType.Numeric, 100, true, "Posición del enumerable"
+                10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
+             */
+
+            if (lastDownLoad == null)
+                lastDownLoad = DateTime.MinValue;
+
+            IQueryable<Station> stationsQuery = AcabusDataContext.AllStations.LoadReference(1)
+                .Where(x => x.ModifyTime > lastDownLoad)
+                .OrderBy(x => x.ModifyTime);
+
+            ServerHelper.Enumerating(message, stationsQuery.ToList().Count,
+                i => message[61] = stationsQuery.ToList()[i].Serialize());
         }
 
         /// <summary>
@@ -356,19 +425,6 @@ namespace Opera.Acabus.Server.Gui
         }
 
         /// <summary>
-        /// Obtiene todos los equipos.
-        /// </summary>
-        /// <param name="id">Identificador de la estación.</param>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetDevices(IMessage message)
-        {
-            IQueryable<Device> devices = AcabusDataContext.AllDevices.LoadReference(1);
-
-            Helpers.Enumerating(message, devices.ToList().Count,
-                i => message[61] = devices.ToList()[i].Serialize());
-        }
-
-        /// <summary>
         /// Obtiene la ruta con el ID especificado.
         /// </summary>
         /// <param name="id">Identificador de la ruta.</param>
@@ -377,30 +433,6 @@ namespace Opera.Acabus.Server.Gui
         {
             Route route = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == id);
             message[61] = route.Serialize();
-        }
-
-        /// <summary>
-        /// Obtiene las rutas.
-        /// </summary>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetRoutes(IMessage message)
-        {
-            IQueryable<Route> routeQuery = AcabusDataContext.AllRoutes;
-
-            Helpers.Enumerating(message, routeQuery.ToList().Count,
-                  i => message[61] = routeQuery.ToList()[i].Serialize());
-        }
-
-        /// <summary>
-        /// Obtiene el personal.
-        /// </summary>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStaff(IMessage message)
-        {
-            IQueryable<Staff> staffQuery = AcabusDataContext.AllStaff;
-
-            Helpers.Enumerating(message, staffQuery.ToList().Count,
-                  i => message[61] = staffQuery.ToList()[i].Serialize());
         }
 
         /// <summary>
@@ -426,25 +458,6 @@ namespace Opera.Acabus.Server.Gui
         }
 
         /// <summary>
-        /// Obtiene las estaciones.
-        /// </summary>
-        /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStations(IMessage message)
-        {
-            /***
-                7, FieldType.Binary, 1, false, "Es enumerable"
-                8, FieldType.Numeric, 100, true, "Registros totales del enumerable"
-                9, FieldType.Numeric, 100, true, "Posición del enumerable"
-                10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
-             */
-
-            IQueryable<Station> stationsQuery = AcabusDataContext.AllStations.LoadReference(1);
-
-            Helpers.Enumerating(message, stationsQuery.ToList().Count,
-                i => message[61] = stationsQuery.ToList()[i].Serialize());
-        }
-
-        /// <summary>
         /// Actualiza el autobus especificado por el ID
         /// </summary>
         /// <param name="id">Identificador del autobus</param>
@@ -454,6 +467,7 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Bus bus = AcabusDataContext.AllBuses.FirstOrDefault(x => x.ID == id);
+                bus.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(bus);
 
@@ -463,7 +477,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Bus), id.ToString(), LocalSyncOperation.UPDATE));
+                    ServerService.Notify(new PushAcabus(nameof(Bus), id, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -483,6 +497,7 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Device device = AcabusDataContext.AllDevices.FirstOrDefault(x => x.ID == id);
+                device.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(device);
 
@@ -492,7 +507,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Device), id.ToString(), LocalSyncOperation.UPDATE));
+                    ServerService.Notify(new PushAcabus(nameof(Device), id, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -512,6 +527,7 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Route route = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == id);
+                route.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(route);
 
@@ -521,7 +537,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Route), id.ToString(), LocalSyncOperation.UPDATE));
+                    ServerService.Notify(new PushAcabus(nameof(Route), id, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -534,13 +550,13 @@ namespace Opera.Acabus.Server.Gui
         /// <summary>
         /// Actualiza el personal especificado por el ID
         /// </summary>
-        /// <param name="id">Identificador de la estación.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateStaff([ParameterField(14)] UInt64 id, IMessage message)
+        public static void UpdateStaff(IMessage message)
         {
             try
             {
-                Staff staff = AcabusDataContext.AllStaff.FirstOrDefault(x => x.ID == id);
+                Staff staff = DataHelper.GetStaff(message.GetBytes(61));
+                staff.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(staff);
 
@@ -550,7 +566,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Staff), id.ToString(), LocalSyncOperation.UPDATE));
+                    ServerService.Notify(new PushAcabus(nameof(Staff), staff.ID, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -570,6 +586,7 @@ namespace Opera.Acabus.Server.Gui
             try
             {
                 Station station = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == id);
+                station.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(station);
 
@@ -579,7 +596,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Station), id.ToString(), LocalSyncOperation.UPDATE));
+                    ServerService.Notify(new PushAcabus(nameof(Station), id, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {

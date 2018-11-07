@@ -12,7 +12,7 @@ namespace Opera.Acabus.Server.Core.Utils
     /// <summary>
     /// Contiene funciones auxiliares para la validación de los datos al realizar las peticiones.
     /// </summary>
-    public static class Helpers
+    public static class ServerHelper
     {
         /// <summary>
         /// Realiza la llamada a la función especificada.
@@ -24,7 +24,7 @@ namespace Opera.Acabus.Server.Core.Utils
             String funcName = message[6]?.ToString();
 
             if (String.IsNullOrEmpty(funcName))
-                return;
+                throw new InvalidOperationException("No se especificó el nombre de la función.");
 
             MethodInfo[] methods = functionsClass.GetMethods(BindingFlags.Static | BindingFlags.Public);
             methods = methods.Where(x => x.Name == funcName).ToArray();
@@ -36,50 +36,77 @@ namespace Opera.Acabus.Server.Core.Utils
             while (enumerator.MoveNext() && !ValidateMethod(message, method = enumerator.Current as MethodInfo)) ;
 
             if (method is null)
-                return;
+                throw new InvalidOperationException("No se encontró la función especificada.");
 
             ParameterInfo[] parameters = method.GetParameters();
             Object[] parametersValues = new Object[parameters.Length];
 
-            for (int i = 0; i < parameters.Length - 1; i++)
+            try
             {
-                int id = parameters[i].GetCustomAttribute<ParameterFieldAttribute>().ID;
 
-                Type type = parameters[i].ParameterType;
+                for (int i = 0; i < parameters.Length - 1; i++)
+                {
+                    ParameterFieldAttribute parameterData = parameters[i].GetCustomAttribute<ParameterFieldAttribute>();
+                    int id = parameterData.ID;
 
-                if (type == typeof(Int16))
-                    parametersValues[i] = Int16.Parse(message[id].ToString());
-                else if (type == typeof(Int32))
-                    parametersValues[i] = Int32.Parse(message[id].ToString());
-                else if (type == typeof(Int64))
-                    parametersValues[i] = Int64.Parse(message[id].ToString());
-                else if (type == typeof(UInt16))
-                    parametersValues[i] = Convert.ToUInt16(message[id]);
-                else if (type == typeof(UInt32))
-                    parametersValues[i] = Convert.ToUInt32(message[id]);
-                else if (type == typeof(UInt64))
-                    parametersValues[i] = Convert.ToUInt64(message[id]);
-                else if (type == typeof(Double))
-                    parametersValues[i] = Double.Parse(message[id].ToString());
-                else if (type == typeof(Single))
-                    parametersValues[i] = Single.Parse(message[id].ToString());
-                else if (type == typeof(DateTime))
-                    parametersValues[i] = DateTime.Parse(String.Format("{0}{1}-{2}-{3} {4}:{5}:{6}", message[id].ToString().Cut(7)));
-                else if (type == typeof(TimeSpan))
-                    parametersValues[i] = TimeSpan.Parse(String.Format("{0}:{1}:{2}", message[id].ToString().Cut(3)));
-                else if (type == typeof(Decimal))
-                    parametersValues[i] = Decimal.Parse(message[id].ToString());
-                else if (type.IsEnum)
-                    parametersValues[i] = Enum.Parse(parameters[i].ParameterType, message[id].ToString());
-                else if (type == typeof(bool))
-                    parametersValues[i] = BitConverter.ToBoolean(message[id] as byte[] ?? BitConverter.GetBytes(default(bool)), 0);
-                else
-                    parametersValues[i] = Convert.ChangeType(message[id], parameters[i].ParameterType);
+                    Type type = parameters[i].ParameterType;
+
+                    if (!message.IsSet(id) && !parameterData.Nullable)
+                        throw new ArgumentNullException("Campo " + id);
+
+                    if (parameterData.Nullable && !message.IsSet(id))
+                    {
+                        parametersValues[i] = type.IsValueType ? Activator.CreateInstance(type) : null;
+                        continue;
+                    }
+
+                    type = Nullable.GetUnderlyingType(type) ?? type;
+
+                    if (type == typeof(Int16))
+                        parametersValues[i] = Int16.Parse(message[id].ToString());
+                    else if (type == typeof(Int32))
+                        parametersValues[i] = Int32.Parse(message[id].ToString());
+                    else if (type == typeof(Int64))
+                        parametersValues[i] = Int64.Parse(message[id].ToString());
+                    else if (type == typeof(UInt16))
+                        parametersValues[i] = Convert.ToUInt16(message[id]);
+                    else if (type == typeof(UInt32))
+                        parametersValues[i] = Convert.ToUInt32(message[id]);
+                    else if (type == typeof(UInt64))
+                        parametersValues[i] = Convert.ToUInt64(message[id]);
+                    else if (type == typeof(Double))
+                        parametersValues[i] = Double.Parse(message[id].ToString());
+                    else if (type == typeof(Single))
+                        parametersValues[i] = Single.Parse(message[id].ToString());
+                    else if (type == typeof(DateTime))
+                        parametersValues[i] = DateTime.Parse(String.Format("{0}{1}-{2}-{3} {4}:{5}:{6}", message[id].ToString().Cut(7)));
+                    else if (type == typeof(TimeSpan))
+                        parametersValues[i] = TimeSpan.Parse(String.Format("{0}:{1}:{2}", message[id].ToString().Cut(3)));
+                    else if (type == typeof(Decimal))
+                        parametersValues[i] = Decimal.Parse(message[id].ToString());
+                    else if (type.IsEnum)
+                        parametersValues[i] = Enum.Parse(parameters[i].ParameterType, message[id].ToString());
+                    else if (type == typeof(bool))
+                        parametersValues[i] = BitConverter.ToBoolean(message[id] as byte[] ?? BitConverter.GetBytes(default(bool)), 0);
+                    else
+                        parametersValues[i] = Convert.ChangeType(message[id], parameters[i].ParameterType);
+                }
+
+                parametersValues[parametersValues.Length - 1] = message;
+
+                method.Invoke(null, parametersValues);
+
+            }
+            catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidCastException || ex is FormatException)
+            {
+                throw new InvalidCastException("No se logró hacer la conversión de los datos recibidos a los parametros de la función.");
+            }
+            catch (Exception ex) when (ex is TargetException || ex is TargetInvocationException || ex is TargetParameterCountException)
+            {
+                throw new InvalidOperationException("Error al realizar la llamada a la función.");
             }
 
-            parametersValues[parametersValues.Length - 1] = message;
 
-            method.Invoke(null, parametersValues);
         }
 
         /// <summary>
@@ -93,11 +120,12 @@ namespace Opera.Acabus.Server.Core.Utils
             bool valid = true;
 
             ParameterInfo[] parameters = method.GetParameters();
-            IEnumerable<int> fields = parameters.Where(x => x.GetCustomAttribute<ParameterFieldAttribute>() != null)
-                .Select(x => x.GetCustomAttribute<ParameterFieldAttribute>().ID);
+            IEnumerable<ParameterFieldAttribute> fields = parameters
+                                                .Where(x => x.GetCustomAttribute<ParameterFieldAttribute>() != null)
+                                                .Select(x => x.GetCustomAttribute<ParameterFieldAttribute>());
 
-            foreach (int field in fields)
-                valid &= message.IsSet(field);
+            foreach (ParameterFieldAttribute field in fields)
+                valid &= (message.IsSet(field.ID) || field.Nullable);
 
             return valid;
         }
@@ -124,7 +152,8 @@ namespace Opera.Acabus.Server.Core.Utils
                 message[AcabusAdaptiveMessageFieldID.EnumerableOperation.ToInt32()] = 0;
             }
 
-            enumeratingFunc?.Invoke(Convert.ToInt32(message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()]));
+            if (count > 0)
+                enumeratingFunc?.Invoke(Convert.ToInt32(message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()]));
         }
 
         /// <summary>
@@ -155,26 +184,5 @@ namespace Opera.Acabus.Server.Core.Utils
 
             return true;
         }
-    }
-
-    /// <summary>
-    /// Representa un atributo utilizado para enlazar el parametro de una función con el campo de un mensaje <see cref="IMessage"/>.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter, Inherited = false, AllowMultiple = false)]
-    public sealed class ParameterFieldAttribute : Attribute
-    {
-        /// <summary>
-        /// Especifica el campo requerido para el parametro de la función.
-        /// </summary>
-        /// <param name="id"></param>
-        public ParameterFieldAttribute(int id)
-        {
-            ID = id;
-        }
-
-        /// <summary>
-        /// Obtiene el ID del campo requerido por el parametro.
-        /// </summary>
-        public int ID { get; }
     }
 }

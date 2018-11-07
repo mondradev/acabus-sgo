@@ -68,7 +68,8 @@
     <Compile Include="Models\ServiceStatus.cs" />
     <Compile Include="Gui\StatusToColorConverter.cs" />
     <Compile Include="ServerService.cs" />
-    <Compile Include="Utils\Helpers.cs" />
+    <Compile Include="Utils\ParameterFieldAttribute.cs" />
+    <Compile Include="Utils\ServerHelper.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
