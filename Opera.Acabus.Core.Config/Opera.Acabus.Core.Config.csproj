@@ -64,6 +64,7 @@
     <Compile Include="ViewModels\AddBusViewModel.cs" />
     <Compile Include="ViewModels\AddDeviceViewModel.cs" />
     <Compile Include="ViewModels\AddRouteViewModel.cs" />
+    <Compile Include="ViewModels\AddStaffViewModel.cs" />
     <Compile Include="ViewModels\AddStationViewModel.cs" />
     <Compile Include="ViewModels\CoreConfigViewModel.cs" />
     <Compile Include="ViewModels\ManualReassignRouteViewModel.cs" />
@@ -75,6 +76,9 @@
     </Compile>
     <Compile Include="Views\AddRouteView.xaml.cs">
       <DependentUpon>AddRouteView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AddStaffView.xaml.cs">
+      <DependentUpon>AddStaffView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AddStationView.xaml.cs">
       <DependentUpon>AddStationView.xaml</DependentUpon>
@@ -94,6 +98,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AddRouteView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AddStaffView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

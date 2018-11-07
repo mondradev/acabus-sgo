@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="Opera.Acabus.Core.Config.Views.AddStaffView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Opera.Acabus.Core.Config.Views"
+             xmlns:vm="clr-namespace:Opera.Acabus.Core.Config.ViewModels"
+             xmlns:g="clr-namespace:Opera.Acabus.Core.Gui;assembly=Opera.Acabus.Core.Gui"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:c="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.DataContext>
+        <vm:AddStaffViewModel />
+    </UserControl.DataContext>
+    
+    <UserControl.Resources>
+        <c:AssignableAreaSpanishConverter x:Key="AssignableAreaConverter" />
+    </UserControl.Resources>
+    
+    <Grid Margin="0" Width="500">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Margin="16,24,16,0" TextWrapping="Wrap" Text="Nuevo personal" FontSize="20" d:LayoutOverrides="Height" />
+        <Grid Margin="16" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="24" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="24" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="24" />
+            </Grid.RowDefinitions>
+            <TextBox md:HintAssist.Hint="Nombre completo" Margin="0" VerticalAlignment="Top" 
+                     Grid.Row="2" Text="{Binding FullName}" />
+            <ComboBox  Grid.Row="4" md:HintAssist.Hint="Puesto"  Margin="0" VerticalAlignment="Top" 
+                       ItemsSource="{Binding Areas, Converter={StaticResource AssignableAreaConverter}}" 
+                       SelectedItem="{Binding SelectedArea, ValidatesOnDataErrors=True, Converter={StaticResource AssignableAreaConverter}}" IsEditable="True" />
+        </Grid>
+        <StackPanel Margin="0,2,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.ColumnSpan="2" d:LayoutOverrides="Height">
+            <Button Command="{x:Static g:Dispatcher.CloseDialogCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left"
+                                HorizontalAlignment="Right" Margin="8" Style="{DynamicResource MaterialDesignFlatButton}" MinHeight="36">
+                <md:PackIcon  Kind="Delete" Width="24" Height="24" />
+            </Button>
+            <Button ToolTip="Agregar" Height="Auto" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,8,8,8" 
+                    Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding AddStaffCommand}" MinHeight="36">
+                <md:PackIcon  Kind="Check" Width="24" Height="24" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

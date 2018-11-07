@@ -163,7 +163,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     break;
 
                 case nameof(IPString):
-                    if (!IPAddress.TryParse(IPString, out IPAddress address))
+                    if (!String.IsNullOrEmpty(IPString) && !IPAddress.TryParse(IPString, out IPAddress address))
                         AddError(nameof(IPString), "La dirección IP no es valida.");
                     break;
             }
@@ -189,9 +189,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
             {
                 Station = SelectedStation,
                 Bus = SelectedBus,
-                IPAddress = IPAddress.Parse(IPString)
+                IPAddress = String.IsNullOrEmpty(IPString) ? null : IPAddress.Parse(IPString)
             };
-
 
             if (ServerContext.GetLocalSync("Device").Create(ref device))
                 Dispatcher.SendMessageToGUI($"Equipo: {device} agregado correctamente.");

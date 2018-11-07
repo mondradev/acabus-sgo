@@ -125,8 +125,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     break;
 
                 case nameof(AssignedSection):
-                    if (String.IsNullOrEmpty(AssignedSection) || !AssignableSections.Any(x => x == AssignedSection))
-                        AddError(nameof(AssignedSection), "Especifique un tipo de válido de ruta.");
+                    if (!String.IsNullOrEmpty(AssignedSection) && !AssignableSections.Any(x => x == AssignedSection))
+                        AddError(nameof(AssignedSection), "Especifique una sección de válida.");
                     break;
             }
         }

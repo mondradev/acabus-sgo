@@ -24,36 +24,6 @@ namespace Opera.Acabus.Core.Config.ViewModels
     public class CoreConfigViewModel : ViewModelBase
     {
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="AllBuses" />.
-        /// </summary>
-        private ICollection<Bus> _allBuses;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="AllDevices" />.
-        /// </summary>
-        private ICollection<Device> _allDevices;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="AllRoutes" />.
-        /// </summary>
-        private ICollection<Route> _allRoutes;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="AllStaff" />.
-        /// </summary>
-        private ICollection<Staff> _allStaff;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="AllStations" />.
-        /// </summary>
-        private ICollection<Station> _allStations;
-
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="IsActive" />.
-        /// </summary>
-        private bool _isActive;
-
-        /// <summary>
         /// Crea una instancia de <see cref="CoreConfigViewModel"/>.
         /// </summary>
         public CoreConfigViewModel()
@@ -98,71 +68,43 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 });
             });
 
-            BusReassingCommand = new Command(parameter =>
-            {
-                switch (parameter.ToString())
-                {
-                    case "0":
-                        Task.Run(() =>
-                        {
-                            Dispatcher.SendNotify("DESCAGANDO AUTOBUSES Y REASIGNANDO...");
-                            if (DownloadBuses())
-                                Dispatcher.SendNotify("VEHÍCULOS AUTOBUSES Y REASIGNADOS.");
-                            ReadFromDataBase();
-                        });
-                        break;
+            BusReassingCommand = new Command(parameter => Dispatcher.RequestShowDialog(new ManualReassignRouteView(), p => RefreshBus()));
 
-                    case "1":
-                        Dispatcher.RequestShowDialog(new ManualReassignRouteView(), RefreshCommand.Execute);
-                        break;
-                }
-            });
+            ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), p => RefreshDevice()));
 
-            ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), p =>
-            {
-                RefreshDevice(null, null);
-            }));
+            ShowAddStationCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStationView(), p => RefreshStation()));
 
-            ShowAddStationCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStationView(), p =>
-            {
-                RefreshStation(null, null);
-            }));
+            ShowAddRouteCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddRouteView(), p => RefreshRoutes()));
 
-            ShowAddRouteCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddRouteView(), p =>
-            {
-                RefreshRoutes(null, null);
-            }));
+            ShowAddBusCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddBusView(), p => RefreshBus()));
 
-            ShowAddBusCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddBusView(), p =>
-            {
-                RefreshBus(null, null);
-            }));
+            ShowAddStaffCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStaffView(), p => RefreshStaff()));
         }
 
         /// <summary>
         /// Obtiene una lista de todos los autobuses
         /// </summary>
-        public ICollection<Bus> AllBuses => _allBuses;
+        public ICollection<Bus> AllBuses { get; private set; }
 
         /// <summary>
         /// Obtiene una lista de todos los equipos.
         /// </summary>
-        public ICollection<Device> AllDevices => _allDevices;
+        public ICollection<Device> AllDevices { get; private set; }
 
         /// <summary>
         /// Obtiene una lista de todas las rutas.
         /// </summary>
-        public ICollection<Route> AllRoutes => _allRoutes;
+        public ICollection<Route> AllRoutes { get; private set; }
 
         /// <summary>
         /// Obtiene una lista de todo el personal empleado.
         /// </summary>
-        public ICollection<Staff> AllStaff => _allStaff;
+        public ICollection<Staff> AllStaff { get; private set; }
 
         /// <summary>
         /// Obtiene una lista de todas las estaciones.
         /// </summary>
-        public ICollection<Station> AllStations => _allStations;
+        public ICollection<Station> AllStations { get; private set; }
 
         /// <summary>
         /// Obtiene el comando para reasignar ruta a los autobuses.
@@ -177,12 +119,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene si los controles están activos. Estos se deshabilitan cuando está cargando la base de datos.
         /// </summary>
-        public bool IsActive => _isActive;
+        public bool IsActive { get; private set; }
 
         /// <summary>
         /// Obtiene el comando para actualizar la información desde la base de datos local.
         /// </summary>
         public ICommand RefreshCommand { get; }
+
+        /// <summary>
+        /// Obtiene el comando para mostrar el formulario para añadir autobuses.
+        /// </summary>
+        public ICommand ShowAddBusCommand { get; }
 
         /// <summary>
         /// Obtiene el comando para mostrar el formulario para añadir equipos.
@@ -195,9 +142,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
         public ICommand ShowAddRouteCommand { get; }
 
         /// <summary>
-        /// Obtiene el comando para mostrar el formulario para añadir autobuses.
+        /// Obtiene el comando para mostrar el formulario para añadir personal.
         /// </summary>
-        public ICommand ShowAddBusCommand { get; }
+        public ICommand ShowAddStaffCommand { get; }
 
         /// <summary>
         /// Obtiene el comando para mostrar el formulario para añadir estaciones.
@@ -225,12 +172,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="parameter">Parametros de descarga</param>
         protected override void OnUnload(object parameter)
         {
-            _isActive = false;
-            _allDevices = null;
-            _allBuses = null;
-            _allStations = null;
-            _allRoutes = null;
-            _allStaff = null;
+            IsActive = false;
+            AllDevices = null;
+            AllBuses = null;
+            AllStations = null;
+            AllRoutes = null;
+            AllStaff = null;
 
             OnPropertyChanged(nameof(IsActive));
             OnPropertyChanged(nameof(AllBuses));
@@ -267,7 +214,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 if (string.IsNullOrEmpty(connectionString)) return false;
                 if (dbConnectionType == null) return false;
 
-                var session = DbFactory.CreateSession(dbConnectionType, new PsqlDialect(connectionString));
+                var session = DbFactory.CreateSession(dbConnectionType, new PsqlDialectAux(connectionString));
 
                 var resultSet = session.Batch(busQuery);
 
@@ -345,7 +292,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 if (string.IsNullOrEmpty(connectionString)) return false;
                 if (dbConnectionType == null) return false;
 
-                var session = DbFactory.CreateSession(dbConnectionType, new PsqlDialect(connectionString));
+                var session = DbFactory.CreateSession(dbConnectionType, new PsqlDialectAux(connectionString));
 
                 var resultSet = session.Batch(deviceQuery);
 
@@ -434,7 +381,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 if (string.IsNullOrEmpty(connectionString)) return false;
                 if (dbConnectionType == null) return false;
 
-                var session = DbFactory.CreateSession(dbConnectionType, new PsqlDialect(connectionString));
+                var session = DbFactory.CreateSession(dbConnectionType, new PsqlDialectAux(connectionString));
 
                 var resultSet = session.Batch(routeQuery);
 
@@ -493,7 +440,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 if (string.IsNullOrEmpty(connectionString)) return false;
                 if (dbConnectionType == null) return false;
 
-                var session = DbFactory.CreateSession(dbConnectionType, new PsqlDialect(connectionString));
+                var session = DbFactory.CreateSession(dbConnectionType, new PsqlDialectAux(connectionString));
 
                 var resultSet = session.Batch(stationQuery);
 
@@ -556,25 +503,27 @@ namespace Opera.Acabus.Core.Config.ViewModels
         {
             /// Lectura desde la base de datos.
 
-            _allDevices = AcabusDataContext.AllDevices.LoadReference(1).ToList();
-            _allBuses = AcabusDataContext.AllBuses.LoadReference(1).ToList();
-            _allStations = AcabusDataContext.AllStations.LoadReference(1).ToList();
-            _allRoutes = AcabusDataContext.AllRoutes.LoadReference(1).ToList();
-            _allStaff = AcabusDataContext.AllStaff.Where(s => s.Active == true).ToList();
+            AllDevices = AcabusDataContext.AllDevices.LoadReference(1).Where(d => d.Active).ToList();
+            AllBuses = AcabusDataContext.AllBuses.LoadReference(1).Where(b => b.Active).ToList();
+            AllStations = AcabusDataContext.AllStations.LoadReference(1).Where(s => s.Active).ToList();
+            AllRoutes = AcabusDataContext.AllRoutes.LoadReference(1).Where(r => r.Active).ToList();
+            AllStaff = AcabusDataContext.AllStaff.Where(s => s.Active == true && s.Name != "SISTEMA").ToList();
 
-            foreach (var s in _allStations)
-                AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), _allDevices);
-            foreach (var b in _allBuses)
-                AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), _allDevices);
-            foreach (var r in _allRoutes)
+            foreach (var s in AllStations)
+                AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), AllDevices);
+
+            foreach (var b in AllBuses)
+                AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), AllDevices);
+
+            foreach (var r in AllRoutes)
             {
-                AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), _allBuses);
-                AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), _allStations);
+                AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), AllBuses);
+                AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), AllStations);
             }
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _isActive = true;
+                IsActive = true;
                 OnPropertyChanged(nameof(IsActive));
                 OnPropertyChanged(nameof(AllBuses));
                 OnPropertyChanged(nameof(AllDevices));
@@ -587,24 +536,24 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de autobuses.
         /// </summary>
-        private void RefreshBus(object sender, LocalSyncArgs args)
+        private void RefreshBus(object sender = null, LocalSyncArgs args = null)
         {
-            _isActive = false;
+            IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
 
-            _allBuses = AcabusDataContext.AllBuses.LoadReference(1).ToList();
+            AllBuses = AcabusDataContext.AllBuses.LoadReference(1).Where(x => x.Active).ToList();
 
-            if (_allDevices != null)
-                foreach (var b in _allBuses)
-                    AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), _allDevices);
+            if (AllDevices != null)
+                foreach (var b in AllBuses)
+                    AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), AllDevices);
 
-            if (_allRoutes != null)
-                foreach (var r in _allRoutes)
-                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), _allBuses);
+            if (AllRoutes != null)
+                foreach (var r in AllRoutes)
+                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), AllBuses);
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _isActive = true;
+                IsActive = true;
                 OnPropertyChanged(nameof(IsActive));
                 OnPropertyChanged(nameof(AllBuses));
                 OnPropertyChanged(nameof(AllRoutes));
@@ -614,22 +563,22 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de equipos.
         /// </summary>
-        private void RefreshDevice(object sender, LocalSyncArgs args)
+        private void RefreshDevice(object sender = null, LocalSyncArgs args = null)
         {
-            _isActive = false;
+            IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
 
-            _allDevices = AcabusDataContext.AllDevices.LoadReference(1).ToList();
+            AllDevices = AcabusDataContext.AllDevices.LoadReference(1).Where(x => x.Active).ToList();
 
-            if (_allStations != null)
-                foreach (var s in _allStations)
-                    AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), _allDevices);
+            if (AllStations != null)
+                foreach (var s in AllStations)
+                    AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), AllDevices);
 
-            if (_allBuses != null)
-                foreach (var b in _allBuses)
-                    AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), _allDevices);
+            if (AllBuses != null)
+                foreach (var b in AllBuses)
+                    AcabusDataContext.DbContext.LoadRefences(b, nameof(Bus.Devices), AllDevices);
 
-            _isActive = true;
+            IsActive = true;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -643,21 +592,21 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de rutas.
         /// </summary>
-        private void RefreshRoutes(object sender, LocalSyncArgs args)
+        private void RefreshRoutes(object sender = null, LocalSyncArgs args = null)
         {
-            _isActive = false;
+            IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
 
-            _allRoutes = AcabusDataContext.AllRoutes.LoadReference(1).ToList();
+            AllRoutes = AcabusDataContext.AllRoutes.LoadReference(1).Where(x => x.Active).ToList();
 
-            if (_allStations != null && _allBuses != null)
-                foreach (var r in _allRoutes)
+            if (AllStations != null && AllBuses != null)
+                foreach (var r in AllRoutes)
                 {
-                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), _allStations);
-                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), _allBuses);
+                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), AllStations);
+                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Buses), AllBuses);
                 }
 
-            _isActive = true;
+            IsActive = true;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -671,14 +620,14 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de personal.
         /// </summary>
-        private void RefreshStaff(object sender, LocalSyncArgs args)
+        private void RefreshStaff(object sender = null, LocalSyncArgs args = null)
         {
-            _isActive = false;
+            IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
 
-            _allStaff = AcabusDataContext.AllStaff.Where(s => s.Active == true).ToList();
+            AllStaff = AcabusDataContext.AllStaff.Where(s => s.Active == true && s.Name != "SISTEMA").ToList();
 
-            _isActive = true;
+            IsActive = true;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -690,24 +639,24 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de estaciones.
         /// </summary>
-        private void RefreshStation(object sender, LocalSyncArgs args)
+        private void RefreshStation(object sender = null, LocalSyncArgs args = null)
         {
-            _isActive = false;
+            IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
 
-            _allStations = AcabusDataContext.AllStations.LoadReference(1).ToList();
+            AllStations = AcabusDataContext.AllStations.LoadReference(1).Where(x => x.Active).ToList();
 
-            if (_allDevices != null)
-                foreach (var s in _allStations)
-                    AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), _allDevices);
+            if (AllDevices != null)
+                foreach (var s in AllStations)
+                    AcabusDataContext.DbContext.LoadRefences(s, nameof(Station.Devices), AllDevices);
 
-            if (_allRoutes != null)
-                foreach (var r in _allRoutes)
+            if (AllRoutes != null)
+                foreach (var r in AllRoutes)
                 {
-                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), _allStations);
+                    AcabusDataContext.DbContext.LoadRefences(r, nameof(Route.Stations), AllStations);
                 }
 
-            _isActive = true;
+            IsActive = true;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -744,13 +693,13 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Dialecto utilizado para la comunicación de solo lectura de los equipos conectados.
         /// </summary>
-        internal class PsqlDialect : DbDialectBase
+        private class PsqlDialectAux : DbDialectBase
         {
             /// <summary>
-            /// Crea una instancia nueva de <see cref="PsqlDialect"/>.
+            /// Crea una instancia nueva de <see cref="PsqlDialectAux"/>.
             /// </summary>
             /// <param name="connection">Cadena de conexión a la base de datos de los equipos.</param>
-            public PsqlDialect(String connection) : base(connection) { }
+            public PsqlDialectAux(String connection) : base(connection) { }
 
             /// <summary>
             /// Obtiene el convertidor de fecha de la base de datos.
