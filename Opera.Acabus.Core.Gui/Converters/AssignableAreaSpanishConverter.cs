@@ -19,7 +19,10 @@ namespace Opera.Acabus.Core.Gui.Converters
                 { AssignableArea.SUPERVISOR, "SUPERVISOR DE MANTENIMIENTO" },
                 { AssignableArea.SUPPORT, "SOPORTE TÉCNICO" },
                 { AssignableArea.DATABASE, "ANALISTA ABD" },
-                { AssignableArea.IT_MANAGER, "GERENTE TI" }
+                { AssignableArea.IT_MANAGER, "GERENTE TI" },
+                { AssignableArea.CCTV, "MONITOREO/CCTV" },
+                { AssignableArea.CAU, "CENTRO DE ATENCIÓN A USUARIOS" },
+                { AssignableArea.CALL_CENTER, "ATENCIÓN A CLIENTES" }
         })
         { }
     }
