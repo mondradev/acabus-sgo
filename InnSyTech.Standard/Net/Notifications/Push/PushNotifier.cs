@@ -79,8 +79,21 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         /// <param name="data">Datos a notificar.</param>
         public void Notify(T data)
         {
-            foreach (Socket client in _clients)
-                SendNotify(client, new PushNotification<T>(data));
+            while (true)
+            {
+                try
+                {
+                    foreach (Socket client in _clients)
+                        SendNotify(client, new PushNotification<T>(data));
+
+                    break;
+                }
+                catch {
+
+                }
+
+                Thread.Sleep(10);
+            }
         }
 
         /// <summary>

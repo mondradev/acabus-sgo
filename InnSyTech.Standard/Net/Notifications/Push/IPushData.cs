@@ -13,7 +13,7 @@
         /// <summary>
         /// Identificador de la entidad del evento.
         /// </summary>
-        string ID { get;  }
+        ulong ID { get;  }
 
         /// <summary>
         /// Representa a la instancia actual en una cadena de caracteres.

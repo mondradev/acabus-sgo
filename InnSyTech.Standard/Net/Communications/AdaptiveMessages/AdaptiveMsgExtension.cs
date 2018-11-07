@@ -60,6 +60,23 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         }
 
         /// <summary>
+        /// Obtiene el valor derivado de Enum del campo especificado.
+        /// </summary>
+        /// <param name="src">Mensaje origen.</param>
+        /// <param name="id">Identificador del campo.</param>
+        /// <returns>El valor del campo.</returns>
+        public static T GetEnum<T>(this IMessage src, int id) where T : struct
+        {
+            if (src == null)
+                throw new ArgumentNullException(nameof(src));
+
+            if (src.TryGetValue(id, out int value, x => Convert.ToInt16(x)))
+                return (T)Convert.ChangeType(value, typeof(T));
+
+            throw new FormatException("No se logró realizar la conversión a " + typeof(T).Name);
+        }
+
+        /// <summary>
         /// Obtiene el valor Int16 del campo especificado.
         /// </summary>
         /// <param name="src">Mensaje origen.</param>
@@ -223,9 +240,23 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
 
-            String dateTimeText = String.Format("{0}{1}{2}{3}{4}{5}", value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second);
+            String dateTimeText = String.Format("{0}{1:00}{2:00}{3:00}{4:00}{5:00}", value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second);
 
             src[id] = dateTimeText;
+        }
+
+        /// <summary>
+        /// Establece el valor del campo derivado Enum especificado. El campo deberá ser del tipo <see cref="FieldDefinition.FieldType.Numeric"/>.
+        /// </summary>
+        /// <param name="src">Mensaje origen.</param>
+        /// <param name="id">Identificador del campo.</param>
+        /// <param name="value">Valor del campo.</param>
+        public static void SetEnum<T>(this IMessage src, int id, T value) where T : struct
+        {
+            if (src == null)
+                throw new ArgumentNullException(nameof(src));
+
+            src[id] = Convert.ChangeType(value, typeof(int));
         }
 
         /// <summary>
