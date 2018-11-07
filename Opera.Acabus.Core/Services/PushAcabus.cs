@@ -11,7 +11,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Crea una nueva instancia.
         /// </summary>
-        public PushAcabus(string entityName, string id, LocalSyncOperation operation)
+        public PushAcabus(string entityName, ulong id, LocalSyncOperation operation)
         {
             EntityName = entityName;
             ID = id;
@@ -26,7 +26,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Identificador de la entidad del evento.
         /// </summary>
-        public string ID { get; private set; }
+        public ulong ID { get; private set; }
 
         /// <summary>
         /// Operación que desencadenó el evento.
@@ -43,7 +43,7 @@ namespace Opera.Acabus.Core.Services
             GroupCollection group = Regex.Match(src, "(.*):(.*):(.*)").Groups;
             PushAcabus push = new PushAcabus(
                 group[1]?.Value,
-                group[2]?.Value,
+                ulong.Parse(group[2]?.Value),
                 (LocalSyncOperation)int.Parse(group[3]?.Value)
             );
 

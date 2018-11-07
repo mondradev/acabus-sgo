@@ -2,9 +2,14 @@
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
+using Opera.Acabus.Core.Models.ModelsBase;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.Services
 {
@@ -12,7 +17,7 @@ namespace Opera.Acabus.Core.Services
     /// Clase base que mantiene los datos actualizados desde el servidor.
     /// </summary>
     /// <typeparam name="T">Tipo de la entidad a sincronzar.</typeparam>
-    public abstract class EntityLocalSyncBase<T> : IEntityLocalSync where T : class
+    public abstract class EntityLocalSyncBase<T> : IEntityLocalSync where T : AcabusEntityBase
     {
         /// <summary>
         /// Función crear para una entidad.
@@ -32,7 +37,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Función obtener para una entidad.
         /// </summary>
-        private const string GET_FUNC_NAME = "Get{0}";
+        private const string DOWNLOAD_FUNC_NAME = "Download{0}";
 
         /// <summary>
         /// Función actualizar para una unidad.
@@ -123,12 +128,13 @@ namespace Opera.Acabus.Core.Services
                 }
                 else throw new LocalSyncException("No se procesó correctamente la petición.",
                     new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+
             }).Wait();
 
             instance = instanceR;
 
             if (created)
-                if (!Exists(LocalContext.Read<T>(), instance) && LocalContext.Create(instance))
+                if (!Exists(instance) && LocalContext.Create(instance))
                     Created?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.CREATE));
 
             return created;
@@ -164,7 +170,7 @@ namespace Opera.Acabus.Core.Services
 
             if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(DELETE_FUNC_NAME, typeof(T).Name);
-            message[IDField] = GetID(instance);
+            message[IDField] = instance.ID;
 
             Boolean deleted = false;
 
@@ -176,8 +182,10 @@ namespace Opera.Acabus.Core.Services
                    new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
             }).Wait();
 
+            (instance as AcabusEntityBase).Delete();
+
             if (deleted)
-                if (LocalContext.Delete(instance))
+                if (LocalContext.Update(instance))
                     Deleted?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.DELETE));
 
             return deleted;
@@ -195,10 +203,9 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Descarga una instancia por ID desde el servidor y almacenda de manera local.
         /// </summary>
-        /// <typeparam name="TID">Tipo del identificador.</typeparam>
         /// <param name="id">Valor del identificador a descargar.</param>
         /// <returns>Un valor true si fue descargada satisfactoriamente.</returns>
-        public bool DownloadByID<TID>(TID id)
+        public bool DownloadByID(UInt64 id)
         {
             var remoteContext = new AppClient();
 
@@ -219,14 +226,17 @@ namespace Opera.Acabus.Core.Services
                     if (instance == null)
                         throw new LocalSyncException("No se logró descargar la instancia por ID.");
 
-                    bool exists = Exists(LocalContext.Read<T>(), instance);
+                    bool exists = Exists(instance);
 
                     if (exists)
                     {
                         downloaded = LocalContext.Update(instance);
 
                         if (downloaded)
-                            Updated?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.UPDATE));
+                            if (instance.Active)
+                                Updated?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.UPDATE));
+                            else
+                                Deleted?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.DELETE));
                     }
                     else
                     {
@@ -248,65 +258,79 @@ namespace Opera.Acabus.Core.Services
         /// toda la tabla a sincronizar y almance los datos faltantes.
         /// </summary>
         /// <param name="guiProgress">Controlador de progreso, útil para interfaces gráficas.</param>
-        /// <returns>Un valor true si se sincronizó de manera satisfactoria.</returns>
-        public bool FullUniSync(IProgress<float> guiProgress = null)
+        public void PullAsync(IProgress<float> guiProgress = null)
         {
-            var remoteContext = new AppClient();
-
-            float currentProgress = 0;
-            List<T> list = new List<T>();
-            IMessage message = remoteContext.CreateMessage();
-
-            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
-            message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(GET_FUNC_NAME, typeof(T).Name);
-
-            remoteContext.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
+            Task.Run(() =>
             {
-                if (x.Current.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                var remoteContext = new AppClient();
+
+                var hostName = Dns.GetHostName();
+                var ipHost = Dns.GetHostEntry(hostName);
+                var listIP = ipHost.AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
+
+                if (listIP.Any(x => x.Equals(remoteContext.ServerIP)))
+                     return;
+
+                float currentProgress = 0;
+                List<T> list = new List<T>();
+                IMessage message = remoteContext.CreateMessage();
+
+                if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
+
+                T lastSync = LocalContext.Read<T>().OrderBy(x => x.ModifyTime).ToList().Take(1).FirstOrDefault();
+
+                message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(DOWNLOAD_FUNC_NAME, typeof(T).Name);
+                message.SetDateTime(25, lastSync.ModifyTime);
+
+                remoteContext.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
                 {
-                    T instance = x.Current.IsSet(SourceField) ? FromBytes(x.Current.GetBytes(SourceField)) : null;
+                    if (x.Current.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                    {
+                        T instance = x.Current.IsSet(SourceField) ? FromBytes(x.Current.GetBytes(SourceField)) : null;
 
-                    if (instance == null)
-                        throw new LocalSyncException("No se logró obtener la instancia.");
+                        if (instance == null)
+                            throw new LocalSyncException("No se logró obtener la instancia.");
 
-                    list.Add(instance);
+                        list.Add(instance);
+                        currentProgress++;
+                        guiProgress?.Report(currentProgress / x.Current.GetInt32(AcabusAdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
+                    }
+                    else throw new LocalSyncException("No se procesó correctamente la petición.",
+                        new InvalidOperationException(x.Current.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                }).Wait();
+
+                currentProgress = 0;
+
+                list.ForEach(x =>
+                {
+                    bool exists = Exists(x);
+                    bool createdOrUpdated = false;
+
+                    if (exists)
+                    {
+                        createdOrUpdated = LocalContext.Update(x);
+
+                        if (createdOrUpdated)
+                            if (x.Active)
+                                Updated?.Invoke(this, new LocalSyncArgs(x, LocalSyncOperation.UPDATE));
+                            else
+                                Deleted?.Invoke(this, new LocalSyncArgs(x, LocalSyncOperation.DELETE));
+                    }
+                    else
+                    {
+                        createdOrUpdated = LocalContext.Create(x);
+
+                        if (createdOrUpdated)
+                            Created?.Invoke(this, new LocalSyncArgs(x, LocalSyncOperation.CREATE));
+                    }
+
+                    if (!createdOrUpdated)
+                        throw new LocalSyncException("No se logró guardar o actualizar la instancia descargada: " + x);
+
                     currentProgress++;
-                    guiProgress?.Report(currentProgress / x.Current.GetInt32(AcabusAdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
-                }
-                else throw new LocalSyncException("No se procesó correctamente la petición.",
-                    new InvalidOperationException(x.Current.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
-            }).Wait();
-
-            currentProgress = 0;
-
-            list.ForEach(x =>
-            {
-                bool exists = Exists(LocalContext.Read<T>(), x);
-                bool createdOrUpdated = false;
-
-                if (exists)
-                {
-                    createdOrUpdated = LocalContext.Update(x);
-
-                    if (createdOrUpdated)
-                        Updated?.Invoke(this, new LocalSyncArgs(x, LocalSyncOperation.UPDATE));
-                }
-                else
-                {
-                    createdOrUpdated = LocalContext.Create(x);
-
-                    if (createdOrUpdated)
-                        Created?.Invoke(this, new LocalSyncArgs(x, LocalSyncOperation.CREATE));
-                }
-
-                if (!createdOrUpdated)
-                    throw new LocalSyncException("No se logró guardar o actualizar la instancia descargada: " + x);
-
-                currentProgress++;
-                guiProgress?.Report(50f + currentProgress / list.Count / 2f * 100f);
+                    guiProgress?.Report(50f + currentProgress / list.Count / 2f * 100f);
+                });
             });
-
-            return true;
         }
 
         /// <summary>
@@ -315,10 +339,12 @@ namespace Opera.Acabus.Core.Services
         /// <typeparam name="T">Tipo del identificador de la instancia.</typeparam>
         /// <param name="id">Identificador de la instancia a eliminar.</param>
         /// <returns>Un valor true si se eliminó de forma correcta.</returns>
-        public bool LocalDeleteByID<TID>(TID id)
+        public bool LocalDeleteByID(UInt64 id)
         {
-            T instance = LocalReadByID(id);
-            bool deleted = LocalContext.Delete(instance);
+            T instance = LocalContext.Read<T>().Where(x => x.ID == id).FirstOrDefault();
+            instance.Delete();
+
+            bool deleted = LocalContext.Update(instance);
 
             if (deleted)
                 Deleted?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.DELETE));
@@ -364,8 +390,8 @@ namespace Opera.Acabus.Core.Services
         }
 
         /// <summary>
-        /// Método no genérico que solicita la actualización de la instancia espeficicada en el servidor, de completarse
-        /// satisfactoriamente se realiza de manera local.
+        /// Método no genérico que solicita la actualización de la instancia espeficicada en el
+        /// servidor, de completarse satisfactoriamente se realiza de manera local.
         /// </summary>
         /// <param name="instance">Instancia a actualizar.</param>
         /// <returns>Un valor true si la instancia fue actualizada.</returns>
@@ -373,26 +399,11 @@ namespace Opera.Acabus.Core.Services
             => Update(instance as T);
 
         /// <summary>
-        /// Determina si la instancia especificada existe en la secuencia.
-        /// </summary>
-        /// <param name="source">Secuencia de datos a analizar.</param>
-        /// <param name="instance">Instancia a buscar.</param>
-        /// <returns>Un valor true si la instancia existe en la secuencia.</returns>
-        protected abstract bool Exists(IQueryable<T> source, T instance);
-
-        /// <summary>
         /// Obtiene una instancia a partir de una secuencia de bytes.
         /// </summary>
         /// <param name="source">Secuencia de bytes origen.</param>
         /// <returns>Una instancia creada desde la secuencia.</returns>
         protected abstract T FromBytes(Byte[] source);
-
-        /// <summary>
-        /// Obtiene el valor del identificador de la entidad.
-        /// </summary>
-        /// <param name="instance">Instancia a obtener el identificador.</param>
-        /// <returns>Un valor que representa el identificador unico de la instancia.</returns>
-        protected abstract object GetID(T instance);
 
         /// <summary>
         /// Asigna las propiedades de la instancia en los campos del mensaje requeridos para la
@@ -403,18 +414,18 @@ namespace Opera.Acabus.Core.Services
         protected abstract void InstanceToMessage(T instance, IMessage message);
 
         /// <summary>
-        /// Obtiene una instancia almacenada en el contexto local la cual coincide con el identificador especificado.
-        /// </summary>
-        /// <typeparam name="TID">Tipo del identificador.</typeparam>
-        /// <param name="id">Identificador de la instancia.</param>
-        /// <returns>Instancia leida del contexto local.</returns>
-        protected abstract T LocalReadByID<TID>(TID id);
-
-        /// <summary>
         /// Obtiene una secuencia de bytes a partir de una instancia especificada.
         /// </summary>
         /// <param name="instance">Instancia a serializar.</param>
         /// <returns>Una secuencia de bytes que representan a la instancia.</returns>
         protected abstract Byte[] ToBytes(T instance);
+
+        /// <summary>
+        /// Valida si la instancia existe.
+        /// </summary>
+        /// <param name="instance">Instancia a validar.</param>
+        /// <returns></returns>
+        private bool Exists(T instance)
+            => LocalContext.Read<T>().Where(y => y.ID == instance.ID).ToList().Any();
     }
 }

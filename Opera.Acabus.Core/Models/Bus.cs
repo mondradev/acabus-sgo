@@ -1,69 +1,19 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
+using Opera.Acabus.Core.Models.ModelsBase;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Opera.Acabus.Core.Models
 {
-    /// <summary>
-    /// Define los estados posibles de un autobus.
-    /// </summary>
-    public enum BusStatus
-    {
-        /// <summary>
-        /// En operación (Valor predeterminado).
-        /// </summary>
-        OPERATIONAL = 0,
-
-        /// <summary>
-        /// En reparación o taller mecánico.
-        /// </summary>
-        IN_REPAIR = 1,
-
-        /// <summary>
-        /// Sin energía en baterías.
-        /// </summary>
-        WITHOUT_ENERGY = 2,
-
-        /// <summary>
-        /// Otras razones.
-        /// </summary>
-        OTHERS_REASONS = 4
-    }
-
-    /// <summary>
-    /// Enumera todos los tipos de autobuses.
-    /// </summary>
-    public enum BusType
-    {
-        /// <summary>
-        /// Sin tipo de autobus (Valor predeterminado).
-        /// </summary>
-        NONE,
-
-        /// <summary>
-        /// Autobus tipo convencional.
-        /// </summary>
-        CONVENTIONAL,
-
-        /// <summary>
-        /// Autobus tipo padrón.
-        /// </summary>
-        STANDARD,
-
-        /// <summary>
-        /// Autobus tipo articulado.
-        /// </summary>
-        ARTICULATED
-    }
 
     /// <summary>
     /// Esta clase define los autobuses que circulan por el BRT.
     /// </summary>
     [Entity(TableName = "Buses")]
-    public sealed class Bus : NotifyPropertyChanged, ILocation, IComparable<Bus>, IComparable
+    public sealed class Bus : AcabusEntityBase, ILocation, IComparable<Bus>, IComparable
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Devices" />.
@@ -133,9 +83,9 @@ namespace Opera.Acabus.Core.Models
         /// Obtiene o establece el identificador único del autobus.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 ID {
+        override public UInt64 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }

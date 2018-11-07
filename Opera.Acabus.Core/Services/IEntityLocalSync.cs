@@ -47,26 +47,23 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Descarga una instancia por ID desde el servidor y almacenda de manera local.
         /// </summary>
-        /// <typeparam name="TID">Tipo del identificador.</typeparam>
         /// <param name="id">Valor del identificador a descargar.</param>
         /// <returns>Un valor true si fue descargada satisfactoriamente.</returns>
-        bool DownloadByID<TID>(TID id);
+        bool DownloadByID(UInt64 id);
 
         /// <summary>
         /// Realiza una sincronización unidireccional desde servidor a local. Este proceso descarga
         /// toda la tabla a sincronizar y almance los datos faltantes.
         /// </summary>
         /// <param name="guiProgress">Controlador de progreso, útil para interfaces gráficas.</param>
-        /// <returns>Un valor true si se sincronizó de manera satisfactoria.</returns>
-        bool FullUniSync(IProgress<float> guiProgress = null);
+        void PullAsync(IProgress<float> guiProgress = null);
 
         /// <summary>
         /// Elimina la instancia de manera local.
         /// </summary>
-        /// <typeparam name="T">Tipo del identificador de la instancia.</typeparam>
         /// <param name="id">Identificador de la instancia a eliminar.</param>
         /// <returns>Un valor true si se eliminó de forma correcta.</returns>
-        bool LocalDeleteByID<TID>(TID id);
+        bool LocalDeleteByID(UInt64 id);
 
         /// <summary>
         /// Solicita la actualización de la instancia espeficicada en el

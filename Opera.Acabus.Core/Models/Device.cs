@@ -1,172 +1,19 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
-using InnSyTech.Standard.Translates;
 using Opera.Acabus.Core.DataAccess.DbConverters;
+using Opera.Acabus.Core.Models.ModelsBase;
 using System;
-using System.Collections.Generic;
 using System.Net;
 
 namespace Opera.Acabus.Core.Models
 {
-    /// <summary>
-    /// Define todos los tipos de dispositivos disponibles.
-    /// </summary>
-    public enum DeviceType
-    {
-        /// <summary>
-        /// Sin tipo definido.
-        /// </summary>
-        NONE,
-
-        /// <summary>
-        /// Kiosko de venta y recarga.
-        /// </summary>
-        KVR,
-
-        /// <summary>
-        /// Torniquete de E/S.
-        /// </summary>
-        TOR,
-
-        /// <summary>
-        /// Torniquete Doble E/S.
-        /// </summary>
-        TD,
-
-        /// <summary>
-        /// Torniquete de Salida
-        /// </summary>
-        TS,
-
-        /// <summary>
-        /// Torniquete Simple de E/S.
-        /// </summary>
-        TSI,
-
-        /// <summary>
-        /// Paso de movilidad reducida.
-        /// </summary>
-        PMR,
-
-        /// <summary>
-        /// Grabador de video en red.
-        /// </summary>
-        NVR,
-
-        /// <summary>
-        /// Switch de estación.
-        /// </summary>
-        SW,
-
-        /// <summary>
-        /// Concentrador de estación.
-        /// </summary>
-        CDE,
-
-        /// <summary>
-        /// Servidor de aplicación.
-        /// </summary>
-        APP,
-
-        /// <summary>
-        /// Servidor de patio de encierro.
-        /// </summary>
-        PDE,
-
-        /// <summary>
-        /// Servidor base de datos.
-        /// </summary>
-        DB,
-
-        /// <summary>
-        /// Display de autobus.
-        /// </summary>
-        DSPB,
-
-        /// <summary>
-        /// Display de estación.
-        /// </summary>
-        DSPL,
-
-        /// <summary>
-        /// Contador de pasajeros.
-        /// </summary>
-        CONT,
-
-        /// <summary>
-        /// Grabador de video móvil.
-        /// </summary>
-        MRV,
-
-        /// <summary>
-        /// Torniquete abordo.
-        /// </summary>
-        TA,
-
-        /// <summary>
-        /// Camara.
-        /// </summary>
-        CAM,
-
-        /// <summary>
-        /// Monitor de autobus.
-        /// </summary>
-        MON,
-
-        /// <summary>
-        /// PC Abordo.
-        /// </summary>
-        PCA,
-
-        /// <summary>
-        /// Planta electrógena de estación.
-        /// </summary>
-        PGE,
-
-        /// <summary>
-        /// Rack de estación.
-        /// </summary>
-        RACK,
-
-        /// <summary>
-        /// Luminarias
-        /// </summary>
-        LIGHT
-    }
-
-    /// <summary>
-    /// Provee de funciones extra a la enumeración <see cref="DeviceType"/>.
-    /// </summary>
-    public static class DeviceTypeExtension
-    {
-        ///<summary>
-        /// Traductor al español de la enumeración <see cref="DeviceType"/>.
-        ///</summary>
-        private static DeviceTypeSpanishTranslator _translate;
-
-        /// <summary>
-        /// Constructo estático de la clase <see cref="DeviceTypeExtension"/>.
-        /// </summary>
-        static DeviceTypeExtension()
-        {
-            _translate = new DeviceTypeSpanishTranslator();
-        }
-
-        /// <summary>
-        /// Traduce al español la enumeración <see cref="DeviceType"/>.
-        /// </summary>
-        /// <param name="type">Valor de la enumeración <see cref="DeviceType"/> a traducir.</param>
-        /// <returns>Una cadena en español que representa la enumeración <see cref="DeviceType"/>.</returns>
-        public static String TranslateToSpanish(this DeviceType type)
-        => _translate.Translate(type);
-    }
 
     /// <summary>
     /// Define la estructura de todos los dispositivos que se encuentran en operación del BRT.
     /// </summary>
     [Entity(TableName = "Devices")]
-    public class Device : NotifyPropertyChanged, IComparable, IComparable<Device>
+    public class Device : AcabusEntityBase, IComparable, IComparable<Device>
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Bus" />.
@@ -244,9 +91,9 @@ namespace Opera.Acabus.Core.Models
         /// Obtiene o establece el identificador único del equipo.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 ID {
+        override public UInt64 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }
@@ -405,45 +252,5 @@ namespace Opera.Acabus.Core.Models
         /// <returns>Una cadena que representa una instancia <see cref="Device"/>.</returns>
         public override string ToString()
             => String.IsNullOrEmpty(SerialNumber) ? Type.TranslateToSpanish() : SerialNumber;
-    }
-
-    /// <summary>
-    /// Esta clase permite la traducción de la enumeración <see cref="DeviceType"/> a texto en
-    /// "Español" que puede leer un ser humano.
-    /// </summary>
-    public sealed class DeviceTypeSpanishTranslator : EnumTranslator<DeviceType>
-    {
-        /// <summary>
-        /// Crea una instancia del traductor.
-        /// </summary>
-        public DeviceTypeSpanishTranslator()
-            : base(new Dictionary<DeviceType, string>() {
-                { DeviceType.TA, "TORNIQUETE ABORDO" },
-                { DeviceType.MRV, "GRABADOR DE VIDEO MÓVIL" },
-                { DeviceType.PCA, "PC ABORDO" },
-                { DeviceType.CAM, "CAMARA" },
-                { DeviceType.MON, "MONITOR" },
-                { DeviceType.CONT, "CONTADOR DE PASAJEROS" },
-                { DeviceType.DSPB, "DISPLAY DE AUTOBUS" },
-                { DeviceType.CDE, "CONCENTRADOR DE ESTACIÓN" },
-                { DeviceType.DSPL, "DISPLAY DE ESTACIÓN" },
-                { DeviceType.KVR, "KIOSKO DE VENTA Y RECARGA" },
-                { DeviceType.NVR, "GRABADOR DE VIDEO EN RED" },
-                { DeviceType.PMR, "PASO DE MOVILIDAD REDUCIDA" },
-                { DeviceType.SW, "SWITCH DE ESTACIÓN" },
-                { DeviceType.TD, "TORNIQUETE DOBLE E/S" },
-                { DeviceType.TS, "TORNIQUETE DE SALIDA" },
-                { DeviceType.TSI, "TORNIQUETE SIMPLE E/S" },
-                { DeviceType.TOR, "TORNIQUETE GENÉRICO E/S" },
-                { DeviceType.APP, "SERVIDOR DE APLICACIÓN" },
-                { DeviceType.DB, "SERVIDOR BASE DE DATOS" },
-                { DeviceType.PDE, "SERVIDOR PATIO DE ENCIERRO" },
-                { DeviceType.PGE, "PLANTA ELECTRÓGENA" },
-                { DeviceType.RACK, "RACK DE ESTACIÓN" },
-                { DeviceType.LIGHT, "LUMINARIA DE ESTACIÓN" },
-                { DeviceType.NONE, "NINGUNO" }
-            })
-        {
-        }
     }
 }

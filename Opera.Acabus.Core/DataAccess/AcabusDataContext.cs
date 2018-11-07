@@ -34,12 +34,28 @@ namespace Opera.Acabus.Core.DataAccess
         {
             _resourcesDirectory = Path.Combine(Environment.CurrentDirectory, "Resources");
 
+            string[] commands = Environment.GetCommandLineArgs();
+            string configFile = Path.Combine(_resourcesDirectory, "app.conf");
+
+            if (commands.Length > 0)
+            {
+                var enumerator = commands.GetEnumerator();
+                enumerator.Reset();
+
+                while (enumerator.MoveNext())
+                    if (enumerator.Current.Equals("--config") && enumerator.MoveNext())
+                    {
+                        configFile = enumerator.Current.ToString();
+                        break;
+                    }
+            }
+
             if (!Directory.Exists(_resourcesDirectory))
                 Directory.CreateDirectory(_resourcesDirectory);
 
             ConfigContext = new Configuration()
             {
-                Filename = Path.Combine(_resourcesDirectory, "app.conf")
+                Filename = configFile
             };
 
             Type dbType = TypeHelper.LoadFromDll(
@@ -73,31 +89,31 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene una lista de autobuses desde la base de datos.
         /// </summary>
         public static IQueryable<Bus> AllBuses
-            => DbContext?.Read<Bus>();
+            => DbContext?.Read<Bus>().Where(x => x.Active);
 
         /// <summary>
         /// Obtiene una lista de equipos desde la base de datos.
         /// </summary>
         public static IQueryable<Device> AllDevices
-            => DbContext?.Read<Device>();
+            => DbContext?.Read<Device>().Where(x => x.Active);
 
         /// <summary>
         /// Obtiene una lista de rutas desde la base de datos.
         /// </summary>
         public static IQueryable<Route> AllRoutes
-            => DbContext?.Read<Route>();
+            => DbContext?.Read<Route>().Where(x => x.Active);
 
         /// <summary>
         /// Obtiene una lista del personal desde la base de datos.
         /// </summary>
         public static IQueryable<Staff> AllStaff
-            => DbContext?.Read<Staff>();
+            => DbContext?.Read<Staff>().Where(x => x.Active);
 
         /// <summary>
         /// Obtiene una lista de estaciones desde la base de datos.
         /// </summary>
         public static IQueryable<Station> AllStations
-            => DbContext?.Read<Station>();
+            => DbContext?.Read<Station>().Where(x => x.Active);
 
         /// <summary>
         /// Obtiene una lista de las secciones que pueden ser asignadas para dar mantenimiento o servicio.

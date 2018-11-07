@@ -33,6 +33,23 @@
         /// <summary>
         /// Área de gerencia TI.
         /// </summary>
-        IT_MANAGER = 16
+        IT_MANAGER = 16,
+
+        /// <summary>
+        /// Área de monitoreo.
+        /// </summary>
+        CCTV = 32,
+
+        /// <summary>
+        /// Área de CAU
+        /// </summary>
+        CAU = 64,
+
+        /// <summary>
+        /// Área de atención a clientes.
+        /// </summary>
+        CALL_CENTER = 128
+
+
     }
 }

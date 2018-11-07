@@ -54,8 +54,18 @@
   <ItemGroup>
     <Compile Include="DataAccess\AcabusDataContext.cs" />
     <Compile Include="DataAccess\CsvDump.cs" />
+    <Compile Include="DataAccess\DataHelper.cs" />
     <Compile Include="DataAccess\DbConverters\DbIPAddressConverter.cs" />
-    <Compile Include="DataAccess\ModelHelper.cs" />
+    <Compile Include="Models\BusStatus.cs" />
+    <Compile Include="Models\BusType.cs" />
+    <Compile Include="Models\DeviceType.cs" />
+    <Compile Include="Models\DeviceTypeExtension.cs" />
+    <Compile Include="Models\DeviceTypeSpanishTranslator.cs" />
+    <Compile Include="Models\ModelsBase\AcabusEntityBase.cs" />
+    <Compile Include="Models\ModelsBase\AcabusEntityExtension.cs" />
+    <Compile Include="Models\RouteType.cs" />
+    <Compile Include="Services\AcabusAdaptiveMessageFieldID.cs" />
+    <Compile Include="Services\AcabusAdaptiveMessageFieldIDExtension.cs" />
     <Compile Include="Services\PushAcabus.cs" />
     <Compile Include="DataAccess\ServerContext.cs" />
     <Compile Include="Models\AssignableArea.cs" />

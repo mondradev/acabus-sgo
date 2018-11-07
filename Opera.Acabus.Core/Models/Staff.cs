@@ -1,6 +1,6 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Mvvm;
+using Opera.Acabus.Core.Models.ModelsBase;
 using System;
 
 namespace Opera.Acabus.Core.Models
@@ -9,13 +9,8 @@ namespace Opera.Acabus.Core.Models
     /// Define la estructura del personal de trabajo.
     /// </summary>
     [Entity]
-    public class Staff : NotifyPropertyChanged, IComparable, IComparable<Staff>
+    public class Staff : AcabusEntityBase, IComparable, IComparable<Staff>
     {
-        /// <summary>
-        /// Campo que provee a la propiedad <see cref="Active" />.
-        /// </summary>
-        private bool _active;
-
         /// <summary>
         /// Campo que provee a la propiedad 'Area'.
         /// </summary>
@@ -43,17 +38,6 @@ namespace Opera.Acabus.Core.Models
         public Staff() { }
 
         /// <summary>
-        /// Obtiene o establece si el elemento de personal sigue activo.
-        /// </summary>
-        public bool Active {
-            get => _active;
-            set {
-                _active = value;
-                OnPropertyChanged(nameof(Active));
-            }
-        }
-
-        /// <summary>
         /// Obtiene o establece el area asignada.
         /// </summary>
         [Column(Converter = typeof(DbEnumConverter<AssignableArea>))]
@@ -69,9 +53,9 @@ namespace Opera.Acabus.Core.Models
         /// Obtiene o establece el identificador unico de este miembro del personal.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 ID {
+        override public UInt64 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }

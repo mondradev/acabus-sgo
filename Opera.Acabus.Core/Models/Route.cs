@@ -1,6 +1,6 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Mvvm;
+using Opera.Acabus.Core.Models.ModelsBase;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,31 +8,10 @@ using System.Collections.ObjectModel;
 namespace Opera.Acabus.Core.Models
 {
     /// <summary>
-    /// Enumera todos los tipos de rutas que existen.
-    /// </summary>
-    public enum RouteType
-    {
-        /// <summary>
-        /// Sin tipo de ruta (valor predeterminado).
-        /// </summary>
-        NONE = 0,
-
-        /// <summary>
-        /// Ruta tipo alimentador.
-        /// </summary>
-        ALIM = 1,
-
-        /// <summary>
-        /// Ruta tipo troncal.
-        /// </summary>
-        TRUNK = 2
-    }
-
-    /// <summary>
     /// Esta clase define toda ruta que circula por el sistema BRT.
     /// </summary>
     [Entity(TableName = "Routes")]
-    public class Route : NotifyPropertyChanged, IAssignableSection, IComparable<Route>, IComparable
+    public class Route : AcabusEntityBase, IAssignableSection, IComparable<Route>, IComparable
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AssignedSection"/>.
@@ -109,9 +88,9 @@ namespace Opera.Acabus.Core.Models
         /// Obtiene o establece identificador único de la ruta.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 ID {
+        override public UInt64 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }

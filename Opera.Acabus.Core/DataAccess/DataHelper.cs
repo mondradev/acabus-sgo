@@ -1,5 +1,6 @@
 ﻿using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Models.ModelsBase;
 using System;
 using System.Linq;
 using System.Net;
@@ -10,7 +11,7 @@ namespace Opera.Acabus.Core.DataAccess
     /// <summary>
     /// Provee métodos auxiliares para la manipulación de los modelos utilizados en el <see cref="Core"/>.
     /// </summary>
-    public static class ModelHelper
+    public static class DataHelper
     {
         /// <summary>
         /// Obtiene una instancia <see cref="Bus"/> desde un vector de bytes.
@@ -19,6 +20,15 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Una instancia <see cref="Bus"/>.</returns>
         public static Bus GetBus(Byte[] bytes)
         {
+            Deserialize(
+                       ref bytes,
+                   out string createUser,
+                   out DateTime createTime,
+                   out string modifyUser,
+                   out DateTime modifyTime,
+                   out Boolean active
+               );
+
             var id = BitConverter.ToUInt64(bytes, 0);
             var type = (BusType)bytes.Skip(8).Take(1).Single();
             var status = (BusStatus)bytes.Skip(9).Take(1).Single();
@@ -27,12 +37,16 @@ namespace Opera.Acabus.Core.DataAccess
             var economicNumber = GetStringFromBytes(bytes, 12, economicLength);
             var routeID = BitConverter.ToUInt64(bytes, 12 + economicLength);
 
-            return new Bus(id, economicNumber)
+            Bus bus = new Bus(id, economicNumber)
             {
                 Route = AcabusDataContext.AllRoutes?.SingleOrDefault(r => r.ID == routeID),
                 Status = status,
                 Type = type
             };
+
+            AcabusEntityBase.AssignData(bus, createUser, createTime, modifyUser, modifyTime, active);
+
+            return bus;
         }
 
         /// <summary>
@@ -42,12 +56,21 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Una instancia <see cref="Device"/>.</returns>
         public static Device GetDevice(Byte[] bytes)
         {
+            Deserialize(
+                    ref bytes,
+                out string createUser,
+                out DateTime createTime,
+                out string modifyUser,
+                out DateTime modifyTime,
+                out Boolean active
+            );
+
             var id = BitConverter.ToUInt64(bytes, 0);
             var bstation = BitConverter.ToUInt64(bytes, 8);
             var bbus = BitConverter.ToUInt64(bytes, 16);
             var ip = new IPAddress(bytes.Skip(24).Take(4).ToArray());
-            var type = (DeviceType)bytes.Skip(28).Take(1).Single();
-            var serial = GetStringFromBytes(bytes, 29, bytes.Length - 29);
+            var type = (DeviceType)BitConverter.ToInt64(bytes, 28);
+            var serial = GetStringFromBytes(bytes, 36, bytes.Length - 36);
 
             return new Device(id, serial, type)
             {
@@ -64,6 +87,15 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Una instancia <see cref="Route"/>.</returns>
         public static Route GetRoute(Byte[] bytes)
         {
+            Deserialize(
+                    ref bytes,
+                out string createUser,
+                out DateTime createTime,
+                out string modifyUser,
+                out DateTime modifyTime,
+                out Boolean active
+            );
+
             var id = BitConverter.ToUInt64(bytes, 0);
             var number = BitConverter.ToUInt16(bytes, 8);
             var type = (RouteType)bytes.Skip(10).Take(1).Single();
@@ -74,11 +106,15 @@ namespace Opera.Acabus.Core.DataAccess
             string name = GetStringFromBytes(bytes, 13, nameLenght);
             var assignation = GetStringFromBytes(bytes, 13 + nameLenght + 2, assignationLength);
 
-            return new Route(id, number, type)
+            Route route = new Route(id, number, type)
             {
                 Name = name,
                 AssignedSection = assignation
             };
+
+            AcabusEntityBase.AssignData(route, createUser, createTime, modifyUser, modifyTime, active);
+
+            return route;
         }
 
         /// <summary>
@@ -88,16 +124,29 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Una instancia <see cref="Staff"/>.</returns>
         public static Staff GetStaff(Byte[] bytes)
         {
+            Deserialize(
+                    ref bytes,
+                out string createUser,
+                out DateTime createTime,
+                out string modifyUser,
+                out DateTime modifyTime,
+                out Boolean active
+            );
+
             var id = BitConverter.ToUInt64(bytes, 0);
             var area = (AssignableArea)bytes.Skip(8).Take(1).Single();
             var nameLength = BitConverter.ToUInt16(bytes, 9);
             var name = GetStringFromBytes(bytes, 11, nameLength);
 
-            return new Staff(id)
+            Staff staff = new Staff(id)
             {
                 Name = name,
                 Area = area
             };
+
+            AcabusEntityBase.AssignData(staff, createUser, createTime, modifyUser, modifyTime, active);
+
+            return staff;
         }
 
         /// <summary>
@@ -107,6 +156,15 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Una instancia <see cref="Station"/>.</returns>
         public static Station GetStation(Byte[] bytes)
         {
+            Deserialize(
+                    ref bytes,
+                out string createUser,
+                out DateTime createTime,
+                out string modifyUser,
+                out DateTime modifyTime,
+                out Boolean active
+            );
+
             var id = BitConverter.ToUInt64(bytes, 0);
             var number = BitConverter.ToUInt16(bytes, 8);
 
@@ -120,12 +178,16 @@ namespace Opera.Acabus.Core.DataAccess
 
             Route route = AcabusDataContext.AllRoutes?.SingleOrDefault(r => r.ID == routeID);
 
-            return new Station(id, number)
+            Station station = new Station(id, number)
             {
                 Name = name,
                 AssignedSection = assignation,
                 Route = route
             };
+
+            AcabusEntityBase.AssignData(station, createUser, createTime, modifyUser, modifyTime, active);
+
+            return station;
         }
 
         /// <summary>
@@ -143,7 +205,9 @@ namespace Opera.Acabus.Core.DataAccess
             var bname = GetBytesFromString(name);
             var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
 
-            return new[] { bid, new[] { type }, bnameLength, bname }.Merge().ToArray();
+            var bEntity = Serialize((AcabusEntityBase)staff);
+
+            return new[] { bEntity, bid, new[] { type }, bnameLength, bname }.Merge().ToArray();
         }
 
         /// <summary>
@@ -164,7 +228,9 @@ namespace Opera.Acabus.Core.DataAccess
             var beconomic = GetBytesFromString(economic);
             var beconomicLength = BitConverter.GetBytes((UInt16)beconomic.Length);
 
-            return new[] { bid, new[] { type, status }, beconomicLength, beconomic, broute }.Merge().ToArray();
+            var bEntity = Serialize((AcabusEntityBase)bus);
+
+            return new[] { bEntity, bid, new[] { type, status }, beconomicLength, beconomic, broute }.Merge().ToArray();
         }
 
         /// <summary>
@@ -177,7 +243,7 @@ namespace Opera.Acabus.Core.DataAccess
             var id = device.ID; // 8 bytes
             var serial = device.SerialNumber; // n bytes
             var ip = device.IPAddress; // 4 bytes
-            var type = (byte)device.Type; // 1 byte
+            var type = (ulong)device.Type; // 8 byte
             var station = device.Station?.ID; // 8 bytes
             var bus = device.Bus?.ID;  // 8 bytes
 
@@ -186,8 +252,11 @@ namespace Opera.Acabus.Core.DataAccess
             var bbus = BitConverter.GetBytes(bus ?? 0L);
             var bip = ip.GetAddressBytes();
             var bserial = GetBytesFromString(serial);
+            var btype = BitConverter.GetBytes(type);
 
-            return new[] { bid, bstation, bbus, bip, new byte[] { type }, bserial }.Merge().ToArray();
+            var bEntity = Serialize((AcabusEntityBase)device);
+
+            return new[] { bEntity, bid, bstation, bbus, bip, btype, bserial }.Merge().ToArray();
         }
 
         /// <summary>
@@ -216,7 +285,9 @@ namespace Opera.Acabus.Core.DataAccess
             var bassignedLength = BitConverter.GetBytes((UInt16)bassigned.Length);
             var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
 
-            return new[] { bid, bnumber, new[] { type }, bnameLength, bname, bassignedLength, bassigned }.Merge().ToArray();
+            var bEntity = Serialize((AcabusEntityBase)route);
+
+            return new[] { bEntity, bid, bnumber, new[] { type }, bnameLength, bname, bassignedLength, bassigned }.Merge().ToArray();
         }
 
         /// <summary>
@@ -240,7 +311,33 @@ namespace Opera.Acabus.Core.DataAccess
             var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
             var broute = BitConverter.GetBytes(route ?? 0L);
 
-            return new[] { bid, bnumber, bnameLength, bname, bassignedLength, bassigned, broute }.Merge().ToArray();
+            var bEntity = Serialize((AcabusEntityBase)station);
+
+            return new[] { bEntity, bid, bnumber, bnameLength, bname, bassignedLength, bassigned, broute }.Merge().ToArray();
+        }
+
+        /// <summary>
+        /// Deserializa los valores de la entidad derivada de <see cref="AcabusEntityBase"/>.
+        /// </summary>
+        /// <param name="source">Fuente de datos binarios que contienen la entidad.</param>
+        /// <param name="createUser">Nombre de usuario que creo la entidad.</param>
+        /// <param name="createTime">Fecha de creación de la entidad.</param>
+        /// <param name="modifyUser">Nombre de usuario que modificó la entidad.</param>
+        /// <param name="modifyTime">Fecha de modificación de la entidad.</param>
+        private static void Deserialize(ref Byte[] source, out String createUser, out DateTime createTime,
+            out String modifyUser, out DateTime modifyTime, out Boolean active)
+        {
+            var createUserCount = Convert.ToInt32(BitConverter.ToInt64(source, 0));
+            createUser = Encoding.UTF8.GetString(source, 8, createUserCount);
+            createTime = DateTime.FromBinary(BitConverter.ToInt64(source, 8 + createUserCount));
+
+            var modifyUserCount = Convert.ToInt32(BitConverter.ToInt64(source, 16 + createUserCount));
+            modifyUser = Encoding.UTF8.GetString(source, 24 + createUserCount, modifyUserCount);
+            modifyTime = DateTime.FromBinary(BitConverter.ToInt64(source, 24 + createUserCount + modifyUserCount));
+
+            active = BitConverter.ToBoolean(source, 24 + createUserCount + modifyUserCount);
+
+            source = source.Skip(33 + createUserCount + modifyUserCount).ToArray();
         }
 
         /// <summary>
@@ -271,6 +368,34 @@ namespace Opera.Acabus.Core.DataAccess
             var s = Encoding.UTF8.GetString(bytes, startIndex, count);
             s = String.IsNullOrEmpty(s) ? null : s;
             return s;
+        }
+
+        /// <summary>
+        /// Serializa las propiedades de la entidad derivada de <see cref="AcabusEntityBase"/>.
+        /// </summary>
+        /// <param name="entityBase">Entidad a serializar.</param>
+        /// <returns>Secuencia de bytes que representa la entidad.</returns>
+        private static Byte[] Serialize(AcabusEntityBase entityBase)
+        {
+            var bCreateTime = BitConverter.GetBytes(entityBase.CreateTime.ToBinary());
+            var bModifyTime = BitConverter.GetBytes(entityBase.ModifyTime.ToBinary());
+            var bCreateUser = Encoding.UTF8.GetBytes(entityBase.CreateUser);
+            var bModifyUser = Encoding.UTF8.GetBytes(entityBase.ModifyUser);
+
+            var bCreateUserCount = BitConverter.GetBytes(bCreateUser.LongLength);
+            var bModifyUserCount = BitConverter.GetBytes(bModifyUser.LongLength);
+
+            var bActive = BitConverter.GetBytes(entityBase.Active);
+
+            return new[] {
+                bCreateUserCount,
+                bCreateUser,
+                bCreateTime,
+                bModifyUserCount,
+                bModifyUser,
+                bModifyTime,
+                bActive
+            }.Merge().ToArray();
         }
     }
 }

@@ -67,6 +67,8 @@ namespace Opera.Acabus.Core.DataAccess
                 throw new InvalidOperationException("Ya existe un IEntityLocalSync para la entidad '" + localSync.EntityName + "'.");
 
             _entityLocalSyncs.Add(localSync.EntityName, localSync);
+
+            localSync.PullAsync();
         }
 
         /// <summary>

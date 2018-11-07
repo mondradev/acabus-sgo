@@ -1,5 +1,5 @@
 ﻿using InnSyTech.Standard.Database;
-using InnSyTech.Standard.Mvvm;
+using Opera.Acabus.Core.Models.ModelsBase;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +10,7 @@ namespace Opera.Acabus.Core.Models
     /// Esta clase define toda estación en el sistema BRT.
     /// </summary>
     [Entity(TableName = "Stations")]
-    public sealed class Station : NotifyPropertyChanged, IAssignableSection, ILocation, IComparable<Station>, IComparable
+    public sealed class Station : AcabusEntityBase, IAssignableSection, ILocation, IComparable<Station>, IComparable
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AssignedSection"/>
@@ -85,9 +85,9 @@ namespace Opera.Acabus.Core.Models
         /// Obtiene el identificador único de estación.
         /// </summary>
         [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 ID {
+        override public UInt64 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }

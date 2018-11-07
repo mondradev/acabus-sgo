@@ -21,14 +21,6 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         protected override int SourceField => 61;
 
-        /// <summary>
-        /// Determina si el personal existe localmente.
-        /// </summary>
-        /// <param name="source">Secuencia local de datos.</param>
-        /// <param name="instance">Personal a verificar.</param>
-        /// <returns>Un valor true si existe el personal.</returns>
-        protected override bool Exists(IQueryable<Staff> source, Staff instance)
-            => source.Where(x => x.ID == instance.ID).ToList().Any();
 
         /// <summary>
         /// Obtiene un miembro del personal a partir de una secuencia de bytes.
@@ -36,21 +28,8 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de personal.</returns>
         protected override Staff FromBytes(byte[] source)
-            => ModelHelper.GetStaff(source);
-
-        /// <summary>
-        /// Obtiene el identificador del personal.
-        /// </summary>
-        /// <param name="instance">Instancia actual.</param>
-        /// <returns>Identificador del personal.</returns>
-        protected override object GetID(Staff instance)
-        {
-            if (instance == null)
-                throw new LocalSyncException("La instancia de Staff no puede ser nulo.");
-
-            return instance.ID;
-        }
-
+            => DataHelper.GetStaff(source);
+        
         /// <summary>
         /// Asigna las propiedades del personal en los campos del mensaje utilizado para la creación
         /// en el servidor.
@@ -59,21 +38,8 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// <param name="message">Mensaje de la petición de creación.</param>
         protected override void InstanceToMessage(Staff staff, IMessage message)
         {
-            message[12] = (int)staff.Area;
+            message.SetEnum(12, staff.Area);
             message[17] = staff.Name;
-            message[23] = staff.Active;
-        }
-
-        /// <summary>
-        /// Obtiene una instancia almacenada en el contexto local la cual coincide con el identificador especificado.
-        /// </summary>
-        /// <typeparam name="TID">Tipo del identificador.</typeparam>
-        /// <param name="id">Identificador de la instancia.</param>
-        /// <returns>Instancia leida del contexto local.</returns>
-        protected override Staff LocalReadByID<TID>(TID id)
-        {
-            UInt64 staffID = UInt64.Parse(id.ToString());
-            return LocalContext.Read<Staff>().FirstOrDefault(x => x.ID == staffID);
         }
 
         /// <summary>
