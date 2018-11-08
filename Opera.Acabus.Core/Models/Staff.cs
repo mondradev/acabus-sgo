@@ -40,7 +40,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el area asignada.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<AssignableArea>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<AssignableArea>))]
         public AssignableArea Area {
             get => _area;
             set {
@@ -52,7 +52,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el identificador unico de este miembro del personal.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
         override public UInt64 ID {
             get => _id;
             protected set {

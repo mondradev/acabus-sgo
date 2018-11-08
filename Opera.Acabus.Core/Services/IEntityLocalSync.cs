@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Opera.Acabus.Core.Services
 {
@@ -21,6 +22,12 @@ namespace Opera.Acabus.Core.Services
         /// Evento que ocurre cuando se actualiza una instancia en el servidor.
         /// </summary>
         event LocalSyncHandler Updated;
+
+        /// <summary>
+        /// Obtiene una lista de todos las entidades que deben estar sincronizadas antes de
+        /// sincronizar esta.
+        /// </summary>
+        IReadOnlyList<String> Dependencies { get; }
 
         /// <summary>
         /// Obtiene el nombre de la entidad a sincronizar.
@@ -52,18 +59,18 @@ namespace Opera.Acabus.Core.Services
         bool DownloadByID(UInt64 id);
 
         /// <summary>
-        /// Realiza una sincronización unidireccional desde servidor a local. Este proceso descarga
-        /// toda la tabla a sincronizar y almance los datos faltantes.
-        /// </summary>
-        /// <param name="guiProgress">Controlador de progreso, útil para interfaces gráficas.</param>
-        void PullAsync(IProgress<float> guiProgress = null);
-
-        /// <summary>
         /// Elimina la instancia de manera local.
         /// </summary>
         /// <param name="id">Identificador de la instancia a eliminar.</param>
         /// <returns>Un valor true si se eliminó de forma correcta.</returns>
         bool LocalDeleteByID(UInt64 id);
+
+        /// <summary>
+        /// Realiza una sincronización unidireccional desde servidor a local. Este proceso descarga
+        /// toda la tabla a sincronizar y almance los datos faltantes.
+        /// </summary>
+        /// <param name="guiProgress">Controlador de progreso, útil para interfaces gráficas.</param>
+        void Pull(IProgress<float> guiProgress = null);
 
         /// <summary>
         /// Solicita la actualización de la instancia espeficicada en el

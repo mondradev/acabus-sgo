@@ -64,7 +64,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene una lista de los dispositivos asignados a este autobus.
         /// </summary>
-        [Column(ForeignKeyName = "Fk_Bus_ID")]
+        [DbColumn(ForeignKeyName = "Fk_Bus_ID")]
         public ICollection<Device> Devices
              => _devices ?? (_devices = new ObservableCollection<Device>());
 
@@ -82,7 +82,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el identificador único del autobus.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
         override public UInt64 ID {
             get => _id;
             protected set {
@@ -94,7 +94,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene el nombre de este autobus.
         /// </summary>
-        [Column(IsIgnored = true)]
+        [DbColumn(IsIgnored = true)]
         public String Name {
             get => _economicNumber;
             set => EconomicNumber = value;
@@ -103,7 +103,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece la ruta a la que este autobus está asignado.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Route_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_Route_ID")]
         public Route Route {
             get => _route;
             set {
@@ -115,7 +115,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el estado actual de la unidad.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<BusStatus>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<BusStatus>))]
         public BusStatus Status {
             get => _status;
             set {
@@ -127,7 +127,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el tipo de autobus.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<BusType>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<BusType>))]
         public BusType Type {
             get => _type;
             set {

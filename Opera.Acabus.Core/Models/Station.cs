@@ -77,14 +77,14 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene la lista de todos los dispositivos asignados a esta ubicación.
         /// </summary>
-        [Column(ForeignKeyName = "Fk_Station_ID")]
+        [DbColumn(ForeignKeyName = "Fk_Station_ID")]
         public ICollection<Device> Devices
                       => _devices ?? (_devices = new ObservableCollection<Device>());
 
         /// <summary>
         /// Obtiene el identificador único de estación.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
         override public UInt64 ID {
             get => _id;
             protected set {
@@ -118,7 +118,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece la ruta a la cual está asignada esta estación.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Route_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_Route_ID")]
         public Route Route {
             get => _route;
             set {
@@ -179,8 +179,13 @@ namespace Opera.Acabus.Core.Models
         public int CompareTo(Station other)
         {
             if (other is null) return 1;
+
             if (other.Route == Route)
                 return StationNumber.CompareTo(other.StationNumber);
+
+            if (Route is null)
+                return -1;
+
             return Route.CompareTo(other.Route);
         }
 

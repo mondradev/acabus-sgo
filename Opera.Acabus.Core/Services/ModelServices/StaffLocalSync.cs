@@ -11,6 +11,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
     /// </summary>
     public sealed class StaffLocalSync : EntityLocalSyncBase<Staff>
     {
+
         /// <summary>
         /// Obtiene el identificador del campo utilizado para el ID de la entidad.
         /// </summary>

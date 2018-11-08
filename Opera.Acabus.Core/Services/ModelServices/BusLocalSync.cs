@@ -1,8 +1,6 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Models;
-using System;
-using System.Linq;
 
 namespace Opera.Acabus.Core.Services.ModelServices
 {
@@ -12,6 +10,11 @@ namespace Opera.Acabus.Core.Services.ModelServices
     public sealed class BusLocalSync : EntityLocalSyncBase<Bus>
     {
         /// <summary>
+        /// Crea una nueva instancia.
+        /// </summary>
+        public BusLocalSync() : base("Route") { }
+
+        /// <summary>
         /// Obtiene el identificador del campo utilizado para el ID de la entidad.
         /// </summary>
         protected override int IDField => 14;
@@ -20,7 +23,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// Obtiene el identificador del campo utilizado para almacenar esta entidad en bytes.
         /// </summary>
         protected override int SourceField => 61;
-        
+
         /// <summary>
         /// Obtiene un autobus a partir de una secuencia de bytes.
         /// </summary>
@@ -28,7 +31,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// <returns>Una instancia de autobus.</returns>
         protected override Bus FromBytes(byte[] source)
             => DataHelper.GetBus(source);
-        
+
         /// <summary>
         /// Asigna las propiedades del autobus en los campos del mensaje utilizado para la creación
         /// en el servidor.
@@ -42,7 +45,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
             message[13] = bus.Route?.ID ?? 0;
             message.SetEnum(36, bus.Status);
         }
-        
+
         /// <summary>
         /// Obtiene una secuencia de datos a partir de la instancia de autobus.
         /// </summary>

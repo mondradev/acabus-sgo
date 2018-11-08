@@ -12,6 +12,11 @@ namespace Opera.Acabus.Core.Services.ModelServices
     public sealed class StationLocalSync : EntityLocalSyncBase<Station>
     {
         /// <summary>
+        /// Crea una nueva instancia.
+        /// </summary>
+        public StationLocalSync() : base("Route") { }
+
+        /// <summary>
         /// Obtiene el identificador del campo utilizado para el ID de la entidad.
         /// </summary>
         protected override int IDField => 14;

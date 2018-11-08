@@ -2,7 +2,6 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Models;
 using System;
-using System.Linq;
 
 namespace Opera.Acabus.Core.Services.ModelServices
 {
@@ -11,6 +10,11 @@ namespace Opera.Acabus.Core.Services.ModelServices
     /// </summary>
     public sealed class DeviceLocalSync : EntityLocalSyncBase<Device>
     {
+        /// <summary>
+        /// Crea una nueva instancia.
+        /// </summary>
+        public DeviceLocalSync() : base("Station", "Bus") { }
+
         /// <summary>
         /// Obtiene el identificador del campo utilizado para el ID de la entidad.
         /// </summary>
@@ -45,7 +49,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
             message[36] = device.Bus?.ID ?? 0;
             message[18] = device.IPAddress.ToString();
         }
-        
+
         /// <summary>
         /// Obtiene una secuencia de datos a partir de la instancia de equipo.
         /// </summary>

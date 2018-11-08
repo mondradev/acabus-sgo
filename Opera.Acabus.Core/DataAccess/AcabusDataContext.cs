@@ -89,31 +89,31 @@ namespace Opera.Acabus.Core.DataAccess
         /// Obtiene una lista de autobuses desde la base de datos.
         /// </summary>
         public static IQueryable<Bus> AllBuses
-            => DbContext?.Read<Bus>().Where(x => x.Active);
+            => DbContext?.Read<Bus>();
 
         /// <summary>
         /// Obtiene una lista de equipos desde la base de datos.
         /// </summary>
         public static IQueryable<Device> AllDevices
-            => DbContext?.Read<Device>().Where(x => x.Active);
+            => DbContext?.Read<Device>();
 
         /// <summary>
         /// Obtiene una lista de rutas desde la base de datos.
         /// </summary>
         public static IQueryable<Route> AllRoutes
-            => DbContext?.Read<Route>().Where(x => x.Active);
+            => DbContext?.Read<Route>();
 
         /// <summary>
         /// Obtiene una lista del personal desde la base de datos.
         /// </summary>
         public static IQueryable<Staff> AllStaff
-            => DbContext?.Read<Staff>().Where(x => x.Active);
+            => DbContext?.Read<Staff>();
 
         /// <summary>
         /// Obtiene una lista de estaciones desde la base de datos.
         /// </summary>
         public static IQueryable<Station> AllStations
-            => DbContext?.Read<Station>().Where(x => x.Active);
+            => DbContext?.Read<Station>();
 
         /// <summary>
         /// Obtiene una lista de las secciones que pueden ser asignadas para dar mantenimiento o servicio.

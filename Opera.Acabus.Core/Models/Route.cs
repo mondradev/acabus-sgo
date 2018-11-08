@@ -80,14 +80,14 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene una lista de los autobuses asignados a esta ruta.
         /// </summary>
-        [Column(ForeignKeyName = "Fk_Route_ID")]
+        [DbColumn(ForeignKeyName = "Fk_Route_ID")]
         public ICollection<Bus> Buses
                => _buses ?? (_buses = new ObservableCollection<Bus>());
 
         /// <summary>
         /// Obtiene o establece identificador único de la ruta.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
         override public UInt64 ID {
             get => _id;
             protected set {
@@ -121,14 +121,14 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene una lista de la lista de estaciones asignadas a esta ruta.
         /// </summary>
-        [Column(ForeignKeyName = "Fk_Route_ID")]
+        [DbColumn(ForeignKeyName = "Fk_Route_ID")]
         public ICollection<Station> Stations
               => _stations ?? (_stations = new ObservableCollection<Station>());
 
         /// <summary>
         /// Obtiene o establece el tipo de la ruta.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<RouteType>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<RouteType>))]
         public RouteType Type {
             get => _type;
             private set {

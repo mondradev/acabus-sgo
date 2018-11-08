@@ -4,6 +4,8 @@ using Opera.Acabus.Core.Services.ModelServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.DataAccess
 {
@@ -13,9 +15,14 @@ namespace Opera.Acabus.Core.DataAccess
     public static class ServerContext
     {
         /// <summary>
+        /// 
+        /// </summary>
+        private static readonly object _lock = new object();
+
+        /// <summary>
         /// Almacena todos los sincronizadores.
         /// </summary>
-        private static readonly Dictionary<String, IEntityLocalSync> _entityLocalSyncs;
+        private static readonly Dictionary<String, LocalSyncsStatus> _entityLocalSyncs;
 
         /// <summary>
         ///
@@ -31,7 +38,7 @@ namespace Opera.Acabus.Core.DataAccess
             int serverPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Push_Port") ?? 5501);
             IPAddress serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("Push_IP") ?? "127.0.0.1");
 
-            _entityLocalSyncs = new Dictionary<string, IEntityLocalSync>();
+            _entityLocalSyncs = new Dictionary<string, LocalSyncsStatus>();
             _pushService = new PushService<PushAcabus>(serverIP, serverPort);
 
             _pushService.Notified += OnNotify;
@@ -43,7 +50,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <param name="entityName">Nombre de la entidad.</param>
         /// <returns>El monitor de sincronización.</returns>
         public static IEntityLocalSync GetLocalSync(String entityName)
-            => _entityLocalSyncs[entityName] ?? throw new ArgumentException("No existe el monitor de sincronización.");
+            => _entityLocalSyncs[entityName].Entity ?? throw new ArgumentException("No existe el monitor de sincronización.");
 
         /// <summary>
         /// Inicializa los servicios con el servidor.
@@ -66,9 +73,38 @@ namespace Opera.Acabus.Core.DataAccess
             if (_entityLocalSyncs.ContainsKey(localSync.EntityName))
                 throw new InvalidOperationException("Ya existe un IEntityLocalSync para la entidad '" + localSync.EntityName + "'.");
 
-            _entityLocalSyncs.Add(localSync.EntityName, localSync);
+            _entityLocalSyncs.Add(localSync.EntityName,
+                new LocalSyncsStatus()
+                {
+                    Entity = localSync,
+                    IsSyncronized = false
+                });
 
-            localSync.PullAsync();
+            Task.Run(() =>
+            {
+                lock (_lock)
+                {
+                    foreach (String entityName in localSync.Dependencies)
+                    {
+                        while (true)
+                        {
+                            LocalSyncsStatus localSyncsStatus = _entityLocalSyncs[entityName];
+                            IEntityLocalSync dependency = localSyncsStatus.Entity;
+                            if (dependency == null || !localSyncsStatus.IsSyncronized)
+                                Monitor.Wait(_lock);
+                            else break;
+                        }
+                    }
+
+                    localSync.Pull();
+
+                    _entityLocalSyncs[localSync.EntityName].IsSyncronized = true;
+
+                    Monitor.Pulse(_lock);
+                }
+            });
+
+
         }
 
         /// <summary>
@@ -78,7 +114,7 @@ namespace Opera.Acabus.Core.DataAccess
         private static void OnNotify(PushArgs args)
         {
             PushAcabus push = args.Data as PushAcabus;
-            IEntityLocalSync localSync = _entityLocalSyncs[push.EntityName];
+            IEntityLocalSync localSync = GetLocalSync(push.EntityName);
 
             switch (push.Operation)
             {
@@ -91,6 +127,22 @@ namespace Opera.Acabus.Core.DataAccess
                     localSync.LocalDeleteByID(push.ID);
                     break;
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private class LocalSyncsStatus
+        {
+            /// <summary>
+            /// 
+            /// </summary>
+            public IEntityLocalSync Entity { get; set; }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public bool IsSyncronized { get; set; }
         }
     }
 }

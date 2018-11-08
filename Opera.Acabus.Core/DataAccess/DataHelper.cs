@@ -174,7 +174,9 @@ namespace Opera.Acabus.Core.DataAccess
             string name = GetStringFromBytes(bytes, 12, nameLenght);
             var assignation = GetStringFromBytes(bytes, 12 + nameLenght + 2, assignationLength);
 
-            var routeID = BitConverter.ToUInt64(bytes, 12 + nameLenght + 2 + assignationLength);
+            var isExternal = BitConverter.ToBoolean(bytes, 12 + nameLenght + 2 + assignationLength);
+
+            var routeID = BitConverter.ToUInt64(bytes, 13 + nameLenght + 2 + assignationLength);
 
             Route route = AcabusDataContext.AllRoutes?.SingleOrDefault(r => r.ID == routeID);
 
@@ -182,11 +184,12 @@ namespace Opera.Acabus.Core.DataAccess
             {
                 Name = name,
                 AssignedSection = assignation,
-                Route = route
+                Route = route,
+                IsExternal = isExternal
             };
 
             AcabusEntityBase.AssignData(station, createUser, createTime, modifyUser, modifyTime, active);
-
+            
             return station;
         }
 
@@ -310,10 +313,11 @@ namespace Opera.Acabus.Core.DataAccess
             var bassignedLength = BitConverter.GetBytes((UInt16)bassigned.Length);
             var bnameLength = BitConverter.GetBytes((UInt16)bname.Length);
             var broute = BitConverter.GetBytes(route ?? 0L);
+            var bext = BitConverter.GetBytes(station.IsExternal);
 
             var bEntity = Serialize((AcabusEntityBase)station);
 
-            return new[] { bEntity, bid, bnumber, bnameLength, bname, bassignedLength, bassigned, broute }.Merge().ToArray();
+            return new[] { bEntity, bid, bnumber, bnameLength, bname, bassignedLength, bassigned, bext, broute }.Merge().ToArray();
         }
 
         /// <summary>
@@ -335,7 +339,7 @@ namespace Opera.Acabus.Core.DataAccess
             modifyUser = Encoding.UTF8.GetString(source, 24 + createUserCount, modifyUserCount);
             modifyTime = DateTime.FromBinary(BitConverter.ToInt64(source, 24 + createUserCount + modifyUserCount));
 
-            active = BitConverter.ToBoolean(source, 24 + createUserCount + modifyUserCount);
+            active = BitConverter.ToBoolean(source, 32 + createUserCount + modifyUserCount);
 
             source = source.Skip(33 + createUserCount + modifyUserCount).ToArray();
         }

@@ -1,6 +1,5 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.DataAccess.DbConverters;
 using Opera.Acabus.Core.Models.ModelsBase;
 using System;
@@ -77,7 +76,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el autobus al que se encuentra asignado este equipo.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Bus_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_Bus_ID")]
         public Bus Bus {
             get => _bus;
             set {
@@ -90,7 +89,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el identificador único del equipo.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
         override public UInt64 ID {
             get => _id;
             protected set {
@@ -102,7 +101,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece la dirección IP del equipo.
         /// </summary>
-        [Column(Converter = typeof(DbIPAddressConverter))]
+        [DbColumn(Converter = typeof(DbIPAddressConverter))]
         public IPAddress IPAddress {
             get => _ipAddress ?? (_ipAddress = new IPAddress(new Byte[] { 0, 0, 0, 0 }));
             set {
@@ -114,9 +113,9 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece la ubicación actual del dispositivo.
         /// </summary>
-        [Column(IsIgnored = true)]
+        [DbColumn(IsIgnored = true)]
         public ILocation Location
-             => (ILocation)Station ?? Bus;
+             => (Station as ILocation) ?? Bus;
 
         /// <summary>
         /// Obtiene o establece el número de seria del equipo.
@@ -132,7 +131,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece la estación a la que se encuentra asignado este equipo.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Station_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_Station_ID")]
         public Station Station {
             get => _station;
             set {
@@ -145,7 +144,7 @@ namespace Opera.Acabus.Core.Models
         /// <summary>
         /// Obtiene o establece el tipo de equipo.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<DeviceType>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<DeviceType>))]
         public DeviceType Type {
             get => _type;
             private set {
