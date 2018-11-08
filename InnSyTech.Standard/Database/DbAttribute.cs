@@ -7,12 +7,12 @@ namespace InnSyTech.Standard.Database
     /// Representa un atributo que permite indicar como se maneja la propiedad de una estructura dentro de la base de datos.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-    public sealed class ColumnAttribute : Attribute
+    public sealed class DbColumnAttribute : Attribute
     {
         /// <summary>
         /// Crea una instancia nueva de un atributo Columna.
         /// </summary>
-        public ColumnAttribute() { }
+        public DbColumnAttribute() { }
 
         /// <summary>
         /// Obtiene o establece el convertidor del valor de la propiedad.

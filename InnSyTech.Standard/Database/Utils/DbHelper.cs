@@ -40,9 +40,9 @@ namespace InnSyTech.Standard.Database.Utils
             if (property.GetCustomAttributes().Count() > 0)
             {
                 foreach (Attribute attribute in property.GetCustomAttributes())
-                    if (attribute is ColumnAttribute)
+                    if (attribute is DbColumnAttribute)
                     {
-                        ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+                        DbColumnAttribute columnAttribute = (attribute as DbColumnAttribute);
 
                         if (columnAttribute.IsIgnored) continue;
 
@@ -78,9 +78,9 @@ namespace InnSyTech.Standard.Database.Utils
 
             if (!isNotEntityMember)
                 foreach (Attribute attribute in member.GetCustomAttributes())
-                    if (attribute is ColumnAttribute)
+                    if (attribute is DbColumnAttribute)
                     {
-                        ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+                        DbColumnAttribute columnAttribute = (attribute as DbColumnAttribute);
 
                         if (columnAttribute.IsIgnored)
                             throw new InvalidOperationException("El atributo está señalado como ignorado.");
@@ -109,9 +109,9 @@ namespace InnSyTech.Standard.Database.Utils
                 if (property.GetCustomAttributes().Count() > 0)
                 {
                     foreach (Attribute attribute in property.GetCustomAttributes())
-                        if (attribute is ColumnAttribute)
+                        if (attribute is DbColumnAttribute)
                         {
-                            ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+                            DbColumnAttribute columnAttribute = (attribute as DbColumnAttribute);
 
                             if (columnAttribute.IsIgnored) continue;
 
@@ -173,9 +173,9 @@ namespace InnSyTech.Standard.Database.Utils
         public static bool IsForeignKey(MemberInfo member)
         {
             foreach (Attribute attribute in member.GetCustomAttributes())
-                if (attribute is ColumnAttribute)
+                if (attribute is DbColumnAttribute)
                 {
-                    ColumnAttribute columnAttribute = (attribute as ColumnAttribute);
+                    DbColumnAttribute columnAttribute = (attribute as DbColumnAttribute);
 
                     if (columnAttribute.IsIgnored)
                         throw new InvalidOperationException("El atributo está señalado como ignorado.");
