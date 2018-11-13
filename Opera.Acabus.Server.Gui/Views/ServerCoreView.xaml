@@ -4,24 +4,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:converters="clr-namespace:Opera.Acabus.Server.Core.Gui;assembly=Opera.Acabus.Server.Core"
-             xmlns:ViewModels="clr-namespace:Opera.Acabus.Server.Gui.ViewModels"
+             xmlns:c="clr-namespace:Opera.Acabus.Server.Core.Gui;assembly=Opera.Acabus.Server.Core"
+             xmlns:v="clr-namespace:Opera.Acabus.Server.Gui.ViewModels"
+             xmlns:cmp="clr-namespace:Opera.Acabus.Server.Gui.Components"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Card.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.CheckBox.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Flipper.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Popupbox.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-            <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
-        </ResourceDictionary>
+        <c:StatusToColorConverter x:Key="StatusToColorConverter"/>
     </UserControl.Resources>
     <UserControl.DataContext>
-        <ViewModels:ServerCoreViewModel/>
+        <v:ServerCoreViewModel/>
     </UserControl.DataContext>
     <Grid>
         <WrapPanel Margin="24,16">
@@ -32,7 +24,7 @@
                         <RowDefinition Height="16"/>
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Style="{StaticResource MaterialDesignTitleTextBlock}" Text="Servicios" Margin="0" Padding="24,16" Background="{DynamicResource AccentColorBrush}" UseLayoutRounding="False" />
+                    <TextBlock Style="{DynamicResource MaterialDesignTitleTextBlock}" Text="Servicios" Margin="0" Padding="24,16" Background="{DynamicResource AccentColorBrush}" UseLayoutRounding="False" />
                     <StackPanel x:Name="serviceContainer" Grid.Row="3" VerticalAlignment="Bottom" Margin="24,0,24,16">
                         <Grid Grid.Row="1" Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
@@ -43,6 +35,7 @@
                             <Label Content="{Binding ServiceName, Mode=OneWay}" Height="26" />
                             <Ellipse Grid.Column="2" Margin="2" Fill="{Binding Status, Converter={StaticResource StatusToColorConverter}, Mode=OneWay}"/>
                         </Grid>
+                        <cmp:ServiceList Services="{Binding ServiceModule}" />
                     </StackPanel>
                 </Grid>
             </materialDesignMahApps:Card>

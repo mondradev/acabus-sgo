@@ -29,7 +29,7 @@ namespace Opera.Acabus.Server.Gui
         /// <summary>
         /// Listado de todos los módulos registrados.
         /// </summary>
-        private static readonly List<IServerModule> _modules;
+        private static readonly List<IServiceModule> _modules;
 
         /// <summary>
         /// Instancia del servidor de mensajes adaptativos.
@@ -46,7 +46,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         static ServerController()
         {
-            _modules = new List<IServerModule>();
+            _modules = new List<IServiceModule>();
 
             string path = AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules")
                 ?? throw new InvalidOperationException("No existe una ruta válida para cargar las reglas de mensajes.");
@@ -59,7 +59,7 @@ namespace Opera.Acabus.Server.Gui
 
             _notifier = new PushNotifier<PushAcabus>();
 
-            ServerService.Notified += (sender, data) => { _notifier.Notify(data); };
+            ServerNotify.Notified += (sender, data) => { _notifier.Notify(data); };
 
             _notifier.Start();
 
@@ -106,24 +106,7 @@ namespace Opera.Acabus.Server.Gui
 
             Trace.WriteLine("Petición desde: " + ipClient);
         }
-
-        /// <summary>
-        /// Crea un mensaje básico de error.
-        /// </summary>
-        /// <param name="text">Mensaje a indicar al cliente.</param>
-        /// <param name="code">Código de respuesta al cliente.</param>
-        /// <param name="e">Instancia que controla el evento de la petición.</param>
-        /// <returns>Una instancia de mensaje.</returns>
-        private static IMessage CreateError(string text, int code, IAdaptiveMsgArgs e)
-        {
-            IMessage message = e.CreateMessage();
-
-            message[AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32()] = text;
-            message[AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()] = code;
-
-            return message;
-        }
-
+        
         /// <summary>
         /// Captura el evento cada vez que un cliente se desconecta del servidor.
         /// </summary>
@@ -145,7 +128,7 @@ namespace Opera.Acabus.Server.Gui
             if (ServerHelper.ValidateRequest(message, typeof(ServerCoreFunctions)))
                 ServerHelper.CallFunc(message, typeof(ServerCoreFunctions));
             else
-                CreateError("Error al realizar la petición: opera.acabus.server.core."
+               ServerHelper.CreateError("Error al realizar la petición: opera.acabus.server.core."
                     + message.GetString(AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()), 403, e);
 
             callback?.Invoke(message);
@@ -171,7 +154,7 @@ namespace Opera.Acabus.Server.Gui
                     if (type is null)
                         throw new Exception($"Libería no contiene módulo especificado ---> {module.ToString("fullname")}");
 
-                    IServerModule moduleInfo = (IServerModule)Activator.CreateInstance(type);
+                    IServiceModule moduleInfo = (IServiceModule)Activator.CreateInstance(type);
 
                     _modules.Add(moduleInfo);
                 }
@@ -185,6 +168,12 @@ namespace Opera.Acabus.Server.Gui
                 }
             }
         }
+
+        /// <summary>
+        /// Obtiene los módulos de servicios registrados actualmente. 
+        /// </summary>
+        public static List<IServiceModule> GetServerModules()
+            => _modules;
 
         /// <summary>
         /// Evalua si la sesión es valida.
@@ -244,7 +233,7 @@ namespace Opera.Acabus.Server.Gui
             {
                 if (!message.IsSet(6))
                 {
-                    e.Send(CreateError("Error al realizar la petición, no especificó la función a llamar", 403, e));
+                    e.Send(ServerHelper.CreateError("Error al realizar la petición, no especificó la función a llamar", 403, e));
                     return;
                 }
 
@@ -254,15 +243,15 @@ namespace Opera.Acabus.Server.Gui
                 if (message.IsSet(AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()))
                 {
                     String modName = message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()].ToString();
-                    IServerModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
+                    IServiceModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
 
                     if (module is null)
                     {
-                        e.Send(CreateError("Error al realizar la petición, no existe el módulo: " + modName, 403, e));
+                        e.Send(ServerHelper.CreateError("Error al realizar la petición, no existe el módulo: " + modName, 403, e));
                         return;
                     }
 
-                    module.Request(message, e.Send);
+                    module.Request(message, e.Send, e );
                     return;
                 }
 
@@ -270,7 +259,7 @@ namespace Opera.Acabus.Server.Gui
             }
             catch (Exception ex)
             {
-                e.Send(CreateError(ex.Message, 500, e));
+                e.Send(ServerHelper.CreateError(ex.Message, 500, e));
             }
         }
 
@@ -284,11 +273,11 @@ namespace Opera.Acabus.Server.Gui
             switch (e.Data)
             {
                 case IMessage m when !Login(m):
-                    e.Send(CreateError("Mensaje no valido", 403, e));
+                    e.Send(ServerHelper.CreateError("Mensaje no valido", 403, e));
                     break;
 
                 case null:
-                    e.Send(CreateError("Petición incorrecta", 403, e));
+                    e.Send(ServerHelper.CreateError("Petición incorrecta", 403, e));
                     break;
 
                 default:

@@ -50,8 +50,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Gui\ServerModule.cs" />
-    <Compile Include="Models\IServerModule.cs" />
+    <Compile Include="Gui\ServiceModuleBase.cs" />
+    <Compile Include="Models\IServiceModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -67,7 +67,7 @@
     </Compile>
     <Compile Include="Models\ServiceStatus.cs" />
     <Compile Include="Gui\StatusToColorConverter.cs" />
-    <Compile Include="ServerService.cs" />
+    <Compile Include="ServerNotify.cs" />
     <Compile Include="Utils\ParameterFieldAttribute.cs" />
     <Compile Include="Utils\ServerHelper.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

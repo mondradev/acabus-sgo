@@ -35,7 +35,7 @@ namespace Opera.Acabus.Server.Gui
             bool res = AcabusDataContext.DbContext.Create(bus);
 
             if (res)
-                ServerService.Notify(new PushAcabus(nameof(Bus), bus.ID, LocalSyncOperation.CREATE));
+                ServerNotify.Notify(new PushAcabus(nameof(Bus), bus.ID, LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
             message[61] = bus.Serialize();
@@ -71,7 +71,7 @@ namespace Opera.Acabus.Server.Gui
                 res = AcabusDataContext.DbContext.Create(device);
 
                 if (res)
-                    ServerService.Notify(new PushAcabus(nameof(Device), device.ID, LocalSyncOperation.CREATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Device), device.ID, LocalSyncOperation.CREATE));
 
                 message[61] = device.Serialize();
             }
@@ -96,7 +96,7 @@ namespace Opera.Acabus.Server.Gui
             bool res = AcabusDataContext.DbContext.Create(route);
 
             if (res)
-                ServerService.Notify(new PushAcabus(nameof(Route), route.ID, LocalSyncOperation.CREATE));
+                ServerNotify.Notify(new PushAcabus(nameof(Route), route.ID, LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
             message[61] = route.Serialize();
@@ -120,7 +120,7 @@ namespace Opera.Acabus.Server.Gui
             bool res = AcabusDataContext.DbContext.Create(staff);
 
             if (res)
-                ServerService.Notify(new PushAcabus(nameof(Staff), staff.ID, LocalSyncOperation.CREATE));
+                ServerNotify.Notify(new PushAcabus(nameof(Staff), staff.ID, LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
             message[61] = staff.Serialize();
@@ -150,7 +150,7 @@ namespace Opera.Acabus.Server.Gui
             bool res = AcabusDataContext.DbContext.Create(station);
 
             if (res)
-                ServerService.Notify(new PushAcabus(nameof(Station), station.ID, LocalSyncOperation.CREATE));
+                ServerNotify.Notify(new PushAcabus(nameof(Station), station.ID, LocalSyncOperation.CREATE));
 
             message.SetBoolean(22, res);
             message[61] = station.Serialize();
@@ -179,7 +179,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, deleted);
 
                 if (deleted)
-                    ServerService.Notify(new PushAcabus(nameof(Bus), id, LocalSyncOperation.DELETE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Bus), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -209,7 +209,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, deleted);
 
                 if (deleted)
-                    ServerService.Notify(new PushAcabus(nameof(Device), id, LocalSyncOperation.DELETE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Device), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -239,7 +239,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, deleted);
 
                 if (deleted)
-                    ServerService.Notify(new PushAcabus(nameof(Route), id, LocalSyncOperation.DELETE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Route), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -269,7 +269,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, deleted);
 
                 if (deleted)
-                    ServerService.Notify(new PushAcabus(nameof(Staff), id, LocalSyncOperation.DELETE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Staff), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -299,7 +299,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, deleted);
 
                 if (deleted)
-                    ServerService.Notify(new PushAcabus(nameof(Station), id, LocalSyncOperation.DELETE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Station), id, LocalSyncOperation.DELETE));
             }
             catch (Exception ex)
             {
@@ -477,7 +477,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Bus), id, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Bus), id, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -507,7 +507,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Device), id, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Device), id, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -537,7 +537,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Route), id, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Route), id, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -566,7 +566,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Staff), staff.ID, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Staff), staff.ID, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -596,7 +596,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerService.Notify(new PushAcabus(nameof(Station), id, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Station), id, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {

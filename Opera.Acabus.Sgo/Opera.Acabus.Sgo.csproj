@@ -177,6 +177,10 @@
       <Project>{ef04233d-7433-4650-9b15-608811df7439}</Project>
       <Name>Opera.Acabus.Server.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Opera.Acabus.Server.Gui\Opera.Acabus.Server.Gui.csproj">
+      <Project>{7356cb0a-7391-4c03-95dc-fe1a646da31f}</Project>
+      <Name>Opera.Acabus.Server.Gui</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="AppIcon.ico" />

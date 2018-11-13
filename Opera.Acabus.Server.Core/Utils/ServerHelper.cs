@@ -1,4 +1,5 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
+using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Services;
 using System;
@@ -43,7 +44,6 @@ namespace Opera.Acabus.Server.Core.Utils
 
             try
             {
-
                 for (int i = 0; i < parameters.Length - 1; i++)
                 {
                     ParameterFieldAttribute parameterData = parameters[i].GetCustomAttribute<ParameterFieldAttribute>();
@@ -95,7 +95,6 @@ namespace Opera.Acabus.Server.Core.Utils
                 parametersValues[parametersValues.Length - 1] = message;
 
                 method.Invoke(null, parametersValues);
-
             }
             catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidCastException || ex is FormatException)
             {
@@ -105,29 +104,23 @@ namespace Opera.Acabus.Server.Core.Utils
             {
                 throw new InvalidOperationException("Error al realizar la llamada a la función.");
             }
-
-
         }
 
         /// <summary>
-        /// Valida si el método corresponde a la petición realizada.
+        /// Crea un mensaje básico de error.
         /// </summary>
-        /// <param name="message">Mensaje de la petición.</param>
-        /// <param name="method"></param>
-        /// <returns>Un valor de true si la petición es compatible con el método.</returns>
-        private static bool ValidateMethod(IMessage message, MethodInfo method)
+        /// <param name="text">Mensaje a indicar al cliente.</param>
+        /// <param name="code">Código de respuesta al cliente.</param>
+        /// <param name="e">Instancia que controla el evento de la petición.</param>
+        /// <returns>Una instancia de mensaje.</returns>
+        public static IMessage CreateError(string text, int code, IAdaptiveMsgArgs e)
         {
-            bool valid = true;
+            IMessage message = e.CreateMessage();
 
-            ParameterInfo[] parameters = method.GetParameters();
-            IEnumerable<ParameterFieldAttribute> fields = parameters
-                                                .Where(x => x.GetCustomAttribute<ParameterFieldAttribute>() != null)
-                                                .Select(x => x.GetCustomAttribute<ParameterFieldAttribute>());
+            message[AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32()] = text;
+            message[AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()] = code;
 
-            foreach (ParameterFieldAttribute field in fields)
-                valid &= (message.IsSet(field.ID) || field.Nullable);
-
-            return valid;
+            return message;
         }
 
         /// <summary>
@@ -169,7 +162,6 @@ namespace Opera.Acabus.Server.Core.Utils
             if (String.IsNullOrEmpty(funcName))
                 return false;
 
-
             MethodInfo[] methods = functionsClass.GetMethods(BindingFlags.Static | BindingFlags.Public);
             methods = methods.Where(x => x.Name == funcName).ToArray();
 
@@ -183,6 +175,27 @@ namespace Opera.Acabus.Server.Core.Utils
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Valida si el método corresponde a la petición realizada.
+        /// </summary>
+        /// <param name="message">Mensaje de la petición.</param>
+        /// <param name="method"></param>
+        /// <returns>Un valor de true si la petición es compatible con el método.</returns>
+        private static bool ValidateMethod(IMessage message, MethodInfo method)
+        {
+            bool valid = true;
+
+            ParameterInfo[] parameters = method.GetParameters();
+            IEnumerable<ParameterFieldAttribute> fields = parameters
+                                                .Where(x => x.GetCustomAttribute<ParameterFieldAttribute>() != null)
+                                                .Select(x => x.GetCustomAttribute<ParameterFieldAttribute>());
+
+            foreach (ParameterFieldAttribute field in fields)
+                valid &= (message.IsSet(field.ID) || field.Nullable);
+
+            return valid;
         }
     }
 }

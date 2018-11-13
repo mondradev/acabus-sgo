@@ -1,4 +1,5 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
+using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using System;
 using System.Threading.Tasks;
 
@@ -7,7 +8,7 @@ namespace Opera.Acabus.Server.Core.Models
     /// <summary>
     /// Representa la estructura básica de un módulo del servidor.
     /// </summary>
-    public interface IServerModule
+    public interface IServiceModule
     {
         /// <summary>
         /// Obtiene el nombre del servicio.
@@ -24,7 +25,6 @@ namespace Opera.Acabus.Server.Core.Models
         /// </summary>
         /// <param name="message">Mensaje con la petición.</param>
         /// <param name="callback">Función de llamada de vuelta.</param>
-        /// <returns>Una instancia Task.</returns>
-        Task Request(IMessage message, Action<IMessage> callback);
+        void Request(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e);
     }
 }

@@ -1,5 +1,8 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
+using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
+using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core.Models;
+using Opera.Acabus.Server.Core.Utils;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -7,9 +10,9 @@ using System.Threading.Tasks;
 namespace Opera.Acabus.Server.Core.Gui
 {
     /// <summary>
-    /// Implementación parcial de <see cref="IServerModule"/> para notificar a la vista de los cambios ocurridos en el servicio.
+    /// Implementación parcial de <see cref="IServiceModule"/> para notificar a la vista de los cambios ocurridos en el servicio.
     /// </summary>
-    public abstract class ServerModule : IServerModule, INotifyPropertyChanged
+    public abstract class ServiceModuleBase : IServiceModule, INotifyPropertyChanged
     {
         /// <summary>
         /// Estado actual del servicio.
@@ -31,7 +34,7 @@ namespace Opera.Acabus.Server.Core.Gui
         /// </summary>
         public ServiceStatus Status {
             get => _status;
-            private set {
+            protected set {
                 _status = value;
                 OnPropertyChanged(nameof(Status));
             }
@@ -42,8 +45,16 @@ namespace Opera.Acabus.Server.Core.Gui
         /// </summary>
         /// <param name="message">Mensaje con la petición.</param>
         /// <param name="callback">Función de llamada de vuelta.</param>
-        /// <returns>Una instancia Task.</returns>
-        public abstract Task Request(IMessage message, Action<IMessage> callback);
+        public void Request(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e)
+        {
+            if (ServerHelper.ValidateRequest(message, GetType()))
+                ServerHelper.CallFunc(message, GetType());
+            else
+                ServerHelper.CreateError("Error al realizar la petición: " + GetType().FullName + " "
+                     + message.GetString(AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()), 403, e);
+
+            callback?.Invoke(message);
+        }
 
         /// <summary>
         /// Captura el evento <see cref="PropertyChanged"/> y notifica a la interfaz que ha cambiado

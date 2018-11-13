@@ -5,11 +5,10 @@ using System.Threading.Tasks;
 namespace Opera.Acabus.Server.Core
 {
     /// <summary>
-    /// Provee de los servicios globales del servidor. Esta clase funciona como puente entre los
-    /// submódulos y el Core del servidor para realizar las funciones aunque no se haga referencia a
-    /// la librería.
+    /// Provee de funciones que permiten notificar a los usuarios activos de los cambios realizados
+    /// en el servidor.
     /// </summary>
-    public static class ServerService
+    public static class ServerNotify
     {
         /// <summary>
         /// Evento que surge cuando se notifica algo a la red.
@@ -21,6 +20,6 @@ namespace Opera.Acabus.Server.Core
         /// </summary>
         /// <param name="push">Datos del cambio.</param>
         public static void Notify(PushAcabus push)
-            => Task.Run(()=> Notified?.Invoke(null, push));
+            => Task.Run(() => Notified?.Invoke(null, push));
     }
 }
