@@ -10,6 +10,11 @@ namespace InnSyTech.Standard.Configuration
     internal sealed class Setting : ISetting
     {
         /// <summary>
+        /// Nodo que representa la configuración.
+        /// </summary>
+        private readonly XmlNode _node;
+
+        /// <summary>
         /// Conjunto de atributos.
         /// </summary>
         private Dictionary<String, Object> _attributes;
@@ -21,6 +26,7 @@ namespace InnSyTech.Standard.Configuration
         public Setting(XmlNode node)
         {
             _attributes = new Dictionary<string, object>();
+            _node = node;
 
             if (node != null)
                 Process(this, node);
@@ -77,7 +83,7 @@ namespace InnSyTech.Standard.Configuration
             var attr = _attributes.ContainsKey(name) ? _attributes[name] : null;
 
             if (attr == null)
-                return null;
+                return GetContent(name);
 
             return attr;
         }
@@ -133,6 +139,18 @@ namespace InnSyTech.Standard.Configuration
                         };
                 else
                     setting._attributes.Add(child.Name, new Setting(child));
+        }
+
+        /// <summary>
+        /// Obtiene el contenido de una etiqueta xml.
+        /// </summary>
+        private String GetContent(String name)
+        {
+            foreach (XmlNode child in _node.ChildNodes)
+                if (child.Name.Equals(name))
+                    return child.InnerText;
+
+            return null;
         }
     }
 }

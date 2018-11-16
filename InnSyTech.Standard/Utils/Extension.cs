@@ -122,6 +122,13 @@ namespace InnSyTech.Standard.Utils
         }
 
         /// <summary>
+        /// Representa el valor boolean a través de un SI o NO.
+        /// </summary>
+        /// <param name="source">Valor booleano.</param>
+        public static String ToStringFriendly(this Boolean source)
+            => source ? "SI" : "NO";
+
+        /// <summary>
         /// Convierte una secuencia de caracteres a texto plano.
         /// </summary>
         /// <param name="src">Secuencia de datos origen.</param>
