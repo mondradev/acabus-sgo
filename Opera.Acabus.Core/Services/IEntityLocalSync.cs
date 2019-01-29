@@ -79,5 +79,6 @@ namespace Opera.Acabus.Core.Services
         /// <param name="instance">Instancia a actualizar.</param>
         /// <returns>Un valor true si la instancia fue actualizada.</returns>
         bool Update<T>(T instance) where T : class;
+
     }
 }

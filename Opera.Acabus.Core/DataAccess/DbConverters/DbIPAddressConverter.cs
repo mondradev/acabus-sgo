@@ -1,17 +1,18 @@
-﻿using InnSyTech.Standard.Database;
+using InnSyTech.Standard.Database;
 using System.Net;
 
 namespace Opera.Acabus.Core.DataAccess.DbConverters
 {
-    /// <summary>
-    /// Convierte una instancia <see cref="IPAddress"/> a una cadena para almacenar en una base de datos.
-    /// </summary>
+    	/// <summary>
+	/// Convierte una instancia <see cref="IPAddress"/> a una cadena para almacenar en
+	/// una base de datos.
+	/// </summary>
     public sealed class DbIPAddressConverter : IDbConverter
     {
         /// <summary>
         /// Convierte la instancia pasada por parametro en una instancia <see cref="IPAddress"/>.
         /// </summary>
-        /// <param name="data">Una cadena con el formato valido para una dirección IP.</param>
+        /// <param name="data">Una cadena con el formato valido para una direcci�n IP.</param>
         /// <returns>Una instancia <see cref="IPAddress"/>.</returns>
         public object ConverterFromDb(object data)
         {

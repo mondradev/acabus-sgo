@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Opera.Acabus.Cctv</RootNamespace>
     <AssemblyName>Opera.Acabus.Cctv</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,14 +64,28 @@
     <Compile Include="CctvModule.cs" />
     <Compile Include="Converters\CashTypeSpanishConverter.cs" />
     <Compile Include="Converters\IncidenceStatusSpanishConverter.cs" />
-    <Compile Include="Helpers\IncidenceExtension.cs" />
+    <Compile Include="DataAccess\CctvContext.cs" />
+    <Compile Include="Helpers\CctvDataHelper.cs" />
     <Compile Include="Models\Activity.cs" />
     <Compile Include="Models\ActivityCategory.cs" />
     <Compile Include="Models\AssignableStaff.cs" />
     <Compile Include="Models\CashDestiny.cs" />
+    <Compile Include="Models\CashType.cs" />
+    <Compile Include="Models\CashTypeExtesion.cs" />
+    <Compile Include="Models\CashTypeTraslator.cs" />
+    <Compile Include="Models\CashTypeTraslatorConverter.cs" />
     <Compile Include="Models\Incidence.cs" />
+    <Compile Include="Models\IncidenceStatus.cs" />
+    <Compile Include="Models\IncidenceStatusExtension.cs" />
+    <Compile Include="Models\IncidenceStatusTranslator.cs" />
     <Compile Include="Models\RefundOfMoney.cs" />
+    <Compile Include="Models\RefundStatus.cs" />
+    <Compile Include="Models\TrackIncidence.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service.Server\CctvService.cs" />
+    <Compile Include="Service.Server\IncidenceService.cs" />
+    <Compile Include="Service.Server\TrackIncidenceService.cs" />
+    <Compile Include="Services\IncidenceLocalSync.cs" />
     <Compile Include="SubModules\AddIncidence\ViewModels\CreateIncidenceViewModel.cs" />
     <Compile Include="SubModules\AddIncidence\ViewModels\MultiIncidenceViewModel.cs" />
     <Compile Include="SubModules\AddIncidence\Views\AddIncidencesView.xaml.cs">
@@ -133,6 +148,10 @@
     <ProjectReference Include="..\Opera.Acabus.Core\Opera.Acabus.Core.csproj">
       <Project>{5870B3E0-A665-4014-94D1-4ED21CEB442F}</Project>
       <Name>Opera.Acabus.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Opera.Acabus.Server.Core\Opera.Acabus.Server.Core.csproj">
+      <Project>{ef04233d-7433-4650-9b15-608811df7439}</Project>
+      <Name>Opera.Acabus.Server.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

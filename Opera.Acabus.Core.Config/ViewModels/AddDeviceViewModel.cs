@@ -44,7 +44,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// Crea una instancia nueva de <see cref="AddDeviceViewModel"/>.
         /// </summary>
         public AddDeviceViewModel()
-            => AddDeviceCommand = new Command(AddDeviceExecute, AddDeviceCanExecute);
+        {
+            AddDeviceCommand = new Command(AddDeviceExecute, AddDeviceCanExecute);
+        }
 
         /// <summary>
         /// Obtiene el comando que agrega el equipo al sistema.
@@ -175,7 +177,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="arg">Parametro del comando.</param>
         /// <returns>Un valor <see cref="true"/> si es posible ejecutar el comando.</returns>
         private bool AddDeviceCanExecute(object arg)
-            => Validate();
+        {
+            return Validate();
+        }
 
         /// <summary>
         /// Crea una instancia <see cref="Device"/> a partir de la información de la instancia actual

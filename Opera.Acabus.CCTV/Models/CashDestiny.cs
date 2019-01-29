@@ -1,48 +1,16 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
-using InnSyTech.Standard.Mvvm.Converters;
-using InnSyTech.Standard.Translates;
+using Opera.Acabus.Core.Models.Base;
 using System;
-using System.Collections.Generic;
 
 namespace Opera.Acabus.Cctv.Models
 {
     /// <summary>
-    /// Define los tipos de dinero posible.
-    /// </summary>
-    public enum CashType
-    {
-        /// <summary>
-        /// Monedas.
-        /// </summary>
-        MONEY,
-
-        /// <summary>
-        /// Billetes.
-        /// </summary>
-        BILL
-    }
-
-    /// <summary>
-    /// Provee de funciones extra a la enumeración <see cref="CashType"/>.
-    /// </summary>
-    public static class CashTypeExtesion
-    {
-        /// <summary>
-        /// Traduce el valor de la enumeración al idioma español.
-        /// </summary>
-        /// <param name="cashType">Enumeración a traducir.</param>
-        /// <returns>Una cadena que representa al objeto en español.</returns>
-        public static String Translate(this CashType cashType)
-            => new CashTypeTraslator().Translate(cashType);
-    }
-
-    /// <summary>
     /// Define la estructura de un destino de devolución de dinero.
     /// </summary>
     [Entity(TableName = "CashDestinies")]
-    public class CashDestiny : NotifyPropertyChanged, IComparable, IComparable<CashDestiny>
+    public class CashDestiny : AcabusEntityBase, IComparable, IComparable<CashDestiny>
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="CashType"/>
@@ -57,17 +25,17 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Campo que provee a la propiedad <see cref="ID"/>
         /// </summary>
-        private Int64 _id;
+        private UInt64 _id;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="RequiresMoving" />.
+        /// Campo que provee a la propiedad <see cref="RequiresMoveToCAU" />.
         /// </summary>
-        private bool _requiresMoving;
+        private bool _requiresMoveToCAU;
 
         /// <summary>
         /// Obtiene o establece el tipo de dinero valido para este destino.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<CashType>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<CashType>))]
         public CashType CashType {
             get => _cashType;
             private set {
@@ -90,10 +58,10 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece el identificador unico del destino de dinero.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public Int64 ID {
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
+        public override UInt64 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }
@@ -102,11 +70,11 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece si el destino requiere ser desplazado a otra ubicación.
         /// </summary>
-        public bool RequiresMoving {
-            get => _requiresMoving;
+        public bool RequiresMoveToCAU {
+            get => _requiresMoveToCAU;
             set {
-                _requiresMoving = value;
-                OnPropertyChanged(nameof(RequiresMoving));
+                _requiresMoveToCAU = value;
+                OnPropertyChanged(nameof(RequiresMoveToCAU));
             }
         }
 
@@ -201,33 +169,5 @@ namespace Opera.Acabus.Cctv.Models
         /// <returns>Una cadena que representa la instancia.</returns>
         public override string ToString()
             => Description;
-    }
-
-    /// <summary>
-    /// Representa un traductor al idioma español de la enumeración <see cref="CashType"/>.
-    /// </summary>
-    public sealed class CashTypeTraslator : EnumTranslator<CashType>
-    {
-        /// <summary>
-        /// Crea una nueva instancia.
-        /// </summary>
-        public CashTypeTraslator() : base(new Dictionary<CashType, string>()
-        {
-            { CashType.BILL , "BILLETE" },
-            { CashType.MONEY, "MONEDAS" }
-        })
-        { }
-    }
-
-    /// <summary>
-    /// Representa un convertidor para la traducción al idioma español de la enumeración <see cref="CashType"/>.
-    /// </summary>
-    public sealed class CashTypeTraslatorConverter : TranslateEnumConverter<CashType>
-    {
-        /// <summary>
-        /// Crea una nueva instancia.
-        /// </summary>
-        public CashTypeTraslatorConverter() : base(new CashTypeTraslator())
-        { }
     }
 }

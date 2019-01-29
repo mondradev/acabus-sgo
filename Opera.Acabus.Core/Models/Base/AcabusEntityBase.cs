@@ -1,11 +1,11 @@
-ï»¿using InnSyTech.Standard.Mvvm;
+using InnSyTech.Standard.Mvvm;
 using System;
 
-namespace Opera.Acabus.Core.Models.ModelsBase
+namespace Opera.Acabus.Core.Models.Base
 {
 
     /// <summary>
-    /// Provee de una base para la definiciÃ³n de entidades.
+    /// Provee de una base para la definición de entidades.
     /// </summary>
     public abstract class AcabusEntityBase : NotifyPropertyChanged
     {
@@ -15,32 +15,32 @@ namespace Opera.Acabus.Core.Models.ModelsBase
         public Boolean Active { get; internal set; } = true;
 
         /// <summary>
-        /// Obtiene la fecha/hora de creaciÃ³n de la instancia.
+        /// Obtiene la fecha/hora de creación de la instancia.
         /// </summary>
         public DateTime CreateTime { get; internal set; } = DateTime.Now;
 
         /// <summary>
-        /// Obtiene el nombre de usuario que creÃ³ la instancia.
+        /// Obtiene el nombre de usuario que creó la instancia.
         /// </summary>
         public String CreateUser { get; internal set; } = "SISTEMA";
 
         /// <summary>
-        /// Obtiene el identificador Ãºnico de la entidad.
+        /// Obtiene el identificador único de la entidad.
         /// </summary>
         public abstract UInt64 ID { get; protected set; }
 
         /// <summary>
-        /// Obtiene la fecha/hora de la Ãºltima modificaciÃ³n de la instancia.
+        /// Obtiene la fecha/hora de la última modificación de la instancia.
         /// </summary>
         public DateTime ModifyTime { get; internal set; } = DateTime.Now;
 
         /// <summary>
-        /// Obtiene el nombre del Ãºltimo usuario que modificÃ³ la instancia.
+        /// Obtiene el nombre del último usuario que modificó la instancia.
         /// </summary>
         public String ModifyUser { get; internal set; } = "SISTEMA";
 
         /// <summary>
-        /// Asigna la informaciÃ³n de la entidad.
+        /// Asigna la información de la entidad.
         /// </summary>
         public static void AssignData(AcabusEntityBase entity, String createUser,
             DateTime createTime, String modifyUser, DateTime modifyTime, Boolean active)

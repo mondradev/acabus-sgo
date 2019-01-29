@@ -1,6 +1,7 @@
 ﻿using InnSyTech.Standard.Database;
-using InnSyTech.Standard.Mvvm;
+using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Models.Base;
 using System;
 
 namespace Opera.Acabus.Cctv.Models
@@ -10,7 +11,7 @@ namespace Opera.Acabus.Cctv.Models
     /// el BRT.
     /// </summary>
     [Entity]
-    public sealed class AssignableStaff : NotifyPropertyChanged, IComparable, IComparable<AssignableStaff>, IAssignableSection
+    public sealed class AssignableStaff : AcabusEntityBase, IComparable, IComparable<AssignableStaff>, IAssignableSection
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AssignedSection"/>.
@@ -73,10 +74,10 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece el identificador único del personal asignable.
         /// </summary>
-        [Column(IsPrimaryKey = true)]
-        public UInt64 ID {
+        [DbColumn(IsPrimaryKey = true)]
+        public override UInt64 ID {
             get => _id;
-            set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }
@@ -85,7 +86,7 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece el elemento del personal de la asignación.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Staff_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_Staff_ID")]
         public Staff Staff {
             get => _staff;
             set {
@@ -190,6 +191,11 @@ namespace Opera.Acabus.Cctv.Models
         /// </summary>
         /// <returns>Una cadena que representa la instancia.</returns>
         public override string ToString()
-            => Staff.ToString();
+            => String.Format("NOMBRE: {0}\nSECCIÓN: {1}\nKVR: {2}\nAUTOBUSES: {3}",
+                    Staff,
+                    AssignedSection,
+                    HasKvrKey.ToStringFriendly(),
+                    HasNemaKey.ToStringFriendly()
+                );
     }
 }

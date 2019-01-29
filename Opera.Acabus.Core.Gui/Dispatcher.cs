@@ -1,41 +1,40 @@
-锘縰sing System;
+using System;
 using System.Windows.Input;
-using static Opera.Acabus.Core.Gui.Dispatcher.RequestSendMessageArg;
 
 namespace Opera.Acabus.Core.Gui
 {
     /// <summary>
-    /// Gestiona toda la comunicaci贸n con los visores de datos de la aplicaci贸n.
+    /// Gestiona toda la comunicaci髇 con los visores de datos de la aplicaci髇.
     /// </summary>
     public static class Dispatcher
     {
         /// <summary>
-        /// Representa el m茅todo que controla el evento para la petici贸n env铆o de mensajes y
+        /// Representa el m閠odo que controla el evento para la petici髇 env韔 de mensajes y
         /// notificaciones a la interfaz.
         /// </summary>
         /// <param name="arg">Argumentos del evento.</param>
         public delegate void RequestSendMessageHandler(RequestSendMessageArg arg);
 
         /// <summary>
-        /// Representa el m茅todo que controla el evento para la petici贸n de muestra de contenido.
+        /// Representa el m閠odo que controla el evento para la petici髇 de muestra de contenido.
         /// </summary>
         /// <param name="arg">Argumentos del evento.</param>
         public delegate void RequestShowContentHandler(RequestShowContentArg arg);
 
         /// <summary>
-        /// Evento que se desencadena cuando se realiza una petici贸n para env铆ar un mensaje o
-        /// notificaci贸n a la interfaz.
+        /// Evento que se desencadena cuando se realiza una petici髇 para env韆r un mensaje o
+        /// notificaci髇 a la interfaz.
         /// </summary>
         public static event RequestSendMessageHandler RequestingSendMessageOrNotify;
 
         /// <summary>
-        /// Evento que se desencadena cuando se realiza una petici贸n para mostrar el contenido.
+        /// Evento que se desencadena cuando se realiza una petici髇 para mostrar el contenido.
         /// </summary>
         public static event RequestShowContentHandler RequestingShowContent;
 
         /// <summary>
-        /// Evento que se desencadena cuando se realiza una petici贸n para mostrar el contenido a
-        /// trav茅s de un cuadro de di谩logo.
+        /// Evento que se desencadena cuando se realiza una petici髇 para mostrar el contenido a
+        /// trav閟 de un cuadro de di醠ogo.
         /// </summary>
         public static event RequestShowContentHandler RequestingShowDialog;
 
@@ -64,31 +63,31 @@ namespace Opera.Acabus.Core.Gui
 
         /// <summary>
         /// Solicita a la ventana principal del SGO mostrar el contenido especificado y realizar una
-        /// funci贸n cuando este sea ocultado.
+        /// funci髇 cuando este sea ocultado.
         /// </summary>
         /// <param name="content">Contenido a mostrar.</param>
-        /// <param name="execute">Acci贸n a realizar al ocultar el contenido.</param>
+        /// <param name="execute">Acci髇 a realizar al ocultar el contenido.</param>
         public static void RequestShowDialog(System.Windows.Controls.UserControl content, Action<object> execute = null)
             => RequestingShowDialog?.Invoke(new RequestShowContentArg(content, execute));
 
         /// <summary>
-        /// Env铆a una mensaje a la interfaz gr谩fica.
+        /// Env韆 una mensaje a la interfaz gr醘ica.
         /// </summary>
-        /// <param name="message">Mensaje a env铆ar.</param>
+        /// <param name="message">Mensaje a env韆r.</param>
         public static void SendMessageToGUI(string message)
             => RequestingSendMessageOrNotify?
-                .Invoke(new RequestSendMessageArg(message, RequestSendType.MESSAGE));
+                .Invoke(new RequestSendMessageArg(message, RequestSendMessageArg.RequestSendType.MESSAGE));
 
         /// <summary>
-        /// Env铆a una notificaci贸n a la interfaz gr谩fica.
+        /// Env韆 una notificaci髇 a la interfaz gr醘ica.
         /// </summary>
         /// <param name="message">Mensaje a notificar.</param>
         public static void SendNotify(string message)
             => RequestingSendMessageOrNotify?
-                .Invoke(new RequestSendMessageArg(message, RequestSendType.NOTIFY));
+                .Invoke(new RequestSendMessageArg(message, RequestSendMessageArg.RequestSendType.NOTIFY));
 
         /// <summary>
-        /// Define la estructura de los argumentos utilizados para la solicitud de env铆o de mensajes
+        /// Define la estructura de los argumentos utilizados para la solicitud de env韔 de mensajes
         /// o notificaciones a la interfaz.
         /// </summary>
         public sealed class RequestSendMessageArg : EventArgs
@@ -97,7 +96,7 @@ namespace Opera.Acabus.Core.Gui
             /// Crea una nueva instancia de <see cref="RequestSendMessageArg"/>.
             /// </summary>
             /// <param name="message">Mensaje a mostrar.</param>
-            /// <param name="type">Tipo la petici贸n de env铆o.</param>
+            /// <param name="type">Tipo la petici髇 de env韔.</param>
             public RequestSendMessageArg(String message, RequestSendType type)
             {
                 Message = message;
@@ -105,18 +104,18 @@ namespace Opera.Acabus.Core.Gui
             }
 
             /// <summary>
-            /// Define los tipos de petici贸n de env铆o.
+            /// Define los tipos de petici髇 de env韔.
             /// </summary>
             public enum RequestSendType
             {
                 /// <summary>
-                /// Petici贸n de env铆o tipo mensaje. Muestra un peque帽o cuadro de di谩logo con el
+                /// Petici髇 de env韔 tipo mensaje. Muestra un peque駉 cuadro de di醠ogo con el
                 /// mensaje a mostrar.
                 /// </summary>
                 MESSAGE,
 
                 /// <summary>
-                /// Petici贸n de env铆o tipo notificaci贸n. Muestra una notificaci贸n en la parte
+                /// Petici髇 de env韔 tipo notificaci髇. Muestra una notificaci髇 en la parte
                 /// inferior de la ventana.
                 /// </summary>
                 NOTIFY
@@ -128,14 +127,14 @@ namespace Opera.Acabus.Core.Gui
             public String Message { get; }
 
             /// <summary>
-            /// Obtiene el tipo de petici贸n de env铆o.
+            /// Obtiene el tipo de petici髇 de env韔.
             /// </summary>
             public RequestSendType SendType { get; }
         }
 
         /// <summary>
         /// Define la estructura de los argumentos utilizados para la solicitud de muestra de
-        /// contenido o cuadros de dialogos con funci贸n de llamada de vuelta.
+        /// contenido o cuadros de dialogos con funci髇 de llamada de vuelta.
         /// </summary>
         public sealed class RequestShowContentArg : EventArgs
         {
@@ -143,7 +142,7 @@ namespace Opera.Acabus.Core.Gui
             /// Crea una instancia nueva de <see cref="RequestShowContentArg"/>.
             /// </summary>
             /// <param name="content">Contenido a que se solicita mostrar.</param>
-            /// <param name="callback">Funci贸n a ejecutar al ocultar el contenido.</param>
+            /// <param name="callback">Funci髇 a ejecutar al ocultar el contenido.</param>
             public RequestShowContentArg(System.Windows.Controls.UserControl content, Action<Object> callback = null)
             {
                 Content = content;
@@ -151,7 +150,7 @@ namespace Opera.Acabus.Core.Gui
             }
 
             /// <summary>
-            /// Obtiene la funci贸n de llamada devuelta que se ejecuta cuando el contenido se oculta.
+            /// Obtiene la funci髇 de llamada devuelta que se ejecuta cuando el contenido se oculta.
             /// </summary>
             public Action<Object> Callback { get; }
 

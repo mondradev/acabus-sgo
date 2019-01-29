@@ -1,7 +1,7 @@
 using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +12,7 @@ namespace Opera.Acabus.Cctv.Models
     /// Representa la categoría de las actividades se presentan en los equipos del BRT.
     /// </summary>
     [Entity(TableName = "ActivityCategories")]
-    public sealed class ActivityCategory : NotifyPropertyChanged, IComparable, IComparable<ActivityCategory>
+    public sealed class ActivityCategory : AcabusEntityBase, IComparable, IComparable<ActivityCategory>
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Activities" />.
@@ -35,16 +35,32 @@ namespace Opera.Acabus.Cctv.Models
         private String _name;
 
         /// <summary>
+        /// Crea una nueva instancia.
+        /// </summary>
+        public ActivityCategory() : this(0, DeviceType.NONE) { }
+
+        /// <summary>
+        /// Crea una instancia especificando su ID.
+        /// </summary>
+        /// <param name="id">Identificador de la instancia.</param>
+        /// <param name="assignableType">Tipo de dispositivo asignable.</param>
+        public ActivityCategory(UInt64 id, DeviceType assignableType)
+        {
+            _id = id;
+            _deviceType = assignableType;
+        }
+
+        /// <summary>
         /// Obtiene una lista de las fallas correspondientes a esta categoría.
         /// </summary>
-        [Column(ForeignKeyName = "Fk_ActivityCategories_ID")]
+        [DbColumn(ForeignKeyName = "Fk_ActivityCategories_ID")]
         public ICollection<Activity> Activities
             => _activities ?? (_activities = new ObservableCollection<Activity>());
 
         /// <summary>
         /// Obtiene o establece el tipo de dispositivo a la que corresponde esta categoría de fallas.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<DeviceType>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<DeviceType>))]
         public DeviceType DeviceType {
             get => _deviceType;
             private set {
@@ -56,10 +72,10 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene el identificador de la categoría de fallas.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 ID {
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
+        public override UInt64 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }

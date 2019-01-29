@@ -1,5 +1,6 @@
 ﻿using InnSyTech.Standard.Mvvm;
 using InnSyTech.Standard.Utils;
+using Opera.Acabus.Cctv.DataAccess;
 using Opera.Acabus.Cctv.Models;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
@@ -74,7 +75,7 @@ namespace Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels
         }
 
         /// <summary>
-        /// Obtiene o establece el nuevo valor de la propiedad <see cref="Incidence.Observations"/>.
+        /// Obtiene o establece el nuevo valor de la propiedad <see cref="Incidence.FaultObservations"/>.
         /// </summary>
         public String Observations {
             get => _observations;
@@ -91,7 +92,7 @@ namespace Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels
             get => _selectedIncidence;
             set {
                 _selectedIncidence = value;
-                _observations = value?.Observations;
+                _observations = value?.FaultObservations;
                 _newWhoReporting = value?.WhoReporting;
                 OnPropertyChanged(nameof(SelectedIncidence));
                 OnPropertyChanged(nameof(Observations));
@@ -125,7 +126,7 @@ namespace Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels
             ValidateProperty(nameof(NewWhoReporting));
 
             if (NewWhoReporting == SelectedIncidence?.WhoReporting
-                && Observations == SelectedIncidence?.Observations)
+                && Observations == SelectedIncidence?.FaultObservations)
                 return false;
 
             return !HasErrors;
@@ -137,29 +138,28 @@ namespace Opera.Acabus.Cctv.SubModules.ModifyIncidence.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void UpdateIncidence(object obj)
         {
-            var oldObservations = SelectedIncidence.Observations;
+            var oldObservations = SelectedIncidence.FaultObservations;
             var oldWhoReporting = SelectedIncidence.WhoReporting;
 
             try
             {
-                SelectedIncidence.Observations = Observations;
+                SelectedIncidence.FaultObservations = Observations;
                 SelectedIncidence.WhoReporting = NewWhoReporting;
 
                 AcabusDataContext.DbContext.Update(SelectedIncidence);
-                AcabusDataContext.GetService("Cctv_Manager", out dynamic service);
 
-                (service as CctvModule)?.RefreshData();
+                CctvContext.RefreshData();
 
                 Dispatcher.CloseDialog();
             }
             catch (Exception ex)
             {
-                SelectedIncidence.Observations = oldObservations;
+                SelectedIncidence.FaultObservations = oldObservations;
                 SelectedIncidence.WhoReporting = oldWhoReporting;
 
                 Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
                 Dispatcher.CloseDialog();
-                ShowMessage($"No se logró modificar la incidencia {SelectedIncidence.Folio}");
+                ShowMessage($"No se logró modificar la incidencia {SelectedIncidence.ID}");
             }
         }
     }

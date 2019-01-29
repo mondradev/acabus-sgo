@@ -5,12 +5,14 @@ using Opera.Acabus.Server.Core.Models;
 using Opera.Acabus.Server.Core.Utils;
 using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace Opera.Acabus.Server.Core.Gui
 {
     /// <summary>
-    /// Implementación parcial de <see cref="IServiceModule"/> para notificar a la vista de los cambios ocurridos en el servicio.
+    /// Implementación parcial de <see cref="IServiceModule"/> para notificar a la vista de los
+    /// cambios ocurridos en el servicio. También es una clase base para la creación de servicios
+    /// para los distintos módulos que requieran propagar la información a través de los
+    /// nodos conectados.
     /// </summary>
     public abstract class ServiceModuleBase : IServiceModule, INotifyPropertyChanged
     {

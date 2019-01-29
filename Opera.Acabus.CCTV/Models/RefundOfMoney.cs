@@ -1,25 +1,16 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Models.Base;
 using System;
 
 namespace Opera.Acabus.Cctv.Models
 {
     /// <summary>
-    /// Define los estados de una devolución de dinero.
-    /// </summary>
-    public enum RefundStatus
-    {
-        FOR_DELIVERY,
-        DELIVERED
-    }
-
-    /// <summary>
     /// Define la estructura de una devolución de dinero.
     /// </summary>
     [Entity(TableName = "RefundOfMoney")]
-    public sealed class RefundOfMoney : NotifyPropertyChanged, IComparable, IComparable<RefundOfMoney>
+    public sealed class RefundOfMoney : AcabusEntityBase, IComparable, IComparable<RefundOfMoney>
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="CashDestiny"/>
@@ -37,9 +28,9 @@ namespace Opera.Acabus.Cctv.Models
         private Incidence _incidence;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Quantity"/>
+        /// Campo que provee a la propiedad <see cref="Amount"/>
         /// </summary>
-        private Single _quantity;
+        private Single _amount;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="RefundDate"/>
@@ -76,12 +67,15 @@ namespace Opera.Acabus.Cctv.Models
 
             _incidence = incidence;
             _id = id;
+
+            if (!_incidence.RefundsOfMoney.Contains(this))
+                _incidence.RefundsOfMoney.Add(this);
         }
 
         /// <summary>
         /// Obtiene o establece el destino del dinero.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_CashDestiny_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_CashDestiny_ID")]
         public CashDestiny CashDestiny {
             get => _cashDestiny;
             set {
@@ -93,10 +87,10 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece el identificador de la devolución.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 ID {
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
+        public override UInt64 ID {
             get => _id;
-            private set {
+            protected set {
                 _id = value;
                 OnPropertyChanged(nameof(ID));
             }
@@ -105,7 +99,7 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece la incidencia a la que corresponde la devolución.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Incidence_Folio")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_Incidence_ID")]
         public Incidence Incidence {
             get => _incidence;
             private set {
@@ -117,11 +111,11 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece la cantidad de la devolución.
         /// </summary>
-        public Single Quantity {
-            get => _quantity;
+        public Single Amount {
+            get => _amount;
             set {
-                _quantity = value;
-                OnPropertyChanged(nameof(Quantity));
+                _amount = value;
+                OnPropertyChanged(nameof(Amount));
             }
         }
 
@@ -139,7 +133,7 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece el estado de la devolución de dinero.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<RefundStatus>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<RefundStatus>))]
         public RefundStatus Status {
             get => _status;
             set {
@@ -189,7 +183,7 @@ namespace Opera.Acabus.Cctv.Models
             if (RefundDate == other.RefundDate)
                 if (Incidence == other.Incidence)
                     if (CashDestiny == other.CashDestiny)
-                        return Quantity.CompareTo(other.Quantity);
+                        return Amount.CompareTo(other.Amount);
                     else
                         return CashDestiny.CompareTo(other.CashDestiny);
                 else
@@ -237,13 +231,14 @@ namespace Opera.Acabus.Cctv.Models
         /// </summary>
         /// <returns>Código hash de la instancia.</returns>
         public override int GetHashCode()
-            => Tuple.Create(RefundDate, Incidence, CashDestiny, Quantity).GetHashCode();
+            => Tuple.Create(RefundDate, Incidence, CashDestiny, Amount).GetHashCode();
 
         /// <summary>
         /// Representa la instancia actual en una cadena.
         /// </summary>
         /// <returns>Una cadena que representa la instancia.</returns>
         public override string ToString()
-            => String.Format("Devolución a {0} de $ {1:d2} en {2}", CashDestiny?.ToString() ?? "(sin definir)", Quantity, CashDestiny?.CashType.Translate() ?? "(sin definir)");
+            => String.Format("Devolución a {0} de $ {1:d2} en {2}", CashDestiny?.ToString()
+                ?? "(sin definir)", Amount, CashDestiny?.CashType.Translate() ?? "(sin definir)");
     }
 }

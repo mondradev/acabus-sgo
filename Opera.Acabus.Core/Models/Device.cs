@@ -1,7 +1,7 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using Opera.Acabus.Core.DataAccess.DbConverters;
-using Opera.Acabus.Core.Models.ModelsBase;
+using Opera.Acabus.Core.Models.Base;
 using System;
 using System.Net;
 

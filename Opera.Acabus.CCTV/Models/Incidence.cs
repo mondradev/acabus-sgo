@@ -1,64 +1,34 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Mvvm;
-using InnSyTech.Standard.Mvvm.Converters;
-using InnSyTech.Standard.Translates;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Models.Base;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text;
 
 namespace Opera.Acabus.Cctv.Models
 {
     /// <summary>
-    /// Estados posibles de una incidencia.
-    /// </summary>
-    public enum IncidenceStatus
-    {
-        /// <summary>
-        /// Incidencia abierta.
-        /// </summary>
-        OPEN = 0,
-
-        /// <summary>
-        /// Incidencia cerrada.
-        /// </summary>
-        CLOSE = 1,
-
-        /// <summary>
-        /// Por confirmar.
-        /// </summary>
-        UNCOMMIT = 2,
-
-        /// <summary>
-        /// Pendiente.
-        /// </summary>
-        PENDING = 4
-    }
-
-    /// <summary>
-    /// Provee de funciones a la enumeración <see cref="IncidenceStatus"/>.
-    /// </summary>
-    public static class IncidenceStatusExtension
-    {
-        /// <summary>
-        /// Traduce al idioma español el valor de la enumeración especificada.
-        /// </summary>
-        /// <param name="incidenceStatus">Valor de la enumeración a traducir.</param>
-        /// <returns>Una cadena que representa en idioma español el valor de la enumeración.</returns>
-        public static String Translate(this IncidenceStatus incidenceStatus)
-            => new IncidenceStatusTranslator().Translate(incidenceStatus);
-    }
-
-    /// <summary>
     /// Define la estructura de la incidencias de la operación de Acabus.
     /// </summary>
     [Entity(TableName = "Incidences")]
-    public sealed class Incidence : NotifyPropertyChanged, IComparable, IComparable<Incidence>
+    public sealed class Incidence : AcabusEntityBase, IComparable, IComparable<Incidence>
     {
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="Activity"/>
+        /// </summary>
+        private Activity _activity;
+
         /// <summary>
         /// Campo que provee a la propiedad <see cref="AssignedStaff"/>.
         /// </summary>
         private AssignableStaff _assignedStaff;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="Comments"/>
+        /// </summary>
+        private String _comments;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Device"/>
@@ -66,9 +36,9 @@ namespace Opera.Acabus.Cctv.Models
         private Device _device;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Activity"/>
+        /// Campo que provee a la propiedad <see cref="FaultObservations"/>
         /// </summary>
-        private Activity _activity;
+        private String _faultObservations;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="FinishDate"/>
@@ -76,9 +46,9 @@ namespace Opera.Acabus.Cctv.Models
         private DateTime? _finishDate;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Folio"/>
+        /// Campo que provee a la propiedad <see cref="ID"/>
         /// </summary>
-        private UInt64 _folio;
+        private UInt64 _id;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="LockAssignation"/>.
@@ -86,19 +56,14 @@ namespace Opera.Acabus.Cctv.Models
         private bool _lockAssignation;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Observations"/>
-        /// </summary>
-        private String _observations;
-
-        /// <summary>
         /// Campo que provee a la propiedad <see cref="Priority"/>
         /// </summary>
         private Priority _priority;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="RefundOfMoney"/>
+        /// Campo que provee a la propiedad <see cref="RefundsOfMoney"/>
         /// </summary>
-        private RefundOfMoney _refundOfMoney;
+        private ICollection<RefundOfMoney> _refundsOfMoney;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="StartDate"/>
@@ -111,9 +76,14 @@ namespace Opera.Acabus.Cctv.Models
         private IncidenceStatus _status;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="Technician"/>
+        /// Campo que provee a la propiedad <see cref="StaffThatResolve"/>
         /// </summary>
-        private Staff _technician;
+        private Staff _staffThatResolve;
+
+        /// <summary>
+        /// Campo que provee a la propiedad <see cref="TrackIncidences"/>
+        /// </summary>
+        private ICollection<TrackIncidence> _trackIncidences;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="WhoReporting"/>
@@ -123,11 +93,11 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Crea una instancia nueva de <see cref="Incidence"/> especificando el estado de la misma.
         /// </summary>
-        /// <param name="folio">Folio de la incidencia.</param>
+        /// <param name="id">Folio de la incidencia.</param>
         /// <param name="status">Estado de la incidencia.</param>
-        public Incidence(UInt64 folio, IncidenceStatus status)
+        public Incidence(UInt64 id, IncidenceStatus status)
         {
-            _folio = folio;
+            _id = id;
             _status = status;
         }
 
@@ -137,9 +107,21 @@ namespace Opera.Acabus.Cctv.Models
         public Incidence() : this(0, IncidenceStatus.OPEN) { }
 
         /// <summary>
+        /// Obtiene o establece la descripción de la incidencia.
+        /// </summary>
+        [DbColumn(Name = "Fk_Activity_ID", IsForeignKey = true)]
+        public Activity Activity {
+            get => _activity;
+            set {
+                _activity = value;
+                OnPropertyChanged(nameof(Activity));
+            }
+        }
+
+        /// <summary>
         /// Obtiene o establece el personal asignado a esta incidencia.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_AssignableStaff_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_AssignableStaff_ID")]
         public AssignableStaff AssignedStaff {
             get => _assignedStaff;
             set {
@@ -149,9 +131,20 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
+        /// Obtiene o establece el comentario de cierre de la incidencia.
+        /// </summary>
+        public String Comments {
+            get => _comments;
+            set {
+                _comments = value;
+                OnPropertyChanged(nameof(Comments));
+            }
+        }
+
+        /// <summary>
         /// Obtiene o establece el equipo el cual presenta la incidencia.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Device_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_Device_ID")]
         public Device Device {
             get => _device;
             set {
@@ -161,14 +154,13 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
-        /// Obtiene o establece la descripción de la incidencia.
+        /// Obtiene o establece las observaciones de la incidencia.
         /// </summary>
-        [Column(Name = "Fk_Activity_ID", IsForeignKey = true)]
-        public Activity Activity {
-            get => _activity;
+        public String FaultObservations {
+            get => _faultObservations;
             set {
-                _activity = value;
-                OnPropertyChanged(nameof(Activity));
+                _faultObservations = value;
+                OnPropertyChanged(nameof(FaultObservations));
             }
         }
 
@@ -187,12 +179,12 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene el folio de la incidencia.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 Folio {
-            get => _folio;
-            private set {
-                _folio = value;
-                OnPropertyChanged(nameof(Folio));
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
+        public override UInt64 ID {
+            get => _id;
+            protected set {
+                _id = value;
+                OnPropertyChanged(nameof(ID));
             }
         }
 
@@ -208,20 +200,9 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
-        /// Obtiene o establece las observaciones de la incidencia.
-        /// </summary>
-        public String Observations {
-            get => _observations;
-            set {
-                _observations = value;
-                OnPropertyChanged(nameof(Observations));
-            }
-        }
-
-        /// <summary>
         /// Obtiene o establece la prioridad de la incidencia.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<Priority>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<Priority>))]
         public Priority Priority {
             get => _priority;
             set {
@@ -233,14 +214,10 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece la devolución de dinero
         /// </summary>
-        [Column(ForeignKeyName = "Fk_Incidence_Folio")]
-        public RefundOfMoney RefundOfMoney {
-            get => _refundOfMoney;
-            set {
-                _refundOfMoney = value;
-                OnPropertyChanged(nameof(RefundOfMoney));
-            }
-        }
+        [DbColumn(ForeignKeyName = "Fk_Incidence_ID")]
+        public ICollection<RefundOfMoney> RefundsOfMoney
+            => _refundsOfMoney ?? (_refundsOfMoney = new ObservableCollection<RefundOfMoney>());
+
 
         /// <summary>
         /// Obtiene o establece la fecha y hora de inicio de la incidencia.
@@ -255,9 +232,9 @@ namespace Opera.Acabus.Cctv.Models
         }
 
         /// <summary>
-        /// Obtiene o establece el estado de la incidencia (Abierta|Cerrada).
+        /// Obtiene o establece el estado de la incidencia especificadas en la enumeración <seealso cref="IncidenceStatus"/>.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<IncidenceStatus>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<IncidenceStatus>))]
         public IncidenceStatus Status {
             get => _status;
             set {
@@ -269,21 +246,28 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece el técnico que resolvió la incidencia.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_Staff_ID")]
-        public Staff Technician {
-            get => _technician;
+        [DbColumn(IsForeignKey = true, Name = "Fk_Staff_ID")]
+        public Staff StaffThatResolve {
+            get => _staffThatResolve;
             set {
-                _technician = value;
-                OnPropertyChanged(nameof(Technician));
+                _staffThatResolve = value;
+                OnPropertyChanged(nameof(StaffThatResolve));
             }
         }
 
         /// <summary>
         /// Obtiene el tiempo total de la solución.
         /// </summary>
-        [Column(IsIgnored = true)]
+        [DbColumn(IsIgnored = true)]
         public TimeSpan? TotalTime
             => FinishDate - StartDate;
+
+        /// <summary>
+        /// Obtiene el seguimiento de la incidencia.
+        /// </summary>
+        [DbColumn(ForeignKeyName = "Fk_Incidences_ID")]
+        public ICollection<TrackIncidence> TrackIncidences
+            => _trackIncidences ?? (_trackIncidences = new ObservableCollection<TrackIncidence>());
 
         /// <summary>
         /// Obtiene o establece quien realiza el reporte.
@@ -330,18 +314,11 @@ namespace Opera.Acabus.Cctv.Models
         /// </summary>
         /// <param name="other">Objeto que se va a comparar con esta instancia.</param>
         /// <returns>Un valor que indica el orden relativo de los objetos que se están comparando.</returns>
-
         public int CompareTo(Incidence other)
         {
             if (other == null) return -1;
 
-            if (Device == other.Device)
-                if (Activity == other.Activity)
-                    return StartDate.CompareTo(other.StartDate);
-                else
-                    return Activity.CompareTo(other.Activity);
-
-            return Device.CompareTo(other.Device);
+            return ID.CompareTo(other.ID);
         }
 
         /// <summary>
@@ -351,7 +328,6 @@ namespace Opera.Acabus.Cctv.Models
         /// </summary>
         /// <param name="obj">Objeto que se va a comparar con esta instancia.</param>
         /// <returns>Un valor que indica el orden relativo de los objetos que se están comparando.</returns>
-
         public int CompareTo(object obj)
         {
             if (obj == null) return -1;
@@ -390,29 +366,47 @@ namespace Opera.Acabus.Cctv.Models
         /// Indica si la incidencia tiene una devolución de dinero.
         /// </summary>
         /// <returns>Un valor true en caso de presentar una devolución.</returns>
-        public Boolean HasRefundOfMoney()
-            => RefundOfMoney != null;
+        public Boolean HasRefundsOfMoney()
+            => RefundsOfMoney.Count > 0;
 
         /// <summary>
         /// Representa la instancia de incidencia en una cadena utilizable para subir el reporte.
         /// </summary>
         /// <returns>Una cadena que representa la incidencia.</returns>
-        public String ToReportString()
+        public String ToStringForChat()
         {
-            return String.Format("*{0}* {1} {2} {3} {4}",
-                Folio == 0 ? "(No definido)" : String.Format("F-{0:D5}", Folio),
-                Device?.Bus != null
-                    ? String.Format("{0} {1}",
-                        Device?.Bus.EconomicNumber,
-                        Device)
-                    : Device?.SerialNumber ?? "(No definido)",
-                String.Format("*{0}*, {1}", Activity?.Category?.Name, Activity),
-                AssignedStaff is null
-                ? String.Empty
-                : String.Format("\n*Asignado:* {0}", AssignedStaff),
-                String.IsNullOrEmpty(Observations?.Trim())
-                ? String.Empty
-                : String.Format("\n*Observaciones:* {0}", Observations?.Trim().ToUpper()));
+            String template = "*F-{0:D5}* {1} {2}\n";
+            String templateObs = "*Observaciones:* {0}\n";
+            String templateAssign = "*Asignado a:* {0}";
+            String templateLocation = "";
+
+            StringBuilder builder = new StringBuilder();
+
+            if (Device?.Bus != null)
+                templateLocation = String.Format("{0} {1} {2}",
+                    Device.Bus.Route.GetRouteCode(),
+                    Device.Bus.EconomicNumber,
+                    Device
+                    );
+            else
+                templateLocation = Device.SerialNumber ?? "(No definido)";
+
+            builder.AppendFormat(template, ID, templateLocation, Activity);
+
+            if (Activity.Priority == Priority.HIGH || Priority == Priority.HIGH)
+                if (Activity.Priority == Priority)
+                    builder.Append("*Requiere atención inmediata* 🆘\n");
+                else
+                    builder.Append("Atención con prioridad ❗\n");
+
+            if (FaultObservations != null)
+                builder.AppendFormat(templateObs, FaultObservations);
+
+            if (AssignedStaff != null)
+                builder.AppendFormat(templateAssign, AssignedStaff.Staff);
+
+
+            return builder.ToString().ToUpper();
         }
 
         /// <summary>
@@ -420,35 +414,6 @@ namespace Opera.Acabus.Cctv.Models
         /// </summary>
         /// <returns>Una cadena que representa la instancia actual.</returns>
         public override string ToString()
-            => ToReportString();
-    }
-
-    /// <summary>
-    /// Convertidor para la traducción de la enumeración <see cref="IncidenceStatus"/>.
-    /// </summary>
-    public sealed class IncidenceStatusConverter : TranslateEnumConverter<IncidenceStatus>
-    {
-        /// <summary>
-        /// Crea una instancia del traductor de la enumaración <see cref="IncidenceStatus"/>.
-        /// </summary>
-        public IncidenceStatusConverter() : base(new IncidenceStatusTranslator()) { }
-    }
-
-    /// <summary>
-    /// Representa un traductor al idioma español de la enumeración <see cref="IncidenceStatus"/>.
-    /// </summary>
-    public sealed class IncidenceStatusTranslator : EnumTranslator<IncidenceStatus>
-    {
-        /// <summary>
-        /// Crea una nueva instancia del traductor.
-        /// </summary>
-        public IncidenceStatusTranslator() : base(new Dictionary<IncidenceStatus, string>()
-        {
-            { IncidenceStatus.OPEN, "ABIERTA" },
-            { IncidenceStatus.CLOSE, "CERRADA" },
-            { IncidenceStatus.UNCOMMIT, "POR CONFIRMAR" },
-            { IncidenceStatus.PENDING, "PENDIENTE" }
-        })
-        { }
+            => ToStringForChat();
     }
 }

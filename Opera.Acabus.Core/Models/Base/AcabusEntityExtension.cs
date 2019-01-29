@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Opera.Acabus.Core.Models.ModelsBase
+namespace Opera.Acabus.Core.Models.Base
 {
     /// <summary>
     /// Provee de funciones utilizadas para la persistencia.

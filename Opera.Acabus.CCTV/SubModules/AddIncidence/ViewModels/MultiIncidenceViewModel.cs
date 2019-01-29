@@ -1,6 +1,7 @@
 ﻿using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Mvvm;
 using InnSyTech.Standard.Utils;
+using Opera.Acabus.Cctv.DataAccess;
 using Opera.Acabus.Cctv.Helpers;
 using Opera.Acabus.Cctv.Models;
 using Opera.Acabus.Core.DataAccess;
@@ -411,15 +412,11 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         {
             if (!Validate()) return false;
 
-            AcabusDataContext.GetService("Cctv_Manager", out dynamic service);
-
-            CctvModule cctvModule = service as CctvModule;
-
-            var incidences = cctvModule.Incidences.Where(i => i.Status == IncidenceStatus.OPEN);
+            var incidences = CctvContext.Incidences.Where(i => i.Status == IncidenceStatus.OPEN);
 
             incidences = incidences.Where(i => SelectedDevices.Any(d => d.SelectedDevice == i.Device) && i.Activity.Description == SelectedDescription);
             if (incidences.Any())
-                AddError(nameof(SelectedDescription), String.Format("Ya existe una incidencia abierta igual para: F-{0:D5}", incidences.First().Folio));
+                AddError(nameof(SelectedDescription), String.Format("Ya existe una incidencia abierta igual para: F-{0:D5}", incidences.First().ID));
 
             return !incidences.Any();
         }
@@ -430,19 +427,17 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         /// <param name="parameter">Parametro del comando.</param>
         private void CreateIncidence(Object parameter)
         {
-            AcabusDataContext.GetService("Cctv_Manager", out dynamic service);
-            CctvModule cctvModule = service as CctvModule;
 
             foreach (var device in SelectedDevices)
             {
-                var incidences = cctvModule.Incidences;
+                var incidences = CctvContext.Incidences;
                 var fault = AcabusDataContext.DbContext.Read<Activity>()
                     .FirstOrDefault(f => f.Description == SelectedDescription && f.Category.DeviceType == device.SelectedDevice.Type);
                 Incidence incidence = new Incidence
                 {
                     Device = device.SelectedDevice,
                     Activity = fault,
-                    Observations = device.Observations ?? GlobalObservations,
+                    FaultObservations = device.Observations ?? GlobalObservations,
                     Priority = Priority.LOW,
                     StartDate = DateTime.Now,
                     Status = IncidenceStatus.OPEN,

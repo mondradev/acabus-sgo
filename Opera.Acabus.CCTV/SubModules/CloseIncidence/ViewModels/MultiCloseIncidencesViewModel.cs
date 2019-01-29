@@ -49,25 +49,25 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                     var previousStatus = incidence.Status;
 
                     incidence.Status = IncidenceStatus.CLOSE;
-                    incidence.Technician = SelectedTechnician;
+                    incidence.StaffThatResolve = SelectedTechnician;
                     incidence.FinishDate = FinishDate;
 
                     if (previousStatus == IncidenceStatus.UNCOMMIT && incidence.Device.Type == DeviceType.KVR)
                     {
                         Models.RefundOfMoney refundOfMoney = AcabusDataContext.DbContext.Read<Models.RefundOfMoney>().LoadReference(2)
-                            .FirstOrDefault(r => r.Incidence.Folio == incidence.Folio);
+                            .FirstOrDefault(r => r.Incidence.ID == incidence.ID);
 
                         if (refundOfMoney != null)
                         {
                             refundOfMoney.RefundDate = FinishDate;
                             refundOfMoney.Incidence.FinishDate = FinishDate;
-                            refundOfMoney.Incidence.Observations = incidence.Observations;
+                            refundOfMoney.Incidence.FaultObservations = incidence.FaultObservations;
                             refundOfMoney.Incidence.Status = IncidenceStatus.CLOSE;
 
                             if (!AcabusDataContext.DbContext.Update(refundOfMoney, 1))
                             {
                                 Dispatcher.CloseDialog();
-                                ShowMessage(String.Format("No se confirmó la devolución de dinero F-{0:D5}", incidence.Folio));
+                                ShowMessage(String.Format("No se confirmó la devolución de dinero F-{0:D5}", incidence.ID));
                                 return;
                             }
                         }
@@ -83,7 +83,7 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                         if (!AcabusDataContext.DbContext.Update(incidence))
                         {
                             Dispatcher.CloseDialog();
-                            ShowMessage(String.Format("No se cerró la incidencia: F-{0:D5}", incidence.Folio));
+                            ShowMessage(String.Format("No se cerró la incidencia: F-{0:D5}", incidence.ID));
                             return;
                         }
                     }

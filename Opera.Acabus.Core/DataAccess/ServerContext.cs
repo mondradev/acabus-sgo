@@ -90,6 +90,7 @@ namespace Opera.Acabus.Core.DataAccess
                         {
                             LocalSyncsStatus localSyncsStatus = _entityLocalSyncs[entityName];
                             IEntityLocalSync dependency = localSyncsStatus.Entity;
+
                             if (dependency == null || !localSyncsStatus.IsSyncronized)
                                 Monitor.Wait(_lock);
                             else break;

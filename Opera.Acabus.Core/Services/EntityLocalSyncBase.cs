@@ -2,14 +2,12 @@
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Models.ModelsBase;
+using Opera.Acabus.Core.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.Services
 {
@@ -43,7 +41,12 @@ namespace Opera.Acabus.Core.Services
         /// Función actualizar para una unidad.
         /// </summary>
         private const string UPDATE_FUNC_NAME = "Update{0}";
-        
+
+        /// <summary>
+        /// Provee a la propieded <see cref="Dependencies"/>.
+        /// </summary>
+        private readonly List<String> _dependencies;
+
         /// <summary>
         /// Crea una nueva entidad de sincronía.
         /// </summary>
@@ -70,6 +73,11 @@ namespace Opera.Acabus.Core.Services
         public event LocalSyncHandler Updated;
 
         /// <summary>
+        /// Obtiene una lista de las entidades a las cual depende esta para sincronizar.
+        /// </summary>
+        public IReadOnlyList<string> Dependencies => _dependencies;
+
+        /// <summary>
         /// Obtiene el nombre de la entidad a sincronizar.
         /// </summary>
         /// <returns>Nombre de la entidad.</returns>
@@ -94,16 +102,6 @@ namespace Opera.Acabus.Core.Services
         /// Obtiene el identificador del campo utilizado para almacenar esta entidad en bytes.
         /// </summary>
         protected abstract int SourceField { get; }
-
-        /// <summary>
-        /// Provee a la propieded <see cref="Dependencies"/>.
-        /// </summary>
-        private readonly List<String> _dependencies;
-
-        /// <summary>
-        /// Obtiene una lista de las entidades a las cual depende esta para sincronizar.
-        /// </summary>
-        public IReadOnlyList<string> Dependencies => _dependencies;
 
         /// <summary>
         /// Solicita la creación de una nueva instancia de la entidad actual, si es satisfactoria, se
@@ -358,7 +356,6 @@ namespace Opera.Acabus.Core.Services
                 currentProgress++;
                 guiProgress?.Report(50f + currentProgress / list.Count / 2f * 100f);
             });
-
         }
 
         /// <summary>

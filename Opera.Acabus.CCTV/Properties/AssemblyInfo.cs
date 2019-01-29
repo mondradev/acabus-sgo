@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("InnSy Tech")]
 [assembly: AssemblyProduct("Opera.Acabus.CCTV")]
-[assembly: AssemblyCopyright("Copyright © InnSy Tech 2017")]
+[assembly: AssemblyCopyright("Copyright © InnSy Tech 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

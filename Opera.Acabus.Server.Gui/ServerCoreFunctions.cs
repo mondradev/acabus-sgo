@@ -460,13 +460,12 @@ namespace Opera.Acabus.Server.Gui
         /// <summary>
         /// Actualiza el autobus especificado por el ID
         /// </summary>
-        /// <param name="id">Identificador del autobus</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateBus([ParameterField(14)] UInt64 id, IMessage message)
+        public static void UpdateBus( IMessage message)
         {
             try
             {
-                Bus bus = AcabusDataContext.AllBuses.FirstOrDefault(x => x.ID == id);
+                Bus bus = DataHelper.GetBus(message.GetBytes(61));
                 bus.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(bus);
@@ -477,7 +476,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerNotify.Notify(new PushAcabus(nameof(Bus), id, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Bus), bus.ID, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -492,11 +491,11 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador del equipo.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateDevice([ParameterField(14)] UInt64 id, IMessage message)
+        public static void UpdateDevice(IMessage message)
         {
             try
             {
-                Device device = AcabusDataContext.AllDevices.FirstOrDefault(x => x.ID == id);
+                Device device =  DataHelper.GetDevice(message.GetBytes(61));
                 device.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(device);
@@ -507,7 +506,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerNotify.Notify(new PushAcabus(nameof(Device), id, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Device), device.ID, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -520,13 +519,12 @@ namespace Opera.Acabus.Server.Gui
         /// <summary>
         /// Actualiza la ruta especificada por el ID
         /// </summary>
-        /// <param name="id">Identificador de la ruta.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateRoute([ParameterField(14)] UInt64 id, IMessage message)
+        public static void UpdateRoute(IMessage message)
         {
             try
             {
-                Route route = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == id);
+                Route route = DataHelper.GetRoute(message.GetBytes(61));
                 route.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(route);
@@ -537,7 +535,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerNotify.Notify(new PushAcabus(nameof(Route), id, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Route), route.ID, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {
@@ -579,13 +577,12 @@ namespace Opera.Acabus.Server.Gui
         /// <summary>
         /// Actualiza la estación especificada por el ID
         /// </summary>
-        /// <param name="id">Identificador de la estación.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateStation([ParameterField(14)] UInt64 id, IMessage message)
+        public static void UpdateStation(IMessage message)
         {
             try
             {
-                Station station = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == id);
+                Station station = DataHelper.GetStation(message.GetBytes(61));
                 station.Commit();
 
                 bool updated = AcabusDataContext.DbContext.Update(station);
@@ -596,7 +593,7 @@ namespace Opera.Acabus.Server.Gui
                 message.SetBoolean(22, updated);
 
                 if (updated)
-                    ServerNotify.Notify(new PushAcabus(nameof(Station), id, LocalSyncOperation.UPDATE));
+                    ServerNotify.Notify(new PushAcabus(nameof(Station), station.ID, LocalSyncOperation.UPDATE));
             }
             catch (Exception ex)
             {

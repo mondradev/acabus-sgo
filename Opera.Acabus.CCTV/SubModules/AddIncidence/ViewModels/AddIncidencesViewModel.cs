@@ -1,5 +1,6 @@
 ﻿using InnSyTech.Standard.Database.Linq;
 using InnSyTech.Standard.Mvvm;
+using Opera.Acabus.Cctv.DataAccess;
 using Opera.Acabus.Cctv.Helpers;
 using Opera.Acabus.Cctv.Models;
 using Opera.Acabus.Core.DataAccess;
@@ -311,11 +312,8 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         private bool CanCreate(object parameter)
         {
             if (!Validate()) return false;
-
-            AcabusDataContext.GetService("Cctv_Manager", out dynamic service);
-            CctvModule cctvModule = service as CctvModule;
-
-            var incidences = cctvModule.Incidences;
+            
+            var incidences = CctvContext.Incidences;
 
             if (incidences.Any(i => i.Device == SelectedDevice && i.Activity == SelectedFault && i.Status == IncidenceStatus.OPEN))
                 AddError(nameof(SelectedFault), "Ya existe una incidencia abierta igual para el equipo");
@@ -329,15 +327,13 @@ namespace Opera.Acabus.Cctv.SubModules.AddIncidence.ViewModels
         /// <param name="parameter">Parametro del comando.</param>
         private void CreateIncidence(Object parameter)
         {
-            AcabusDataContext.GetService("Cctv_Manager", out dynamic service);
-            CctvModule cctvModule = service as CctvModule;
 
-            var incidences = cctvModule.Incidences;
+            var incidences = CctvContext.Incidences;
             Incidence incidence = new Incidence
             {
                 Device = SelectedDevice,
                 Activity = SelectedFault,
-                Observations = Observations,
+                FaultObservations = Observations,
                 Priority = Priority.LOW,
                 StartDate = StartTime,
                 Status = IncidenceStatus.OPEN,

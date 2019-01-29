@@ -2,6 +2,7 @@ using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Models.Base;
 using System;
 
 namespace Opera.Acabus.Cctv.Models
@@ -10,7 +11,7 @@ namespace Opera.Acabus.Cctv.Models
     /// Representa una actividad aplicada a un equipo del BRT.
     /// </summary>
     [Entity(TableName = "Activities")]
-    public sealed class Activity : NotifyPropertyChanged, IComparable<Activity>, IComparable
+    public sealed class Activity : AcabusEntityBase, IComparable<Activity>, IComparable
     {
         /// <summary>
         /// Campo que provee a la propiedad <see cref="Assignable"/>.
@@ -58,7 +59,7 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece el area a la que se puede asignar la falla.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<AssignableArea>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<AssignableArea>))]
         public AssignableArea Assignable {
             get => _assignable;
             set {
@@ -70,7 +71,7 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece la categoría de fallas.
         /// </summary>
-        [Column(IsForeignKey = true, Name = "Fk_ActivityCategories_ID")]
+        [DbColumn(IsForeignKey = true, Name = "Fk_ActivityCategories_ID")]
         public ActivityCategory Category {
             get => _category;
             set {
@@ -93,10 +94,10 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece el identificador unico de la falla.
         /// </summary>
-        [Column(IsPrimaryKey = true, IsAutonumerical = true)]
-        public UInt64 ID {
+        [DbColumn(IsPrimaryKey = true, IsAutonumerical = true)]
+        public override UInt64 ID {
             get => _id;
-            set {
+            protected set {
                 _id = value;
                 OnPropertyChanged("ID");
             }
@@ -105,7 +106,7 @@ namespace Opera.Acabus.Cctv.Models
         /// <summary>
         /// Obtiene o establece la prioridad de atención.
         /// </summary>
-        [Column(Converter = typeof(DbEnumConverter<Priority>))]
+        [DbColumn(Converter = typeof(DbEnumConverter<Priority>))]
         public Priority Priority {
             get => _priority;
             set {
@@ -113,7 +114,7 @@ namespace Opera.Acabus.Cctv.Models
                 OnPropertyChanged(nameof(Priority));
             }
         }
-
+        
         /// <summary>
         /// Compara dos instancias de <see cref="Activity"/> y determina si son diferentes.
         /// </summary>

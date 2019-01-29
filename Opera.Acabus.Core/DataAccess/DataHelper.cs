@@ -1,6 +1,6 @@
 ﻿using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Models;
-using Opera.Acabus.Core.Models.ModelsBase;
+using Opera.Acabus.Core.Models.Base;
 using System;
 using System.Linq;
 using System.Net;
@@ -13,6 +13,30 @@ namespace Opera.Acabus.Core.DataAccess
     /// </summary>
     public static class DataHelper
     {
+        /// <summary>
+        /// Deserializa los valores de la entidad derivada de <see cref="AcabusEntityBase"/>.
+        /// </summary>
+        /// <param name="source">Fuente de datos binarios que contienen la entidad.</param>
+        /// <param name="createUser">Nombre de usuario que creo la entidad.</param>
+        /// <param name="createTime">Fecha de creación de la entidad.</param>
+        /// <param name="modifyUser">Nombre de usuario que modificó la entidad.</param>
+        /// <param name="modifyTime">Fecha de modificación de la entidad.</param>
+        public static void Deserialize(ref Byte[] source, out String createUser, out DateTime createTime,
+            out String modifyUser, out DateTime modifyTime, out Boolean active)
+        {
+            var createUserCount = Convert.ToInt32(BitConverter.ToInt64(source, 0));
+            createUser = Encoding.UTF8.GetString(source, 8, createUserCount);
+            createTime = DateTime.FromBinary(BitConverter.ToInt64(source, 8 + createUserCount));
+
+            var modifyUserCount = Convert.ToInt32(BitConverter.ToInt64(source, 16 + createUserCount));
+            modifyUser = Encoding.UTF8.GetString(source, 24 + createUserCount, modifyUserCount);
+            modifyTime = DateTime.FromBinary(BitConverter.ToInt64(source, 24 + createUserCount + modifyUserCount));
+
+            active = BitConverter.ToBoolean(source, 32 + createUserCount + modifyUserCount);
+
+            source = source.Skip(33 + createUserCount + modifyUserCount).ToArray();
+        }
+
         /// <summary>
         /// Obtiene una instancia <see cref="Bus"/> desde un vector de bytes.
         /// </summary>
@@ -47,6 +71,20 @@ namespace Opera.Acabus.Core.DataAccess
             AcabusEntityBase.AssignData(bus, createUser, createTime, modifyUser, modifyTime, active);
 
             return bus;
+        }
+
+        /// <summary>
+        /// Valida si el ID es válido (mayor a cero) y hace la consulta a través de <see cref="AcabusDataContext.DbContext"/> para obtener esa entidad.
+        /// </summary>
+        /// <typeparam name="T">Tipo de la entidad, esta debe heredar de <see cref="AcabusEntityBase"/>.</typeparam>
+        /// <param name="id">Identificador de la entidad.</param>
+        /// <returns>Una instancia del tipo especificado de existir el ID en la base de datos.</returns>
+        public static T GetByIDFromDb<T>(UInt64 id) where T : AcabusEntityBase
+        {
+            if (id == 0)
+                return null;
+
+            return AcabusDataContext.DbContext.Read<T>().FirstOrDefault(x => x.ID == id);
         }
 
         /// <summary>
@@ -189,7 +227,7 @@ namespace Opera.Acabus.Core.DataAccess
             };
 
             AcabusEntityBase.AssignData(station, createUser, createTime, modifyUser, modifyTime, active);
-            
+
             return station;
         }
 
@@ -321,27 +359,31 @@ namespace Opera.Acabus.Core.DataAccess
         }
 
         /// <summary>
-        /// Deserializa los valores de la entidad derivada de <see cref="AcabusEntityBase"/>.
+        /// Serializa las propiedades de la entidad derivada de <see cref="AcabusEntityBase"/>.
         /// </summary>
-        /// <param name="source">Fuente de datos binarios que contienen la entidad.</param>
-        /// <param name="createUser">Nombre de usuario que creo la entidad.</param>
-        /// <param name="createTime">Fecha de creación de la entidad.</param>
-        /// <param name="modifyUser">Nombre de usuario que modificó la entidad.</param>
-        /// <param name="modifyTime">Fecha de modificación de la entidad.</param>
-        private static void Deserialize(ref Byte[] source, out String createUser, out DateTime createTime,
-            out String modifyUser, out DateTime modifyTime, out Boolean active)
+        /// <param name="entityBase">Entidad a serializar.</param>
+        /// <returns>Secuencia de bytes que representa la entidad.</returns>
+        public static Byte[] Serialize(AcabusEntityBase entityBase)
         {
-            var createUserCount = Convert.ToInt32(BitConverter.ToInt64(source, 0));
-            createUser = Encoding.UTF8.GetString(source, 8, createUserCount);
-            createTime = DateTime.FromBinary(BitConverter.ToInt64(source, 8 + createUserCount));
+            var bCreateTime = BitConverter.GetBytes(entityBase.CreateTime.ToBinary());
+            var bModifyTime = BitConverter.GetBytes(entityBase.ModifyTime.ToBinary());
+            var bCreateUser = Encoding.UTF8.GetBytes(entityBase.CreateUser);
+            var bModifyUser = Encoding.UTF8.GetBytes(entityBase.ModifyUser);
 
-            var modifyUserCount = Convert.ToInt32(BitConverter.ToInt64(source, 16 + createUserCount));
-            modifyUser = Encoding.UTF8.GetString(source, 24 + createUserCount, modifyUserCount);
-            modifyTime = DateTime.FromBinary(BitConverter.ToInt64(source, 24 + createUserCount + modifyUserCount));
+            var bCreateUserCount = BitConverter.GetBytes(bCreateUser.LongLength);
+            var bModifyUserCount = BitConverter.GetBytes(bModifyUser.LongLength);
 
-            active = BitConverter.ToBoolean(source, 32 + createUserCount + modifyUserCount);
+            var bActive = BitConverter.GetBytes(entityBase.Active);
 
-            source = source.Skip(33 + createUserCount + modifyUserCount).ToArray();
+            return new[] {
+                bCreateUserCount,
+                bCreateUser,
+                bCreateTime,
+                bModifyUserCount,
+                bModifyUser,
+                bModifyTime,
+                bActive
+            }.Merge().ToArray();
         }
 
         /// <summary>
@@ -372,34 +414,6 @@ namespace Opera.Acabus.Core.DataAccess
             var s = Encoding.UTF8.GetString(bytes, startIndex, count);
             s = String.IsNullOrEmpty(s) ? null : s;
             return s;
-        }
-
-        /// <summary>
-        /// Serializa las propiedades de la entidad derivada de <see cref="AcabusEntityBase"/>.
-        /// </summary>
-        /// <param name="entityBase">Entidad a serializar.</param>
-        /// <returns>Secuencia de bytes que representa la entidad.</returns>
-        private static Byte[] Serialize(AcabusEntityBase entityBase)
-        {
-            var bCreateTime = BitConverter.GetBytes(entityBase.CreateTime.ToBinary());
-            var bModifyTime = BitConverter.GetBytes(entityBase.ModifyTime.ToBinary());
-            var bCreateUser = Encoding.UTF8.GetBytes(entityBase.CreateUser);
-            var bModifyUser = Encoding.UTF8.GetBytes(entityBase.ModifyUser);
-
-            var bCreateUserCount = BitConverter.GetBytes(bCreateUser.LongLength);
-            var bModifyUserCount = BitConverter.GetBytes(bModifyUser.LongLength);
-
-            var bActive = BitConverter.GetBytes(entityBase.Active);
-
-            return new[] {
-                bCreateUserCount,
-                bCreateUser,
-                bCreateTime,
-                bModifyUserCount,
-                bModifyUser,
-                bModifyTime,
-                bActive
-            }.Merge().ToArray();
         }
     }
 }

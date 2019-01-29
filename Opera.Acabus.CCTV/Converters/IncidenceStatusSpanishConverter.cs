@@ -12,7 +12,7 @@ namespace Opera.Acabus.Cctv.Converters
     public sealed class IncidenceStatusSpanishConverter : TranslateEnumConverter<IncidenceStatus>
     {
         /// <summary>
-        /// Crea una instancia del traductor de la enumaración <see cref="IncidenceStatus"/>.
+        /// Crea una instancia del traductor de la enumeración <see cref="IncidenceStatus"/>.
         /// </summary>
         public IncidenceStatusSpanishConverter() : base(new IncidenceStatusTranslator()) { }
     }

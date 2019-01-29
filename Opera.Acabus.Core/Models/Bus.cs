@@ -1,7 +1,7 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
 using InnSyTech.Standard.Mvvm;
-using Opera.Acabus.Core.Models.ModelsBase;
+using Opera.Acabus.Core.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

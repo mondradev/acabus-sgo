@@ -311,7 +311,7 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
                         "para el identificador de la actividad relacionada con la devolución del dinero. " +
                         "Añada la configuración --> <Cctv> <refundOfMoney Money=\"id_fault\" Bill=\"id_fault\" /> </Cctv>");
 
-                IncidenceStatus status = SelectedDestiny.RequiresMoving ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
+                IncidenceStatus status = SelectedDestiny.RequiresMoveToCAU ? IncidenceStatus.UNCOMMIT : IncidenceStatus.CLOSE;
                 Activity refundFault = AcabusDataContext.DbContext.Read<Activity>().FirstOrDefault(df => df.ID == idFault);
 
                 if (refundFault == null)
@@ -322,9 +322,9 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
                     Device = SelectedKvr,
                     FinishDate = RefundDateTime,
                     StartDate = RefundDateTime,
-                    Technician = SelectedTechnician,
+                    StaffThatResolve = SelectedTechnician,
                     WhoReporting = AcabusDataContext.ConfigContext["Owner"]?.ToString("name"),
-                    Observations = Observations ?? String.Format("DEVOLUCIÓN {0} {1:C} A {2}", SelectedDestiny.CashType.Translate(), Single.Parse(Quantity), SelectedDestiny),
+                    FaultObservations = Observations ?? String.Format("DEVOLUCIÓN {0} {1:C} A {2}", SelectedDestiny.CashType.Translate(), Single.Parse(Quantity), SelectedDestiny),
                     Priority = Priority.NONE,
                     Activity = refundFault,
                     Status = status
@@ -333,7 +333,7 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
                 Models.RefundOfMoney refundOfMoney = new Models.RefundOfMoney(incidence)
                 {
                     CashDestiny = SelectedDestiny,
-                    Quantity = Single.Parse(Quantity),
+                    Amount = Single.Parse(Quantity),
                     RefundDate = status == IncidenceStatus.CLOSE ? RefundDateTime : (DateTime?)null,
                     Status = status == IncidenceStatus.CLOSE ? RefundStatus.DELIVERED : RefundStatus.FOR_DELIVERY
                 };
@@ -341,7 +341,7 @@ namespace Opera.Acabus.Cctv.SubModules.RefundOfMoney.ViewModels
                 if (AcabusDataContext.DbContext.Create(refundOfMoney, 1))
                 {
                     Dispatcher.CloseDialog();
-                    ShowMessage(String.Format("Devolución de dinero generada con folio: F-{0:D5}", incidence.Folio));
+                    ShowMessage(String.Format("Devolución de dinero generada con folio: F-{0:D5}", incidence.ID));
                 }
                 else
                     throw new InvalidOperationException("No se logró generar la devolución de dinero.");

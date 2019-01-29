@@ -32,7 +32,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// Crea una nueva instancia del modelo de la vista.
         /// </summary>
         public AddBusViewModel()
-            => AddBusCommand = new Command(AddBusExecute, AddBusCanExecute);
+        {
+            AddBusCommand = new Command(AddBusExecute, AddBusCanExecute);
+        }
 
         /// <summary>
         /// Obtiene el comando que agrega el autobús al sistema.
@@ -127,7 +129,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="arg">Parametro del comando.</param>
         /// <returns>Un valor true si es posible ejecutar el comando.</returns>
         private bool AddBusCanExecute(object arg)
-            => Validate();
+        {
+            return Validate();
+        }
 
         /// <summary>
         /// Crea una instancia <see cref="Bus"/> a partir de la información de la instancia actual

@@ -61,8 +61,8 @@
     <Compile Include="Models\DeviceType.cs" />
     <Compile Include="Models\DeviceTypeExtension.cs" />
     <Compile Include="Models\DeviceTypeSpanishTranslator.cs" />
-    <Compile Include="Models\ModelsBase\AcabusEntityBase.cs" />
-    <Compile Include="Models\ModelsBase\AcabusEntityExtension.cs" />
+    <Compile Include="Models\Base\AcabusEntityBase.cs" />
+    <Compile Include="Models\Base\AcabusEntityExtension.cs" />
     <Compile Include="Models\RouteType.cs" />
     <Compile Include="Services\AcabusAdaptiveMessageFieldID.cs" />
     <Compile Include="Services\AcabusAdaptiveMessageFieldIDExtension.cs" />

@@ -51,13 +51,6 @@ namespace Opera.Acabus.Cctv
         public override FrameworkElement Icon => GuiHelper.CreateIcon("M18.15,4.94C17.77,4.91 17.37,5 17,5.2L8.35,10.2C7.39,10.76 7.07,12 7.62,12.94L9.12,15.53C9.67,16.5 10.89,16.82 11.85,16.27L13.65,15.23C13.92,15.69 14.32,16.06 14.81,16.27V18.04C14.81,19.13 15.7,20 16.81,20H22V18.04H16.81V16.27C17.72,15.87 18.31,14.97 18.31,14C18.31,13.54 18.19,13.11 17.97,12.73L20.5,11.27C21.47,10.71 21.8,9.5 21.24,8.53L19.74,5.94C19.4,5.34 18.79,5 18.15,4.94M6.22,13.17L2,13.87L2.75,15.17L4.75,18.63L5.5,19.93L8.22,16.63L6.22,13.17Z");
 
         /// <summary>
-        /// Obtiene una lista de todas las incidencias abiertas, pendientes y sin confirmar así como
-        /// las cerradas hasta hace 5 días.
-        /// </summary>
-        public ObservableCollection<Incidence> Incidences
-            => _incidences ?? (_incidences = new ObservableCollection<Incidence>());
-
-        /// <summary>
         /// Obtiene el tipo de módulo.
         /// </summary>
         public override ModuleType ModuleType => ModuleType.VIEWER;
@@ -76,109 +69,7 @@ namespace Opera.Acabus.Cctv
         /// Obtiene el tipo de la vista principal del módulo.
         /// </summary>
         public override Type ViewType => typeof(CctvReportsView);
-
-        /// <summary>
-        /// Obtiene la lista de asignaciones disponibles por el sistema de Cctv.
-        /// </summary>
-        /// <returns> Una secuencia de personal asignable. </returns>
-        public IEnumerable<AssignableStaff> GetStaff()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Invoca el cuadro de dialogo para la apertura de uno o multiples folios.
-        /// </summary>
-        /// <param name="callback">
-        /// Llamada de vuelte después de realizar la acción con una respuesta positiva.
-        /// </param>
-        public void InvokeAddIncidenceDialog(Action callback = null)
-            => Dispatcher.RequestShowDialog(new CreateIncidenceView(), delegate
-            {
-                RefreshData();
-                callback?.Invoke();
-            });
-
-        /// <summary>
-        /// Invoca el cuadro de dialogo del cierre de uno o multiples folios.
-        /// </summary>
-        /// <param name="selectedIncidences"> Secuencia que contiene los folios a cerrar. </param>
-        /// <param name="callback">
-        /// Llamada de vuelte después de realizar la acción con una respuesta positiva.
-        /// </param>
-        public void InvokeCloseIncidence(IEnumerable<Incidence> selectedIncidences, Action callback = null)
-        {
-            if (selectedIncidences.Count() > 1)
-                Dispatcher.RequestShowDialog(new MultiCloseIncidencesView
-                {
-                    DataContext = new MultiCloseIncidencesViewModel
-                    {
-                        SelectedIncidences = new ObservableCollection<Incidence>(selectedIncidences)
-                    }
-                }, delegate
-                {
-                    RefreshData();
-                    callback?.Invoke();
-                });
-            else
-                Dispatcher.RequestShowDialog(new CloseIncidenceView
-                {
-                    DataContext = new CloseIncidenceViewModel
-                    {
-                        SelectedIncidence = selectedIncidences.FirstOrDefault()
-                    }
-                }, delegate
-                {
-                    RefreshData();
-                    callback?.Invoke();
-                });
-        }
-
-        /// <summary>
-        /// Invoca el cuadro de dialogo que permite exportar la información en formato CSV.
-        /// </summary>
-        public void InvokeExportDialog()
-            => Dispatcher.RequestShowDialog(new ExportDataView());
-
-        /// <summary>
-        /// Invoca el cuadro de dialogo que permite la busqueda de multiples folios en el historial.
-        /// </summary>
-        public void InvokeHistoryIncidence()
-            => Dispatcher.RequestShowDialog(new IncidencesHistorialView());
-
-        /// <summary>
-        /// Invoca el cuadro de dialogo que permite la modificación de los atributos del folio.
-        /// </summary>
-        /// <param name="selectedIncidence"> Incidencia a modificar. </param>
-        /// <param name="callback">
-        /// Llamada de vuelte después de realizar la acción con una respuesta positiva.
-        /// </param>
-        public void InvokeModifyDialog(Incidence selectedIncidence, Action callback = null)
-        {
-            var viewModel = new ModifyIncidenceViewModel { SelectedIncidence = selectedIncidence };
-            Dispatcher.RequestShowDialog(new ModifyIncidenceView() { DataContext = viewModel },
-                delegate { callback?.Invoke(); });
-        }
-
-        /// <summary>
-        /// Invoca el cuadro de dialogo que permite la gestion de los autobuses en fuera de servicio.
-        /// </summary>
-        public void InvokeOffDutyBusDialog()
-            => Dispatcher.RequestShowDialog(new OffDutyBusView());
-
-        /// <summary>
-        /// Invoca el cuadro de dialog que permite la devolución de dinero.
-        /// </summary>
-        /// <param name="callback">
-        /// Llamada de vuelte después de realizar la acción con una respuesta positiva.
-        /// </param>
-        public void InvokeRefundCashDialog(Action callback = null)
-            => Dispatcher.RequestShowDialog(new RefundOfMoneyView(), delegate
-            {
-                RefreshData();
-                callback?.Invoke();
-            });
-
+                
         /// <summary>
         /// Inicializa el módulo de Cctv_Manager, cargando la lista de incidencias utilizadas en el módulo.
         /// </summary>
@@ -202,23 +93,5 @@ namespace Opera.Acabus.Cctv
             }
         }
 
-        /// <summary>
-        /// Actualiza la información leída desde la base de datos.
-        /// </summary>
-        public void RefreshData()
-        {
-            try
-            {
-                _incidences = new ObservableCollection<Incidence>(AcabusDataContext.DbContext
-                     .Read<Incidence>()
-                     .Where(i => i.Status != IncidenceStatus.CLOSE
-                             || (i.StartDate > DateTime.Now.AddDays(-5)))
-                     .LoadReference(3));
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
-            }
-        }
     }
 }

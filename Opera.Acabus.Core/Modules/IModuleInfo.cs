@@ -1,21 +1,21 @@
-Ôªøusing System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace Opera.Acabus.Core.Modules
 {
     /// <summary>
-    /// Define la estructura b√°sica de un m√≥dulo que proporciona servicios para el Sistema Gestor de Operaciones.
+    /// Define la estructura b·sica de un mÛdulo que proporciona servicios para el Sistema Gestor de Operaciones.
     /// </summary>
     public interface IModuleInfo
     {
         /// <summary>
-        /// Obtiene el autor del m√≥dulo.
+        /// Obtiene el autor del mÛdulo.
         /// </summary>
         String Author { get; }
 
         /// <summary>
-        /// Obtiene el nombre c√≥digo del m√≥dulo.
+        /// Obtiene el nombre cÛdigo del mÛdulo.
         /// </summary>
         string CodeName { get; }
 
@@ -30,19 +30,19 @@ namespace Opera.Acabus.Core.Modules
         String DllFilename { get; }
 
         /// <summary>
-        /// Obtiene el nombre del m√≥dulo.
+        /// Obtiene el nombre del mÛdulo.
         /// </summary>
         String Name { get; }
 
         /// <summary>
-        /// Obtiene la versi√≥n actual del m√≥dulo.
+        /// Obtiene la versiÛn actual del mÛdulo.
         /// </summary>
         String Version { get; }
 
         /// <summary>
-        /// Carga el m√≥dulo en el sistema y devuelve un valor que indica si lo hizo correctamente.
+        /// Carga el mÛdulo en el sistema y devuelve un valor que indica si lo hizo correctamente.
         /// </summary>
-        /// <returns>Un valor true si carg√≥ correctamente.</returns>
+        /// <returns>Un valor true si cargÛ correctamente.</returns>
         bool LoadModule();
     }
 }

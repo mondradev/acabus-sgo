@@ -246,10 +246,10 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
         {
             _finishDate = DateTime.Now;
             _isIncidenceFromKvr = _selectedIncidence.Device.Type == DeviceType.KVR;
-            _observationes = _selectedIncidence.Observations;
+            _observationes = _selectedIncidence.FaultObservations;
             if (_selectedIncidence.Status == IncidenceStatus.UNCOMMIT)
             {
-                _selectedTechnician = _selectedIncidence.Technician;
+                _selectedTechnician = _selectedIncidence.StaffThatResolve;
                 _isCommit = _isIncidenceFromKvr;
                 _isIncidenceFromKvr = false;
             }
@@ -325,33 +325,33 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
         private void CloseIncidenceCommandExecute(object parameter)
         {
             var previousStatus = SelectedIncidence.Status;
-            SelectedIncidence.Technician = SelectedTechnician;
-            SelectedIncidence.Observations = Observations;
+            SelectedIncidence.StaffThatResolve = SelectedTechnician;
+            SelectedIncidence.FaultObservations = Observations;
             SelectedIncidence.Status = IncidenceStatus.CLOSE;
             SelectedIncidence.FinishDate = FinishDate;
 
             if (SelectedIncidence.Device.Type == DeviceType.KVR && previousStatus == IncidenceStatus.UNCOMMIT)
             {
                 Models.RefundOfMoney refundOfMoney = AcabusDataContext.DbContext.Read<Models.RefundOfMoney>().LoadReference(2)
-                    .FirstOrDefault(r => r.Incidence.Folio == SelectedIncidence.Folio);
+                    .FirstOrDefault(r => r.Incidence.ID == SelectedIncidence.ID);
 
                 if (refundOfMoney != null)
                 {
                     refundOfMoney.RefundDate = FinishDate;
                     refundOfMoney.Incidence.FinishDate = FinishDate;
-                    refundOfMoney.Incidence.Technician = SelectedTechnician;
-                    refundOfMoney.Incidence.Observations = Observations;
+                    refundOfMoney.Incidence.StaffThatResolve = SelectedTechnician;
+                    refundOfMoney.Incidence.FaultObservations = Observations;
                     refundOfMoney.Incidence.Status = IncidenceStatus.CLOSE;
 
                     if (AcabusDataContext.DbContext.Update(refundOfMoney, 1))
                     {
                         Dispatcher.CloseDialog();
-                        ShowMessage(String.Format("Devolución correcta: F-{0:D5}", SelectedIncidence.Folio));
+                        ShowMessage(String.Format("Devolución correcta: F-{0:D5}", SelectedIncidence.ID));
                     }
                     else
                     {
                         Dispatcher.CloseDialog();
-                        ShowMessage(String.Format("No se confirmó la devolución de dinero F-{0:D5}", SelectedIncidence.Folio));
+                        ShowMessage(String.Format("No se confirmó la devolución de dinero F-{0:D5}", SelectedIncidence.ID));
                     }
                 }
                 else
@@ -365,10 +365,10 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                 var refundOfMoney = new Models.RefundOfMoney(SelectedIncidence)
                 {
                     CashDestiny = SelectedCashDestiny,
-                    Quantity = Single.Parse(Quantity)
+                    Amount = Single.Parse(Quantity)
                 };
 
-                if (SelectedCashDestiny.RequiresMoving)
+                if (SelectedCashDestiny.RequiresMoveToCAU)
                 {
                     SelectedIncidence.Status = IncidenceStatus.UNCOMMIT;
                     SelectedIncidence.Priority = Priority.NONE;
@@ -381,14 +381,14 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
                 }
 
                 if (String.IsNullOrEmpty(Observations))
-                    SelectedIncidence.Observations = String.Format("DEVOLUCIÓN DE {0} {1:C} A {2}",
-                        CashTypeName, refundOfMoney.Quantity, refundOfMoney.CashDestiny.Description);
+                    SelectedIncidence.FaultObservations = String.Format("DEVOLUCIÓN DE {0} {1:C} A {2}",
+                        CashTypeName, refundOfMoney.Amount, refundOfMoney.CashDestiny.Description);
 
                 if (AcabusDataContext.DbContext.Create(refundOfMoney))
                     if (AcabusDataContext.DbContext.Update(SelectedIncidence))
                     {
                         Dispatcher.CloseDialog();
-                        ShowMessage(String.Format("Incidencia cerrada correctamente: F-{0:D5}", SelectedIncidence.Folio));
+                        ShowMessage(String.Format("Incidencia cerrada correctamente: F-{0:D5}", SelectedIncidence.ID));
                     }
                     else
                     {
@@ -400,7 +400,7 @@ namespace Opera.Acabus.Cctv.SubModules.CloseIncidences.ViewModels
             else if (AcabusDataContext.DbContext.Update(SelectedIncidence))
             {
                 Dispatcher.CloseDialog();
-                ShowMessage(String.Format("Incidencia cerrada correctamente: F-{0:D5}", SelectedIncidence.Folio));
+                ShowMessage(String.Format("Incidencia cerrada correctamente: F-{0:D5}", SelectedIncidence.ID));
             }
             else
             {

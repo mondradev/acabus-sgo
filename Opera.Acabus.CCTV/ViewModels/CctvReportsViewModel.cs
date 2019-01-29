@@ -1,4 +1,5 @@
 ﻿using InnSyTech.Standard.Mvvm;
+using Opera.Acabus.Cctv.DataAccess;
 using Opera.Acabus.Cctv.Helpers;
 using Opera.Acabus.Cctv.Models;
 using Opera.Acabus.Core.DataAccess;
@@ -49,12 +50,7 @@ namespace Opera.Acabus.Cctv.ViewModels
         /// </summary>
         public CctvReportsViewModel()
         {
-            if (!AcabusDataContext.GetService("Cctv_Manager", out dynamic service))
-                throw new InvalidOperationException("No se logró tener acceso al servicio Cctv_Manager");
-
-            _cctvManager = service as CctvModule;
-
-            ShowHistoryDialogCommand = new Command(p => _cctvManager.InvokeHistoryIncidence());
+            ShowHistoryDialogCommand = new Command(p => CctvContext.InvokeHistoryIncidence());
 
             ReassignTechnicianCommand = new Command(p =>
             {
@@ -87,17 +83,17 @@ namespace Opera.Acabus.Cctv.ViewModels
                 SelectedIncidences.ToClipboard();
             });
 
-            ShowCloseIncidenceDialogCommand = new Command(p => _cctvManager?.InvokeCloseIncidence(SelectedIncidences, ApplyChanges), CanInvokeCloseDialog);
+            ShowCloseIncidenceDialogCommand = new Command(p => CctvContext.InvokeCloseIncidence(SelectedIncidences, ApplyChanges), CanInvokeCloseDialog);
 
-            ShowAddIncidenceDialogCommand = new Command(p => _cctvManager?.InvokeAddIncidenceDialog(ApplyChanges));
+            ShowAddIncidenceDialogCommand = new Command(p => CctvContext.InvokeAddIncidenceDialog(ApplyChanges));
 
-            ShowRefundCashDialogCommand = new Command(p => _cctvManager?.InvokeRefundCashDialog(ApplyChanges));
+            ShowRefundCashDialogCommand = new Command(p => CctvContext.InvokeRefundCashDialog(ApplyChanges));
 
-            ShowModifyIncidenceDialogCommand = new Command(p => _cctvManager?.InvokeModifyDialog(SelectedIncidences.FirstOrDefault(), ApplyChanges), CanInvokeModifyDialog);
+            ShowModifyIncidenceDialogCommand = new Command(p => CctvContext.InvokeModifyDialog(SelectedIncidences.FirstOrDefault(), ApplyChanges), CanInvokeModifyDialog);
 
-            ShowExportDialogCommand = new Command(p => _cctvManager?.InvokeExportDialog());
+            ShowExportDialogCommand = new Command(p => CctvContext.InvokeExportDialog());
 
-            ShowOffDutyVehiclesDialogCommand = new Command(p => _cctvManager?.InvokeOffDutyBusDialog());
+            ShowOffDutyVehiclesDialogCommand = new Command(p => CctvContext.InvokeOffDutyBusDialog());
 
             RefreshIncidencesCommand = new Command(p =>
             {
@@ -131,7 +127,7 @@ namespace Opera.Acabus.Cctv.ViewModels
                 {
                     Boolean isClosed = i.Status == IncidenceStatus.CLOSE;
                     Boolean isMatch = String.IsNullOrEmpty(KeywordToSearchIncidence)
-                        || (i.Technician != null && i.Technician.Name.ToUpper().Contains(KeywordToSearchIncidence.ToUpper()))
+                        || (i.StaffThatResolve != null && i.StaffThatResolve.Name.ToUpper().Contains(KeywordToSearchIncidence.ToUpper()))
                         || i.Activity.ToString().ToUpper().Contains(KeywordToSearchIncidence.ToUpper());
 
                     return isClosed && isMatch;
@@ -146,7 +142,7 @@ namespace Opera.Acabus.Cctv.ViewModels
         /// Obtiene una lista de las incidencias actualmente abiertas.
         /// </summary>
         public ObservableCollection<Incidence> Incidences
-            => _cctvManager?.Incidences;
+            => new ObservableCollection<Incidence>(CctvContext.Incidences);
 
         /// <summary>
         /// Obtiene o establece el criterio de busqueda la incidencia cerrada.
@@ -182,7 +178,7 @@ namespace Opera.Acabus.Cctv.ViewModels
                 {
                     Boolean isOpen = i.Status != IncidenceStatus.CLOSE;
                     Boolean isMatch = String.IsNullOrEmpty(OpenedFolioToSearch)
-                        || String.Format("F-{0:D5", i.Folio).ToUpper().Contains(OpenedFolioToSearch.ToUpper());
+                        || String.Format("F-{0:D5", i.ID).ToUpper().Contains(OpenedFolioToSearch.ToUpper());
 
                     return isOpen && isMatch;
                 }).OrderByDescending(i => i.Activity.Priority)
@@ -259,7 +255,7 @@ namespace Opera.Acabus.Cctv.ViewModels
         /// Invoca las funciones del módulo que permite actualizar la lista de incidencias.
         /// </summary>
         public void ReloadData()
-            => _cctvManager?.RefreshData();
+            => CctvContext.RefreshData();
 
         /// <summary>
         /// Determina si es posible invocar el cuadro de dialogo para cerrar incidencias.

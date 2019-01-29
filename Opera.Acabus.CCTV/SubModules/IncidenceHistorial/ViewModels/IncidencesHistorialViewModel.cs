@@ -415,7 +415,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
                 var query = AcabusDataContext.DbContext.Read<Incidence>().LoadReference(3);
 
                 if (UInt64.TryParse(Folio, out ulong folio))
-                    query = query.Where(i => i.Folio == folio);
+                    query = query.Where(i => i.ID == folio);
 
                 if (SelectedLocation != null && SelectedLocation is Station)
                     query = query.Where(i => i.Device.Station.ID == (SelectedLocation as Station).ID);
@@ -432,7 +432,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
                     query = query.Where(i => i.Device.ID == SelectedDevice.ID);
 
                 if (SelectedTechnician != null)
-                    query = query.Where(i => i.Technician.ID == SelectedTechnician.ID);
+                    query = query.Where(i => i.StaffThatResolve.ID == SelectedTechnician.ID);
 
                 if (SelectedDescription != null)
                     query = query.Where(i => i.Activity.Description == SelectedDescription.Description);
@@ -460,7 +460,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
                 var query = AcabusDataContext.DbContext.Read<Models.RefundOfMoney>().LoadReference(4);
 
                 if (UInt64.TryParse(Folio, out ulong folio))
-                    query = query.Where(r => r.Incidence.Folio == folio);
+                    query = query.Where(r => r.Incidence.ID == folio);
 
                 if (SelectedLocation != null && SelectedLocation is Station)
                     query = query.Where(r => r.Incidence.Device.Station.ID == (SelectedLocation as Station).ID);
@@ -477,7 +477,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
                     query = query.Where(r => r.Incidence.Device.ID == SelectedDevice.ID);
 
                 if (SelectedTechnician != null)
-                    query = query.Where(r => r.Incidence.Technician.ID == SelectedTechnician.ID);
+                    query = query.Where(r => r.Incidence.StaffThatResolve.ID == SelectedTechnician.ID);
 
                 if (SelectedDescription != null)
                     query = query.Where(r => r.Incidence.Activity.Description == SelectedDescription.Description);
@@ -493,7 +493,7 @@ namespace Opera.Acabus.Cctv.SubModules.IncidenceHistorial.ViewModels
                     var executed = query.ToList();
 
                     foreach (var refund in executed)
-                        refund.Incidence.RefundOfMoney = refund;
+                        refund.Incidence.RefundsOfMoney.Add(refund);
 
                     _result = executed.Select(r => r.Incidence);
 

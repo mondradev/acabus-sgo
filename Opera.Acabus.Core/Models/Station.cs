@@ -1,5 +1,5 @@
 ﻿using InnSyTech.Standard.Database;
-using Opera.Acabus.Core.Models.ModelsBase;
+using Opera.Acabus.Core.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
