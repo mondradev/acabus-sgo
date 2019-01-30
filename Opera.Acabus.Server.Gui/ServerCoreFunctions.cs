@@ -3,7 +3,7 @@ using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
-using Opera.Acabus.Core.Models.ModelsBase;
+using Opera.Acabus.Core.Models.Base;
 using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core;
 using Opera.Acabus.Server.Core.Utils;

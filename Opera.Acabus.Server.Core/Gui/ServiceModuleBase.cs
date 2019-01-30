@@ -4,6 +4,7 @@ using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core.Models;
 using Opera.Acabus.Server.Core.Utils;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Opera.Acabus.Server.Core.Gui
@@ -16,6 +17,7 @@ namespace Opera.Acabus.Server.Core.Gui
     /// </summary>
     public abstract class ServiceModuleBase : IServiceModule, INotifyPropertyChanged
     {
+
         /// <summary>
         /// Estado actual del servicio.
         /// </summary>
@@ -50,7 +52,7 @@ namespace Opera.Acabus.Server.Core.Gui
         public void Request(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e)
         {
             if (ServerHelper.ValidateRequest(message, GetType()))
-                ServerHelper.CallFunc(message, GetType());
+                ServerHelper.CallFunc(message, GetType(), this);
             else
                 ServerHelper.CreateError("Error al realizar la petición: " + GetType().FullName + " "
                      + message.GetString(AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()), 403, e);

@@ -2,6 +2,7 @@
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.Services;
+using Opera.Acabus.Server.Core.Gui;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,19 +21,19 @@ namespace Opera.Acabus.Server.Core.Utils
         /// </summary>
         /// <param name="message">Mensaje de la petición</param>
         /// <param name="functionsClass">Clase de las funciones.</param>
-        public static void CallFunc(IMessage message, Type functionsClass)
+        public static void CallFunc(IMessage message, Type functionsClass, ServiceModuleBase module = null)
         {
             String funcName = message[6]?.ToString();
 
             if (String.IsNullOrEmpty(funcName))
                 throw new InvalidOperationException("No se especificó el nombre de la función.");
 
+            MethodInfo method = null;
+
             MethodInfo[] methods = functionsClass.GetMethods(BindingFlags.Static | BindingFlags.Public);
             methods = methods.Where(x => x.Name == funcName).ToArray();
 
             IEnumerator enumerator = methods.GetEnumerator();
-
-            MethodInfo method = null;
 
             while (enumerator.MoveNext() && !ValidateMethod(message, method = enumerator.Current as MethodInfo)) ;
 

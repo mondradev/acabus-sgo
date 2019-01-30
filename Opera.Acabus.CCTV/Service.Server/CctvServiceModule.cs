@@ -1,16 +1,9 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
-using Opera.Acabus.Cctv.DataAccess;
-using Opera.Acabus.Cctv.Helpers;
 using Opera.Acabus.Cctv.Models;
-using Opera.Acabus.Core.DataAccess;
-using Opera.Acabus.Core.Models;
-using Opera.Acabus.Core.Models.ModelsBase;
-using Opera.Acabus.Core.Services;
-using Opera.Acabus.Server.Core;
 using Opera.Acabus.Server.Core.Gui;
 using Opera.Acabus.Server.Core.Utils;
 using System;
-using System.Linq;
+using System.Reflection;
 
 namespace Opera.Acabus.Cctv.Service.Server
 {
@@ -18,13 +11,13 @@ namespace Opera.Acabus.Cctv.Service.Server
     /// Provee de todos los servicios requeridos por el módulo de Cctv y dependientes. Permite la
     /// gestión de incidencias en los equipos así como la alta de devoluciones de dinero.
     /// </summary>
-    public sealed class CctvService : ServiceModuleBase
+    public sealed class CctvServiceModule : ServiceModuleBase
     {
         /// <summary>
         /// Obtiene el nombre del servicio.
         /// </summary>
         public override string ServiceName => "Cctv_Service";
-
+        
         /// <summary>
         /// Crea una nueva incidencia especificando sus atributos iniciales.
         /// </summary>
@@ -78,7 +71,6 @@ namespace Opera.Acabus.Cctv.Service.Server
         /// <param name="message">Mensaje de la petición.</param>
         public static void UpdateIncidence(IMessage message)
             => IncidenceService.UpdateIncidence(message);
-
 
         /// <summary>
         /// Crea un seguimiento de incidencia especificando sus atributos iniciales.
