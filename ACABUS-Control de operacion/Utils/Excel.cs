@@ -1,5 +1,6 @@
 ﻿using Microsoft.Office.Interop.Excel;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
@@ -137,10 +138,14 @@ namespace ACABUS_Control_de_operacion.Utils
             try
             {
                 range = _worksheetActive.UsedRange;
+
                 cell = range.get_Item(rowIndex, columnIndex);
-                cell.Value2 = value;
+                              
+                cell.Value = value;
             }
-            catch (Exception) { }
+            catch (Exception ex) {
+                Trace.WriteLine(ex.StackTrace);
+            }
             finally
             {
                 if (cell != null)

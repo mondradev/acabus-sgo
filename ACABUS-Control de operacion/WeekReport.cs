@@ -20,6 +20,23 @@ namespace ACABUS_Control_de_operacion
         {
             Excel excel = Excel.Open(AcabusData.TEMPLATE_WEEK_REPORT);
 
+            DateTime iniDate = DateTime.Parse(weekFirstDay);
+            DateTime endDate = iniDate.AddDays(6);
+            String timeLapse = "";
+            if (iniDate.Year.Equals(endDate.Year))
+                if (iniDate.Month.Equals(endDate.Month))
+                    timeLapse = String.Format("{0:dd} al {1:dd} de {0:MMMM} del {0:yyyy}", iniDate, endDate);
+                else
+                    timeLapse = String.Format("{0:dd} de {0:MMMM} al {1:dd} de {1:MMMM} del {0:yyyy}", iniDate, endDate);
+            else
+                timeLapse = String.Format("{0:dd} de {0:MMMM} del {0:yyyy} al {1:dd} de {1:MMMM} del {1:yyyy}", iniDate, endDate);
+
+            excel.SetWorksheetActive("Contraprestación Anexo\"C\"");
+            excel.SetValue(timeLapse, "D6");
+
+
+            Trace.WriteLine(String.Format("Periodo {0}", timeLapse));                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+
             excel.SetWorksheetActive("Información_Troncal-Anexo\"A\"");
             excel.SetValue(weekFirstDay, "B12");
 
@@ -35,22 +52,6 @@ namespace ACABUS_Control_de_operacion
             );
             try
             {
-                DateTime iniDate = DateTime.Parse(weekFirstDay);
-                DateTime endDate = iniDate.AddDays(6);
-                String timeLapse = "";
-                if (iniDate.Year.Equals(endDate.Year))
-                    if (iniDate.Month.Equals(endDate.Month))
-                        timeLapse = String.Format("{0:dd} al {1:dd} de {0:MMMM} del {0:yyyy}", iniDate, endDate);
-                    else
-                        timeLapse = String.Format("{0:dd} de {0:MMMM} al {1:dd} de {1:MMMM} del {0:yyyy}", iniDate, endDate);
-                else
-                    timeLapse = String.Format("{0:dd} de {0:MMMM} del {0:yyyy} al {1:dd} de {1:MMMM} del {1:yyyy}", iniDate, endDate);
-
-                excel.SetWorksheetActive("Contraprestación Anexo\"C\"");
-                excel.SetValue(timeLapse, "D5");
-
-                Trace.WriteLine("Periodo {0}", timeLapse);
-
                 String[][] sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_SALES)
                                                                                 .Replace("{paramFchIni}", weekFirstDay));
                 Boolean readHeader = false;
@@ -115,11 +116,11 @@ namespace ACABUS_Control_de_operacion
                     if (i > 6)
                         break;
 
-                    excel.SetValue(row[1], "R" + (9 + i));
-                    excel.SetValue(row[2], "S" + (9 + i));
-                    excel.SetValue(row[3], "T" + (9 + i));
-                    excel.SetValue(row[4], "U" + (9 + i));
-                    excel.SetValue(row[5], "V" + (9 + i));
+                    excel.SetValue(row[1], "T" + (9 + i));
+                    excel.SetValue(row[2], "U" + (9 + i));
+                    excel.SetValue(row[3], "V" + (9 + i));
+                    excel.SetValue(row[4], "W" + (9 + i));
+                    excel.SetValue(row[5], "X" + (9 + i));
                     i++;
                 }
                 Trace.WriteLine("Detalle Validación - Vehículos ¡Listo!", "INFO");
@@ -140,11 +141,11 @@ namespace ACABUS_Control_de_operacion
                     if (i > 6)
                         break;
 
-                    excel.SetValue(row[1], "I" + (9 + i));
-                    excel.SetValue(row[2], "J" + (9 + i));
-                    excel.SetValue(row[3], "K" + (9 + i));
-                    excel.SetValue(row[4], "L" + (9 + i));
-                    excel.SetValue(row[5], "W" + (9 + i));
+                    excel.SetValue(row[1], "J" + (9 + i));
+                    excel.SetValue(row[2], "K" + (9 + i));
+                    excel.SetValue(row[3], "L" + (9 + i));
+                    excel.SetValue(row[4], "M" + (9 + i));
+                    excel.SetValue(row[5], "Y" + (9 + i));
                     i++;
                 }
                 Trace.WriteLine("Detalle Validación - Estaciones ¡Listo!", "INFO");
@@ -159,7 +160,7 @@ namespace ACABUS_Control_de_operacion
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
 
-                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
                         i++;
 
                     if (i > 6)
@@ -181,7 +182,7 @@ namespace ACABUS_Control_de_operacion
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
 
-                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
                         i++;
 
                     if (i > 6)
@@ -211,7 +212,7 @@ namespace ACABUS_Control_de_operacion
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("Otros");
 
-                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
                         i++;
 
                     if (i > 6)
@@ -235,13 +236,13 @@ namespace ACABUS_Control_de_operacion
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("DetalleValidacion");
 
-                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
                         i++;
 
                     if (i > 6)
                         break;
 
-                    excel.SetValue(row[1], "Y" + (9 + i));
+                    excel.SetValue(row[1], "AA" + (9 + i));
                     i++;
                 }
                 Trace.WriteLine("Detalle Validación - Mantenimiento en estaciones ¡Listo!", "INFO");
@@ -256,13 +257,13 @@ namespace ACABUS_Control_de_operacion
                     if (String.IsNullOrEmpty(row[0])) break;
                     excel.SetWorksheetActive("DetalleValidacion");
 
-                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
                         i++;
 
                     if (i > 6)
                         break;
 
-                    excel.SetValue(row[1], "X" + (9 + i));
+                    excel.SetValue(row[1], "Z" + (9 + i));
                     i++;
                 }
                 Trace.WriteLine("Detalle Validación - Mantenimiento en vehiculo ¡Listo!", "INFO");
@@ -278,7 +279,7 @@ namespace ACABUS_Control_de_operacion
 
                     excel.SetWorksheetActive("Información_Troncal-Anexo\"A\"");
 
-                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("I" + (12 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("I" + (12 + i)))).Equals(DateTime.Parse(row[0])))
                         i++;
 
                     if (i > 6)
@@ -301,7 +302,7 @@ namespace ACABUS_Control_de_operacion
 
                     excel.SetWorksheetActive("Otros");
 
-                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
                         i++;
 
                     if (i > 6)
@@ -312,6 +313,49 @@ namespace ACABUS_Control_de_operacion
                     i++;
                 }
                 Trace.WriteLine("Recargas y abonos a créditos en TPV ¡Listo!", "INFO");
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_DISC_TRUNK)
+                                                                              .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+                    excel.SetWorksheetActive("DetalleValidacion");
+
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
+                        i++;
+
+                    if (i > 6)
+                        break;
+
+                    excel.SetValue(row[1], "O" + (9 + i));
+                    i++;
+                }
+
+                Trace.WriteLine("Detalle Validación - Preferencial en estaciones ¡Listo!", "INFO");
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_DISC_VEHI)
+                                                                             .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+                    excel.SetWorksheetActive("DetalleValidacion");
+
+                      while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
+                        i++;
+
+                    if (i > 6)
+                        break;
+
+                    excel.SetValue(row[1], "H" + (9 + i));
+                    i++;
+                }
+                Trace.WriteLine("Detalle Validación - Preferencial en vehiculo ¡Listo!", "INFO");
 
             }
             catch (Exception ex)
