@@ -123,6 +123,7 @@ namespace ACABUS_Control_de_operacion
                     excel.SetValue(row[5], "X" + (9 + i));
                     i++;
                 }
+
                 Trace.WriteLine("Detalle Validación - Vehículos ¡Listo!", "INFO");
 
                 sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_ACCE_TRUNK)
@@ -356,6 +357,109 @@ namespace ACABUS_Control_de_operacion
                     i++;
                 }
                 Trace.WriteLine("Detalle Validación - Preferencial en vehiculo ¡Listo!", "INFO");
+
+                // Validaciones por TPR
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_ACCE_VEHI_TPR)
+                                                                                .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+                    excel.SetWorksheetActive("DetalleValidacion (TPR)");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
+                    excel.SetValue(row[1], "M" + (9 + i));
+                    excel.SetValue(row[2], "N" + (9 + i));
+                    excel.SetValue(row[3], "O" + (9 + i));
+                    excel.SetValue(row[4], "P" + (9 + i));
+                    i++;
+                }
+
+                Trace.WriteLine("Detalle Validación - Vehículos TPR ¡Listo!", "INFO");
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_ACCE_EST_TPR)
+                                                                               .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+                    excel.SetWorksheetActive("DetalleValidacion (TPR)");
+
+                    while (!DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])) & i < 7)
+                        i++;
+
+                    if (i > 6)
+                        break;
+
+                    excel.SetValue(row[1], "G" + (9 + i));
+                    excel.SetValue(row[2], "H" + (9 + i));
+                    excel.SetValue(row[3], "I" + (9 + i));
+                    i++;
+                }
+                Trace.WriteLine("Detalle Validación - Estaciones TPR ¡Listo!", "INFO");
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_ACCE_VEHI_CRED_TPR)
+                                                                               .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+                    excel.SetWorksheetActive("Otros");
+
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (26 + i)))).Equals(DateTime.Parse(row[0])))
+                        i++;
+
+                    if (i > 6)
+                        break;
+
+                    excel.SetValue(row[1], "C" + (26 + i));
+                    excel.SetValue(row[2], "D" + (26 + i));
+                    i++;
+                }
+                Trace.WriteLine("Otros - Viajes parciales TPR ¡Listo!", "INFO");
+
+                sqlResponse = psql.ExecuteQuery(File.ReadAllText(AcabusData.QUERY_FILE_ACCE_VEHI_CRED_COST_TPR)
+                                                                               .Replace("{paramFchIni}", weekFirstDay));
+                readHeader = false;
+                i = 0;
+                foreach (String[] row in sqlResponse)
+                {
+                    if (!readHeader) { readHeader = true; continue; }
+                    if (String.IsNullOrEmpty(row[0])) break;
+                    excel.SetWorksheetActive("Otros");
+
+                    while (i < 7 && !DateTime.FromOADate(Double.Parse(excel.GetValue("B" + (9 + i)))).Equals(DateTime.Parse(row[0])))
+                        i++;
+
+                    if (i > 6)
+                        break;
+
+                    excel.SetValue(row[1], "E" + (26 + i));
+                    excel.SetValue(row[2], "F" + (26 + i));
+                    excel.SetValue(row[3], "G" + (26 + i));
+                    excel.SetValue(row[4], "H" + (26 + i));
+                    excel.SetValue(row[5], "I" + (26 + i));
+                    excel.SetValue(row[6], "J" + (26 + i));
+                    excel.SetValue(row[7], "K" + (26 + i));
+                    excel.SetValue(row[8], "L" + (26 + i));
+                    excel.SetValue(row[9], "M" + (26 + i));
+                    excel.SetValue(row[10], "N" + (26+ i));
+                    i++;
+                }
+                Trace.WriteLine("Otros - Detalles viajes parciales TPR ¡Listo!", "INFO");
+
 
             }
             catch (Exception ex)
