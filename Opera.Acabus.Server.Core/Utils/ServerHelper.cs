@@ -21,7 +21,7 @@ namespace Opera.Acabus.Server.Core.Utils
         /// </summary>
         /// <param name="message">Mensaje de la petición</param>
         /// <param name="functionsClass">Clase de las funciones.</param>
-        public static void CallFunc(IMessage message, Type functionsClass, ServiceModuleBase module = null)
+        public static void CallFunc(IMessage message, Type functionsClass)
         {
             String funcName = message[6]?.ToString();
 
