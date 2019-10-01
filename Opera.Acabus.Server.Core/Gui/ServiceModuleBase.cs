@@ -52,7 +52,7 @@ namespace Opera.Acabus.Server.Core.Gui
         public void Request(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e)
         {
             if (ServerHelper.ValidateRequest(message, GetType()))
-                ServerHelper.CallFunc(message, GetType(), this);
+                ServerHelper.CallFunc(message, GetType());
             else
                 ServerHelper.CreateError("Error al realizar la petición: " + GetType().FullName + " "
                      + message.GetString(AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()), 403, e);

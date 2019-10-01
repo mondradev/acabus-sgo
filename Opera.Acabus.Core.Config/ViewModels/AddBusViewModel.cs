@@ -29,6 +29,11 @@ namespace Opera.Acabus.Core.Config.ViewModels
         private BusType? _type;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="IDVehi"/>
+        /// </summary>
+        private UInt32 _idVehi;
+
+        /// <summary>
         /// Crea una nueva instancia del modelo de la vista.
         /// </summary>
         public AddBusViewModel()
@@ -49,6 +54,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
             set {
                 _assignedRoute = value;
                 OnPropertyChanged(nameof(AssignedRoute));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el campo de identificador de vehículo.
+        /// </summary>
+        public UInt32 IDVehi {
+            get => _idVehi;
+            set {
+                _idVehi = value;
+                OnPropertyChanged(nameof(IDVehi));
             }
         }
 
@@ -141,7 +157,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddBusExecute(object obj)
         {
-            Bus bus = new Bus(0, EconomicNumber)
+            Bus bus = new Bus(IDVehi, EconomicNumber)
             {
                 Status = BusStatus.OPERATIONAL,
                 Type = Type.Value,

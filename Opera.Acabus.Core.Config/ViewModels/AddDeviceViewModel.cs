@@ -41,6 +41,11 @@ namespace Opera.Acabus.Core.Config.ViewModels
         private String serialNumber;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="IDEqui" />
+        /// </summary>
+        private UInt32 _idequi;
+
+        /// <summary>
         /// Crea una instancia nueva de <see cref="AddDeviceViewModel"/>.
         /// </summary>
         public AddDeviceViewModel()
@@ -63,6 +68,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// </summary>
         public IEnumerable<DeviceType> DeviceTypes => Enum.GetValues(typeof(DeviceType))
             .Cast<DeviceType>().Where(x => x != DeviceType.NONE);
+
+        /// <summary>
+        /// Obtiene o establece el ID de equipo.
+        /// </summary>
+        public UInt32 IDEqui {
+            get => _idequi;
+            set {
+                _idequi = value;
+                OnPropertyChanged(nameof(IDEqui));
+            }
+        }
 
         /// <summary>
         /// Obtiene o establece la dirección IP del equipo.
@@ -189,7 +205,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddDeviceExecute(object obj)
         {
-            Device device = new Device(SerialNumber, SelectedType.Value)
+            Device device = new Device(IDEqui, SerialNumber, SelectedType.Value)
             {
                 Station = SelectedStation,
                 Bus = SelectedBus,

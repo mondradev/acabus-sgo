@@ -163,7 +163,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
             RegisterHandlers(ServerContext.GetLocalSync("Route"), RefreshRoutes);
             RegisterHandlers(ServerContext.GetLocalSync("Staff"), RefreshStaff);
 
-            Task.Run((Action)ReadFromDataBase);
+            Task.Run(ReadFromDataBase);
         }
 
         /// <summary>

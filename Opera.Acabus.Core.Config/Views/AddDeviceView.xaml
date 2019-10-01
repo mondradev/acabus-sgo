@@ -36,8 +36,9 @@
                 <RowDefinition Height="24" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBox materialDesign:HintAssist.Hint="Número de serie" Margin="0" VerticalAlignment="Top" Grid.Row="2" Text="{Binding SerialNumber}" />
-            <ComboBox materialDesign:HintAssist.Hint="Tipo de equipo" Margin="0" Grid.Row="4" SelectedItem="{Binding SelectedType, Converter={StaticResource DeviceTypeConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding DeviceTypes, Converter={StaticResource DeviceTypeConverter}, Mode=OneWay}" VerticalAlignment="Top" IsEditable="True" />
+            <TextBox materialDesign:HintAssist.Hint="ID Equipo" Margin="0" VerticalAlignment="Top" Grid.Row="0" Text="{Binding IDEqui}" />
+            <TextBox materialDesign:HintAssist.Hint="Número de serie" Margin="0" VerticalAlignment="Top" Grid.Row="2" Text="{Binding SerialNumber}" AutomationProperties.IsRequiredForForm="True" />
+            <ComboBox materialDesign:HintAssist.Hint="Tipo de equipo" Margin="0" Grid.Row="4" SelectedItem="{Binding SelectedType, Converter={StaticResource DeviceTypeConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ItemsSource="{Binding DeviceTypes, Converter={StaticResource DeviceTypeConverter}, Mode=OneWay}" VerticalAlignment="Top" IsEditable="True" AutomationProperties.IsRequiredForForm="True" />
             <TextBox materialDesign:HintAssist.Hint="Dirección IP" Margin="0" VerticalAlignment="Top" Grid.Row="6" Text="{Binding IPString}" />
             <ComboBox  Grid.Row="8" materialDesign:HintAssist.Hint="Estación asignada"  Margin="0" VerticalAlignment="Top" ItemsSource="{Binding Stations}" SelectedItem="{Binding SelectedStation, ValidatesOnDataErrors=True}" IsEditable="True" />
             <ComboBox materialDesign:HintAssist.Hint="Vehículo asignado" VerticalAlignment="Top" Grid.Row="10" ItemsSource="{Binding Buses}" SelectedItem="{Binding SelectedBus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"  IsEditable="True" />
