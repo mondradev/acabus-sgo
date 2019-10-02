@@ -25,6 +25,11 @@ namespace Opera.Acabus.Core.Config.ViewModels
         private Boolean _isExternal = false;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="IDEst"/>
+        /// </summary>
+        private UInt32 _idEst;
+
+        /// <summary>
         /// Campo que provee a la propiedad <see cref="Name"/>.
         /// </summary>
         private String _name;
@@ -75,6 +80,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
             set {
                 _isExternal = value;
                 OnPropertyChanged(nameof(IsExternal));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el identificador de la estación.
+        /// </summary>
+        public UInt32 IDEst {
+            get => _idEst;
+            set {
+                _idEst = value;
+                OnPropertyChanged(nameof(IDEst));
             }
         }
 
@@ -179,7 +195,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddStationExecute(object obj)
         {
-            Station station = new Station(0, UInt16.Parse(StationNumber))
+            Station station = new Station(IDEst, UInt16.Parse(StationNumber))
             {
                 Name = Name,
                 IsExternal = IsExternal,

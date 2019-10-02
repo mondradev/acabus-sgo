@@ -20,6 +20,11 @@ namespace Opera.Acabus.Core.Config.ViewModels
         private String _assignedSection;
 
         /// <summary>
+        /// Campo que provee a la propidad <see cref="IDLin"/>
+        /// </summary>
+        private UInt32 _idLin;
+
+        /// <summary>
         /// Campo que provee a la propiedad <see cref="Name"/>.
         /// </summary>
         private String _name;
@@ -59,6 +64,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
             set {
                 _assignedSection = value;
                 OnPropertyChanged(nameof(AssignedSection));
+            }
+        }
+
+        /// <summary>
+        /// Obtiene o establece el valor del identificador de la ruta.
+        /// </summary>
+        public UInt32 IDLin {
+            get => _idLin;
+            set {
+                _idLin = value;
+                OnPropertyChanged(nameof(IDLin));
             }
         }
 
@@ -120,7 +136,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     break;
 
                 case nameof(Type):
-                    if (Type==null || !Types.Any(x => x ==  Type))
+                    if (Type == null || !Types.Any(x => x == Type))
                         AddError(nameof(Type), "Especifique un tipo de válido de ruta.");
                     break;
 
@@ -147,7 +163,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddRouteExecute(object obj)
         {
-            Route route = new Route(0, UInt16.Parse(RouteNumber), Type.Value)
+            Route route = new Route(IDLin, UInt16.Parse(RouteNumber), Type.Value)
             {
                 AssignedSection = AssignedSection,
                 Name = Name

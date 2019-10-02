@@ -38,7 +38,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <TextBox md:HintAssist.Hint="ID Vehículo" Margin="0" VerticalAlignment="Top" Grid.Row="0" Text="{Binding IDVehi}" />
-            <TextBox md:HintAssist.Hint="Número económico" Margin="0" VerticalAlignment="Top" Grid.Row="2" Text="{Binding EconomicNumber}" AutomationProperties.IsRequiredForForm="True" />
+            <TextBox md:HintAssist.Hint="Número económico" Margin="0" VerticalAlignment="Top" Grid.Row="2" Text="{Binding EconomicNumber}" />
             <ComboBox  Grid.Row="4" md:HintAssist.Hint="Tipo de autobús"  Margin="0" VerticalAlignment="Top" 
                        ItemsSource="{Binding Types, Converter={StaticResource BusTypeConverter}}" 
                        SelectedItem="{Binding Type, ValidatesOnDataErrors=True, Converter={StaticResource BusTypeConverter}}" IsEditable="True" />

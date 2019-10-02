@@ -74,6 +74,8 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 case nameof(FullName):
                     if (String.IsNullOrEmpty(FullName))
                         AddError(nameof(FullName), "Especifique un nombre válido.");
+                    if (AcabusDataContext.AllStaff.Any(s => s.Name == FullName))
+                        AddError(nameof(FullName), "Existe una persona con el mismo nombre");
                     break;
 
                 case nameof(SelectedArea):

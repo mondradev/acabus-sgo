@@ -37,6 +37,7 @@
                 <RowDefinition Height="24" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+            <TextBox md:HintAssist.Hint="ID Ruta" Margin="0" VerticalAlignment="Top" Grid.Row="0" Text="{Binding IDLIn}" />
             <TextBox md:HintAssist.Hint="Número de la ruta" Margin="0" VerticalAlignment="Top" Grid.Row="2" Text="{Binding RouteNumber}" />
             <TextBox md:HintAssist.Hint="Descripción" Margin="0" VerticalAlignment="Top" Grid.Row="4" Text="{Binding Name}" />
             <ComboBox  Grid.Row="6" md:HintAssist.Hint="Tipo de ruta"  Margin="0" VerticalAlignment="Top" 
@@ -48,12 +49,10 @@
         </Grid>
         <StackPanel Margin="0,2,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.ColumnSpan="2" d:LayoutOverrides="Height">
             <Button Command="{x:Static g:Dispatcher.CloseDialogCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left"
-                                HorizontalAlignment="Right" Margin="8" Style="{DynamicResource MaterialDesignFlatButton}" MinHeight="36">
-                <md:PackIcon  Kind="Delete" Width="24" Height="24" />
+                                HorizontalAlignment="Right" Margin="8" Style="{DynamicResource MaterialDesignFlatButton}" MinHeight="36" Content="DESCARTAR">
             </Button>
             <Button ToolTip="Agregar" Height="Auto" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,8,8,8" 
-                    Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding AddRouteCommand}" MinHeight="36">
-                <md:PackIcon  Kind="Check" Width="24" Height="24" />
+                    Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding AddRouteCommand}" MinHeight="36" Content="AGREGAR">
             </Button>
         </StackPanel>
     </Grid>
