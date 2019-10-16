@@ -38,14 +38,11 @@
         <TextBox materialDesign:HintAssist.Hint="Número(s) económico(s)"  Text="{Binding EconomicNumbers}" Grid.Row="4" Margin="16,0" AcceptsReturn="True" MaxLines="200" VerticalScrollBarVisibility="Auto" MaxHeight="100" />
         <ComboBox materialDesign:HintAssist.Hint="Ruta" Grid.Row="6" ItemsSource="{Binding Routes, Mode=OneWay}" SelectedItem="{Binding SelectedRoute}" Margin="16,0" />
         <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,8,0,0">
-            <Button Command="{Binding DiscartCommand}" ToolTip="Limpiar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0,0,8,8" Height="Auto" MinHeight="36">
-                <materialDesign:PackIcon Kind="EraserVariant" Width="24" Height="24" />
+            <Button Command="{Binding DiscartCommand}" ToolTip="Limpiar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0,0,8,8" Height="Auto" MinHeight="36" Content="LIMPIAR">
             </Button>
-            <Button Command="{Binding ReassignRouteCommand}" ToolTip="Reasignar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0,0,8,8" Height="Auto" MinHeight="36">
-                <materialDesign:PackIcon Kind="MapMarkerCircle" Width="24" Height="24" />
+            <Button Command="{Binding ReassignRouteCommand}" ToolTip="Reasignar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0,0,8,8" Height="Auto" MinHeight="36" Content="REASIGNAR">
             </Button>
-            <Button Command="{Binding DoneCommand}" ToolTip="Finalizar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0,0,8,8" Height="Auto" MinHeight="36">
-                <materialDesign:PackIcon Kind="Check" Width="24" Height="24" />
+            <Button Command="{Binding DoneCommand}" ToolTip="Finalizar" Style="{DynamicResource MaterialDesignFlatButton}" Margin="0,0,8,8" Height="Auto" MinHeight="36" Content="LISTO">
             </Button>
         </StackPanel>
     </Grid>
