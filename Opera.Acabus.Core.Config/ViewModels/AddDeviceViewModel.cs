@@ -205,17 +205,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddDeviceExecute(object obj)
         {
-            Device device = new Device(IDEqui, SerialNumber, SelectedType.Value)
+            object device = new Device(IDEqui, SerialNumber, SelectedType.Value)
             {
                 Station = SelectedStation,
                 Bus = SelectedBus,
                 IPAddress = String.IsNullOrEmpty(IPString) ? null : IPAddress.Parse(IPString)
             };
 
-            if (ServerContext.GetLocalSync("Device").Create(ref device))
+            if (ServerContext.GetLocalSync("Device").Create(ref device, out Exception reason))
                 Dispatcher.SendMessageToGUI($"Equipo: {device} agregado correctamente.");
             else
-                Dispatcher.SendMessageToGUI("No se pudo guardar el equipo nuevo.");
+                Dispatcher.SendMessageToGUI("No se pudo guardar el equipo nuevo, razón: " + reason.Message);
 
             Dispatcher.CloseDialog();
         }

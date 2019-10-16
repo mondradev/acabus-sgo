@@ -28,7 +28,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de personal.</returns>
-        protected override Staff FromBytes(byte[] source)
+        protected override Staff Deserialize(byte[] source)
             => DataHelper.GetStaff(source);
         
         /// <summary>
@@ -37,7 +37,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="staff">Instancia del personal.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void InstanceToMessage(Staff staff, IMessage message)
+        protected override void ToMessage(Staff staff, IMessage message)
         {
             message.SetEnum(12, staff.Area);
             message[17] = staff.Name;
@@ -48,7 +48,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="instance">Instancia de personal.</param>
         /// <returns>Una secuencia de datos.</returns>
-        protected override byte[] ToBytes(Staff instance)
+        protected override byte[] Serialize(Staff instance)
             => instance.Serialize();
     }
 }

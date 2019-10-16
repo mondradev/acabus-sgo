@@ -74,7 +74,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 case nameof(FullName):
                     if (String.IsNullOrEmpty(FullName))
                         AddError(nameof(FullName), "Especifique un nombre válido.");
-                    if (AcabusDataContext.AllStaff.Any(s => s.Name == FullName))
+                    else if (AcabusDataContext.AllStaff.Where(s => s.Name == FullName).Count() > 0)
                         AddError(nameof(FullName), "Existe una persona con el mismo nombre");
                     break;
 
@@ -101,16 +101,16 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddStaffExecute(object parameter)
         {
-            Staff staff = new Staff()
+            object staff = new Staff()
             {
                 Area = SelectedArea.Value,
                 Name = FullName
             };
 
-            if (ServerContext.GetLocalSync("Staff").Create(ref staff))
+            if (ServerContext.GetLocalSync("Staff").Create(ref staff, out Exception reason))
                 Dispatcher.SendMessageToGUI($"Personal: {staff} agregado correctamente.");
             else
-                Dispatcher.SendMessageToGUI("No se pudo guardar el personal nuevo.");
+                Dispatcher.SendMessageToGUI("No se pudo guardar el personal nuevo, razón: " + reason.Message);
 
             Dispatcher.CloseDialog();
         }

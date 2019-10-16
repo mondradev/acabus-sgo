@@ -31,7 +31,7 @@ namespace Opera.Acabus.Cctv.Services
         /// </summary>
         /// <param name="source">Secuencia de bytes origen.</param>
         /// <returns>Una instancia creada desde la secuencia.</returns>
-        protected override Incidence FromBytes(byte[] source)
+        protected override Incidence Deserialize(byte[] source)
             => CctvDataHelper.GetIncidence(source);
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Opera.Acabus.Cctv.Services
         /// </summary>
         /// <param name="instance">Instancia a crear.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void InstanceToMessage(Incidence instance, IMessage message)
+        protected override void ToMessage(Incidence instance, IMessage message)
         {
             message[40] = instance.WhoReporting;
             message[41] = instance.FaultObservations;
@@ -56,7 +56,7 @@ namespace Opera.Acabus.Cctv.Services
         /// </summary>
         /// <param name="instance">Instancia a serializar.</param>
         /// <returns>Una secuencia de bytes que representan a la instancia.</returns>
-        protected override byte[] ToBytes(Incidence instance)
+        protected override byte[] Serialize(Incidence instance)
             => instance.Serialize();
     }
 }

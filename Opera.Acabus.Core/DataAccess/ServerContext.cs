@@ -22,7 +22,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <summary>
         /// Almacena todos los sincronizadores.
         /// </summary>
-        private static readonly Dictionary<String, LocalSyncsStatus> _entityLocalSyncs;
+        private static readonly Dictionary<String, LocalSyncStatus> _entityLocalSyncs;
 
         /// <summary>
         ///
@@ -38,7 +38,7 @@ namespace Opera.Acabus.Core.DataAccess
             int serverPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Push_Port") ?? 5501);
             IPAddress serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("Push_IP") ?? "127.0.0.1");
 
-            _entityLocalSyncs = new Dictionary<string, LocalSyncsStatus>();
+            _entityLocalSyncs = new Dictionary<string, LocalSyncStatus>();
             _pushService = new PushService<PushAcabus>(serverIP, serverPort);
 
             _pushService.Notified += OnNotify;
@@ -74,9 +74,8 @@ namespace Opera.Acabus.Core.DataAccess
                 throw new InvalidOperationException("Ya existe un IEntityLocalSync para la entidad '" + localSync.EntityName + "'.");
 
             _entityLocalSyncs.Add(localSync.EntityName,
-                new LocalSyncsStatus()
+                new LocalSyncStatus(localSync)
                 {
-                    Entity = localSync,
                     IsSyncronized = false
                 });
 
@@ -88,7 +87,7 @@ namespace Opera.Acabus.Core.DataAccess
                     {
                         while (true)
                         {
-                            LocalSyncsStatus localSyncsStatus = _entityLocalSyncs[entityName];
+                            LocalSyncStatus localSyncsStatus = _entityLocalSyncs[entityName];
                             IEntityLocalSync dependency = localSyncsStatus.Entity;
 
                             if (dependency == null || !localSyncsStatus.IsSyncronized)
@@ -97,7 +96,7 @@ namespace Opera.Acabus.Core.DataAccess
                         }
                     }
 
-                    localSync.Pull();
+                    localSync.Pull(out _);
 
                     _entityLocalSyncs[localSync.EntityName].IsSyncronized = true;
 
@@ -121,29 +120,38 @@ namespace Opera.Acabus.Core.DataAccess
             {
                 case LocalSyncOperation.CREATE:
                 case LocalSyncOperation.UPDATE:
-                    localSync.DownloadByID(push.ID);
+                    localSync.DownloadByID(push.ID, out _);
                     break;
 
                 case LocalSyncOperation.DELETE:
-                    localSync.LocalDeleteByID(push.ID);
+                    localSync.LocalDeleteByID(push.ID, out _);
                     break;
             }
         }
 
         /// <summary>
-        /// 
+        /// Estructura que permite especificar el estado de la sincronización de los datos para una entidad.
         /// </summary>
-        private class LocalSyncsStatus
+        private class LocalSyncStatus
         {
             /// <summary>
-            /// 
+            /// Obtiene la entidad en sincronización
             /// </summary>
-            public IEntityLocalSync Entity { get; set; }
+            public IEntityLocalSync Entity { get; }
 
             /// <summary>
-            /// 
+            /// Indica si la entidad finalizó la sincronización.
             /// </summary>
             public bool IsSyncronized { get; set; }
+
+            /// <summary>
+            /// Crea una nueva instancia de estado.
+            /// </summary>
+            /// <param name="entity">Entidad a sincronizar.</param>
+            public LocalSyncStatus(IEntityLocalSync entity)
+            {
+                Entity = entity;
+            }
         }
     }
 }

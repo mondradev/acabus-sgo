@@ -41,7 +41,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a crear en el servidor.</param>
         /// <returns>Un valor true si la instancia fue creada.</returns>
-        bool Create<T>(ref T instance) where T : class;
+        bool Create(ref object instance, out Exception reason);
 
         /// <summary>
         /// Solicita la eliminación de la instancia espeficicada en el
@@ -49,28 +49,28 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a eliminar.</param>
         /// <returns>Un valor true si la instancia fue eliminada.</returns>
-        bool Delete<T>(T instance) where T : class;
+        bool Delete(object instance, out Exception reason);
 
         /// <summary>
         /// Descarga una instancia por ID desde el servidor y almacenda de manera local.
         /// </summary>
         /// <param name="id">Valor del identificador a descargar.</param>
         /// <returns>Un valor true si fue descargada satisfactoriamente.</returns>
-        bool DownloadByID(UInt64 id);
+        bool DownloadByID(UInt64 id, out Exception reason);
 
         /// <summary>
         /// Elimina la instancia de manera local.
         /// </summary>
         /// <param name="id">Identificador de la instancia a eliminar.</param>
         /// <returns>Un valor true si se eliminó de forma correcta.</returns>
-        bool LocalDeleteByID(UInt64 id);
+        bool LocalDeleteByID(UInt64 id, out Exception reason);
 
         /// <summary>
         /// Realiza una sincronización unidireccional desde servidor a local. Este proceso descarga
         /// toda la tabla a sincronizar y almance los datos faltantes.
         /// </summary>
         /// <param name="guiProgress">Controlador de progreso, útil para interfaces gráficas.</param>
-        void Pull(IProgress<float> guiProgress = null);
+        void Pull(out Exception reason, IProgress<float> guiProgress = null);
 
         /// <summary>
         /// Solicita la actualización de la instancia espeficicada en el
@@ -78,7 +78,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a actualizar.</param>
         /// <returns>Un valor true si la instancia fue actualizada.</returns>
-        bool Update<T>(T instance) where T : class;
+        bool Update(object instance, out Exception reason);
 
     }
 }

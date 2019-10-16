@@ -163,16 +163,16 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddRouteExecute(object obj)
         {
-            Route route = new Route(IDLin, UInt16.Parse(RouteNumber), Type.Value)
+            object route = new Route(IDLin, UInt16.Parse(RouteNumber), Type.Value)
             {
                 AssignedSection = AssignedSection,
                 Name = Name
             };
 
-            if (ServerContext.GetLocalSync("Route").Create(ref route))
+            if (ServerContext.GetLocalSync("Route").Create(ref route, out Exception reason))
                 Dispatcher.SendMessageToGUI($"Ruta: {route} agregado correctamente.");
             else
-                Dispatcher.SendMessageToGUI("No se pudo guardar la ruta nueva.");
+                Dispatcher.SendMessageToGUI("No se pudo guardar la ruta nueva, razón: " + reason.Message);
 
             Dispatcher.CloseDialog();
         }

@@ -109,20 +109,24 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a crear en el servidor.</param>
         /// <returns>Un valor true si la instancia fue creada.</returns>
-        public bool Create(ref T instance)
+        public bool Create(ref T instance, out Exception reason)
         {
             var remoteContext = new AppClient();
 
             if (instance == null)
-                throw new LocalSyncException("Instancia no especificada.", new ArgumentNullException());
+            {
+                reason = new LocalSyncException("La instancia especificada es un valor nulo.", new ArgumentNullException(nameof(instance)));
+                return false;
+            }
 
             IMessage message = remoteContext.CreateMessage();
 
             if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(CREATE_FUNC_NAME, typeof(T).Name);
-            InstanceToMessage(instance, message);
+            ToMessage(instance, message);
 
             Boolean created = false;
+            Exception exception = null;
 
             T instanceR = instance;
 
@@ -132,19 +136,27 @@ namespace Opera.Acabus.Core.Services
                 {
                     created = x.IsSet(22) ? x.GetBoolean(22) : false;
                     if (created)
-                        instanceR = FromBytes(x.GetBytes(SourceField));
-                    else throw new LocalSyncException("No se creo la instancia en el servidor.",
-                        new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                        instanceR = Deserialize(x.GetBytes(SourceField));
+                    else
+                        exception = new LocalSyncException("No se logró crear la instancia en el servidor.",
+                           new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+
                 }
-                else throw new LocalSyncException("No se procesó correctamente la petición.",
+                else
+                    exception = new LocalSyncException("Operación de creación realizada de manera erronea.",
                     new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
             }).Wait();
+
+            if ((reason = exception) != null)
+                return false;
 
             instance = instanceR;
 
             if (created)
-                if (!Exists(instance) && LocalContext.Create(instance))
+                if (!LocalExists(instance) && LocalContext.Create(instance))
                     Created?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.CREATE));
+
+
 
             return created;
         }
@@ -155,10 +167,10 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a crear en el servidor.</param>
         /// <returns>Un valor true si la instancia fue creada.</returns>
-        bool IEntityLocalSync.Create<T2>(ref T2 instance)
+        bool IEntityLocalSync.Create(ref object instance, out Exception reason)
         {
             T instanceCasted = instance as T;
-            return Create(ref instanceCasted);
+            return Create(ref instanceCasted, out reason);
         }
 
         /// <summary>
@@ -167,13 +179,16 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a eliminar.</param>
         /// <returns>Un valor true si la instancia fue eliminada.</returns>
-        public bool Delete(T instance)
+        public bool Delete(T instance, out Exception reason)
         {
             var remoteContext = new AppClient();
 
             if (instance == null)
-                throw new LocalSyncException("La instancia a eliminar debe ser especificada.",
-                    new ArgumentNullException());
+            {
+                reason = new LocalSyncException("No se puede borrar un valor nulo.",
+                      new ArgumentNullException());
+                return false;
+            }
 
             IMessage message = remoteContext.CreateMessage();
 
@@ -182,14 +197,24 @@ namespace Opera.Acabus.Core.Services
             message[IDField] = instance.ID;
 
             Boolean deleted = false;
+            Exception exception = null;
 
             remoteContext.SendMessage(message, (IMessage x) =>
             {
                 if (x.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                {
                     deleted = x.IsSet(22) ? x.GetBoolean(22) : false;
-                else throw new LocalSyncException("No se procesó correctamente la petición.",
+                    if (!deleted)
+                        exception = new LocalSyncException("No se logró eliminar en el servidor.",
+                                          new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                }
+                else
+                    exception = new LocalSyncException("Operación de borrado realizada de manera erronea.",
                    new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
             }).Wait();
+
+            if ((reason = exception) != null)
+                return false;
 
             (instance as AcabusEntityBase).Delete();
 
@@ -206,15 +231,15 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a eliminar.</param>
         /// <returns>Un valor true si la instancia fue eliminada.</returns>
-        bool IEntityLocalSync.Delete<T2>(T2 instance)
-            => Delete(instance as T);
+        bool IEntityLocalSync.Delete(object instance, out Exception reason)
+            => Delete(instance as T, out reason);
 
         /// <summary>
         /// Descarga una instancia por ID desde el servidor y almacenda de manera local.
         /// </summary>
         /// <param name="id">Valor del identificador a descargar.</param>
         /// <returns>Un valor true si fue descargada satisfactoriamente.</returns>
-        public bool DownloadByID(UInt64 id)
+        public bool DownloadByID(UInt64 id, out Exception reason)
         {
             var remoteContext = new AppClient();
 
@@ -225,17 +250,24 @@ namespace Opera.Acabus.Core.Services
             message[IDField] = id;
 
             bool downloaded = false;
+            Exception exception = null;
 
             remoteContext.SendMessage(message, (IMessage x) =>
             {
                 if (x.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
                 {
-                    T instance = x.IsSet(SourceField) ? FromBytes(x.GetBytes(SourceField)) : null;
+                    T instance = x.IsSet(SourceField) ? Deserialize(x.GetBytes(SourceField)) : null;
 
                     if (instance == null)
-                        throw new LocalSyncException("No se logró descargar la instancia por ID.");
+                    {
+                        exception = new LocalSyncException(
+                            x.IsSet(SourceField) ?
+                            "Información no válida para obtener la instancia" :
+                            "No se logró obtener alguna instancia desde el servidor: {ID=" + id + "}");
+                        return;
+                    }
 
-                    bool exists = Exists(instance);
+                    bool exists = LocalExists(instance);
 
                     if (exists)
                     {
@@ -246,6 +278,8 @@ namespace Opera.Acabus.Core.Services
                                 Updated?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.UPDATE));
                             else
                                 Deleted?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.DELETE));
+                        else
+                            exception = new LocalSyncException("No se logró actualizar de forma local {" + instance + "}");
                     }
                     else
                     {
@@ -253,11 +287,16 @@ namespace Opera.Acabus.Core.Services
 
                         if (downloaded)
                             Created?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.CREATE));
+                        else
+                            exception = new LocalSyncException("No se logró crear de forma local {" + instance + "}");
                     }
                 }
-                else throw new LocalSyncException("No se procesó correctamente la petición.",
+                else
+                    exception = new LocalSyncException("Operación de descarga de instancia por ID realizada de manera erronea.",
                     new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
             }).Wait();
+
+            reason = exception;
 
             return downloaded;
         }
@@ -268,15 +307,19 @@ namespace Opera.Acabus.Core.Services
         /// <typeparam name="T">Tipo del identificador de la instancia.</typeparam>
         /// <param name="id">Identificador de la instancia a eliminar.</param>
         /// <returns>Un valor true si se eliminó de forma correcta.</returns>
-        public bool LocalDeleteByID(UInt64 id)
+        public bool LocalDeleteByID(UInt64 id, out Exception reason)
         {
             T instance = LocalContext.Read<T>().Where(x => x.ID == id).FirstOrDefault();
             instance.Delete();
 
             bool deleted = LocalContext.Update(instance);
 
+            reason = null;
+
             if (deleted)
                 Deleted?.Invoke(this, new LocalSyncArgs(instance, LocalSyncOperation.DELETE));
+            else
+                reason = new LocalSyncException("No se logró eliminar la instancia locamente: {" + instance + "}");
 
             return deleted;
         }
@@ -286,13 +329,15 @@ namespace Opera.Acabus.Core.Services
         /// toda la tabla a sincronizar y almance los datos faltantes.
         /// </summary>
         /// <param name="guiProgress">Controlador de progreso, útil para interfaces gráficas.</param>
-        public void Pull(IProgress<float> guiProgress = null)
+        public void Pull(out Exception reason, IProgress<float> guiProgress = null)
         {
             var remoteContext = new AppClient();
 
             var hostName = Dns.GetHostName();
             var ipHost = Dns.GetHostEntry(hostName);
             var listIP = ipHost.AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
+
+            reason = null;
 
             if (listIP.Any(x => x.Equals(remoteContext.ServerIP)))
                 return;
@@ -308,28 +353,40 @@ namespace Opera.Acabus.Core.Services
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(DOWNLOAD_FUNC_NAME, typeof(T).Name);
             message.SetDateTime(25, lastSync.ModifyTime);
 
+            Exception exception = null;
+
             remoteContext.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
                 if (x.Current.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
                 {
-                    T instance = x.Current.IsSet(SourceField) ? FromBytes(x.Current.GetBytes(SourceField)) : null;
+                    T instance = x.Current.IsSet(SourceField) ? Deserialize(x.Current.GetBytes(SourceField)) : null;
 
                     if (instance == null)
-                        throw new LocalSyncException("No se logró obtener la instancia.");
+                    {
+                        exception = new LocalSyncException(
+                            x.Current.IsSet(SourceField) ?
+                            "Información no valida para obtener la instancia" :
+                            "No se logró obtener el elemento desde servidor");
+                        return;
+                    }
 
                     list.Add(instance);
                     currentProgress++;
                     guiProgress?.Report(currentProgress / x.Current.GetInt32(AcabusAdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
                 }
-                else throw new LocalSyncException("No se procesó correctamente la petición.",
+                else
+                    exception = new LocalSyncException("No se procesó correctamente la petición.",
                     new InvalidOperationException(x.Current.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
             }).Wait();
 
+            if ((reason = exception) != null)
+                return;
+
             currentProgress = 0;
 
-            list.ForEach(x =>
+            foreach (T x in list)
             {
-                bool exists = Exists(x);
+                bool exists = LocalExists(x);
                 bool createdOrUpdated = false;
 
                 if (exists)
@@ -351,11 +408,14 @@ namespace Opera.Acabus.Core.Services
                 }
 
                 if (!createdOrUpdated)
-                    throw new LocalSyncException("No se logró guardar o actualizar la instancia descargada: " + x);
+                {
+                    reason = new LocalSyncException("No se logró guardar o actualizar la instancia descargada: " + x);
+                    return;
+                }
 
                 currentProgress++;
                 guiProgress?.Report(50f + currentProgress / list.Count / 2f * 100f);
-            });
+            }
         }
 
         /// <summary>
@@ -364,29 +424,43 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a actualizar.</param>
         /// <returns>Un valor true si la instancia fue actualizada.</returns>
-        public bool Update(T instance)
+        public bool Update(T instance, out Exception reason)
         {
             var remoteContext = new AppClient();
 
             if (instance == null)
-                throw new LocalSyncException("La instancia a actualizar debe ser especificada.",
-                    new ArgumentNullException());
+            {
+                reason = new LocalSyncException("La instancia a actualizar debe ser especificada.",
+                      new ArgumentNullException());
+                return false;
+            }
 
             IMessage message = remoteContext.CreateMessage();
 
             if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
             message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(UPDATE_FUNC_NAME, typeof(T).Name);
-            message[SourceField] = ToBytes(instance);
+            message[SourceField] = Serialize(instance);
 
             Boolean updated = false;
+            Exception exception = null;
 
             remoteContext.SendMessage(message, (IMessage x) =>
              {
                  if (x.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                 {
                      updated = x.IsSet(22) ? x.GetBoolean(22) : false;
-                 else throw new LocalSyncException("No se procesó correctamente la petición.",
-                    new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+
+                     if (!updated)
+                         exception = new LocalSyncException("No se logró actualizar los atributos de la instancia.",
+                     new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                 }
+                 else
+                     exception = new LocalSyncException("Operación de actualización realizada de manera erronea.",
+                 new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
              }).Wait();
+
+            if ((reason = exception) != null)
+                return false;
 
             if (updated)
                 if (LocalContext.Update(instance))
@@ -401,15 +475,15 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a actualizar.</param>
         /// <returns>Un valor true si la instancia fue actualizada.</returns>
-        bool IEntityLocalSync.Update<T2>(T2 instance)
-        => Update(instance as T);
+        bool IEntityLocalSync.Update(object instance, out Exception reason)
+        => Update(instance as T, out reason);
 
         /// <summary>
         /// Obtiene una instancia a partir de una secuencia de bytes.
         /// </summary>
         /// <param name="source">Secuencia de bytes origen.</param>
         /// <returns>Una instancia creada desde la secuencia.</returns>
-        protected abstract T FromBytes(Byte[] source);
+        protected abstract T Deserialize(Byte[] source);
 
         /// <summary>
         /// Asigna las propiedades de la instancia en los campos del mensaje requeridos para la
@@ -417,21 +491,21 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="instance">Instancia a crear.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected abstract void InstanceToMessage(T instance, IMessage message);
+        protected abstract void ToMessage(T instance, IMessage message);
 
         /// <summary>
         /// Obtiene una secuencia de bytes a partir de una instancia especificada.
         /// </summary>
         /// <param name="instance">Instancia a serializar.</param>
         /// <returns>Una secuencia de bytes que representan a la instancia.</returns>
-        protected abstract Byte[] ToBytes(T instance);
+        protected abstract Byte[] Serialize(T instance);
 
         /// <summary>
         /// Valida si la instancia existe.
         /// </summary>
         /// <param name="instance">Instancia a validar.</param>
         /// <returns></returns>
-        private bool Exists(T instance)
+        private bool LocalExists(T instance)
             => LocalContext.Read<T>().Where(y => y.ID == instance.ID).ToList().Any();
     }
 }

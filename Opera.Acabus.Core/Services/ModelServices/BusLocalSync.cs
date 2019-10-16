@@ -29,7 +29,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de autobus.</returns>
-        protected override Bus FromBytes(byte[] source)
+        protected override Bus Deserialize(byte[] source)
             => DataHelper.GetBus(source);
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="bus">Instancia del autobus.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void InstanceToMessage(Bus bus, IMessage message)
+        protected override void ToMessage(Bus bus, IMessage message)
         {
             message.SetEnum(12, bus.Type);
             message[17] = bus.EconomicNumber;
@@ -51,7 +51,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="instance">Instancia de autobus.</param>
         /// <returns>Una secuencia de datos.</returns>
-        protected override byte[] ToBytes(Bus instance)
+        protected override byte[] Serialize(Bus instance)
             => instance.Serialize();
     }
 }

@@ -26,7 +26,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de ruta.</returns>
-        protected override Route FromBytes(byte[] source)
+        protected override Route Deserialize(byte[] source)
             => DataHelper.GetRoute(source);
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="route">Instancia de la ruta.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void InstanceToMessage(Route route, IMessage message)
+        protected override void ToMessage(Route route, IMessage message)
         {
             message[12] = route.RouteNumber;
             message[17] = route.Name;
@@ -50,7 +50,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="instance">Instancia de ruta.</param>
         /// <returns>Una secuencia de datos.</returns>
-        protected override byte[] ToBytes(Route instance)
+        protected override byte[] Serialize(Route instance)
             => instance.Serialize();
     }
 }

@@ -157,17 +157,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddBusExecute(object obj)
         {
-            Bus bus = new Bus(IDVehi, EconomicNumber)
+            object bus = new Bus(IDVehi, EconomicNumber)
             {
                 Status = BusStatus.OPERATIONAL,
                 Type = Type.Value,
                 Route = AssignedRoute
             };
 
-            if (ServerContext.GetLocalSync("Bus").Create(ref bus))
+            if (ServerContext.GetLocalSync("Bus").Create(ref bus, out Exception reason))
                 Dispatcher.SendMessageToGUI($"Autobús: {bus} agregado correctamente.");
             else
-                Dispatcher.SendMessageToGUI("No se pudo guardar el autobús nuevo.");
+                Dispatcher.SendMessageToGUI("No se pudo guardar el autobús nuevo, razón: " + reason.Message);
 
             Dispatcher.CloseDialog();
         }

@@ -31,7 +31,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de estación.</returns>
-        protected override Station FromBytes(byte[] source)
+        protected override Station Deserialize(byte[] source)
             => DataHelper.GetStation(source);
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="station">Instancia de la estación.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void InstanceToMessage(Station station, IMessage message)
+        protected override void ToMessage(Station station, IMessage message)
         {
             message[12] = station.StationNumber;
             message[17] = station.Name;
@@ -56,7 +56,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="instance">Instancia de estación.</param>
         /// <returns>Una secuencia de datos.</returns>
-        protected override byte[] ToBytes(Station instance)
+        protected override byte[] Serialize(Station instance)
             => instance.Serialize();
     }
 }

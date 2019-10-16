@@ -48,9 +48,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
             UpdateSelectionCommand = new Command(param =>
             {
-                var selectedBuses = param as IList;
-
-                if (selectedBuses == null) return;
+                if (!(param is IList selectedBuses)) return;
 
                 _economicNumbers = String.Empty;
 
