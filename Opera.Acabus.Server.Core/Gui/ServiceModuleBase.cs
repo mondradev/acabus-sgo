@@ -1,11 +1,10 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
-using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core.Models;
 using Opera.Acabus.Server.Core.Utils;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Opera.Acabus.Server.Core.Gui
 {
@@ -49,15 +48,29 @@ namespace Opera.Acabus.Server.Core.Gui
         /// </summary>
         /// <param name="message">Mensaje con la petición.</param>
         /// <param name="callback">Función de llamada de vuelta.</param>
-        public void Request(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e)
+        /// <param name="e">Parametros utilizados para el envío de respuestas al cliente.</param>
+        public void Request(IMessage message, IAdaptiveMsgArgs e)
         {
-            if (ServerHelper.ValidateRequest(message, GetType()))
-                ServerHelper.CallFunc(message, GetType());
-            else
-                ServerHelper.CreateError("Error al realizar la petición: " + GetType().FullName + " "
-                     + message.GetString(AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()), 403, e);
+            Task.Run(() =>
+            {
+                try
+                {
+                    if (ServerHelper.ValidateRequest(message, GetType()))
+                        ServerHelper.CallFunc(message, GetType());
+                    else
+                        throw new ServiceException("No se encontró la función solicitada.", AdaptativeMsgResponseCode.BAD_REQUEST, message.GetFunctionName(), ServiceName);
 
-            callback?.Invoke(message);
+                    e.Send(message);
+                }
+                catch (ServiceException ex)
+                {
+                    e.SendException(ex);
+                }
+                catch (Exception ex)
+                {
+                    e.SendException(new ServiceException(message.GetFunctionName(), ServiceName, ex));
+                }
+            });
         }
 
         /// <summary>

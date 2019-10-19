@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -52,7 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Gui\ServiceModuleBase.cs" />
-    <Compile Include="Models\IServiceModule.cs" />
+    <Compile Include="IServiceModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -66,9 +68,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Models\ServiceStatus.cs" />
+    <Compile Include="ServiceException.cs" />
+    <Compile Include="ServiceStatus.cs" />
     <Compile Include="Gui\StatusToColorConverter.cs" />
-    <Compile Include="ServerNotify.cs" />
     <Compile Include="Utils\ParameterFieldAttribute.cs" />
     <Compile Include="Utils\ServerHelper.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

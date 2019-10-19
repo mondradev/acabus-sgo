@@ -1,8 +1,6 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using InnSyTech.Standard.Utils;
-using Opera.Acabus.Core.Services;
-using Opera.Acabus.Server.Core.Gui;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -114,14 +112,32 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <param name="code">Código de respuesta al cliente.</param>
         /// <param name="e">Instancia que controla el evento de la petición.</param>
         /// <returns>Una instancia de mensaje.</returns>
-        public static IMessage CreateError(string text, int code, IAdaptiveMsgArgs e)
+        public static IMessage CreateError(string text, AdaptativeMsgResponseCode code, IAdaptiveMsgArgs e)
         {
             IMessage message = e.CreateMessage();
 
-            message[AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32()] = text;
-            message[AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()] = code;
+            message.SetResponse(text, code);
 
             return message;
+        }
+
+        /// <summary>
+        /// Envía una respuesta de error al cliente definido en los argumentos de la petición.
+        /// </summary>
+        /// <param name="e">Datos de la petición.</param>
+        /// <param name="exception">Excepción que se enviará como respuesta.</param>
+        public static void SendException(this IAdaptiveMsgArgs e, ServiceException exception)
+        {
+            string response = String.Format("{0} [Error=\"{1}\", Servicio=\"{2}\", Función={3}]",
+                  exception.InnerException != null ? exception.Message : "Ocurrió un error al procesar la petición",
+                  exception.InnerException != null ? exception.InnerException.Message : exception.Message,
+                   exception.ModuleName,
+                   exception.FunctionName
+                   );
+
+            IMessage message = CreateError(response, AdaptativeMsgResponseCode.INTERNAL_SERVER_ERROR, e);
+
+            e.Send(message);
         }
 
         /// <summary>
@@ -132,22 +148,23 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <param name="enumeratingFunc">Función para procesar el elemento actual.</param>
         public static void Enumerating(IMessage message, Int32 count, Action<Int32> enumeratingFunc)
         {
-            if (!message.IsSet(AcabusAdaptiveMessageFieldID.IsEnumerable.ToInt32()))
-            {
-                message[AcabusAdaptiveMessageFieldID.IsEnumerable.ToInt32()] = BitConverter.GetBytes(true);
-                message[AcabusAdaptiveMessageFieldID.EnumerableCount.ToInt32()] = count;
-                message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()] = 0;
-            }
-            else if (message.GetValue(AcabusAdaptiveMessageFieldID.EnumerableOperation.ToInt32(), x => Convert.ToInt32(x)) == 0)
-                message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()] = message.GetValue(AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32(), x => Convert.ToInt32(x)) + 1;
-            else if (message.GetValue(AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32(), x => Convert.ToInt32(x)) == 1)
-            {
-                message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()] = 0;
-                message[AcabusAdaptiveMessageFieldID.EnumerableOperation.ToInt32()] = 0;
-            }
+            if (!message.IsEnumerable())
+                message.SetAsEnumerable(count);
+            else
+                switch (message.GetEnumOp())
+                {
+                    case AdaptativeMsgEnumOp.NEXT:
+                        message.SetPosition(message.GetPosition() + 1);
+                        break;
+
+                    case AdaptativeMsgEnumOp.RESET:
+                        message.SetPosition(0);
+                        message.SetEnumOp(AdaptativeMsgEnumOp.NEXT);
+                        break;
+                }
 
             if (count > 0)
-                enumeratingFunc?.Invoke(Convert.ToInt32(message[AcabusAdaptiveMessageFieldID.CurrentPosition.ToInt32()]));
+                enumeratingFunc?.Invoke(message.GetPosition());
         }
 
         /// <summary>

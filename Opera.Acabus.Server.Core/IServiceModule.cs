@@ -24,7 +24,7 @@ namespace Opera.Acabus.Server.Core.Models
         /// Realiza una petición asíncrona al módulo.
         /// </summary>
         /// <param name="message">Mensaje con la petición.</param>
-        /// <param name="callback">Función de llamada de vuelta.</param>
-        void Request(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e);
+        /// <param name="e">Parametros utilizados para el envío de respuestas al cliente.</param>
+        void Request(IMessage message, IAdaptiveMsgArgs e);
     }
 }
