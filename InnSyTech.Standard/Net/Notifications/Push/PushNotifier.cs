@@ -29,6 +29,11 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         private bool _disposed;
 
         /// <summary>
+        /// Indica si el servidor a iniciado.
+        /// </summary>
+        private bool _started;
+
+        /// <summary>
         /// Crea una nueva instancia.
         /// </summary>
         public PushNotifier()
@@ -53,9 +58,20 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         public int Port { get; set; } = 5501;
 
         /// <summary>
+        /// Evento que se desencadena cuando el estado del notificador cambia.
+        /// </summary>
+        public event EventHandler<Boolean> StartedChanged;
+
+        /// <summary>
         /// Obtiene un valor que indica si el notificador está iniciado.
         /// </summary>
-        public bool Started { get; private set; }
+        public bool Started {
+            get => _started;
+            private set {
+                _started = value;
+                StartedChanged?.Invoke(this, value);
+            }
+        }
 
         /// <summary>
         /// Libera los recursos del notificador.
@@ -67,10 +83,7 @@ namespace InnSyTech.Standard.Net.Notifications.Push
 
             _disposed = true;
 
-            if (_server.Connected)
-                _server.Shutdown(SocketShutdown.Both);
-
-            _server.Close();
+            Stop();
         }
 
         /// <summary>
@@ -79,21 +92,10 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         /// <param name="data">Datos a notificar.</param>
         public void Notify(T data)
         {
-            while (true)
-            {
-                try
-                {
-                    foreach (Socket client in _clients)
-                        SendNotify(client, new PushNotification<T>(data));
+            var clients = _clients.ToArray();
 
-                    break;
-                }
-                catch {
-
-                }
-
-                Thread.Sleep(10);
-            }
+            foreach (Socket client in clients)
+                SendNotify(client, new PushNotification<T>(data));
         }
 
         /// <summary>
@@ -110,6 +112,24 @@ namespace InnSyTech.Standard.Net.Notifications.Push
 
                 BeginListen();
             });
+        }
+
+        /// <summary>
+        /// Detiene el servidor de notificaciones de descarga.
+        /// </summary>
+        public void Stop()
+        {
+            if (!Started)
+                return;
+
+            _clients.ForEach(x => x.Close());
+
+            if (_server.Connected)
+                _server.Shutdown(SocketShutdown.Both);
+
+            _server.Close();
+
+            Started = false;
         }
 
         /// <summary>
@@ -130,7 +150,7 @@ namespace InnSyTech.Standard.Net.Notifications.Push
                 catch (SocketException) { break; }
             }
 
-            Started = false;
+            Stop();
         }
 
         /// <summary>
@@ -140,22 +160,25 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         /// <param name="data">Notificación.</param>
         private void SendNotify(Socket client, PushNotification<T> data)
         {
-            try
+            Task.Run(() =>
             {
-                int bytesTransferred = client.Send(data.ToBytes());
+                try
+                {
+                    int bytesTransferred = client.Send(data.Serialize());
 
-                if (bytesTransferred <= 0)
-                    throw new SocketException((int)SocketError.HostDown);
-            }
-            catch (SocketException)
-            {
-                if (client.Connected)
-                    client.Shutdown(SocketShutdown.Both);
+                    if (bytesTransferred <= 0)
+                        throw new SocketException((int)SocketError.HostDown);
+                }
+                catch (SocketException)
+                {
+                    if (client.Connected)
+                        client.Shutdown(SocketShutdown.Both);
 
-                client.Close();
+                    client.Close();
 
-                _clients.Remove(client);
-            }
+                    _clients.Remove(client);
+                }
+            });
         }
     }
 }

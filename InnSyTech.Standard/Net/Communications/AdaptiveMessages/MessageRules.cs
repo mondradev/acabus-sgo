@@ -34,7 +34,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Lista de definición de campos.
         /// </summary>
-        private List<FieldDefinition> _definitions;
+        private readonly List<FieldDefinition> _definitions;
 
         /// <summary>
         /// Crea una instancia nueva de definición de mensajes.
@@ -65,7 +65,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             MessageRules rules = JsonConvert.DeserializeObject<MessageRules>(File.ReadAllText(path));
 
             foreach (var x in rules.Where(x => _staticFields.Any(y => y.ID == x.ID)))
-                Trace.WriteLine(String.Format("Se descarta campo {0} de la plantilla", x));
+                Trace.WriteLine(String.Format("Se descarta campo {0} de la plantilla, ya que pertenece al encabezado.", x));
 
             rules.RemoveForced(_staticFields.Select(x => x.ID).ToArray());
             rules._definitions.AddRange(_staticFields);

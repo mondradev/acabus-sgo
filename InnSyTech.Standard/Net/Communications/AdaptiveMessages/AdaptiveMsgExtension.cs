@@ -274,5 +274,304 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
             src[id] = timeSpanText;
         }
+
+        /// <summary>
+        /// Indica si tiene el campo de nombre de la función activo.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        public static Boolean HashFunctionName(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.IsSet((int)AdaptiveMessageFieldID.FunctionName);
+        }
+
+        /// <summary>
+        /// Obtiene el nombre de la función en el mensaje.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Nombre de la función.</returns>
+        public static string GetFunctionName(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.GetString((int)AdaptiveMessageFieldID.FunctionName);
+        }
+
+        /// <summary>
+        /// Establece el nombre de la función en el mensaje.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <param name="functionName">Nombre de la función.</param>
+        public static void SetFunctionName(this IMessage message, string functionName)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            message[(int)AdaptiveMessageFieldID.FunctionName] = functionName;
+        }
+
+        /// <summary>
+        /// Establece el token de la aplicación requerido para la autenticación de un nodo válido.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <param name="appToken">Token de aplicación.</param>
+        public static void SetAPIToken(this IMessage message, byte[] appToken)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            message[(int)AdaptiveMessageFieldID.APIToken] = appToken;
+        }
+
+        /// <summary>
+        /// Establece el hash de las reglas utilizadas por el sistema de mensajes.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <param name="hashRules">Hash de las reglas de mensajes.</param>
+        public static void SetHashRules(this IMessage message, byte[] hashRules)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            message[(int)AdaptiveMessageFieldID.HashRules] = hashRules;
+        }
+
+        /// <summary>
+        /// Establece el nombre del módulo.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <param name="moduleName">Nombre del módulo.</param>
+        public static void SetModuleName(this IMessage message, string moduleName)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            message[(int)AdaptiveMessageFieldID.ModuleName] = moduleName;
+        }
+
+        /// <summary>
+        /// Obtiene el nombre del módulo.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        public static string GetModuleName(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.GetString((int)AdaptiveMessageFieldID.ModuleName);
+        }
+
+
+        /// <summary>
+        /// Indica si tiene el campo de nombre del módulo activo.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        public static Boolean HasModuleName(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.IsSet((int)AdaptiveMessageFieldID.ModuleName);
+        }
+
+        /// <summary>
+        /// Obtiene el código de respuesta de la petición.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>El código de respuesta de la última petición.</returns>
+        public static Int32 GetResponseCode(this IMessage message)
+        {
+
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.GetInt32((int)AdaptiveMessageFieldID.ResponseCode);
+        }
+
+        /// <summary>
+        /// Obtiene el mensaje de respuesta de la petición.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>El mensaje de respuesta de la última petición.</returns>
+        public static string GetResponseMessage(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.GetString((int)AdaptiveMessageFieldID.ResponseMessage);
+        }
+
+        /// <summary>
+        /// Obtiene la cantidad de elementos de la enumeración.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Cantidad de elementos de la colección.</returns>
+        public static int GetEnumerableCount(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.GetInt32((int)AdaptiveMessageFieldID.EnumerableCount);
+        }
+
+        /// <summary>
+        /// Establece la respuesta a una petición.
+        /// </summary>
+        /// <param name="message">Mensaja adaptativo.</param>
+        /// <param name="response">Respuesta de la petición.</param>
+        /// <param name="code">Código de respuesta a la petición.</param>
+        public static void SetResponse(this IMessage message, string response, AdaptativeMsgResponseCode code)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            message[(int)AdaptiveMessageFieldID.ResponseMessage] = response;
+            message[(int)AdaptiveMessageFieldID.ResponseCode] = code;
+        }
+
+        /// <summary>
+        /// Obtiene si el mensaje contiene una colección.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Un valor true si es enumerable.</returns>
+        public static Boolean IsEnumerable(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+
+            return message.IsSet((int)AdaptiveMessageFieldID.IsEnumerable);
+        }
+
+        /// <summary>
+        /// Establece el mensaje como enumerable y se posiciona al comienzo de la enumeración.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <param name="count">Cantidad de elementos de la colección.</param>
+        public static void SetAsEnumerable(this IMessage message, int count)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            message[(int)AdaptiveMessageFieldID.IsEnumerable] = BitConverter.GetBytes(true);
+            message[(int)AdaptiveMessageFieldID.EnumerableCount] = count;
+            message[(int)AdaptiveMessageFieldID.CurrentPosition] = 0;
+        }
+
+        /// <summary>
+        /// Obtiene la posición actual de la colección. En caso de no ser una colección devuelve un valor -1.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Posición en el recorrido de la enumeración.</returns>
+        public static int GetPosition(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            if (!message.IsEnumerable())
+                return -1;
+
+            return message.GetInt32((int)AdaptiveMessageFieldID.CurrentPosition);
+        }
+
+
+        /// <summary>
+        /// Establece la posición actual de la colección.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <param name="position">Posición de la colección.</param>
+        public static void SetPosition(this IMessage message, int position)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            if (message.IsEnumerable())
+                message[(int)AdaptiveMessageFieldID.CurrentPosition] = position;
+        }
+
+        /// <summary>
+        /// Establece la operación a realizar en la enumeración.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <param name="op">Operación a realizar.</param>
+        public static void SetEnumOp(this IMessage message, AdaptativeMsgEnumOp op)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            if (message.IsEnumerable())
+                message[(int)AdaptiveMessageFieldID.EnumerableOperation] = op;
+        }
+
+        /// <summary>
+        /// Obtiene la operación a realizar en la enumeración.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Operación a efecturar.</returns>
+        public static AdaptativeMsgEnumOp GetEnumOp(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            if (message.IsEnumerable())
+                return (AdaptativeMsgEnumOp)message[(int)AdaptiveMessageFieldID.EnumerableOperation];
+
+            return (AdaptativeMsgEnumOp)(-1);
+        }
+
+        /// <summary>
+        /// Indica si tiene el campo de APIToken activo.
+        /// </summary>
+        /// <param name="message">Mensaje adaptivo.</param>
+        /// <returns>Un valor true si tiene el campo activo.</returns>
+        public static Boolean HasAPIToken(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.IsSet((int)AdaptiveMessageFieldID.APIToken);
+        }
+
+        /// <summary>
+        /// Indica si tiene el campo de HashRules activo.
+        /// </summary>
+        /// <param name="message">Mensaje adaptivo.</param>
+        /// <returns>Un valor true si tiene el campo activo.</returns>
+        public static Boolean HasHashRules(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.IsSet((int)AdaptiveMessageFieldID.HashRules);
+        }
+
+        /// <summary>
+        /// Obtiene el token de aplicación.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Token de aplicación.</returns>
+        public static byte[] GetAPIToken(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.GetBytes((int)AdaptiveMessageFieldID.APIToken);
+        }
+
+        /// <summary>
+        /// Obtiene el hash de las reglas de mensajes.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Hash de las reglas de mensajes.</returns>
+        public static byte[] GetHashRules(this IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.GetBytes((int)AdaptiveMessageFieldID.HashRules);
+        }
     }
 }

@@ -18,12 +18,12 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Lista de campos.
         /// </summary>
-        private List<Field> _fields;
+        private readonly List<Field> _fields;
 
         /// <summary>
         /// Reglas de composición del mensaje.
         /// </summary>
-        private MessageRules _messageRules;
+        private readonly MessageRules _messageRules;
 
         /// <summary>
         /// Crea una instancia nueva de un mensaje.
@@ -88,7 +88,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             while (headerRead > 1)
             {
                 UInt64 res = headerRead % 2;
-                headerRead = headerRead / 2;
+                headerRead /= 2;
 
                 if (res == 1)
                     message.Add(index + 1, new object());
@@ -265,7 +265,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns>Un valor true si se obtuvo el valor del campo.</returns>
         public bool TryGetValue<TResult>(int id, out TResult value, Func<object, TResult> converter = null)
         {
-            value = default(TResult);
+            value = default;
 
             if (!_fields.Any(x => x.ID == id))
                 return false;
@@ -288,20 +288,16 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (definition == null)
                 return null;
 
-            switch (definition.Type)
+            return definition.Type switch
             {
-                case FieldDefinition.FieldType.Numeric:
-                    return new NumericSerializer();
+                FieldDefinition.FieldType.Numeric => new NumericSerializer(),
 
-                case FieldDefinition.FieldType.Text:
-                    return new TextSerializer();
+                FieldDefinition.FieldType.Text => new TextSerializer(),
 
-                case FieldDefinition.FieldType.Binary:
-                    return new BinarySerializer();
+                FieldDefinition.FieldType.Binary => new BinarySerializer(),
 
-                default:
-                    throw new AdaptiveMsgException("El tipo de campo no es válido para la conversión");
-            }
+                _ => throw new AdaptiveMsgException("El tipo de campo no es válido para la conversión"),
+            };
         }
 
         /// <summary>

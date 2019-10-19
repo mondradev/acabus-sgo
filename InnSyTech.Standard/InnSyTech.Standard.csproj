@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
@@ -85,11 +87,14 @@
     <Compile Include="Database\Utils\DbHelper.cs" />
     <Compile Include="Database\Sqlite\DbDateTimeConverter.cs" />
     <Compile Include="Gui\GuiHelper.cs" />
+    <Compile Include="Net\Communications\AdaptiveMessages\AdaptiveMessageFieldID.cs" />
+    <Compile Include="Net\Communications\AdaptiveMessages\AdaptativeMsgEnumOp.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\AdaptiveMsgException.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\AdaptiveMsgExtension.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\BinaryExtension.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\IMessage.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\MessageRules.cs" />
+    <Compile Include="Net\Communications\AdaptiveMessages\AdaptativeMsgResponseCode.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Serializers\HexaSerializer.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\Field.cs" />
     <Compile Include="Net\Communications\AdaptiveMessages\FieldDefinition.cs" />

@@ -63,7 +63,7 @@ namespace InnSyTech.Standard.Net.Notifications.Push
         /// Obtiene los bytes de la notificación.
         /// </summary>
         /// <returns>Una secuencia de bytes.</returns>
-        public Byte[] ToBytes()
+        public Byte[] Serialize()
             => Encoding.UTF8.GetBytes(ToString());
 
         /// <summary>
