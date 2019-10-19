@@ -121,8 +121,8 @@ namespace Opera.Acabus.Core.Services
 
             IMessage message = remoteContext.CreateMessage();
 
-            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
-            message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(CREATE_FUNC_NAME, typeof(T).Name);
+            if (!String.IsNullOrEmpty(ModuleName)) message.SetModuleName(ModuleName);
+            message.SetFunctionName(String.Format(CREATE_FUNC_NAME, typeof(T).Name));
             ToMessage(instance, message);
 
             Boolean created = false;
@@ -132,19 +132,19 @@ namespace Opera.Acabus.Core.Services
 
             remoteContext.SendMessage(message, x =>
             {
-                if (x.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                if (x.GetResponseCode() == 200)
                 {
                     created = x.IsSet(22) ? x.GetBoolean(22) : false;
                     if (created)
                         instanceR = Deserialize(x.GetBytes(SourceField));
                     else
                         exception = new LocalSyncException("No se logró crear la instancia en el servidor.",
-                           new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                           new InvalidOperationException(x.GetResponseMessage()));
 
                 }
                 else
                     exception = new LocalSyncException("Operación de creación realizada de manera erronea.",
-                    new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                    new InvalidOperationException(x.GetResponseMessage()));
             }).Wait();
 
             if ((reason = exception) != null)
@@ -192,8 +192,8 @@ namespace Opera.Acabus.Core.Services
 
             IMessage message = remoteContext.CreateMessage();
 
-            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
-            message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(DELETE_FUNC_NAME, typeof(T).Name);
+            if (!String.IsNullOrEmpty(ModuleName)) message.SetModuleName(ModuleName);
+            message.SetFunctionName(String.Format(DELETE_FUNC_NAME, typeof(T).Name));
             message[IDField] = instance.ID;
 
             Boolean deleted = false;
@@ -201,16 +201,16 @@ namespace Opera.Acabus.Core.Services
 
             remoteContext.SendMessage(message, (IMessage x) =>
             {
-                if (x.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                if (x.GetResponseCode() == 200)
                 {
                     deleted = x.IsSet(22) ? x.GetBoolean(22) : false;
                     if (!deleted)
                         exception = new LocalSyncException("No se logró eliminar en el servidor.",
-                                          new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                                          new InvalidOperationException(x.GetResponseMessage()));
                 }
                 else
                     exception = new LocalSyncException("Operación de borrado realizada de manera erronea.",
-                   new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                   new InvalidOperationException(x.GetResponseMessage()));
             }).Wait();
 
             if ((reason = exception) != null)
@@ -245,8 +245,8 @@ namespace Opera.Acabus.Core.Services
 
             IMessage message = remoteContext.CreateMessage();
 
-            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
-            message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(GET_BY_ID_FUNC_NAME, typeof(T).Name);
+            if (!String.IsNullOrEmpty(ModuleName)) message.SetModuleName(ModuleName);
+            message.SetFunctionName(String.Format(GET_BY_ID_FUNC_NAME, typeof(T).Name));
             message[IDField] = id;
 
             bool downloaded = false;
@@ -254,7 +254,7 @@ namespace Opera.Acabus.Core.Services
 
             remoteContext.SendMessage(message, (IMessage x) =>
             {
-                if (x.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                if (x.GetResponseCode() == 200)
                 {
                     T instance = x.IsSet(SourceField) ? Deserialize(x.GetBytes(SourceField)) : null;
 
@@ -293,7 +293,7 @@ namespace Opera.Acabus.Core.Services
                 }
                 else
                     exception = new LocalSyncException("Operación de descarga de instancia por ID realizada de manera erronea.",
-                    new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                    new InvalidOperationException(x.GetResponseMessage()));
             }).Wait();
 
             reason = exception;
@@ -346,18 +346,18 @@ namespace Opera.Acabus.Core.Services
             List<T> list = new List<T>();
             IMessage message = remoteContext.CreateMessage();
 
-            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
+            if (!String.IsNullOrEmpty(ModuleName)) message.SetModuleName(ModuleName);
 
             T lastSync = LocalContext.Read<T>().OrderBy(x => x.ModifyTime).ToList().Take(1).FirstOrDefault();
 
-            message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(DOWNLOAD_FUNC_NAME, typeof(T).Name);
+            message.SetFunctionName(String.Format(DOWNLOAD_FUNC_NAME, typeof(T).Name));
             message.SetDateTime(25, lastSync.ModifyTime);
 
             Exception exception = null;
 
             remoteContext.SendMessage(message, (IAdaptiveMsgEnumerator x) =>
             {
-                if (x.Current.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                if (x.Current.GetResponseCode() == 200)
                 {
                     T instance = x.Current.IsSet(SourceField) ? Deserialize(x.Current.GetBytes(SourceField)) : null;
 
@@ -372,11 +372,11 @@ namespace Opera.Acabus.Core.Services
 
                     list.Add(instance);
                     currentProgress++;
-                    guiProgress?.Report(currentProgress / x.Current.GetInt32(AcabusAdaptiveMessageFieldID.EnumerableCount.ToInt32()) / 2f * 100f);
+                    guiProgress?.Report(currentProgress / x.Current.GetEnumerableCount() / 2f * 100f);
                 }
                 else
                     exception = new LocalSyncException("No se procesó correctamente la petición.",
-                    new InvalidOperationException(x.Current.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                    new InvalidOperationException(x.Current.GetResponseMessage()));
             }).Wait();
 
             if ((reason = exception) != null)
@@ -437,8 +437,8 @@ namespace Opera.Acabus.Core.Services
 
             IMessage message = remoteContext.CreateMessage();
 
-            if (!String.IsNullOrEmpty(ModuleName)) message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()] = ModuleName;
-            message[AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()] = String.Format(UPDATE_FUNC_NAME, typeof(T).Name);
+            if (!String.IsNullOrEmpty(ModuleName)) message.SetModuleName(ModuleName);
+            message.SetFunctionName(String.Format(UPDATE_FUNC_NAME, typeof(T).Name));
             message[SourceField] = Serialize(instance);
 
             Boolean updated = false;
@@ -446,17 +446,17 @@ namespace Opera.Acabus.Core.Services
 
             remoteContext.SendMessage(message, (IMessage x) =>
              {
-                 if (x.GetInt32(AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()) == 200)
+                 if (x.GetResponseCode() == 200)
                  {
                      updated = x.IsSet(22) ? x.GetBoolean(22) : false;
 
                      if (!updated)
                          exception = new LocalSyncException("No se logró actualizar los atributos de la instancia.",
-                     new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                     new InvalidOperationException(x.GetResponseMessage()));
                  }
                  else
                      exception = new LocalSyncException("Operación de actualización realizada de manera erronea.",
-                 new InvalidOperationException(x.GetString(AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32())));
+                 new InvalidOperationException(x.GetResponseMessage()));
              }).Wait();
 
             if ((reason = exception) != null)

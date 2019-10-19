@@ -24,6 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
@@ -66,7 +68,7 @@
     <Compile Include="Models\Base\AcabusEntityExtension.cs" />
     <Compile Include="Models\RouteType.cs" />
     <Compile Include="Services\AcabusAdaptiveMessageFieldID.cs" />
-    <Compile Include="Services\AcabusAdaptiveMessageFieldIDExtension.cs" />
+    <Compile Include="Services\AcabusAdaptiveMessageExtension.cs" />
     <Compile Include="Services\PushAcabus.cs" />
     <Compile Include="DataAccess\ServerContext.cs" />
     <Compile Include="Models\AssignableArea.cs" />

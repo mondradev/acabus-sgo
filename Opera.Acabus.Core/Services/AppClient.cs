@@ -27,7 +27,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Controlador de peticiones al servidor.
         /// </summary>
-        private AdaptiveMsgRequest _request;
+        private readonly AdaptiveMsgRequest _request;
 
         /// <summary>
         /// Crea una instancia nueva de <see cref="AppClient"/>.
@@ -81,9 +81,9 @@ namespace Opera.Acabus.Core.Services
         {
             IMessage message = _request.CreateMessage();
 
-            message[AcabusAdaptiveMessageFieldID.APIToken.ToInt32()] = Encoding.UTF8.GetBytes(AppToken);
-            message[AcabusAdaptiveMessageFieldID.HashRules.ToInt32()] = HashRules;
-            message[AcabusAdaptiveMessageFieldID.DeviceToken.ToInt32()] = Encoding.UTF8.GetBytes(_token);
+            message.SetAPIToken(Encoding.UTF8.GetBytes(AppToken));
+            message.SetHashRules(HashRules);
+            message.SetDeviceToken(Encoding.UTF8.GetBytes(_token));
 
             return message;
         }
