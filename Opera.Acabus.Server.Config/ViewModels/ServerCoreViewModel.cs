@@ -3,7 +3,7 @@ using Opera.Acabus.Server.Core.Models;
 using System;
 using System.Collections.ObjectModel;
 
-namespace Opera.Acabus.Server.Gui.ViewModels
+namespace Opera.Acabus.Server.Config.ViewModels
 {
     /// <summary>
     /// Modelo de la vista <see cref="Views.ServerCoreView"/> el cual controla todas las

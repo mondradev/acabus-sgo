@@ -6,22 +6,28 @@ using Opera.Acabus.Core.Models;
 using Opera.Acabus.Core.Models.Base;
 using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core;
+using Opera.Acabus.Server.Core.Gui;
 using Opera.Acabus.Server.Core.Utils;
 using System;
 using System.Linq;
 using System.Net;
 
-namespace Opera.Acabus.Server.Gui
+namespace Opera.Acabus.Server.Config
 {
     /// <summary>
     /// Provee de funciones de consulta básica del sistema.
     /// </summary>
-    public static class ServerCoreFunctions
+    public  class ServerCoreFunctions : ServiceModuleBase
     {
+        /// <summary>
+        /// Obtiene el nombre del servicio.
+        /// </summary>
+        public override string ServiceName => "Server Core";
+
         /// <summary>
         /// Crea un autobus nuevo.
         /// </summary>
-        public static void CreateBus([ParameterField(12)] BusType type,
+        public  void CreateBus([ParameterField(12)] BusType type,
             [ParameterField(17)] String economicNumber, [ParameterField(13, true)] UInt16 idRoute,
             [ParameterField(36)] BusStatus status, IMessage message)
         {
@@ -47,7 +53,7 @@ namespace Opera.Acabus.Server.Gui
         /// <summary>
         /// Crea un equipo.
         /// </summary>
-        public static void CreateDevice([ParameterField(14)] DeviceType type,
+        public  void CreateDevice([ParameterField(14)] DeviceType type,
             [ParameterField(17, true)] String serialNumber, [ParameterField(13, true)] UInt16 idStation,
             [ParameterField(36, true)] UInt16 idBus, [ParameterField(18, true)] String ipAddress, IMessage message)
         {
@@ -64,7 +70,8 @@ namespace Opera.Acabus.Server.Gui
                 .ToList().Any(x => x.SerialNumber.Equals(device.SerialNumber)))
             {
                 message[61] = AcabusDataContext.AllDevices.FirstOrDefault(x => x.SerialNumber.Equals(device.SerialNumber)).Serialize();
-                message[AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32()] = String.Format("SERVIDOR: El número de serie {0} ya existe", serialNumber);
+
+                message.SetResponse(String.Format("SERVIDOR: El número de serie {0} ya existe", serialNumber), AdaptativeMsgResponseCode.OK);
             }
             else
             {
@@ -88,7 +95,7 @@ namespace Opera.Acabus.Server.Gui
         /// <param name="number">Numero de la ruta.</param>
         /// <param name="name">Nombre de la ruta.</param>
         /// <param name="type">Tipo de la ruta. ALIM = 1 o TRUNK = 2.</param>
-        public static void CreateRoute([ParameterField(12)] UInt16 number,
+        public  void CreateRoute([ParameterField(12)] UInt16 number,
             [ParameterField(17)] String name, [ParameterField(13)] RouteType type,
             [ParameterField(18, true)] String assignedSection, IMessage message)
         {
@@ -108,7 +115,7 @@ namespace Opera.Acabus.Server.Gui
         /// <summary>
         /// Crea un personal nuevo.
         /// </summary>
-        public static void CreateStaff([ParameterField(12)] AssignableArea area,
+        public  void CreateStaff([ParameterField(12)] AssignableArea area,
             [ParameterField(17)] String name, IMessage message)
         {
             Staff staff = new Staff()
@@ -134,7 +141,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="number">Numero de la estación.</param>
         /// <param name="name">Nombre de la estación.</param>
-        public static void CreateStation([ParameterField(12)] UInt16 number,
+        public  void CreateStation([ParameterField(12)] UInt16 number,
             [ParameterField(17)] String name, [ParameterField(18, true)] String assignedSection,
             [ParameterField(13, true)] UInt16 routeID, [ParameterField(23)] Boolean isExternal,
             IMessage message)
@@ -164,7 +171,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador del autobus</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DeleteBus([ParameterField(14)] UInt64 id, IMessage message)
+        public  void DeleteBus([ParameterField(14)] UInt64 id, IMessage message)
         {
             try
             {
@@ -194,7 +201,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador del equipo.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DeleteDevice([ParameterField(14)] UInt64 id, IMessage message)
+        public  void DeleteDevice([ParameterField(14)] UInt64 id, IMessage message)
         {
             try
             {
@@ -224,7 +231,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador de la ruta.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DeleteRoute([ParameterField(14)] UInt64 id, IMessage message)
+        public  void DeleteRoute([ParameterField(14)] UInt64 id, IMessage message)
         {
             try
             {
@@ -254,7 +261,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador de la estación.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DeleteStaff([ParameterField(14)] UInt64 id, IMessage message)
+        public  void DeleteStaff([ParameterField(14)] UInt64 id, IMessage message)
         {
             try
             {
@@ -284,7 +291,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador de la estación.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DeleteStation([ParameterField(14)] UInt64 id, IMessage message)
+        public  void DeleteStation([ParameterField(14)] UInt64 id, IMessage message)
         {
             try
             {
@@ -313,7 +320,7 @@ namespace Opera.Acabus.Server.Gui
         /// Obtiene los autobuses.
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DownloadBus([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        public  void DownloadBus([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
         {
             if (lastDownLoad == null)
                 lastDownLoad = DateTime.MinValue;
@@ -331,7 +338,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador de la estación.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DownloadDevice([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        public  void DownloadDevice([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
         {
             if (lastDownLoad == null)
                 lastDownLoad = DateTime.MinValue;
@@ -348,7 +355,7 @@ namespace Opera.Acabus.Server.Gui
         /// Obtiene las rutas.
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DownloadRoute([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        public  void DownloadRoute([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
         {
             if (lastDownLoad == null)
                 lastDownLoad = DateTime.MinValue;
@@ -365,7 +372,7 @@ namespace Opera.Acabus.Server.Gui
         /// Obtiene el personal.
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DownloadStaff([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        public  void DownloadStaff([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
         {
             if (lastDownLoad == null)
                 lastDownLoad = DateTime.MinValue;
@@ -382,7 +389,7 @@ namespace Opera.Acabus.Server.Gui
         /// Obtiene las estaciones.
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void DownloadStation([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
+        public  void DownloadStation([ParameterField(25, true)] DateTime? lastDownLoad, IMessage message)
         {
             /***
                 7, FieldType.Binary, 1, false, "Es enumerable"
@@ -407,7 +414,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador del autobus.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetBusByID([ParameterField(14)] UInt64 id, IMessage message)
+        public  void GetBusByID([ParameterField(14)] UInt64 id, IMessage message)
         {
             Bus bus = AcabusDataContext.AllBuses.LoadReference(1).FirstOrDefault(x => x.ID == id);
             message[61] = bus.Serialize();
@@ -418,7 +425,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador del equipo.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetDeviceByID([ParameterField(14)] UInt64 id, IMessage message)
+        public  void GetDeviceByID([ParameterField(14)] UInt64 id, IMessage message)
         {
             Device device = AcabusDataContext.AllDevices.LoadReference(1).FirstOrDefault(x => x.ID == id);
             message[61] = device.Serialize();
@@ -429,7 +436,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador de la ruta.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetRouteByID([ParameterField(14)] UInt64 id, IMessage message)
+        public  void GetRouteByID([ParameterField(14)] UInt64 id, IMessage message)
         {
             Route route = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == id);
             message[61] = route.Serialize();
@@ -440,7 +447,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador del personal.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStaffByID([ParameterField(14)] UInt64 id, IMessage message)
+        public  void GetStaffByID([ParameterField(14)] UInt64 id, IMessage message)
         {
             Staff staff = AcabusDataContext.AllStaff.LoadReference(1).FirstOrDefault(x => x.ID == id);
             message[61] = staff.Serialize();
@@ -451,7 +458,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador de la estación.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void GetStationByID([ParameterField(14)] UInt64 id, IMessage message)
+        public  void GetStationByID([ParameterField(14)] UInt64 id, IMessage message)
         {
             Station station = AcabusDataContext.AllStations.LoadReference(1).FirstOrDefault(x => x.ID == id);
             message[61] = station.Serialize();
@@ -461,7 +468,7 @@ namespace Opera.Acabus.Server.Gui
         /// Actualiza el autobus especificado por el ID
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateBus( IMessage message)
+        public  void UpdateBus( IMessage message)
         {
             try
             {
@@ -491,7 +498,7 @@ namespace Opera.Acabus.Server.Gui
         /// </summary>
         /// <param name="id">Identificador del equipo.</param>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateDevice(IMessage message)
+        public  void UpdateDevice(IMessage message)
         {
             try
             {
@@ -520,7 +527,7 @@ namespace Opera.Acabus.Server.Gui
         /// Actualiza la ruta especificada por el ID
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateRoute(IMessage message)
+        public  void UpdateRoute(IMessage message)
         {
             try
             {
@@ -549,7 +556,7 @@ namespace Opera.Acabus.Server.Gui
         /// Actualiza el personal especificado por el ID
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateStaff(IMessage message)
+        public  void UpdateStaff(IMessage message)
         {
             try
             {
@@ -578,7 +585,7 @@ namespace Opera.Acabus.Server.Gui
         /// Actualiza la estación especificada por el ID
         /// </summary>
         /// <param name="message">Mensaje de la petición.</param>
-        public static void UpdateStation(IMessage message)
+        public  void UpdateStation(IMessage message)
         {
             try
             {

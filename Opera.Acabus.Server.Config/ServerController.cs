@@ -18,7 +18,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace Opera.Acabus.Server.Gui
+namespace Opera.Acabus.Server.Config
 {
     /// <summary>
     /// Controlador de peticiones del servidor de SGO. Provee de la funcionalidad básica para aceptar
@@ -58,8 +58,13 @@ namespace Opera.Acabus.Server.Gui
             _msgServer.Disconnected += DisconnectedHandle;
 
             _notifier = new PushNotifier<PushAcabus>();
+            _notifier.StartedChanged += (sender, started) =>
+            {
+                if (!started)
+                    Stop();
+            };
 
-            ServerNotify.Notified += (sender, data) => { _notifier.Notify(data); };
+            ServerNotify.Notified += (sender, data) => _notifier.Notify(data);
 
             _notifier.Start();
 
@@ -104,9 +109,9 @@ namespace Opera.Acabus.Server.Gui
         {
             IPEndPoint ipClient = e.Connection.RemoteEndPoint as IPEndPoint;
 
-            Trace.WriteLine("Petición desde: " + ipClient);
+            Trace.WriteLine(String.Format("Cliente aceptado [IP={0}]", ipClient.Address.ToString()));
         }
-        
+
         /// <summary>
         /// Captura el evento cada vez que un cliente se desconecta del servidor.
         /// </summary>
@@ -115,23 +120,8 @@ namespace Opera.Acabus.Server.Gui
         private static void DisconnectedHandle(object sender, IAdaptiveMsgClientArgs e)
         {
             IPEndPoint ipClient = e.Connection.RemoteEndPoint as IPEndPoint;
-        }
 
-        /// <summary>
-        /// Funcciones internas del nucleo del servidor.
-        /// </summary>
-        /// <param name="message">Mensaje con la petición.</param>
-        /// <param name="callback">Funcción de llamada de vuelta.</param>
-        /// <param name="e">Instancia que controla el evento de la petición.</param>
-        private static void Functions(IMessage message, Action<IMessage> callback, IAdaptiveMsgArgs e)
-        {
-            if (ServerHelper.ValidateRequest(message, typeof(ServerCoreFunctions)))
-                ServerHelper.CallFunc(message, typeof(ServerCoreFunctions));
-            else
-               ServerHelper.CreateError("Error al realizar la petición: opera.acabus.server.core."
-                    + message.GetString(AcabusAdaptiveMessageFieldID.FunctionName.ToInt32()), 403, e);
-
-            callback?.Invoke(message);
+            Trace.WriteLine(String.Format("Cliente desconectado [IP={0}]", ipClient.Address.ToString()));
         }
 
         /// <summary>
@@ -184,84 +174,31 @@ namespace Opera.Acabus.Server.Gui
         {
             /***
              *  1, FieldType.Binary, 32, true, "Token de aplicación"
-                2, FieldType.Text, 20, true, "Versión de las reglas"
+                2, FieldType.Text, 20, true, "Hash de las reglas"
                 11, FIeldType.Binary, 32, true, "Token de equipo"
             */
 
-            if (!message.IsSet(AcabusAdaptiveMessageFieldID.APIToken.ToInt32())
-                || !message.IsSet(AcabusAdaptiveMessageFieldID.HashRules.ToInt32())
-                || !message.IsSet(AcabusAdaptiveMessageFieldID.DeviceToken.ToInt32()))
+            if (!message.HasAPIToken() || !message.HasHashRules() || !message.HasDeviceToken())
                 return false;
 
-            if (!ValidateToken(message.GetValue(AcabusAdaptiveMessageFieldID.APIToken.ToInt32(), x => x as byte[])))
+            if (!ValidateToken(message.GetAPIToken()))
                 return false;
 
             using (SHA256 sha256 = SHA256.Create())
             {
                 String hashRules = sha256.ComputeHash(File.ReadAllBytes(AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules"))).ToTextPlain();
-                String HashRulesClients = message.GetValue(AcabusAdaptiveMessageFieldID.HashRules.ToInt32(), x => (x as byte[]).ToTextPlain());
+                String HashRulesClients = message.GetHashRules().ToTextPlain();
 
                 if (!hashRules.Equals(HashRulesClients))
                     return false;
             }
 
-            if (!ValidateTokenDevice(message.GetValue(AcabusAdaptiveMessageFieldID.DeviceToken.ToInt32(), x => x as byte[])))
+            if (!ValidateTokenDevice(message.GetDeviceToken()))
                 return false;
 
             return true;
         }
 
-        /// <summary>
-        /// Procesa o redirecciona a otros módulos las peticiones recibidas por el servidor.
-        /// </summary>
-        /// <param name="message">Mensaje recibido del cliente.</param>
-        private static void ProcessRequest(IMessage message, IAdaptiveMsgArgs e)
-        {
-            /***
-             *  1, FieldType.Binary, 32, true, "Token de aplicación"
-                2, FieldType.Text, 20, true, "Versión de las reglas"
-                3, FieldType.Numeric, 3, false, "Código de respuesta"
-                4, FieldType.Text, 255, true, "Mensaje de respuesta"
-                5, FieldType.Text, 50, true, "Nombre del módulo"
-                6, FieldType.Text, 20, true, "Nombre de la función"
-                7, FieldType.Binary, 1, false, "Es enumerable"
-                8, FieldType.Numeric, 100, true, "Registros totales del enumerable"
-                9, FieldType.Numeric, 100, true, "Posición del enumerable"
-                10, FieldType.Numeric, 1, false, "Operaciones del enumerable (Siguiente|Inicio)"
-             */
-            try
-            {
-                if (!message.IsSet(6))
-                {
-                    e.Send(ServerHelper.CreateError("Error al realizar la petición, no especificó la función a llamar", 403, e));
-                    return;
-                }
-
-                message[AcabusAdaptiveMessageFieldID.ResponseCode.ToInt32()] = 200;
-                message[AcabusAdaptiveMessageFieldID.ResponseMessage.ToInt32()] = "OK";
-
-                if (message.IsSet(AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()))
-                {
-                    String modName = message[AcabusAdaptiveMessageFieldID.ModuleName.ToInt32()].ToString();
-                    IServiceModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
-
-                    if (module is null)
-                    {
-                        e.Send(ServerHelper.CreateError("Error al realizar la petición, no existe el módulo: " + modName, 403, e));
-                        return;
-                    }
-
-                    module.Request(message, e.Send, e );
-                    return;
-                }
-
-                Functions(message, e.Send, e);
-            }
-            catch (Exception ex)
-            {
-                e.Send(ServerHelper.CreateError(ex.Message, 500, e));
-            }
-        }
 
         /// <summary>
         /// Captura la llegada de nuevas peticiones.
@@ -273,16 +210,48 @@ namespace Opera.Acabus.Server.Gui
             switch (e.Data)
             {
                 case IMessage m when !Login(m):
-                    e.Send(ServerHelper.CreateError("Mensaje no valido", 403, e));
+                    e.SendException(new ServiceException("No se logró autenticar", AdaptativeMsgResponseCode.UNAUTHORIZED, "Authenticator", "Server"));
                     break;
 
                 case null:
-                    e.Send(ServerHelper.CreateError("Petición incorrecta", 403, e));
+                    e.SendException(new ServiceException("Sin datos para procesar la petición", AdaptativeMsgResponseCode.BAD_REQUEST, "Processor", "Server"));
                     break;
 
                 default:
                     ProcessRequest(e.Data, e);
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Procesa o redirecciona a otros módulos las peticiones recibidas por el servidor.
+        /// </summary>
+        /// <param name="message">Mensaje recibido del cliente.</param>
+        private static void ProcessRequest(IMessage message, IAdaptiveMsgArgs e)
+        {
+            try
+            {
+                if (!message.HashFunctionName())
+                    throw new ServiceException("No se especificó la función a llamar", AdaptativeMsgResponseCode.BAD_REQUEST, "Processor", "Server");
+
+                message.SetResponse("OK", AdaptativeMsgResponseCode.OK);
+
+                String modName = message.GetModuleName() ?? "Server Core";
+                IServiceModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
+
+                if (module is null)
+                    throw new ServiceException(String.Format("El módulo especificado no existe [Módulo={0}, Función={1}]",
+                        AdaptativeMsgResponseCode.BAD_REQUEST, modName, message.GetFunctionName()), "Processor", "Server");
+
+                module.Request(message, e);
+            }
+            catch (ServiceException ex)
+            {
+                e.SendException(ex);
+            }
+            catch (Exception ex)
+            {
+                e.SendException(new ServiceException("Processor", "Server", ex));
             }
         }
 

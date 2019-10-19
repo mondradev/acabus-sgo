@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29201.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acabus_Control_Operaciones", "MassiveSsh\Acabus_Control_Operaciones.csproj", "{E196B435-1093-4704-8F4D-FC430842FFCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acabus_Control_Operaciones", "Acabus_Control_Operaciones\Acabus_Control_Operaciones.csproj", "{E196B435-1093-4704-8F4D-FC430842FFCD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnSyTech.Standard", "InnSyTech.Standard\InnSyTech.Standard.csproj", "{F74FEE3D-D536-44DF-9E2C-53540CE78173}"
 EndProject
@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opera.Acabus.Server.Core", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opera.Acabus.SyncDb", "Opera.Acabus.SyncDb\Opera.Acabus.SyncDb.csproj", "{1E911371-B690-4EF2-8851-45A2404A7C4B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opera.Acabus.Server.Gui", "Opera.Acabus.Server.Gui\Opera.Acabus.Server.Gui.csproj", "{7356CB0A-7391-4C03-95DC-FE1A646DA31F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opera.Acabus.Server.Config", "Opera.Acabus.Server.Config\Opera.Acabus.Server.Config.csproj", "{7356CB0A-7391-4C03-95DC-FE1A646DA31F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnSyTech.Library.Core", "InnSyTech.Library.Core\InnSyTech.Library.Core.csproj", "{68F3CBCB-79DF-4011-BA04-E09FF00D2176}"
 EndProject

@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7356CB0A-7391-4C03-95DC-FE1A646DA31F}</ProjectGuid>
     <OutputType>library</OutputType>
-    <RootNamespace>Opera.Acabus.Server.Gui</RootNamespace>
-    <AssemblyName>Opera.Acabus.Server.Gui</AssemblyName>
+    <RootNamespace>Opera.Acabus.Server.Config</RootNamespace>
+    <AssemblyName>Opera.Acabus.Server.Config</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Dragablz, Version=0.0.3.203, Culture=neutral, processorArchitecture=MSIL">
@@ -76,6 +78,7 @@
     <Compile Include="ServerController.cs" />
     <Compile Include="ServerCoreFunctions.cs" />
     <Compile Include="ServerCoreModule.cs" />
+    <Compile Include="ServerNotify.cs" />
     <Compile Include="ViewModels\ServerCoreViewModel.cs" />
     <Compile Include="Views\ServerCoreView.xaml.cs">
       <DependentUpon>ServerCoreView.xaml</DependentUpon>
@@ -118,5 +121,6 @@
       <Name>Opera.Acabus.Server.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,12 +1,12 @@
-﻿<UserControl x:Class="Opera.Acabus.Server.Gui.Views.ServerCoreView"
+﻿<UserControl x:Class="Opera.Acabus.Server.Config.Views.ServerCoreView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:materialDesignMahApps="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:c="clr-namespace:Opera.Acabus.Server.Core.Gui;assembly=Opera.Acabus.Server.Core"
-             xmlns:v="clr-namespace:Opera.Acabus.Server.Gui.ViewModels"
-             xmlns:cmp="clr-namespace:Opera.Acabus.Server.Gui.Components"
+             xmlns:v="clr-namespace:Opera.Acabus.Server.Config.ViewModels"
+             xmlns:cmp="clr-namespace:Opera.Acabus.Server.Config.Components"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>

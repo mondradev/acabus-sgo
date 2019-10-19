@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Shapes;
 
-namespace Opera.Acabus.Server.Gui.Components
+namespace Opera.Acabus.Server.Config.Components
 {
     /// <summary>
     /// 
