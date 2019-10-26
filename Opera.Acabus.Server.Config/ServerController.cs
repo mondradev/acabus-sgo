@@ -34,7 +34,7 @@ namespace Opera.Acabus.Server.Config
         /// <summary>
         /// Instancia del servidor de mensajes adaptativos.
         /// </summary>
-        private static readonly AdaptiveMsgServer _msgServer;
+        private static readonly AdaptiveMessageServer _msgServer;
 
         /// <summary>
         /// Notificador de actualizaciones.
@@ -51,7 +51,7 @@ namespace Opera.Acabus.Server.Config
             string path = AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules")
                 ?? throw new InvalidOperationException("No existe una ruta válida para cargar las reglas de mensajes.");
 
-            _msgServer = new AdaptiveMsgServer(path);
+            _msgServer = new AdaptiveMessageServer(path);
 
             _msgServer.Accepted += AcceptedHandle;
             _msgServer.Received += ReceivedHandle;
@@ -105,7 +105,7 @@ namespace Opera.Acabus.Server.Config
         /// </summary>
         /// <param name="sender">Instancia del servidor.</param>
         /// <param name="e">Parametros del evento.</param>
-        private static void AcceptedHandle(object sender, IAdaptiveMsgClientArgs e)
+        private static void AcceptedHandle(object sender, IAdaptiveMessageAcceptedArgs e)
         {
             IPEndPoint ipClient = e.Connection.RemoteEndPoint as IPEndPoint;
 
@@ -117,7 +117,7 @@ namespace Opera.Acabus.Server.Config
         /// </summary>
         /// <param name="sender">Instancia del servidor.</param>
         /// <param name="e">Parametros del evento.</param>
-        private static void DisconnectedHandle(object sender, IAdaptiveMsgClientArgs e)
+        private static void DisconnectedHandle(object sender, IAdaptiveMessageAcceptedArgs e)
         {
             IPEndPoint ipClient = e.Connection.RemoteEndPoint as IPEndPoint;
 
@@ -170,7 +170,7 @@ namespace Opera.Acabus.Server.Config
         /// </summary>
         /// <param name="message">Mensaje recibido del cliente.</param>
         /// <returns>Un true si es un cliente valido.</returns>
-        private static bool Login(IMessage message)
+        private static bool Login(IAdaptiveMessage message)
         {
             /***
              *  1, FieldType.Binary, 32, true, "Token de aplicación"
@@ -205,20 +205,20 @@ namespace Opera.Acabus.Server.Config
         /// </summary>
         /// <param name="sender">Instancia del servidor.</param>
         /// <param name="e">Parametros del evento.</param>
-        private static void ReceivedHandle(object sender, IAdaptiveMsgArgs e)
+        private static void ReceivedHandle(object sender, IAdaptiveMessageReceivedArgs e)
         {
             switch (e.Data)
             {
-                case IMessage m when !Login(m):
-                    e.SendException(new ServiceException("No se logró autenticar", AdaptativeMsgResponseCode.UNAUTHORIZED, "Authenticator", "Server"));
+                case IAdaptiveMessage m when !Login(m):
+                    e.SendException(new ServiceException("No se logró autenticar", AdaptiveMessageResponseCode.UNAUTHORIZED, "Authenticator", "Server"));
                     break;
 
                 case null:
-                    e.SendException(new ServiceException("Sin datos para procesar la petición", AdaptativeMsgResponseCode.BAD_REQUEST, "Processor", "Server"));
+                    e.SendException(new ServiceException("Sin datos para procesar la petición", AdaptiveMessageResponseCode.BAD_REQUEST, "Processor", "Server"));
                     break;
 
                 default:
-                    ProcessRequest(e.Data, e);
+                    ProcessRequest(e);
                     break;
             }
         }
@@ -227,23 +227,23 @@ namespace Opera.Acabus.Server.Config
         /// Procesa o redirecciona a otros módulos las peticiones recibidas por el servidor.
         /// </summary>
         /// <param name="message">Mensaje recibido del cliente.</param>
-        private static void ProcessRequest(IMessage message, IAdaptiveMsgArgs e)
+        private static void ProcessRequest(IAdaptiveMessageReceivedArgs e)
         {
             try
             {
-                if (!message.HashFunctionName())
-                    throw new ServiceException("No se especificó la función a llamar", AdaptativeMsgResponseCode.BAD_REQUEST, "Processor", "Server");
+                IAdaptiveMessage message = e.Data;
 
-                message.SetResponse("OK", AdaptativeMsgResponseCode.OK);
+                if (!message.HasFunctionName())
+                    throw new ServiceException("No se especificó la función a llamar", AdaptiveMessageResponseCode.BAD_REQUEST, "Processor", "Server");
 
                 String modName = message.GetModuleName() ?? "Server Core";
                 IServiceModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
 
                 if (module is null)
                     throw new ServiceException(String.Format("El módulo especificado no existe [Módulo={0}, Función={1}]",
-                        AdaptativeMsgResponseCode.BAD_REQUEST, modName, message.GetFunctionName()), "Processor", "Server");
+                        AdaptiveMessageResponseCode.BAD_REQUEST, modName, message.GetFunctionName()), "Processor", "Server");
 
-                module.Request(message, e);
+                module.Request(e);
             }
             catch (ServiceException ex)
             {
