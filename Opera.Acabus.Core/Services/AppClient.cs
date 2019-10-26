@@ -2,8 +2,6 @@
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using Opera.Acabus.Core.DataAccess;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
@@ -27,7 +25,7 @@ namespace Opera.Acabus.Core.Services
         /// <summary>
         /// Controlador de peticiones al servidor.
         /// </summary>
-        private readonly AdaptiveMsgRequest _request;
+        private readonly AdaptiveMessageRequest _request;
 
         /// <summary>
         /// Crea una instancia nueva de <see cref="AppClient"/>.
@@ -44,7 +42,7 @@ namespace Opera.Acabus.Core.Services
                 HashRules = sha256.ComputeHash(File.ReadAllBytes(RulesMsgPath));
             }
 
-            _request = new AdaptiveMsgRequest(RulesMsgPath, ServerIP, ServerPort);
+            _request = new AdaptiveMessageRequest(RulesMsgPath, ServerIP, ServerPort);
             _token = AcabusDataContext.ConfigContext["App"]?.ToString("DeviceKey");
         }
 
@@ -77,9 +75,9 @@ namespace Opera.Acabus.Core.Services
         /// Crea un nuevo mensaje con los campos predeterminados.
         /// </summary>
         /// <returns>Un mensaje vacío.</returns>
-        public IMessage CreateMessage()
+        public IAdaptiveMessage CreateMessage()
         {
-            IMessage message = _request.CreateMessage();
+            IAdaptiveMessage message = _request.CreateMessage();
 
             message.SetAPIToken(Encoding.UTF8.GetBytes(AppToken));
             message.SetHashRules(HashRules);
@@ -92,19 +90,19 @@ namespace Opera.Acabus.Core.Services
         /// Envía un mensaje nuevo al servidor.
         /// </summary>
         /// <param name="message">Mensaje a envíar.</param>
-        /// <param name="callback">Función a realizar al recibir la respuesta.</param>
-        /// <returns>Un instancia Task.</returns>
-        public Task SendMessage(IMessage message, Action<IMessage> callback)
-            => _request.DoRequest(message, callback);
+        /// <returns>Un instancia Task que devuelve la respuesta.</returns>
+        public Task<IAdaptiveMessage> SendMessage(IAdaptiveMessage message)
+            => _request.Send(message);
 
         /// <summary>
         /// Envía un mensaje nuevo al servidor con una secuencia como respuesta.
         /// </summary>
+        /// <typeparam name="TResult">Tipo de dato de la colección a solicitar.</typeparam>
         /// <param name="message">Mensaje a envíar.</param>
-        /// <param name="callback">Función a realizar al recibir la respuesta.</param>
-        /// <returns>Un instancia Task.</returns>
-        public Task SendMessage(IMessage message, Action<IAdaptiveMsgEnumerator> callback)
-            => _request.DoRequestToList(message, callback);
+        /// <param name="convertor">Función de conversión del contenido del mensaje a <typeparamref name="TResult"/>.</param>
+        /// <returns>Un instancia Task que devuelve la colección.</returns>      
+        public Task SendMessage<TResult>(IAdaptiveMessage message, Func<IAdaptiveMessage, TResult> convertor)
+            => _request.Send<TResult>(message, convertor);
 
 
     }

@@ -11,7 +11,7 @@ namespace Opera.Acabus.Core.Models.Base
         /// Marca a la entidad actual como eliminada.
         /// </summary>
         /// <param name="entity"></param>
-        public static void Delete(this AcabusEntityBase entity)
+        public static void SetAsDeleted(this AcabusEntityBase entity)
         {
             entity.Active = false;
             entity.ModifyUser = "SISTEMA";

@@ -11,7 +11,7 @@ namespace Opera.Acabus.Server.Core
         /// <summary>
         /// Obtiene el código de error de la petición.
         /// </summary>
-        public AdaptativeMsgResponseCode Code { get; }
+        public AdaptiveMessageResponseCode Code { get; }
 
         /// <summary>
         /// Obtiene el nombre de la función donde ocurrió la excepción.
@@ -24,13 +24,13 @@ namespace Opera.Acabus.Server.Core
         public string ModuleName { get; }
 
         /// <summary>
-        /// Crea una instancia nueva de error con un código de respuesta <see cref="ResponseCode.INTERNAL_SERVER_ERROR"/>.
+        /// Crea una instancia nueva de error con un código de respuesta <see cref="AdaptiveMessageResponseCode.INTERNAL_SERVER_ERROR"/>.
         /// </summary>
         /// <param name="message">Mensaje de error.</param>
         /// <param name="functionName">Nombre de la función donde surge la excepción.</param>
         /// <param name="moduleName">Nombre del módulo donde surge la excepción.</param>
         public ServiceException(string message, string functionName, string moduleName) :
-            this(message, AdaptativeMsgResponseCode.INTERNAL_SERVER_ERROR, functionName, moduleName)
+            this(message, AdaptiveMessageResponseCode.INTERNAL_SERVER_ERROR, functionName, moduleName)
         { }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Opera.Acabus.Server.Core
         /// <param name="code">Código de respuesta.</param>
         /// <param name="functionName">Nombre de la función donde surge la excepción.</param>
         /// <param name="moduleName">Nombre del módulo donde surge la excepción.</param>
-        public ServiceException(string message, AdaptativeMsgResponseCode code, string functionName, string moduleName) :
+        public ServiceException(string message, AdaptiveMessageResponseCode code, string functionName, string moduleName) :
             this(message, code, functionName, moduleName, null)
         { }
 
@@ -52,7 +52,7 @@ namespace Opera.Acabus.Server.Core
         /// <param name="functionName">Nombre de la función donde surge la excepción.</param>
         /// <param name="moduleName">Nombre del módulo donde surge la excepción.</param>
         /// <param name="innerException">Excepción interna causante el error actual.</param>
-        public ServiceException(string message, AdaptativeMsgResponseCode code, string functionName, string moduleName, Exception innerException) :
+        public ServiceException(string message, AdaptiveMessageResponseCode code, string functionName, string moduleName, Exception innerException) :
             base(message, innerException)
         {
             Code = code;
@@ -68,7 +68,7 @@ namespace Opera.Acabus.Server.Core
         /// <param name="moduleName">Nombre del módulo donde surge la excepción.</param>
         /// <param name="innerException">Excepción interna causante el error actual.</param>
         public ServiceException(string message, string functionName, string moduleName, Exception innerException) :
-            this(message, AdaptativeMsgResponseCode.INTERNAL_SERVER_ERROR, functionName, moduleName, innerException)
+            this(message, AdaptiveMessageResponseCode.INTERNAL_SERVER_ERROR, functionName, moduleName, innerException)
         {
         }
 
@@ -80,7 +80,7 @@ namespace Opera.Acabus.Server.Core
         /// <param name="moduleName">Nombre del módulo donde surge la excepción.</param>
         /// <param name="innerException">Excepción interna causante el error actual.</param>
         public ServiceException(string functionName, string moduleName, Exception innerException) :
-            this(null, AdaptativeMsgResponseCode.INTERNAL_SERVER_ERROR, functionName, moduleName, innerException)
+            this(null, AdaptiveMessageResponseCode.INTERNAL_SERVER_ERROR, functionName, moduleName, innerException)
         {
         }
     }

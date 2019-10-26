@@ -46,21 +46,19 @@ namespace Opera.Acabus.Server.Core.Gui
         /// <summary>
         /// Realiza una petición asíncrona al módulo.
         /// </summary>
-        /// <param name="message">Mensaje con la petición.</param>
-        /// <param name="callback">Función de llamada de vuelta.</param>
         /// <param name="e">Parametros utilizados para el envío de respuestas al cliente.</param>
-        public void Request(IMessage message, IAdaptiveMsgArgs e)
+        public void Request(IAdaptiveMessageReceivedArgs e)
         {
             Task.Run(() =>
             {
                 try
                 {
-                    if (ServerHelper.ValidateRequest(message, GetType()))
-                        ServerHelper.CallFunc(message, GetType());
+                    if (ServerHelper.ValidateRequest(e.Data, GetType()))
+                        ServerHelper.CallFunc(e, GetType());
                     else
-                        throw new ServiceException("No se encontró la función solicitada.", AdaptativeMsgResponseCode.BAD_REQUEST, message.GetFunctionName(), ServiceName);
+                        throw new ServiceException("No se encontró la función solicitada o no coindicieron los parametros especificados.", AdaptiveMessageResponseCode.BAD_REQUEST, e.Data.GetFunctionName(), ServiceName);
 
-                    e.Send(message);
+                    e.Response();
                 }
                 catch (ServiceException ex)
                 {
@@ -68,7 +66,7 @@ namespace Opera.Acabus.Server.Core.Gui
                 }
                 catch (Exception ex)
                 {
-                    e.SendException(new ServiceException(message.GetFunctionName(), ServiceName, ex));
+                    e.SendException(new ServiceException(e.Data.GetFunctionName(), ServiceName, ex));
                 }
             });
         }

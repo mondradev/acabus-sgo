@@ -23,8 +23,7 @@ namespace Opera.Acabus.Server.Core.Models
         /// <summary>
         /// Realiza una petición asíncrona al módulo.
         /// </summary>
-        /// <param name="message">Mensaje con la petición.</param>
         /// <param name="e">Parametros utilizados para el envío de respuestas al cliente.</param>
-        void Request(IMessage message, IAdaptiveMsgArgs e);
+        void Request(IAdaptiveMessageReceivedArgs e);
     }
 }

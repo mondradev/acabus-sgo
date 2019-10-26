@@ -4,7 +4,7 @@ using System;
 namespace Opera.Acabus.Server.Core.Utils
 {
     /// <summary>
-    /// Representa un atributo utilizado para enlazar el parametro de una función con el campo de un mensaje <see cref="IMessage"/>.
+    /// Representa un atributo utilizado para enlazar el parametro de una función con el campo de un mensaje <see cref="IAdaptiveMessage"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, Inherited = false, AllowMultiple = false)]
     public sealed class ParameterFieldAttribute : Attribute

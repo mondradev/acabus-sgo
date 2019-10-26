@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace Opera.Acabus.Server.Core.Utils
 {
@@ -17,11 +18,13 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <summary>
         /// Realiza la llamada a la función especificada.
         /// </summary>
-        /// <param name="message">Mensaje de la petición</param>
+        /// <param name="request">Controlador de la petición.</param>
         /// <param name="functionsClass">Clase de las funciones.</param>
-        public static void CallFunc(IMessage message, Type functionsClass)
+        public static void CallFunc(IAdaptiveMessageReceivedArgs request, Type functionsClass)
         {
-            String funcName = message[6]?.ToString();
+            IAdaptiveMessage message = request.Data;
+
+            String funcName = message.GetFunctionName();
 
             if (String.IsNullOrEmpty(funcName))
                 throw new InvalidOperationException("No se especificó el nombre de la función.");
@@ -43,55 +46,9 @@ namespace Opera.Acabus.Server.Core.Utils
 
             try
             {
-                for (int i = 0; i < parameters.Length - 1; i++)
-                {
-                    ParameterFieldAttribute parameterData = parameters[i].GetCustomAttribute<ParameterFieldAttribute>();
-                    int id = parameterData.ID;
+                ProcessParameters(message, parameters, parametersValues);
 
-                    Type type = parameters[i].ParameterType;
-
-                    if (!message.IsSet(id) && !parameterData.Nullable)
-                        throw new ArgumentNullException("Campo " + id);
-
-                    if (parameterData.Nullable && !message.IsSet(id))
-                    {
-                        parametersValues[i] = type.IsValueType ? Activator.CreateInstance(type) : null;
-                        continue;
-                    }
-
-                    type = Nullable.GetUnderlyingType(type) ?? type;
-
-                    if (type == typeof(Int16))
-                        parametersValues[i] = Int16.Parse(message[id].ToString());
-                    else if (type == typeof(Int32))
-                        parametersValues[i] = Int32.Parse(message[id].ToString());
-                    else if (type == typeof(Int64))
-                        parametersValues[i] = Int64.Parse(message[id].ToString());
-                    else if (type == typeof(UInt16))
-                        parametersValues[i] = Convert.ToUInt16(message[id]);
-                    else if (type == typeof(UInt32))
-                        parametersValues[i] = Convert.ToUInt32(message[id]);
-                    else if (type == typeof(UInt64))
-                        parametersValues[i] = Convert.ToUInt64(message[id]);
-                    else if (type == typeof(Double))
-                        parametersValues[i] = Double.Parse(message[id].ToString());
-                    else if (type == typeof(Single))
-                        parametersValues[i] = Single.Parse(message[id].ToString());
-                    else if (type == typeof(DateTime))
-                        parametersValues[i] = DateTime.Parse(String.Format("{0}{1}-{2}-{3} {4}:{5}:{6}", message[id].ToString().Cut(7)));
-                    else if (type == typeof(TimeSpan))
-                        parametersValues[i] = TimeSpan.Parse(String.Format("{0}:{1}:{2}", message[id].ToString().Cut(3)));
-                    else if (type == typeof(Decimal))
-                        parametersValues[i] = Decimal.Parse(message[id].ToString());
-                    else if (type.IsEnum)
-                        parametersValues[i] = Enum.Parse(parameters[i].ParameterType, message[id].ToString());
-                    else if (type == typeof(bool))
-                        parametersValues[i] = BitConverter.ToBoolean(message[id] as byte[] ?? BitConverter.GetBytes(default(bool)), 0);
-                    else
-                        parametersValues[i] = Convert.ChangeType(message[id], parameters[i].ParameterType);
-                }
-
-                parametersValues[parametersValues.Length - 1] = message;
+                parametersValues[parametersValues.Length - 1] = request;
 
                 method.Invoke(null, parametersValues);
             }
@@ -106,19 +63,59 @@ namespace Opera.Acabus.Server.Core.Utils
         }
 
         /// <summary>
-        /// Crea un mensaje básico de error.
+        /// Procesa los parametros que requiere la función llamada a través de <see cref="CallFunc(IAdaptiveMessage, Type)"/>
         /// </summary>
-        /// <param name="text">Mensaje a indicar al cliente.</param>
-        /// <param name="code">Código de respuesta al cliente.</param>
-        /// <param name="e">Instancia que controla el evento de la petición.</param>
-        /// <returns>Una instancia de mensaje.</returns>
-        public static IMessage CreateError(string text, AdaptativeMsgResponseCode code, IAdaptiveMsgArgs e)
+        /// <param name="message">Mensaje de la petición.</param>
+        /// <param name="parameters">Vector con la información de los parametros de la función.</param>
+        /// <param name="parametersValues">Vector con los valores para los parametros de la función.</param>
+        private static void ProcessParameters(IAdaptiveMessage message, ParameterInfo[] parameters, object[] parametersValues)
         {
-            IMessage message = e.CreateMessage();
+            for (int i = 0; i < parameters.Length - 1; i++)
+            {
+                ParameterFieldAttribute parameterData = parameters[i].GetCustomAttribute<ParameterFieldAttribute>();
+                int id = parameterData.ID;
 
-            message.SetResponse(text, code);
+                Type type = parameters[i].ParameterType;
 
-            return message;
+                if (!message.IsSet(id) && !parameterData.Nullable)
+                    throw new ArgumentNullException("Campo " + id);
+
+                if (parameterData.Nullable && !message.IsSet(id))
+                {
+                    parametersValues[i] = type.IsValueType ? Activator.CreateInstance(type) : null;
+                    continue;
+                }
+
+                type = Nullable.GetUnderlyingType(type) ?? type;
+
+                parametersValues[i] = DeserializeParameter(message[id], parameters[i], type);
+            }
+        }
+
+        /// <summary>
+        /// Deserializa el valor de un campo en el mensaje correspondiente al parametro de la función llamada.
+        /// </summary>
+        /// <param name="data">Dato del campo.</param>
+        /// <param name="parameter">Información del parámetro de la función.</param>
+        /// <param name="type">Tipo de dato del campo.</param>
+        /// <returns>El valor del parametro.</returns>
+        private static object DeserializeParameter(object data, ParameterInfo parameter, Type type)
+        {
+            if (type == typeof(bool))
+                return BitConverter.ToBoolean(data as byte[] ?? BitConverter.GetBytes(default(bool)), 0);
+            else if (type.GetMethod("Parse") != null)
+            {
+                if (type.IsEnum)
+                    return Enum.Parse(parameter.ParameterType, data.ToString());
+                if (type == typeof(DateTime))
+                    return DateTime.Parse(String.Format("{0}{1}-{2}-{3} {4}:{5}:{6}", data.ToString().Cut(7)));
+                else if (type == typeof(TimeSpan))
+                    return TimeSpan.Parse(String.Format("{0}:{1}:{2}", data.ToString().Cut(3)));
+                else
+                    return type.GetMethod("Parse").Invoke(null, new object[] { data.ToString() });
+            }
+            else
+                return Convert.ChangeType(data, parameter.ParameterType);
         }
 
         /// <summary>
@@ -126,7 +123,7 @@ namespace Opera.Acabus.Server.Core.Utils
         /// </summary>
         /// <param name="e">Datos de la petición.</param>
         /// <param name="exception">Excepción que se enviará como respuesta.</param>
-        public static void SendException(this IAdaptiveMsgArgs e, ServiceException exception)
+        public static void SendException(this IAdaptiveMessageReceivedArgs e, ServiceException exception)
         {
             string response = String.Format("{0} [Error=\"{1}\", Servicio=\"{2}\", Función={3}]",
                   exception.InnerException != null ? exception.Message : "Ocurrió un error al procesar la petición",
@@ -135,36 +132,77 @@ namespace Opera.Acabus.Server.Core.Utils
                    exception.FunctionName
                    );
 
-            IMessage message = CreateError(response, AdaptativeMsgResponseCode.INTERNAL_SERVER_ERROR, e);
+            IAdaptiveMessage message = e.CreateMessage();
 
-            e.Send(message);
+            message.SetResponse(response, exception.Code);
+
+            e.Response(message);
         }
 
         /// <summary>
-        /// Procesa el mensaje para tratarlo como una enumeración.
+        /// Envía una colección a través de <see cref="IAdaptiveMessage"/>.
         /// </summary>
-        /// <param name="message">Mensaje que representa la enumeración.</param>
-        /// <param name="count">Cantidad total de la numeración.</param>
-        /// <param name="enumeratingFunc">Función para procesar el elemento actual.</param>
-        public static void Enumerating(IMessage message, Int32 count, Action<Int32> enumeratingFunc)
+        /// <typeparam name="T">Tipo de dato de la colección.</typeparam>
+        /// <param name="collection">Colección a enviar.</param>
+        /// <param name="args">Controlador de la petición.</param>
+        /// <param name="idItem">Identificador del campo utilizado para transmitir los elementos.</param>
+        /// <param name="serializer">Función serializadora.</param>
+        public static void SendCollection<T>(ICollection<T> collection, IAdaptiveMessageReceivedArgs args, uint idItem, Func<T, object> serializer)
         {
-            if (!message.IsEnumerable())
-                message.SetAsEnumerable(count);
-            else
-                switch (message.GetEnumOp())
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
+
+            if (args == null)
+                throw new ArgumentNullException(nameof(args));
+
+            if (serializer == null)
+                throw new ArgumentNullException(nameof(serializer));
+
+            if (!args.Data.IsEnumerable())
+                args.Data.SetAsEnumerable(collection.Count);
+
+            args.Data.SetPosition(-1);
+            args.Data.SetResponse(String.Empty, AdaptiveMessageResponseCode.PARTIAL_CONTENT);
+
+            args.Response();
+
+            while (args.Connection.Connected)
+            {
+                AdaptiveMessageSocketHelper.ReadBuffer(args.Connection, args.Data.Rules)?
+                    .CopyTo(args.Data);
+
+                switch (args.Data.GetEnumOp())
                 {
-                    case AdaptativeMsgEnumOp.NEXT:
-                        message.SetPosition(message.GetPosition() + 1);
+                    case AdaptiveMessageEnumOp.NEXT:
+                        if (args.Data.GetPosition() < -1)
+                            args.Data.SetResponse("Operación no válida al recorrer la colección",
+                                AdaptiveMessageResponseCode.BAD_REQUEST);
+                        else if (args.Data.GetPosition() >= collection.Count)
+                            args.Data.Remove((int)idItem);
+                        else
+                        {
+                            args.Data.SetPosition(args.Data.GetPosition() + 1);
+                            args.Data[(int)idItem] = serializer(collection.ElementAt(args.Data.GetPosition()));
+                        }
+
+                        args.Response();
                         break;
 
-                    case AdaptativeMsgEnumOp.RESET:
-                        message.SetPosition(0);
-                        message.SetEnumOp(AdaptativeMsgEnumOp.NEXT);
+                    case AdaptiveMessageEnumOp.RESET:
+                        args.Data.SetPosition(-1);
+                        args.Response();
+                        break;
+
+                    case (AdaptiveMessageEnumOp)(-1):
+                        args.Data.SetResponse("Operación no válida", AdaptiveMessageResponseCode.METHOD_NOT_ALLOWED);
+                        args.Response();
+                        break;
+
+                    default:
+                        Thread.Sleep(10);
                         break;
                 }
-
-            if (count > 0)
-                enumeratingFunc?.Invoke(message.GetPosition());
+            }
         }
 
         /// <summary>
@@ -173,9 +211,9 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <param name="message">Mensaje de petición.</param>
         /// <param name="functionsClass">Clase que contiene a la función.</param>
         /// <returns>Un valor true si la petición es compatible con la función.</returns>
-        public static bool ValidateRequest(IMessage message, Type functionsClass)
+        public static bool ValidateRequest(IAdaptiveMessage message, Type functionsClass)
         {
-            String funcName = message[6]?.ToString();
+            String funcName = message.GetFunctionName();
 
             if (String.IsNullOrEmpty(funcName))
                 return false;
@@ -201,7 +239,7 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <param name="message">Mensaje de la petición.</param>
         /// <param name="method"></param>
         /// <returns>Un valor de true si la petición es compatible con el método.</returns>
-        private static bool ValidateMethod(IMessage message, MethodInfo method)
+        private static bool ValidateMethod(IAdaptiveMessage message, MethodInfo method)
         {
             bool valid = true;
 

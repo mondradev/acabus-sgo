@@ -13,7 +13,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <param name="deviceToken">Token de dispositivo.</param>
-        public static void SetDeviceToken(this IMessage message, byte[] deviceToken)
+        public static void SetDeviceToken(this IAdaptiveMessage message, byte[] deviceToken)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -26,7 +26,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="message">Mensaje adaptivo.</param>
         /// <returns>Un valor true si tiene el campo activo.</returns>
-        public static Boolean HasDeviceToken(this IMessage message)
+        public static Boolean HasDeviceToken(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -39,7 +39,7 @@ namespace Opera.Acabus.Core.Services
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>Token del dispositivo.</returns>
-        public static byte[] GetDeviceToken(this IMessage message)
+        public static byte[] GetDeviceToken(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
