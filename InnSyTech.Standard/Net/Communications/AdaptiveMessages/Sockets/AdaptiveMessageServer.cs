@@ -12,7 +12,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
     /// Representa un servidor que escucha todas las peticiones de los clientes compatibles a través
     /// del protocolo TCP/IP.
     /// </summary>
-    public sealed class AdaptiveMsgServer : IDisposable
+    public sealed class AdaptiveMessageServer : IDisposable
     {
         /// <summary>
         /// Socket del servidor que escucha las peticiones.
@@ -33,28 +33,28 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// Crea una nueva instancia especificando la composición de los mensajes.
         /// </summary>
         /// <param name="rules">Ubicación de las reglas de composición para los mensajes.</param>
-        public AdaptiveMsgServer(String rulesPath)
+        public AdaptiveMessageServer(String rulesPath)
         {
             _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _tasks = new List<Task>();
-            Rules = MessageRules.Load(rulesPath);
+
+            Rules = AdaptiveMessageRules.Load(rulesPath);
         }
 
         /// <summary>
         /// Evento que se desencadena cuando se acepta un cliente.
         /// </summary>
-        public event EventHandler<IAdaptiveMsgClientArgs> Accepted;
-
+        public event EventHandler<IAdaptiveMessageAcceptedArgs> Accepted;
 
         /// <summary>
         /// Evento que se desencadena cuando se termina la conexión con un cliente.
         /// </summary>
-        public event EventHandler<IAdaptiveMsgClientArgs> Disconnected;
+        public event EventHandler<IAdaptiveMessageAcceptedArgs> Disconnected;
 
         /// <summary>
         /// Evento que se desencadena cuando se recibe una petición de algún cliente.
         /// </summary>
-        public event EventHandler<IAdaptiveMsgArgs> Received;
+        public event EventHandler<IAdaptiveMessageReceivedArgs> Received;
 
         /// <summary>
         /// Obtiene un token de cancelación para detener las peticiones y finalizar el servidor.
@@ -84,7 +84,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <summary>
         /// Obtiene o establece las reglas que permiten serializar y deserializar los mensajes.
         /// </summary>
-        internal MessageRules Rules { get; set; }
+        internal AdaptiveMessageRules Rules { get; set; }
 
         /// <summary>
         /// Libera los recursos no administrador por el servidor.
@@ -146,12 +146,12 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
 
                     Socket client = _server.Accept();
 
-                    Accepted?.Invoke(this, new AdaptiveMsgClientArgs(client));
+                    Accepted?.Invoke(this, new AdaptiveMessageAcceptedArgs(client));
 
                     if (CancellationTokenSource.IsCancellationRequested)
                         break;
 
-                    ListenerRequest(client);
+                    RequestHandler(client);
                 }
                 catch (SocketException) { break; }
             }
@@ -163,7 +163,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// Genera un hilo para aislar la gestión de las peticiones realizadas por los clientes.
         /// </summary>
         /// <param name="connection">Cliente a gestionar.</param>
-        private void ListenerRequest(Socket connection)
+        private void RequestHandler(Socket connection)
         {
             Task requestTask = Task.Run(() =>
             {
@@ -191,9 +191,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
                             if (CancellationTokenSource.IsCancellationRequested)
                                 break;
 
-                            Received?.Invoke(this, new AdaptiveMsgArgs(connection, Rules, buffer));
+                            Received?.Invoke(this, new AdaptiveMessageReceivedArgs(connection, Rules, buffer));
                         }
-                        catch (AdaptiveMsgException ex)
+                        catch (AdaptiveMessageDeserializeException ex)
                         {
                             Trace.WriteLine(ex.Message);
                         }
@@ -204,7 +204,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
                     Trace.WriteLine(ex.Message);
                 }
 
-                Disconnected?.Invoke(this, new AdaptiveMsgClientArgs(connection));
+                Disconnected?.Invoke(this, new AdaptiveMessageAcceptedArgs(connection));
             }, CancellationTokenSource.Token);
 
             _tasks.Add(requestTask);

@@ -4,7 +4,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 {
     /// <summary>
     /// Representa la estructura de un campo contenido en los mensajes adaptativos <seealso
-    /// cref="Message" />. El campo está compuesto por un identificador que lo diferencia dentro del
+    /// cref="AdaptiveMessage" />. El campo está compuesto por un identificador que lo diferencia dentro del
     /// mensaje y su valor almacenado.
     /// </summary>
     public sealed class Field

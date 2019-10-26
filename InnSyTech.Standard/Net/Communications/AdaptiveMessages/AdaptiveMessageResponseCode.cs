@@ -3,7 +3,7 @@
     /// <summary>
     /// Define los estado de respuesta del servicio en el servidor.
     /// </summary>
-    public enum AdaptativeMsgResponseCode
+    public enum AdaptiveMessageResponseCode
     {
         OK = 200,
         CREATED = 201,

@@ -3,15 +3,15 @@
 namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
 {
     /// <summary>
-    /// Implementa los argumentos del evento <see cref="AdaptiveMsgServer.Accepted"/>.
+    /// Implementa los argumentos del evento <see cref="AdaptiveMessageServer.Accepted"/>.
     /// </summary>
-    internal sealed class AdaptiveMsgClientArgs : IAdaptiveMsgClientArgs
+    internal sealed class AdaptiveMessageAcceptedArgs : IAdaptiveMessageAcceptedArgs
     {
         /// <summary>
-        /// Crea una nueva instancia de <see cref="AdaptiveMsgServer"/>.
+        /// Crea una nueva instancia de <see cref="AdaptiveMessageServer"/>.
         /// </summary>
         /// <param name="connection">Cliente que realizó la conexión.</param>
-        public AdaptiveMsgClientArgs(Socket connection)
+        public AdaptiveMessageAcceptedArgs(Socket connection)
         {
             Connection = connection;
         }

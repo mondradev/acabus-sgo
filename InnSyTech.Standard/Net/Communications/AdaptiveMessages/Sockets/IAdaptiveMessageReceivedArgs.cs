@@ -5,10 +5,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
     /// <summary>
     /// Defines las propiedades de los argumentos utilizados para la transferencia de mensajes adaptativos.
     /// </summary>
-    /// <seealso cref="AdaptiveMsgServer"/>
-    /// <seealso cref="IMessage"/>
-    /// <seealso cref="AdaptiveMsgRequest"/>
-    public interface IAdaptiveMsgArgs
+    /// <seealso cref="AdaptiveMessageServer"/>
+    /// <seealso cref="IAdaptiveMessage"/>
+    /// <seealso cref="AdaptiveMessageRequest"/>
+    public interface IAdaptiveMessageReceivedArgs
     {
         /// <summary>
         /// Obtiene la conexión que desencadenó el evento.
@@ -18,18 +18,23 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <summary>
         /// Obtiene la información captura en el evento.
         /// </summary>
-        IMessage Data { get; }
+        IAdaptiveMessage Data { get; }
 
         /// <summary>
         /// Crea un mensaje nuevo.
         /// </summary>
         /// <returns>Obtiene un mensaje totalmente nuevo.</returns>
-        IMessage CreateMessage();
+        IAdaptiveMessage CreateMessage();
 
         /// <summary>
         /// Envía un mensaje al otro extremo de la conexión.
         /// </summary>
         /// <param name="response">Mensaje de respuesta.</param>
-        void Send(IMessage response);
+        void Response(IAdaptiveMessage response);
+
+        /// <summary>
+        /// Envía de vuelta el mensaje de la petición al otro extremo de la conexión.
+        /// </summary>
+        void Response();
     }
 }

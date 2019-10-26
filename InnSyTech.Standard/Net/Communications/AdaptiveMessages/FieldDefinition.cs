@@ -13,7 +13,7 @@
     ///     }
     /// </code>
     /// </summary>
-    internal sealed class FieldDefinition
+    public sealed class FieldDefinition
     {
         /// <summary>
         /// Crea una nueva instancia definiendo las propiedades del campo a manipular.
@@ -23,7 +23,7 @@
         /// <param name="maxLength"> Longitud máxima del campo. </param>
         /// <param name="isVarLength"> Indicador si el campo es de longitud variable. </param>
         /// <param name="description"> Descripción del campo. </param>
-        public FieldDefinition(int id, FieldType type, int maxLength, bool isVarLength = false, string description = null)
+        internal FieldDefinition(int id, FieldType type, int maxLength, bool isVarLength = false, string description = null)
         {
             ID = id;
             Type = type;
@@ -31,27 +31,6 @@
             IsVarLength = isVarLength;
             Length = maxLength;
             Description = description;
-        }
-
-        /// <summary>
-        /// Define los tipos de campos que pueden ser utilizados en los mensajes adaptativos.
-        /// </summary>
-        public enum FieldType
-        {
-            /// <summary>
-            /// Representa un campo numérico en base 10.
-            /// </summary>
-            Numeric,
-
-            /// <summary>
-            /// Representa un campo de texto.
-            /// </summary>
-            Text,
-
-            /// <summary>
-            /// Representa un campo de tipo binario.
-            /// </summary>
-            Binary
         }
 
         /// <summary>
@@ -72,7 +51,7 @@
         /// <summary>
         /// Obtiene o establece la longitud actual del campo en bytes.
         /// </summary>
-        public int Length { get; set; }
+        public int Length { get; internal set; }
 
         /// <summary>
         /// Obtiene la longitud máxima del campo en bytes.

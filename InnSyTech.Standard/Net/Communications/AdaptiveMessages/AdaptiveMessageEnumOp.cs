@@ -3,7 +3,7 @@
     /// <summary>
     /// Define las operaciones válidas por los mensajes de enumeración.
     /// </summary>
-    public enum AdaptativeMsgEnumOp
+    public enum AdaptiveMessageEnumOp
     {
         /// <summary>
         /// Operación para avanzar en la posición de la enumeración.

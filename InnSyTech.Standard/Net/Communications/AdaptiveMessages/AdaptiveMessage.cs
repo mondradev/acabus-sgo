@@ -10,10 +10,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
     /// Representa un mensaje adaptativo en tamaño de la trama, unicamente como obligatorio se
     /// requiere la cabecera de 8 bytes en la cual se representa el campo activo. Este tipo de
     /// mensajes se basa en el ISO8583 pero con la diferencia que las caracteristicas de los campos
-    /// son variables y son definidos por la clase <see cref="MessageRules"/> la cual puede ser
-    /// cargada desde un archivo JSON a través de la función <see cref="MessageRules.Load(string)"/>.
+    /// son variables y son definidos por la clase <see cref="AdaptiveMessageRules"/> la cual puede ser
+    /// cargada desde un archivo JSON a través de la función <see cref="AdaptiveMessageRules.Load(string)"/>.
     /// </summary>
-    internal sealed class Message : IMessage
+    internal sealed class AdaptiveMessage : IAdaptiveMessage
     {
         /// <summary>
         /// Lista de campos.
@@ -23,16 +23,18 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Reglas de composición del mensaje.
         /// </summary>
-        private readonly MessageRules _messageRules;
+        private readonly AdaptiveMessageRules _messageRules;
 
         /// <summary>
         /// Crea una instancia nueva de un mensaje.
         /// </summary>
         /// <param name="rules">Reglas de composición del mensaje.</param>
-        public Message(MessageRules rules)
+        public AdaptiveMessage(AdaptiveMessageRules rules)
         {
             _fields = new List<Field>();
-            _messageRules = rules ?? new MessageRules();
+            _messageRules = rules ?? new AdaptiveMessageRules();
+
+            _messageRules.IsReadOnly = true;
         }
 
         /// <summary>
@@ -44,6 +46,11 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Obtiene si el mensaje es de solo lectura (siempre es false).
         /// </summary>
         public bool IsReadOnly => false;
+
+        /// <summary>
+        /// Obtiene las reglas con las que se creó el mensaje.
+        /// </summary>
+        public AdaptiveMessageRules Rules => throw new NotImplementedException();
 
         /// <summary>
         /// Obtiene, establece o agrega el valor del campo con el ID especificado.
@@ -67,21 +74,21 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Vecto de bytes con el mensaje a deserializar.</param>
         /// <param name="rules">Reglas de composición del mensaje a deserializar.</param>
         /// <returns>Un mensaje rearmado a partir del vector de bytes.</returns>
-        public static Message Deserialize(byte[] src, MessageRules rules)
+        public static AdaptiveMessage Deserialize(byte[] src, AdaptiveMessageRules rules)
         {
             if (src == null)
-                throw new AdaptiveMsgException("No se recibieron datos para construir el mensaje", new ArgumentNullException(nameof(src)));
+                throw new AdaptiveMessageDeserializeException("No se recibieron datos para construir el mensaje", new ArgumentNullException(nameof(src)));
 
             if (src.Length < 8)
-                throw new AdaptiveMsgException("El vector debe contener al menos 8 elementos que correspondan al cabecera del mensaje", src);
+                throw new AdaptiveMessageDeserializeException("El vector debe contener al menos 8 elementos que correspondan al cabecera del mensaje", src);
 
             UInt64 headerRead = BitConverter.ToUInt64(src.Take(8)?.Reverse().ToArray(), 0);
             byte[] body = src.Skip(8)?.ToArray();
 
             if (headerRead == 0)
-                throw new AdaptiveMsgException("El encabezado del mensaje indica un mensaje vacío", src);
+                throw new AdaptiveMessageDeserializeException("El encabezado del mensaje indica un mensaje vacío", src);
 
-            Message message = new Message(rules ?? new MessageRules());
+            AdaptiveMessage message = new AdaptiveMessage(rules ?? new AdaptiveMessageRules());
 
             int index = 0;
 
@@ -105,7 +112,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
         /// <summary>
         /// Agrega campos al mensaje estableciendo el valor del mismo. Este campo deberá estar
-        /// incluido en las reglas del mensaje <seealso cref="MessageRules"/>.
+        /// incluido en las reglas del mensaje <seealso cref="AdaptiveMessageRules"/>.
         /// </summary>
         /// <param name="id">ID del campo.</param>
         /// <param name="value">Valor del campo.</param>
@@ -117,7 +124,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
         /// <summary>
         /// Agrega campos al mensaje. Este campo deberá estar incluido en las reglas del mensaje
-        /// <seealso cref="MessageRules"/>.
+        /// <seealso cref="AdaptiveMessageRules"/>.
         /// </summary>
         /// <param name="field">Campo a agregar.</param>
         /// <exception cref="ArgumentException">
@@ -290,13 +297,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
             return definition.Type switch
             {
-                FieldDefinition.FieldType.Numeric => new NumericSerializer(),
+                FieldType.Numeric => new NumericSerializer(),
 
-                FieldDefinition.FieldType.Text => new TextSerializer(),
+                FieldType.Text => new TextSerializer(),
 
-                FieldDefinition.FieldType.Binary => new BinarySerializer(),
+                FieldType.Binary => new BinarySerializer(),
 
-                _ => throw new AdaptiveMsgException("El tipo de campo no es válido para la conversión"),
+                _ => throw new AdaptiveMessageDeserializeException("El tipo de campo no es válido para la conversión"),
             };
         }
 
@@ -307,7 +314,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="message">Mensaje a decodificar.</param>
         /// <param name="body">Secuencia de bytes que contiene los valores de los campos.</param>
         /// <param name="rules">Reglas de composición del mensaje.</param>
-        private static void Processor(Message message, byte[] body, MessageRules rules)
+        private static void Processor(AdaptiveMessage message, byte[] body, AdaptiveMessageRules rules)
         {
             try
             {
@@ -325,7 +332,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             }
             catch (Exception ex)
             {
-                throw new AdaptiveMsgException("No se logró generar el mensaje desde los datos recibidos", ex);
+                throw new AdaptiveMessageDeserializeException("No se logró generar el mensaje desde los datos recibidos", ex);
             }
         }
 
@@ -335,5 +342,16 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns>Una cadena Hex que representa al mensaje.</returns>
         public override string ToString()
             => BitConverter.ToString(Serialize()).Replace("-", "");
+
+
+        /// <summary>
+        /// Copia el contenido del mensaje a otra instancia, sobreescribiendo los campos utilizados.
+        /// </summary>
+        /// <param name="message">Mensaje destino.</param>
+        public void CopyTo(IAdaptiveMessage dest)
+        {
+            foreach(Field field in this)
+                dest[field.ID] = dest[field.ID];
+        }
     }
 }

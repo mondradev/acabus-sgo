@@ -9,7 +9,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
     /// conjunto de reglas para definir el comportamiento de cada campo en el mensaje, permitiendo
     /// ahorra espacio en el tamaño final del mensaje a enviar a través de un flujo de datos.
     /// </summary>
-    public interface IMessage : IEnumerable, IEnumerable<Field>, ICollection<Field>
+    public interface IAdaptiveMessage : IEnumerable, IEnumerable<Field>, ICollection<Field>
     {
         /// <summary>
         /// Obtiene, establece o agrega el valor del campo con el ID especificado.
@@ -17,7 +17,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="id">ID del campo a manipular.</param>
         /// <returns>El valor del campo.</returns>
         object this[int id] { get; set; }
-        
+
         /// <summary>
         /// Devuelve el valor del campo especificado y realiza la conversión al tipo de dato
         /// <typeparamref name="T"/>
@@ -63,5 +63,16 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="converter">Función convertidora.</param>
         /// <returns>Un valor true si se obtuvo el valor del campo.</returns>
         bool TryGetValue<TResult>(int id, out TResult value, Func<object, TResult> converter = null);
+
+        /// <summary>
+        /// Obtiene las reglas con la que se creó el mensaje.
+        /// </summary>
+        AdaptiveMessageRules Rules { get; }
+
+        /// <summary>
+        /// Copia el contenido del mensaje a otra instancia, sobreescribiendo los campos utilizados.
+        /// </summary>
+        /// <param name="message">Mensaje destino.</param>
+        void CopyTo(IAdaptiveMessage dest);
     }
 }

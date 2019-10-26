@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using static InnSyTech.Standard.Net.Communications.AdaptiveMessages.FieldDefinition;
 
 namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 {
@@ -13,7 +12,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
     /// Representa la composición de los posibles campos de los mensajes adaptativos. Los campos 0 al
     /// 9 no se pueden definir con la plantilla ya que estos se utilizan para la validación de la comunicación.
     /// </summary>
-    internal sealed class MessageRules : IEnumerable<FieldDefinition>, ICollection<FieldDefinition>
+    public sealed class AdaptiveMessageRules : IEnumerable<FieldDefinition>, ICollection<FieldDefinition>
     {
         /// <summary>
         /// Campos básicos necesarios para el manejo de mensajes.
@@ -37,9 +36,21 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         private readonly List<FieldDefinition> _definitions;
 
         /// <summary>
+        /// Campo que provee a la propiedad <see cref="IsReadOnly"/>
+        /// </summary>
+        private bool _isReadOnly;
+
+        /// <summary>
+        /// Obtiene la definición del campo especificado.
+        /// </summary>
+        /// <param name="id">ID del campo.</param>
+        /// <returns>La definición del campo.</returns>
+        public FieldDefinition this[int id] => _definitions.FirstOrDefault(f => f.ID == id);
+
+        /// <summary>
         /// Crea una instancia nueva de definición de mensajes.
         /// </summary>
-        public MessageRules()
+        public AdaptiveMessageRules()
         {
             _definitions = new List<FieldDefinition>();
             _definitions.AddRange(_staticFields);
@@ -53,16 +64,19 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Obtiene si la definición de mensajes es de solo lectura.
         /// </summary>
-        public bool IsReadOnly => false;
+        public bool IsReadOnly {
+            get => _isReadOnly;
+            internal set => _isReadOnly = value;
+        }
 
         /// <summary>
         /// Carga desde un archivo JSON la definición del mensaje a transmitir.
         /// </summary>
         /// <param name="path"> Ruta del archivo JSON. </param>
         /// <returns> Una definición de mensaje. </returns>
-        public static MessageRules Load(String path)
+        public static AdaptiveMessageRules Load(String path)
         {
-            MessageRules rules = JsonConvert.DeserializeObject<MessageRules>(File.ReadAllText(path));
+            AdaptiveMessageRules rules = JsonConvert.DeserializeObject<AdaptiveMessageRules>(File.ReadAllText(path));
 
             foreach (var x in rules.Where(x => _staticFields.Any(y => y.ID == x.ID)))
                 Trace.WriteLine(String.Format("Se descarta campo {0} de la plantilla, ya que pertenece al encabezado.", x));
@@ -79,6 +93,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="item">  </param>
         public void Add(FieldDefinition item)
         {
+            if (_isReadOnly)
+                return;
+
             if (!_definitions.Any(x => x.ID == item.ID))
                 _definitions.Add(item);
         }
@@ -87,7 +104,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Elimina toda las definiciones de campos.
         /// </summary>
         public void Clear()
-            => _definitions.Clear();
+        {
+            if (!_isReadOnly)
+                _definitions.Clear();
+        }
 
         /// <summary>
         /// Determina si la definición de campo existe en la colección.
@@ -101,7 +121,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Copia todas las definiciones de campo a un vector.
         /// </summary>
         /// <param name="array"> Vector destino de las definiciones. </param>
-        /// <param name="arrayIndex"> Indice de partida a copiar los elementos. </param>
+        /// <param name="arrayIndex"> Indice de partida a copiar los elementos, no confundir con el ID de campo. </param>
         public void CopyTo(FieldDefinition[] array, int arrayIndex)
             => _definitions.CopyTo(array, arrayIndex);
 
@@ -127,6 +147,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns> Un valor true si se encontró y eliminó las definición. </returns>
         public bool Remove(FieldDefinition item)
         {
+            if (_isReadOnly)
+                return false;
+
             if (_staticFields.Select(x => x.ID).Contains(item.ID))
                 return false;
 
@@ -141,6 +164,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns>Un valor true si se eliminaron todas las definiciones especificadas.</returns>
         public bool Remove(params int[] id)
         {
+            if (_isReadOnly)
+                return false;
+
             if (id.Any(x => _staticFields.Select(y => y.ID).Contains(x)))
                 return false;
 

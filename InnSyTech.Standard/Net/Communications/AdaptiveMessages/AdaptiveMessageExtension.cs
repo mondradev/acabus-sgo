@@ -4,9 +4,9 @@ using System;
 namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 {
     /// <summary>
-    /// Proporciona funciones para la conversión de los campos de los mensajes <see cref="IMessage"/>.
+    /// Proporciona funciones para la conversión de los campos de los mensajes <see cref="IAdaptiveMessage"/>.
     /// </summary>
-    public static class AdaptiveMsgExtension
+    public static class AdaptiveMessageExtension
     {
         /// <summary>
         /// Obtiene el valor Boolean del campo especificado.
@@ -14,7 +14,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static Boolean GetBoolean(this IMessage src, int id)
+        public static Boolean GetBoolean(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -31,7 +31,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <return>Valor del campo.</return>
-        public static Byte[] GetBytes(this IMessage src, int id)
+        public static Byte[] GetBytes(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -45,7 +45,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static DateTime GetDateTime(this IMessage src, int id)
+        public static DateTime GetDateTime(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -65,7 +65,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static T GetEnum<T>(this IMessage src, int id) where T : struct
+        public static T GetEnum<T>(this IAdaptiveMessage src, int id) where T : struct
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -82,7 +82,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static Int16 GetInt16(this IMessage src, int id)
+        public static Int16 GetInt16(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -99,7 +99,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static Int32 GetInt32(this IMessage src, int id)
+        public static Int32 GetInt32(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -116,7 +116,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static Int64 GetInt64(this IMessage src, int id)
+        public static Int64 GetInt64(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -133,7 +133,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static String GetString(this IMessage src, int id)
+        public static String GetString(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -150,7 +150,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static TimeSpan GetTimeSpan(this IMessage src, int id)
+        public static TimeSpan GetTimeSpan(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -170,7 +170,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static UInt16 GetUInt16(this IMessage src, int id)
+        public static UInt16 GetUInt16(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -187,7 +187,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static UInt32 GetUInt32(this IMessage src, int id)
+        public static UInt32 GetUInt32(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -204,7 +204,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static UInt64 GetUInt64(this IMessage src, int id)
+        public static UInt64 GetUInt64(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -221,7 +221,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <param name="value">Valor del campo.</param>
-        public static void SetBoolean(this IMessage src, int id, Boolean value)
+        public static void SetBoolean(this IAdaptiveMessage src, int id, Boolean value)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -235,7 +235,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <param name="value">Valor del campo.</param>
-        public static void SetDateTime(this IMessage src, int id, DateTime value)
+        public static void SetDateTime(this IAdaptiveMessage src, int id, DateTime value)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -251,7 +251,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <param name="value">Valor del campo.</param>
-        public static void SetEnum<T>(this IMessage src, int id, T value) where T : struct
+        public static void SetEnum<T>(this IAdaptiveMessage src, int id, T value) where T : struct
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -265,7 +265,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <param name="value">Valor del campo.</param>
-        public static void SetTimeSpan(this IMessage src, int id, TimeSpan value)
+        public static void SetTimeSpan(this IAdaptiveMessage src, int id, TimeSpan value)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -279,7 +279,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Indica si tiene el campo de nombre de la función activo.
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
-        public static Boolean HashFunctionName(this IMessage message)
+        public static Boolean HasFunctionName(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -292,7 +292,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>Nombre de la función.</returns>
-        public static string GetFunctionName(this IMessage message)
+        public static string GetFunctionName(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -305,7 +305,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <param name="functionName">Nombre de la función.</param>
-        public static void SetFunctionName(this IMessage message, string functionName)
+        public static void SetFunctionName(this IAdaptiveMessage message, string functionName)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -318,7 +318,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <param name="appToken">Token de aplicación.</param>
-        public static void SetAPIToken(this IMessage message, byte[] appToken)
+        public static void SetAPIToken(this IAdaptiveMessage message, byte[] appToken)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -331,7 +331,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <param name="hashRules">Hash de las reglas de mensajes.</param>
-        public static void SetHashRules(this IMessage message, byte[] hashRules)
+        public static void SetHashRules(this IAdaptiveMessage message, byte[] hashRules)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -344,7 +344,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <param name="moduleName">Nombre del módulo.</param>
-        public static void SetModuleName(this IMessage message, string moduleName)
+        public static void SetModuleName(this IAdaptiveMessage message, string moduleName)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -356,7 +356,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Obtiene el nombre del módulo.
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
-        public static string GetModuleName(this IMessage message)
+        public static string GetModuleName(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -369,7 +369,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Indica si tiene el campo de nombre del módulo activo.
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
-        public static Boolean HasModuleName(this IMessage message)
+        public static Boolean HasModuleName(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -382,13 +382,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>El código de respuesta de la última petición.</returns>
-        public static Int32 GetResponseCode(this IMessage message)
+        public static AdaptiveMessageResponseCode GetResponseCode(this IAdaptiveMessage message)
         {
 
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            return message.GetInt32((int)AdaptiveMessageFieldID.ResponseCode);
+            return message.GetEnum<AdaptiveMessageResponseCode>((int)AdaptiveMessageFieldID.ResponseCode);
         }
 
         /// <summary>
@@ -396,7 +396,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>El mensaje de respuesta de la última petición.</returns>
-        public static string GetResponseMessage(this IMessage message)
+        public static string GetResponseMessage(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -409,7 +409,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>Cantidad de elementos de la colección.</returns>
-        public static int GetEnumerableCount(this IMessage message)
+        public static int GetEnumerableCount(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -423,7 +423,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="message">Mensaja adaptativo.</param>
         /// <param name="response">Respuesta de la petición.</param>
         /// <param name="code">Código de respuesta a la petición.</param>
-        public static void SetResponse(this IMessage message, string response, AdaptativeMsgResponseCode code)
+        public static void SetResponse(this IAdaptiveMessage message, string response, AdaptiveMessageResponseCode code)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -437,7 +437,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>Un valor true si es enumerable.</returns>
-        public static Boolean IsEnumerable(this IMessage message)
+        public static Boolean IsEnumerable(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -451,7 +451,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <param name="count">Cantidad de elementos de la colección.</param>
-        public static void SetAsEnumerable(this IMessage message, int count)
+        public static void SetAsEnumerable(this IAdaptiveMessage message, int count)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -466,7 +466,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>Posición en el recorrido de la enumeración.</returns>
-        public static int GetPosition(this IMessage message)
+        public static int GetPosition(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -483,7 +483,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <param name="position">Posición de la colección.</param>
-        public static void SetPosition(this IMessage message, int position)
+        public static void SetPosition(this IAdaptiveMessage message, int position)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -497,7 +497,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <param name="op">Operación a realizar.</param>
-        public static void SetEnumOp(this IMessage message, AdaptativeMsgEnumOp op)
+        public static void SetEnumOp(this IAdaptiveMessage message, AdaptiveMessageEnumOp op)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -511,15 +511,15 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>Operación a efecturar.</returns>
-        public static AdaptativeMsgEnumOp GetEnumOp(this IMessage message)
+        public static AdaptiveMessageEnumOp GetEnumOp(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
             if (message.IsEnumerable())
-                return (AdaptativeMsgEnumOp)message[(int)AdaptiveMessageFieldID.EnumerableOperation];
+                return (AdaptiveMessageEnumOp)message[(int)AdaptiveMessageFieldID.EnumerableOperation];
 
-            return (AdaptativeMsgEnumOp)(-1);
+            return (AdaptiveMessageEnumOp)(-1);
         }
 
         /// <summary>
@@ -527,7 +527,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptivo.</param>
         /// <returns>Un valor true si tiene el campo activo.</returns>
-        public static Boolean HasAPIToken(this IMessage message)
+        public static Boolean HasAPIToken(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -540,7 +540,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptivo.</param>
         /// <returns>Un valor true si tiene el campo activo.</returns>
-        public static Boolean HasHashRules(this IMessage message)
+        public static Boolean HasHashRules(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -553,7 +553,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>Token de aplicación.</returns>
-        public static byte[] GetAPIToken(this IMessage message)
+        public static byte[] GetAPIToken(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -566,7 +566,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
         /// <returns>Hash de las reglas de mensajes.</returns>
-        public static byte[] GetHashRules(this IMessage message)
+        public static byte[] GetHashRules(this IAdaptiveMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
