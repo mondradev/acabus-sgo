@@ -1,8 +1,11 @@
-﻿namespace Opera.Acabus.Core.Models
+﻿using System;
+
+namespace Opera.Acabus.Core.Models
 {
     /// <summary>
     /// Define las prioridades que establece una tarea.
     /// </summary>
+    [Flags]
     public enum Priority
     {
         /// <summary>

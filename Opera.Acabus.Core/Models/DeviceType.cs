@@ -1,8 +1,11 @@
-﻿namespace Opera.Acabus.Core.Models
+﻿using System;
+
+namespace Opera.Acabus.Core.Models
 {
     /// <summary>
     /// Define todos los tipos de dispositivos disponibles.
     /// </summary>
+    [Flags]
     public enum DeviceType
     {
         /// <summary>
@@ -14,11 +17,6 @@
         /// Kiosko de venta y recarga.
         /// </summary>
         KVR = 1,
-
-        /// <summary>
-        /// Torniquete de E/S.
-        /// </summary>
-        TOR = 14,
 
         /// <summary>
         /// Torniquete Doble E/S.
@@ -34,6 +32,11 @@
         /// Torniquete Simple de E/S.
         /// </summary>
         TSI = 8,
+
+        /// <summary>
+        /// Torniquete de E/S.
+        /// </summary>
+        TOR = TD | TS | TSI,
 
         /// <summary>
         /// Paso de movilidad reducida.

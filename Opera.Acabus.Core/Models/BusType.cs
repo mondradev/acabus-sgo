@@ -1,8 +1,11 @@
-﻿namespace Opera.Acabus.Core.Models
+﻿using System;
+
+namespace Opera.Acabus.Core.Models
 {
     /// <summary>
     /// Enumera todos los tipos de autobuses.
     /// </summary>
+    [Flags]
     public enum BusType
     {
         /// <summary>
@@ -13,16 +16,16 @@
         /// <summary>
         /// Autobus tipo convencional.
         /// </summary>
-        CONVENTIONAL,
+        CONVENTIONAL = 1,
 
         /// <summary>
         /// Autobus tipo padrón.
         /// </summary>
-        STANDARD,
+        STANDARD = 2,
 
         /// <summary>
         /// Autobus tipo articulado.
         /// </summary>
-        ARTICULATED
+        ARTICULATED = 4
     }
 }

@@ -1,8 +1,11 @@
-﻿namespace Opera.Acabus.Core.Models
+﻿using System;
+
+namespace Opera.Acabus.Core.Models
 {
     /// <summary>
     /// Enumera todos los tipos de rutas que existen.
     /// </summary>
+    [Flags]
     public enum RouteType
     {
         /// <summary>
