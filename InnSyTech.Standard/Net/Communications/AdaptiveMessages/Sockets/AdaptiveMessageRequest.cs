@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
     /// </summary>
     public sealed class AdaptiveMessageRequest
     {
-
         /// <summary>
         /// Crea una instancia nueva para realizar una petición con el servidor.
         /// </summary>
@@ -36,14 +34,14 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         public int Port { get; }
 
         /// <summary>
-        /// Obtiene las reglas que permiten serializar y deserializar los mensajes.
-        /// </summary>
-        public AdaptiveMessageRules Rules { get; }
-
-        /// <summary>
         /// Obtiene la instancia que controla la conexión al equipo remoto.
         /// </summary>
         public Socket RemoteEndPoint { get; }
+
+        /// <summary>
+        /// Obtiene las reglas que permiten serializar y deserializar los mensajes.
+        /// </summary>
+        public AdaptiveMessageRules Rules { get; }
 
         /// <summary>
         /// Crea un mensaje vacío a partir de las reglas especificadas en la petición.
@@ -93,36 +91,32 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         public Task<AdaptiveMessageCollection<TResult>> Send<TResult>(IAdaptiveMessage message, Func<IAdaptiveMessage, TResult> converter)
         {
             return Task.Run(() =>
-            {
-                try
-                {
-                    if (!RemoteEndPoint.Connected)
-                        RemoteEndPoint.Connect(IPAddress, Port);
+           {
+               try
+               {
+                   if (!RemoteEndPoint.Connected)
+                       RemoteEndPoint.Connect(IPAddress, Port);
 
-                    var response = message;
+                   int bytesTransferred = RemoteEndPoint.Send(message.Serialize());
 
-                    int bytesTransferred = RemoteEndPoint.Send(response.Serialize());
+                   if (bytesTransferred <= 0)
+                       message.SetResponse("No se logró envíar la petición al otro extremo", AdaptiveMessageResponseCode.SERVICE_UNAVAILABLE);
+                   else
+                       AdaptiveMessageSocketHelper.ReadBuffer(RemoteEndPoint, Rules).CopyTo(message);
 
-                    if (bytesTransferred <= 0)
-                        return null;
+                   if (!message.IsEnumerable() || message.GetResponseCode() != AdaptiveMessageResponseCode.PARTIAL_CONTENT)
+                       message.SetAsEnumerable(0);
+               }
+               catch
+               {
+                   if (RemoteEndPoint.Connected)
+                       RemoteEndPoint.Close();
 
-                    Trace.WriteLine("Bytes enviados: " + bytesTransferred, "DEBUG");
+                   message.SetAsEnumerable(0);
+               }
 
-                    response = AdaptiveMessageSocketHelper.ReadBuffer(RemoteEndPoint, Rules);
-
-                    if (!response.IsEnumerable())
-                        return null;
-
-                    return new AdaptiveMessageCollection<TResult>(response, this, converter);
-                }
-                catch
-                {
-                    if (RemoteEndPoint.Connected)
-                        RemoteEndPoint.Close();
-
-                    return null;
-                }
-            });
+               return new AdaptiveMessageCollection<TResult>(message, this, converter);
+           });
         }
     }
 }

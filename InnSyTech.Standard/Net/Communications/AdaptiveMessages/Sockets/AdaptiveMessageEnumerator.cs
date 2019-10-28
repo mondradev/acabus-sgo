@@ -84,6 +84,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <returns>Un valor true si hay logró avanzar el recorrido en la colección.</returns>
         public bool MoveNext()
         {
+            if (Message.GetEnumerableCount() == 0 || !Message.IsEnumerable() || Message.GetResponseCode() != AdaptiveMessageResponseCode.PARTIAL_CONTENT)
+                return false;
+
             Message.SetEnumOp(AdaptiveMessageEnumOp.NEXT);
 
             if (!_request.RemoteEndPoint.Connected)

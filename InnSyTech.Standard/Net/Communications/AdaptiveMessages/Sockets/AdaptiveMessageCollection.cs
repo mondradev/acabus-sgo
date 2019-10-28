@@ -16,11 +16,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         private readonly AdaptiveMessageEnumerator<TResult> _enumerator;
 
         /// <summary>
-        /// Mensaje que controla la comunicación.
-        /// </summary>
-        private readonly IAdaptiveMessage _message;
-
-        /// <summary>
         /// Crea una instancia de mensaje para transferir una colección.
         /// </summary>
         /// <param name="message">Mensaje de la colección.</param>
@@ -38,14 +33,20 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
             if (converter == null)
                 throw new ArgumentNullException(nameof(converter));
 
-            _message = message;
+            Message = message;
+
             _enumerator = new AdaptiveMessageEnumerator<TResult>(message, request, converter);
         }
 
         /// <summary>
+        /// Obtiene el mensaje la colección.
+        /// </summary>
+        public IAdaptiveMessage Message { get; }
+
+        /// <summary>
         /// Obtiene la cantidad total de elementos de la colección a transmitir.
         /// </summary>
-        public int Count => _message.GetEnumerableCount();
+        public int Count => Message.GetEnumerableCount();
 
         /// <summary>
         /// Obtiene el enumerador genérico de la colección.
