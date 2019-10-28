@@ -29,8 +29,8 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de autobus.</returns>
-        protected override Bus Deserialize(byte[] source)
-            => DataHelper.GetBus(source);
+        protected override Bus Deserialize(IAdaptiveMessage source)
+            => DataHelper.GetBus(source.GetBytes(SourceField));
 
         /// <summary>
         /// Asigna las propiedades del autobus en los campos del mensaje utilizado para la creación
@@ -38,7 +38,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="bus">Instancia del autobus.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void ToMessage(Bus bus, IMessage message)
+        protected override void ToMessage(Bus bus, IAdaptiveMessage message)
         {
             message.SetEnum(12, bus.Type);
             message[17] = bus.EconomicNumber;

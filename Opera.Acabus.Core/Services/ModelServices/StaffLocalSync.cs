@@ -28,8 +28,8 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de personal.</returns>
-        protected override Staff Deserialize(byte[] source)
-            => DataHelper.GetStaff(source);
+        protected override Staff Deserialize(IAdaptiveMessage source)
+            => DataHelper.GetStaff(source.GetBytes(SourceField));
         
         /// <summary>
         /// Asigna las propiedades del personal en los campos del mensaje utilizado para la creación
@@ -37,7 +37,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="staff">Instancia del personal.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void ToMessage(Staff staff, IMessage message)
+        protected override void ToMessage(Staff staff, IAdaptiveMessage message)
         {
             message.SetEnum(12, staff.Area);
             message[17] = staff.Name;

@@ -26,8 +26,8 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de ruta.</returns>
-        protected override Route Deserialize(byte[] source)
-            => DataHelper.GetRoute(source);
+        protected override Route Deserialize(IAdaptiveMessage source)
+            => DataHelper.GetRoute(source.GetBytes(SourceField));
 
         /// <summary>
         /// Asigna las propiedades de la ruta en los campos del mensaje utilizado para la creación
@@ -35,7 +35,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="route">Instancia de la ruta.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void ToMessage(Route route, IMessage message)
+        protected override void ToMessage(Route route, IAdaptiveMessage message)
         {
             message[12] = route.RouteNumber;
             message[17] = route.Name;

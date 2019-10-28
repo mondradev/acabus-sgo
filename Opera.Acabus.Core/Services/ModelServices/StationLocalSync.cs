@@ -31,8 +31,8 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de estación.</returns>
-        protected override Station Deserialize(byte[] source)
-            => DataHelper.GetStation(source);
+        protected override Station Deserialize(IAdaptiveMessage source)
+            => DataHelper.GetStation(source.GetBytes(SourceField));
 
         /// <summary>
         /// Asigna las propiedades de la estación en los campos del mensaje utilizado para la creación
@@ -40,7 +40,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="station">Instancia de la estación.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void ToMessage(Station station, IMessage message)
+        protected override void ToMessage(Station station, IAdaptiveMessage message)
         {
             message[12] = station.StationNumber;
             message[17] = station.Name;

@@ -30,8 +30,8 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="source">Fuente de datos.</param>
         /// <returns>Una instancia de equipo.</returns>
-        protected override Device Deserialize(byte[] source)
-            => DataHelper.GetDevice(source);
+        protected override Device Deserialize(IAdaptiveMessage source)
+            => DataHelper.GetDevice(source.GetBytes(SourceField));
 
         /// <summary>
         /// Asigna las propiedades del equipo en los campos del mensaje utilizado para la creación
@@ -39,7 +39,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         /// <param name="device">Instancia del equipo.</param>
         /// <param name="message">Mensaje de la petición de creación.</param>
-        protected override void ToMessage(Device device, IMessage message)
+        protected override void ToMessage(Device device, IAdaptiveMessage message)
         {
             if (!String.IsNullOrEmpty(device.SerialNumber))
                 message[17] = device.SerialNumber;
