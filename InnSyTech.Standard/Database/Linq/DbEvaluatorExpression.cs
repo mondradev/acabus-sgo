@@ -16,7 +16,6 @@ namespace InnSyTech.Standard.Database.Linq
         public static Expression PartialEval(Expression expression, Func<Expression, bool> fnCanBeEvaluated)
             => new SubtreeEvaluator(new Nominator(fnCanBeEvaluated).Nominate(expression)).Eval(expression);
 
-
         /// <summary>
         /// Performs evaluation & replacement of independent sub-trees
         /// </summary>
@@ -26,7 +25,7 @@ namespace InnSyTech.Standard.Database.Linq
             => PartialEval(expression, CanBeEvaluatedLocally);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>

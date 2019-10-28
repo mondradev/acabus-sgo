@@ -56,11 +56,11 @@ namespace InnSyTech.Standard.SecureShell
         /// <summary>
         /// Desctructor de la instancia.
         /// </summary>
-        ~Ssh() 
-		{
+        ~Ssh()
+        {
             this.Dispose();
-		}
-		
+        }
+
         /// <summary>
         /// Obtiene el resultado de un error al ejecutar un comando.
         /// </summary>

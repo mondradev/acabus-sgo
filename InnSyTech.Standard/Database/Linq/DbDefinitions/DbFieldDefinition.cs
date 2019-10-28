@@ -1,6 +1,5 @@
 ﻿using InnSyTech.Standard.Database.Utils;
 using System;
-using System.Linq;
 using System.Reflection;
 
 namespace InnSyTech.Standard.Database.Linq.DbDefinitions

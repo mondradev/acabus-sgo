@@ -364,7 +364,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             return message.GetString((int)AdaptiveMessageFieldID.ModuleName);
         }
 
-
         /// <summary>
         /// Indica si tiene el campo de nombre del módulo activo.
         /// </summary>
@@ -384,7 +383,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns>El código de respuesta de la última petición.</returns>
         public static AdaptiveMessageResponseCode GetResponseCode(this IAdaptiveMessage message)
         {
-
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
@@ -442,7 +440,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-
             return message.IsSet((int)AdaptiveMessageFieldID.IsEnumerable);
         }
 
@@ -476,7 +473,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
             return message.GetInt32((int)AdaptiveMessageFieldID.CurrentPosition);
         }
-
 
         /// <summary>
         /// Establece la posición actual de la colección.

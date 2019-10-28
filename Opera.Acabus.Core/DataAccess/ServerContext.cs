@@ -15,7 +15,7 @@ namespace Opera.Acabus.Core.DataAccess
     public static class ServerContext
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private static readonly object _lock = new object();
 
@@ -34,7 +34,6 @@ namespace Opera.Acabus.Core.DataAccess
         /// </summary>
         static ServerContext()
         {
-
             int serverPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Push_Port") ?? 5501);
             IPAddress serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("Push_IP") ?? "127.0.0.1");
 
@@ -103,8 +102,6 @@ namespace Opera.Acabus.Core.DataAccess
                     Monitor.Pulse(_lock);
                 }
             });
-
-
         }
 
         /// <summary>

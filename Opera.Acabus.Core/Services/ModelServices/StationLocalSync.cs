@@ -2,7 +2,6 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Models;
 using System;
-using System.Linq;
 
 namespace Opera.Acabus.Core.Services.ModelServices
 {

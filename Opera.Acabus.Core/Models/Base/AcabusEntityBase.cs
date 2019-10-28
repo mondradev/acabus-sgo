@@ -3,7 +3,6 @@ using System;
 
 namespace Opera.Acabus.Core.Models.Base
 {
-
     /// <summary>
     /// Provee de una base para la definición de entidades.
     /// </summary>

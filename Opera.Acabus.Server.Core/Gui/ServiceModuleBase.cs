@@ -16,7 +16,6 @@ namespace Opera.Acabus.Server.Core.Gui
     /// </summary>
     public abstract class ServiceModuleBase : IServiceModule, INotifyPropertyChanged
     {
-
         /// <summary>
         /// Estado actual del servicio.
         /// </summary>

@@ -1,8 +1,6 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Models;
-using System;
-using System.Linq;
 
 namespace Opera.Acabus.Core.Services.ModelServices
 {
@@ -11,7 +9,6 @@ namespace Opera.Acabus.Core.Services.ModelServices
     /// </summary>
     public sealed class StaffLocalSync : EntityLocalSyncBase<Staff>
     {
-
         /// <summary>
         /// Obtiene el identificador del campo utilizado para el ID de la entidad.
         /// </summary>
@@ -22,7 +19,6 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// </summary>
         protected override int SourceField => 61;
 
-
         /// <summary>
         /// Obtiene un miembro del personal a partir de una secuencia de bytes.
         /// </summary>
@@ -30,7 +26,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// <returns>Una instancia de personal.</returns>
         protected override Staff Deserialize(IAdaptiveMessage source)
             => DataHelper.GetStaff(source.GetBytes(SourceField));
-        
+
         /// <summary>
         /// Asigna las propiedades del personal en los campos del mensaje utilizado para la creación
         /// en el servidor.

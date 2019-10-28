@@ -46,6 +46,5 @@ namespace Opera.Acabus.Core.Services
 
             return message.GetBytes((int)AcabusAdaptiveMessageFieldID.DeviceToken);
         }
-
     }
 }

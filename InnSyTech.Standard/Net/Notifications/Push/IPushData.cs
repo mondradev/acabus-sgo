@@ -8,18 +8,17 @@
         /// <summary>
         /// Nombre de la entidad del evento.
         /// </summary>
-        string EntityName { get;}
+        string EntityName { get; }
 
         /// <summary>
         /// Identificador de la entidad del evento.
         /// </summary>
-        ulong ID { get;  }
+        ulong ID { get; }
 
         /// <summary>
         /// Representa a la instancia actual en una cadena de caracteres.
         /// </summary>
         /// <returns>Una cadena de caracteres.</returns>
         string ToString();
-        
     }
 }

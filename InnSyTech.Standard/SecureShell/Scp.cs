@@ -53,10 +53,10 @@ namespace InnSyTech.Standard.SecureShell
         /// <summary>
         /// Desctructor de la instancia.
         /// </summary>
-        ~Scp() 
-		{
-			this.Dispose();
-		}
+        ~Scp()
+        {
+            this.Dispose();
+        }
 
         /// <summary>
         /// Evento que surge durante la transferencia de datos.

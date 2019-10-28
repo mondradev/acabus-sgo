@@ -7,7 +7,6 @@ using System.Net;
 
 namespace Opera.Acabus.Core.Models
 {
-
     /// <summary>
     /// Define la estructura de todos los dispositivos que se encuentran en operación del BRT.
     /// </summary>

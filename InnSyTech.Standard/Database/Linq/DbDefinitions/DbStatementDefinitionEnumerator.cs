@@ -8,9 +8,10 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
         private DbStatementDefinition _current;
         private DbStatementDefinition _root;
 
-        public DbStatementDefinitionEnumerator(DbStatementDefinition root) {
-			_root = root;
-		}
+        public DbStatementDefinitionEnumerator(DbStatementDefinition root)
+        {
+            _root = root;
+        }
 
         public DbStatementDefinition Current => _current;
 

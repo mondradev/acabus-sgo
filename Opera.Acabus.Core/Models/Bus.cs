@@ -1,6 +1,5 @@
 ﻿using InnSyTech.Standard.Database;
 using InnSyTech.Standard.Database.Utils;
-using InnSyTech.Standard.Mvvm;
 using Opera.Acabus.Core.Models.Base;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,6 @@ using System.Collections.ObjectModel;
 
 namespace Opera.Acabus.Core.Models
 {
-
     /// <summary>
     /// Esta clase define los autobuses que circulan por el BRT.
     /// </summary>

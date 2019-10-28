@@ -3,10 +3,10 @@ using System.Net;
 
 namespace Opera.Acabus.Core.DataAccess.DbConverters
 {
-    	/// <summary>
-	/// Convierte una instancia <see cref="IPAddress"/> a una cadena para almacenar en
-	/// una base de datos.
-	/// </summary>
+    /// <summary>
+    /// Convierte una instancia <see cref="IPAddress"/> a una cadena para almacenar en
+    /// una base de datos.
+    /// </summary>
     public sealed class DbIPAddressConverter : IDbConverter
     {
         /// <summary>

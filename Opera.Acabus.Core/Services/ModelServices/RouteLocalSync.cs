@@ -2,7 +2,6 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Models;
 using System;
-using System.Linq;
 
 namespace Opera.Acabus.Core.Services.ModelServices
 {
@@ -20,7 +19,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         /// Obtiene el identificador del campo utilizado para almacenar esta entidad en bytes.
         /// </summary>
         protected override int SourceField => 61;
-        
+
         /// <summary>
         /// Obtiene una ruta a partir de una secuencia de bytes.
         /// </summary>

@@ -55,10 +55,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 foreach (Bus b in selectedBuses)
                     _economicNumbers += b.EconomicNumber + "\n";
 
-                _economicNumbers= _economicNumbers.Remove(_economicNumbers.Length - 1);
+                _economicNumbers = _economicNumbers.Remove(_economicNumbers.Length - 1);
 
                 OnPropertyChanged(nameof(EconomicNumbers));
-
             });
         }
 
@@ -97,7 +96,6 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// Actualiza la lista de selección de la tabla.
         /// </summary>
         public ICommand UpdateSelectionCommand { get; }
-
 
         /// <summary>
         /// Obtiene una lista de las rutas disponibles para reasignación.

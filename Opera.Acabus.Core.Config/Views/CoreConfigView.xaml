@@ -17,7 +17,7 @@
         <ViewModels:CoreConfigViewModel />
     </UserControl.DataContext>
     <i:Interaction.Triggers>
-        <i:EventTrigger >
+        <i:EventTrigger>
             <i:InvokeCommandAction Command="{Binding LoadCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>

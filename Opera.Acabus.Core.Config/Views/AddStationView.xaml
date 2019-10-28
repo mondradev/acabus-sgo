@@ -36,13 +36,13 @@
             <TextBox md:HintAssist.Hint="ID estación" Margin="0" VerticalAlignment="Top" Grid.Row="0" Text="{Binding IDEst}" />
             <TextBox md:HintAssist.Hint="Número de estación" Margin="0" VerticalAlignment="Top" Grid.Row="2" Text="{Binding StationNumber}" />
             <TextBox md:HintAssist.Hint="Descripción" Margin="0" VerticalAlignment="Top" Grid.Row="4" Text="{Binding Name}" />
-            <ComboBox  Grid.Row="6" md:HintAssist.Hint="Sección de mantenimiento"  Margin="0" VerticalAlignment="Top" ItemsSource="{Binding AssignableSections}" 
+            <ComboBox  Grid.Row="6" md:HintAssist.Hint="Sección de mantenimiento"  Margin="0" VerticalAlignment="Top" ItemsSource="{Binding AssignableSections}"
                        SelectedItem="{Binding AssignedSection, ValidatesOnDataErrors=True}" IsEditable="True" />
-            <ComboBox  Grid.Row="8" md:HintAssist.Hint="Ruta asignada"  Margin="0" VerticalAlignment="Top" ItemsSource="{Binding Routes}" 
+            <ComboBox  Grid.Row="8" md:HintAssist.Hint="Ruta asignada"  Margin="0" VerticalAlignment="Top" ItemsSource="{Binding Routes}"
                        SelectedItem="{Binding SelectedRoute, ValidatesOnDataErrors=True}" IsEditable="True" />
             <StackPanel Grid.Row="10" Margin="0,10,0,0" Orientation="Horizontal">
                 <TextBlock Text="Estación externa" Margin="0,0,16,0" />
-                <ToggleButton Content="" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                <ToggleButton Content="" HorizontalAlignment="Center" VerticalAlignment="Center"
                               IsChecked="{Binding IsExternal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </Grid>
@@ -50,7 +50,7 @@
             <Button Command="{x:Static g:Dispatcher.CloseDialogCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left"
                                 HorizontalAlignment="Right" Margin="8" Style="{DynamicResource MaterialDesignFlatButton}" MinHeight="36" Content="DESCARTAR">
             </Button>
-            <Button ToolTip="Agregar" Height="Auto" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,8,8,8" 
+            <Button ToolTip="Agregar" Height="Auto" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,8,8,8"
                     Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding AddStationCommand}" MinHeight="36" Content="AGREGAR">
             </Button>
         </StackPanel>

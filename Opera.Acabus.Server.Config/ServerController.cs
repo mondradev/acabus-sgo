@@ -160,7 +160,7 @@ namespace Opera.Acabus.Server.Config
         }
 
         /// <summary>
-        /// Obtiene los módulos de servicios registrados actualmente. 
+        /// Obtiene los módulos de servicios registrados actualmente.
         /// </summary>
         public static List<IServiceModule> GetServerModules()
             => _modules;
@@ -198,7 +198,6 @@ namespace Opera.Acabus.Server.Config
 
             return true;
         }
-
 
         /// <summary>
         /// Captura la llegada de nuevas peticiones.

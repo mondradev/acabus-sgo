@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,7 +11,6 @@ namespace InnSyTech.Standard.Database.Linq
     /// </summary>
     public static class DbQueryable
     {
-
         /// <summary>
         /// Carga todas las referencias según el nivel de profundidad que se desea avanzar. Si el
         /// tipo A tiene referencias del tipo B y este a su vez del tipo C, para cargar estas
@@ -32,7 +30,7 @@ namespace InnSyTech.Standard.Database.Linq
                 throw new ArgumentNullException(nameof(source), "La colección origen no puede ser nula.");
 
             if (depth < 0)
-                throw new ArgumentOutOfRangeException(nameof(depth), 
+                throw new ArgumentOutOfRangeException(nameof(depth),
                     "El nivel de profundidad de la carga de referencia no puede ser un número negativo.");
 
             MethodInfo loadReferenceMethod = typeof(DbQueryable)
@@ -43,6 +41,5 @@ namespace InnSyTech.Standard.Database.Linq
                 Expression.Call(loadReferenceMethod, source.Expression, Expression.Constant(depth))
             );
         }
-        
     }
 }

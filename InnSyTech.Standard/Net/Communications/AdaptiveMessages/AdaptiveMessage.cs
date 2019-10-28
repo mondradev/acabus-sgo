@@ -343,14 +343,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         public override string ToString()
             => BitConverter.ToString(Serialize()).Replace("-", "");
 
-
         /// <summary>
         /// Copia el contenido del mensaje a otra instancia, sobreescribiendo los campos utilizados.
         /// </summary>
         /// <param name="message">Mensaje destino.</param>
         public void CopyTo(IAdaptiveMessage dest)
         {
-            foreach(Field field in this)
+            foreach (Field field in this)
                 dest[field.ID] = dest[field.ID];
         }
     }

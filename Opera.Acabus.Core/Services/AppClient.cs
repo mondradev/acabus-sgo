@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace Opera.Acabus.Core.Services
 {
-
     /// <summary>
     /// Gestiona las conexiones al servidor de aplicación y provee de toda la funcionalidad que su
     /// identificador de aplicación le permite.
@@ -100,10 +99,8 @@ namespace Opera.Acabus.Core.Services
         /// <typeparam name="TResult">Tipo de dato de la colección a solicitar.</typeparam>
         /// <param name="message">Mensaje a envíar.</param>
         /// <param name="convertor">Función de conversión del contenido del mensaje a <typeparamref name="TResult"/>.</param>
-        /// <returns>Un instancia Task que devuelve la colección.</returns>      
+        /// <returns>Un instancia Task que devuelve la colección.</returns>
         public Task<AdaptiveMessageCollection<TResult>> SendMessage<TResult>(IAdaptiveMessage message, Func<IAdaptiveMessage, TResult> convertor)
             => _request.Send(message, convertor);
-
-
     }
 }

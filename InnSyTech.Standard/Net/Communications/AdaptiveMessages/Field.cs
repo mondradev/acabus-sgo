@@ -9,7 +9,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
     /// </summary>
     public sealed class Field
     {
-
         /// <summary>
         /// Valor almacenado del campo.
         /// </summary>
@@ -38,11 +37,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <exception cref="ArgumentNullException">
         /// En caso de que el valor a asignar sea nulo.
         /// </exception>
-        public object Value
-        {
+        public object Value {
             get => _value;
-            set
-            {
+            set {
                 _value = value ?? throw new ArgumentNullException("value", "El campo no puede ser asignado con un valor nulo.");
             }
         }

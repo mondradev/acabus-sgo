@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
@@ -28,7 +27,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
         /// </param>
         /// <returns>Un vector de bytes que representan al campo.</returns>
         public abstract byte[] Serialize(Field src, FieldDefinition definition);
-        
+
         /// <summary>
         /// Obtiene la longitud del campo.
         /// </summary>

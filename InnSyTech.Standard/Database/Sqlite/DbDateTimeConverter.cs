@@ -14,7 +14,6 @@ namespace InnSyTech.Standard.Database.Sqlite
         /// <returns>Una instancia <see cref="DateTime"/>.</returns>
         public object ConverterFromDb(object data)
         {
-
             if (data.GetType() != typeof(String))
                 throw new ArgumentException("El parametro 'data' debe ser una cadena de texto.");
 

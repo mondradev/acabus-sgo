@@ -17,7 +17,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         public AdaptiveMessageDeserializeException(String message) : this(message, null, null) { }
 
-
         /// <summary>
         /// Crea una nueva excepción especificando un mensaje y los datos recibidos.
         /// </summary>

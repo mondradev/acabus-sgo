@@ -9,6 +9,7 @@
         /// Operación para avanzar en la posición de la enumeración.
         /// </summary>
         NEXT,
+
         /// <summary>
         /// Operación para reiniciar la posición de la enumeración.
         /// </summary>

@@ -69,7 +69,6 @@ namespace InnSyTech.Standard.Database.Linq
             _transactions.Add(transaction);
 
             return transaction;
-
         }
 
         /// <summary>
@@ -168,7 +167,7 @@ namespace InnSyTech.Standard.Database.Linq
                     DbDataReader reader = command.ExecuteReader();
 
                     Type elementType = TypeHelper.GetElementType(expression.Type);
-                    
+
                     return DbReader.Process(elementType, reader, definition);
                 }
                 catch (Exception ex)

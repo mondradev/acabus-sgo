@@ -72,7 +72,6 @@ namespace Opera.Acabus.Server.Core
         {
         }
 
-
         /// <summary>
         /// Crea una instancia nueva de error especificando una excepción interna.
         /// </summary>

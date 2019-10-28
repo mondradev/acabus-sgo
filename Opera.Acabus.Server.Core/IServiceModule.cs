@@ -1,7 +1,5 @@
-﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
-using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
+﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using System;
-using System.Threading.Tasks;
 
 namespace Opera.Acabus.Server.Core.Models
 {

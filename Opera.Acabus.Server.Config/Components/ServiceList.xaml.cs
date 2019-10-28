@@ -10,11 +10,10 @@ using System.Windows.Shapes;
 namespace Opera.Acabus.Server.Config.Components
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public partial class ServiceList : UserControl
     {
-
         public static readonly DependencyProperty ServicesProperty =
             DependencyProperty.Register("Services",
                 typeof(ObservableCollection<IServiceModule>),

@@ -2,7 +2,6 @@
 
 namespace InnSyTech.Standard.Database
 {
-
     /// <summary>
     /// Representa un atributo que permite indicar como se maneja la propiedad de una estructura dentro de la base de datos.
     /// </summary>
@@ -66,5 +65,4 @@ namespace InnSyTech.Standard.Database
         /// </summary>
         public string TableName { get; set; }
     }
-
 }

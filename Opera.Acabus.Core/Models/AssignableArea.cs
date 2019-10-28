@@ -49,7 +49,5 @@
         /// Área de atención a clientes.
         /// </summary>
         CALL_CENTER = 128
-
-
     }
 }

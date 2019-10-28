@@ -27,6 +27,5 @@ namespace Opera.Acabus.Core.Models
         /// Prioridad alta.
         /// </summary>
         HIGH = 4,
-
     }
 }

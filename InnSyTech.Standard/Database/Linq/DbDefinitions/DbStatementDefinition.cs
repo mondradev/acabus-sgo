@@ -46,7 +46,7 @@ namespace InnSyTech.Standard.Database.Linq.DbDefinitions
         /// <summary>
         /// Obtiene o establece si el resultado será una secuancia.
         /// </summary>
-        public bool IsEnumerable { get; set;  }
+        public bool IsEnumerable { get; set; }
 
         /// <summary>
         /// Obtiene un listado de todos los campos utilizados para realizar el ordenamiento.
