@@ -103,7 +103,7 @@ namespace Opera.Acabus.Server.Core.Utils
         {
             if (type == typeof(bool))
                 return BitConverter.ToBoolean(data as byte[] ?? BitConverter.GetBytes(default(bool)), 0);
-            else if (type.GetMethod("Parse") != null)
+            else if (type.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static) != null)
             {
                 if (type.IsEnum)
                     return Enum.Parse(parameter.ParameterType, data.ToString());
