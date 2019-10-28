@@ -31,7 +31,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
             if (src == null)
                 throw new ArgumentNullException("src");
 
-            if (definition.Type != FieldDefinition.FieldType.Text)
+            if (definition.Type != FieldType.Text)
                 throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo texto");
 
             if (src.Length == 0)
@@ -74,7 +74,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
             if (src == null)
                 throw new ArgumentNullException("src");
 
-            if (definition.Type != FieldDefinition.FieldType.Text)
+            if (definition.Type != FieldType.Text)
                 throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo texto");
 
             if (src.ID != definition.ID)

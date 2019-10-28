@@ -32,7 +32,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
             if (src == null)
                 throw new ArgumentNullException("src");
 
-            if (definition.Type != FieldDefinition.FieldType.Numeric)
+            if (definition.Type != FieldType.Numeric)
                 throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo numérico");
 
             if (src.Length == 0)
@@ -90,7 +90,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
             if (src == null)
                 throw new ArgumentNullException("src");
 
-            if (definition.Type != FieldDefinition.FieldType.Numeric)
+            if (definition.Type != FieldType.Numeric)
                 throw new ArgumentOutOfRangeException("definition", "La definición del campo debe representar un campo numérico");
 
             if (src.ID != definition.ID)
