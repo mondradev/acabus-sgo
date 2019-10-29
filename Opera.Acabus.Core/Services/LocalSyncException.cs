@@ -30,5 +30,10 @@ namespace Opera.Acabus.Core.Services
         public LocalSyncException(string message, Exception inner) :
             base(message, inner)
         { }
+
+        /// <summary>
+        /// Obtiene un mensaje que describe la excepción actual.
+        /// </summary>
+        public override string Message => InnerException != null ? $"{base.Message} ({InnerException.Message})" : base.Message;
     }
 }

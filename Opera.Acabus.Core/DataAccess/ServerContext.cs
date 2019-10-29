@@ -3,6 +3,7 @@ using Opera.Acabus.Core.Services;
 using Opera.Acabus.Core.Services.ModelServices;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace Opera.Acabus.Core.DataAccess
     public static class ServerContext
     {
         /// <summary>
-        ///
+        /// Referencia para el bloqueo del hilo.
         /// </summary>
         private static readonly object _lock = new object();
 
@@ -49,7 +50,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <param name="entityName">Nombre de la entidad.</param>
         /// <returns>El monitor de sincronización.</returns>
         public static IEntityLocalSync GetLocalSync(String entityName)
-            => _entityLocalSyncs[entityName].Entity ?? throw new ArgumentException("No existe el monitor de sincronización.");
+            => _entityLocalSyncs[entityName].Entity ?? throw new ArgumentException($"No existe el monitor de sincronización [Entidad={entityName}]");
 
         /// <summary>
         /// Inicializa los servicios con el servidor.
@@ -70,7 +71,7 @@ namespace Opera.Acabus.Core.DataAccess
         public static void RegisterLocalSync(IEntityLocalSync localSync)
         {
             if (_entityLocalSyncs.ContainsKey(localSync.EntityName))
-                throw new InvalidOperationException("Ya existe un IEntityLocalSync para la entidad '" + localSync.EntityName + "'.");
+                throw new InvalidOperationException($"Ya existe la instancia IEntityLocalSync [Entidad={localSync.EntityName}]");
 
             _entityLocalSyncs.Add(localSync.EntityName,
                 new LocalSyncStatus(localSync)
@@ -80,26 +81,39 @@ namespace Opera.Acabus.Core.DataAccess
 
             Task.Run(() =>
             {
-                lock (_lock)
-                {
-                    foreach (String entityName in localSync.Dependencies)
-                    {
-                        while (true)
-                        {
-                            LocalSyncStatus localSyncsStatus = _entityLocalSyncs[entityName];
-                            IEntityLocalSync dependency = localSyncsStatus.Entity;
+                var monitor = _entityLocalSyncs[localSync.EntityName];
 
-                            if (dependency == null || !localSyncsStatus.IsSyncronized)
-                                Monitor.Wait(_lock);
-                            else break;
+                while (!monitor.IsSyncronized)
+                {
+                    lock (_lock)
+                    {
+                        try
+                        {
+                            foreach (String entityName in localSync.Dependencies)
+                            {
+                                while (true)
+                                {
+                                    LocalSyncStatus localSyncsStatus = _entityLocalSyncs[entityName];
+                                    IEntityLocalSync dependency = localSyncsStatus.Entity;
+
+                                    if (dependency == null || !localSyncsStatus.IsSyncronized)
+                                        Monitor.Wait(_lock);
+                                    else break;
+                                }
+                            }
+
+                            localSync.Pull();
+
+                            _entityLocalSyncs[localSync.EntityName].IsSyncronized = true;
+
+                            Monitor.Pulse(_lock);
+                        }
+                        catch (Exception reason)
+                        {
+                            Trace.WriteLine($"Fallo al sincronizar [Entidad={localSync.EntityName}, Razón={reason.Message}]", "WARN");
+                            Thread.Sleep(30000);
                         }
                     }
-
-                    localSync.Pull(out _);
-
-                    _entityLocalSyncs[localSync.EntityName].IsSyncronized = true;
-
-                    Monitor.Pulse(_lock);
                 }
             });
         }
@@ -111,18 +125,26 @@ namespace Opera.Acabus.Core.DataAccess
         private static void OnNotify(PushArgs args)
         {
             PushAcabus push = args.Data as PushAcabus;
-            IEntityLocalSync localSync = GetLocalSync(push.EntityName);
 
-            switch (push.Operation)
+            try
             {
-                case LocalSyncOperation.CREATE:
-                case LocalSyncOperation.UPDATE:
-                    localSync.DownloadByID(push.ID, out _);
-                    break;
+                IEntityLocalSync localSync = GetLocalSync(push.EntityName);
 
-                case LocalSyncOperation.DELETE:
-                    localSync.LocalDeleteByID(push.ID, out _);
-                    break;
+                switch (push.Operation)
+                {
+                    case LocalSyncOperation.CREATE:
+                    case LocalSyncOperation.UPDATE:
+                        localSync.DownloadByID(push.ID);
+                        break;
+
+                    case LocalSyncOperation.DELETE:
+                        localSync.LocalDeleteByID(push.ID);
+                        break;
+                }
+            }
+            catch (Exception reason)
+            {
+                Trace.WriteLine($"Fallo al notificar cambio [Entidad={push.EntityName}, Operación={push.Operation}, Razón={reason.Message}]", "WARN");
             }
         }
 
