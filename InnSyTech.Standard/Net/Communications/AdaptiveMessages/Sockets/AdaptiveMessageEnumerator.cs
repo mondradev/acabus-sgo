@@ -51,8 +51,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <summary>
         /// Obtiene el elemento de la posición actual en la colección.
         /// </summary>
-        public TResult Current => _position >= 0 ? this._converter(Message) :
-            throw new InvalidOperationException("Requiere avanzar a la primera posición con MoveNext()");
+        public TResult Current => _position >= 0 ? this._converter(Message) : default;
 
         /// <summary>
         /// Obtiene el mensaje de la colección.
