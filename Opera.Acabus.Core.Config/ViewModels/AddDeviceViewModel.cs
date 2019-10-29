@@ -38,7 +38,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Campo que provee a la propiedad <see cref="SerialNumber"/>.
         /// </summary>
-        private String serialNumber;
+        private String _serialNumber;
 
         /// <summary>
         /// Campo que provee a la propiedad <see cref="IDEqui" />
@@ -128,9 +128,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// Obtiene o establece el número de serie del nuevo equipo.
         /// </summary>
         public String SerialNumber {
-            get => serialNumber;
+            get => _serialNumber;
             set {
-                serialNumber = value;
+                _serialNumber = value;
                 OnPropertyChanged("SerialNumber");
             }
         }
@@ -181,7 +181,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     break;
 
                 case nameof(IPString):
-                    if (!String.IsNullOrEmpty(IPString) && !IPAddress.TryParse(IPString, out IPAddress address))
+                    if (!String.IsNullOrEmpty(IPString) && !IPAddress.TryParse(IPString, out _))
                         AddError(nameof(IPString), "La dirección IP no es valida.");
                     break;
             }
@@ -205,17 +205,22 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddDeviceExecute(object obj)
         {
-            object device = new Device(IDEqui, SerialNumber, SelectedType.Value)
+            try
             {
-                Station = SelectedStation,
-                Bus = SelectedBus,
-                IPAddress = String.IsNullOrEmpty(IPString) ? null : IPAddress.Parse(IPString)
-            };
+                object device = new Device(IDEqui, SerialNumber, SelectedType.Value)
+                {
+                    Station = SelectedStation,
+                    Bus = SelectedBus,
+                    IPAddress = String.IsNullOrEmpty(IPString) ? null : IPAddress.Parse(IPString)
+                };
 
-            if (ServerContext.GetLocalSync("Device").Create(ref device, out Exception reason))
-                Dispatcher.SendMessageToGUI($"Equipo: {device} agregado correctamente.");
-            else
-                Dispatcher.SendMessageToGUI("No se pudo guardar el equipo nuevo, razón: " + reason.Message);
+                if (ServerContext.GetLocalSync("Device").Create(ref device))
+                    Dispatcher.SendMessageToGUI($"Equipo {device} agregado correctamente.");
+            }
+            catch (Exception reason)
+            {
+                Dispatcher.SendMessageToGUI("Fallo al guardar el equipo, razón: " + reason.Message);
+            }
 
             Dispatcher.CloseDialog();
         }

@@ -195,18 +195,23 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddStationExecute(object obj)
         {
-            object station = new Station(IDEst, UInt16.Parse(StationNumber))
+            try
             {
-                Name = Name,
-                IsExternal = IsExternal,
-                AssignedSection = AssignedSection,
-                Route = SelectedRoute
-            };
+                object station = new Station(IDEst, UInt16.Parse(StationNumber))
+                {
+                    Name = Name,
+                    IsExternal = IsExternal,
+                    AssignedSection = AssignedSection,
+                    Route = SelectedRoute
+                };
 
-            if (ServerContext.GetLocalSync("Station").Create(ref station, out Exception reason))
-                Dispatcher.SendMessageToGUI($"Estación: {station} agregado correctamente.");
-            else
-                Dispatcher.SendMessageToGUI("No se pudo guardar la estación nueva, razón: " + reason.Message);
+                if (ServerContext.GetLocalSync("Station").Create(ref station))
+                    Dispatcher.SendMessageToGUI($"Estación {station} agregado correctamente.");
+            }
+            catch (Exception reason)
+            {
+                Dispatcher.SendMessageToGUI("Fallo al guardar la estación, razón: " + reason.Message);
+            }
 
             Dispatcher.CloseDialog();
         }

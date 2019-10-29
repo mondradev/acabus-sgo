@@ -101,16 +101,21 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <param name="obj">Parametro del comando.</param>
         private void AddStaffExecute(object parameter)
         {
-            object staff = new Staff()
+            try
             {
-                Area = SelectedArea.Value,
-                Name = FullName
-            };
+                object staff = new Staff()
+                {
+                    Area = SelectedArea.Value,
+                    Name = FullName
+                };
 
-            if (ServerContext.GetLocalSync("Staff").Create(ref staff, out Exception reason))
-                Dispatcher.SendMessageToGUI($"Personal: {staff} agregado correctamente.");
-            else
-                Dispatcher.SendMessageToGUI("No se pudo guardar el personal nuevo, razón: " + reason.Message);
+                if (ServerContext.GetLocalSync("Staff").Create(ref staff))
+                    Dispatcher.SendMessageToGUI($"Empleado {staff} agregado correctamente.");
+            }
+            catch (Exception reason)
+            {
+                Dispatcher.SendMessageToGUI("Fallo al guardar el empleado, razón: " + reason.Message);
+            }
 
             Dispatcher.CloseDialog();
         }
