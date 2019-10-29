@@ -17,7 +17,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Campos básicos necesarios para el manejo de mensajes.
         /// </summary>
-        private static readonly FieldDefinition[] _staticFields = new FieldDefinition[] {
+        private static readonly FieldDefinition[] _header = new FieldDefinition[] {
             new FieldDefinition(1, FieldType.Binary, 32, false, "Token de aplicación"), // Token de aplicación gestionados por el servidor
             new FieldDefinition(2, FieldType.Binary, 32, false, "Hash de reglas"), // Versión de la regla
             new FieldDefinition(3, FieldType.Numeric, 3, false, "Código de respuesta"), // Código de respuesta de la petición
@@ -36,11 +36,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         private readonly List<FieldDefinition> _definitions;
 
         /// <summary>
-        /// Campo que provee a la propiedad <see cref="IsReadOnly"/>
-        /// </summary>
-        private bool _isReadOnly;
-
-        /// <summary>
         /// Obtiene la definición del campo especificado.
         /// </summary>
         /// <param name="id">ID del campo.</param>
@@ -53,7 +48,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         public AdaptiveMessageRules()
         {
             _definitions = new List<FieldDefinition>();
-            _definitions.AddRange(_staticFields);
+            _definitions.AddRange(_header);
         }
 
         /// <summary>
@@ -64,10 +59,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Obtiene si la definición de mensajes es de solo lectura.
         /// </summary>
-        public bool IsReadOnly {
-            get => _isReadOnly;
-            internal set => _isReadOnly = value;
-        }
+        public bool IsReadOnly { get; internal set; }
 
         /// <summary>
         /// Carga desde un archivo JSON la definición del mensaje a transmitir.
@@ -77,12 +69,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         public static AdaptiveMessageRules Load(String path)
         {
             AdaptiveMessageRules rules = JsonConvert.DeserializeObject<AdaptiveMessageRules>(File.ReadAllText(path));
-
-            foreach (var x in rules.Where(x => _staticFields.Any(y => y.ID == x.ID)))
-                Trace.WriteLine(String.Format("Se descarta campo {0} de la plantilla, ya que pertenece al encabezado.", x));
-
-            rules.RemoveForced(_staticFields.Select(x => x.ID).ToArray());
-            rules._definitions.AddRange(_staticFields);
+            
+            rules.RemoveForced(_header.Select(x => x.ID).ToArray());
+            rules._definitions.AddRange(_header);
 
             return rules;
         }
@@ -93,7 +82,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="item">  </param>
         public void Add(FieldDefinition item)
         {
-            if (_isReadOnly)
+            if (IsReadOnly)
                 return;
 
             if (!_definitions.Any(x => x.ID == item.ID))
@@ -105,7 +94,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         public void Clear()
         {
-            if (!_isReadOnly)
+            if (!IsReadOnly)
                 _definitions.Clear();
         }
 
@@ -147,10 +136,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns> Un valor true si se encontró y eliminó las definición. </returns>
         public bool Remove(FieldDefinition item)
         {
-            if (_isReadOnly)
+            if (IsReadOnly)
                 return false;
 
-            if (_staticFields.Select(x => x.ID).Contains(item.ID))
+            if (_header.Select(x => x.ID).Contains(item.ID))
                 return false;
 
             return _definitions.Remove(item);
@@ -164,10 +153,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns>Un valor true si se eliminaron todas las definiciones especificadas.</returns>
         public bool Remove(params int[] id)
         {
-            if (_isReadOnly)
+            if (IsReadOnly)
                 return false;
 
-            if (id.Any(x => _staticFields.Select(y => y.ID).Contains(x)))
+            if (id.Any(x => _header.Select(y => y.ID).Contains(x)))
                 return false;
 
             return RemoveForced(id);

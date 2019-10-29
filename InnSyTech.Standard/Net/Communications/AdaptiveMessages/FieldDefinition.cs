@@ -23,7 +23,7 @@
         /// <param name="maxLength"> Longitud máxima del campo. </param>
         /// <param name="isVarLength"> Indicador si el campo es de longitud variable. </param>
         /// <param name="description"> Descripción del campo. </param>
-        internal FieldDefinition(int id, FieldType type, int maxLength, bool isVarLength = false, string description = null)
+        public FieldDefinition(int id, FieldType type, int maxLength, bool isVarLength = false, string description = null)
         {
             ID = id;
             Type = type;

@@ -50,7 +50,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Obtiene las reglas con las que se creó el mensaje.
         /// </summary>
-        public AdaptiveMessageRules Rules => throw new NotImplementedException();
+        public AdaptiveMessageRules Rules => _messageRules;
 
         /// <summary>
         /// Obtiene, establece o agrega el valor del campo con el ID especificado.
