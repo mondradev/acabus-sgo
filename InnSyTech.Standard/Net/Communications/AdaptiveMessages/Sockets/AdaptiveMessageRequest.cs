@@ -66,11 +66,17 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
                     int bytesTransferred = RemoteEndPoint.Send(message.Serialize());
 
                     if (bytesTransferred <= 0)
-                        return null;
+                        throw new SocketException((int)SocketError.Interrupted);
 
                     var response = AdaptiveMessageSocketHelper.ReadBuffer(RemoteEndPoint, Rules);
 
                     return response;
+                }
+                catch (SocketException ex)
+                {
+                    message.SetResponse($"No se logró enviar la petición [Razón={ex.Message}]", AdaptiveMessageResponseCode.SERVICE_UNAVAILABLE);
+
+                    return null;
                 }
                 catch
                 {
@@ -100,12 +106,17 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
                    int bytesTransferred = RemoteEndPoint.Send(message.Serialize());
 
                    if (bytesTransferred <= 0)
-                       message.SetResponse("No se logró envíar la petición al otro extremo", AdaptiveMessageResponseCode.SERVICE_UNAVAILABLE);
+                       throw new SocketException((int)SocketError.Interrupted);
                    else
                        AdaptiveMessageSocketHelper.ReadBuffer(RemoteEndPoint, Rules).CopyTo(message);
 
                    if (!message.IsEnumerable() || message.GetResponseCode() != AdaptiveMessageResponseCode.PARTIAL_CONTENT)
                        message.SetAsEnumerable(0);
+               }
+               catch (SocketException ex)
+               {
+                   message.SetResponse($"No se logró enviar la petición [Razón={ex.Message}]", AdaptiveMessageResponseCode.SERVICE_UNAVAILABLE);
+                   message.SetAsEnumerable(0);
                }
                catch
                {
