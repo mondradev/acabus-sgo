@@ -53,7 +53,7 @@ namespace Opera.Acabus.Server.Core.Gui
                 try
                 {
                     if (ServerHelper.ValidateRequest(e.Data, GetType()))
-                        ServerHelper.CallFunc(e, GetType());
+                        ServerHelper.CallFunc(e, this);
                     else
                         throw new ServiceException("No se encontró la función solicitada o no coindicieron los parametros especificados.", AdaptiveMessageResponseCode.BAD_REQUEST, e.Data.GetFunctionName(), ServiceName);
 

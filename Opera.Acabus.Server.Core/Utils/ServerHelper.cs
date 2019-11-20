@@ -1,6 +1,7 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using InnSyTech.Standard.Utils;
+using Opera.Acabus.Server.Core.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,23 +21,15 @@ namespace Opera.Acabus.Server.Core.Utils
         /// </summary>
         /// <param name="request">Controlador de la petición.</param>
         /// <param name="functionsClass">Clase de las funciones.</param>
-        public static void CallFunc(IAdaptiveMessageReceivedArgs request, Type functionsClass)
+        public static void CallFunc(IAdaptiveMessageReceivedArgs request, IServiceModule module)
         {
+            Type functionsClass = module.GetType();
             IAdaptiveMessage message = request.Data;
 
-            String funcName = message.GetFunctionName();
-
-            if (String.IsNullOrEmpty(funcName))
+            if (!message.HasFunctionName())
                 throw new InvalidOperationException("No se especificó el nombre de la función.");
 
-            MethodInfo method = null;
-
-            MethodInfo[] methods = functionsClass.GetMethods(BindingFlags.Static | BindingFlags.Public);
-            methods = methods.Where(x => x.Name == funcName).ToArray();
-
-            IEnumerator enumerator = methods.GetEnumerator();
-
-            while (enumerator.MoveNext() && !ValidateMethod(message, method = enumerator.Current as MethodInfo)) ;
+            MethodInfo method = GetMethod(functionsClass, message);
 
             if (method is null)
                 throw new InvalidOperationException("No se encontró la función especificada.");
@@ -50,7 +43,11 @@ namespace Opera.Acabus.Server.Core.Utils
 
                 parametersValues[parametersValues.Length - 1] = request;
 
-                method.Invoke(null, parametersValues);
+                method.Invoke(module, parametersValues);
+            }
+            catch (TargetInvocationException ex) when (ex?.InnerException is ServiceException)
+            {
+                throw ex.InnerException;
             }
             catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidCastException || ex is FormatException)
             {
@@ -60,6 +57,31 @@ namespace Opera.Acabus.Server.Core.Utils
             {
                 throw new InvalidOperationException("Error al realizar la llamada a la función.");
             }
+        }
+
+        /// <summary>
+        /// Obtiene el método especificado por el mensaje de la petición.
+        /// </summary>
+        /// <param name="functionsClass">Tipo de dato del módulo.</param>
+        /// <param name="message">Mensaje de la petición.</param>
+        /// <returns>El método que cumple con la especificación en el mensaje.</returns>
+        private static MethodInfo GetMethod(Type functionsClass, IAdaptiveMessage message)
+        {
+            String funcName = message.GetFunctionName();
+
+            if (String.IsNullOrEmpty(funcName))
+                return null;
+
+            MethodInfo method = null;
+
+            MethodInfo[] methods = functionsClass.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+            methods = methods.Where(x => x.Name == funcName).ToArray();
+
+            IEnumerator enumerator = methods.GetEnumerator();
+
+            while (enumerator.MoveNext() && !ValidateMethod(message, method = enumerator.Current as MethodInfo)) ;
+
+            return method;
         }
 
         /// <summary>
@@ -101,19 +123,22 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <returns>El valor del parametro.</returns>
         private static object DeserializeParameter(object data, ParameterInfo parameter, Type type)
         {
+            MethodInfo parseMethod = type.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder,
+                new Type[] { typeof(String) }, new ParameterModifier[] { new ParameterModifier(1) });
+
             if (type == typeof(bool))
                 return BitConverter.ToBoolean(data as byte[] ?? BitConverter.GetBytes(default(bool)), 0);
-            else if (type.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static) != null)
+            else if (parseMethod != null)
             {
-                if (type.IsEnum)
-                    return Enum.Parse(parameter.ParameterType, data.ToString());
                 if (type == typeof(DateTime))
                     return DateTime.Parse(String.Format("{0}{1}-{2}-{3} {4}:{5}:{6}", data.ToString().Cut(7)));
                 else if (type == typeof(TimeSpan))
                     return TimeSpan.Parse(String.Format("{0}:{1}:{2}", data.ToString().Cut(3)));
                 else
-                    return type.GetMethod("Parse").Invoke(null, new object[] { data.ToString() });
+                    return parseMethod.Invoke(null, new object[] { data.ToString() });
             }
+            else if (type.IsEnum)
+                return Enum.Parse(parameter.ParameterType, data.ToString());
             else
                 return Convert.ChangeType(data, parameter.ParameterType);
         }
@@ -125,8 +150,7 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <param name="exception">Excepción que se enviará como respuesta.</param>
         public static void SendException(this IAdaptiveMessageReceivedArgs e, ServiceException exception)
         {
-            string response = String.Format("{0} [Error=\"{1}\", Servicio=\"{2}\", Función={3}]",
-                  exception.InnerException != null ? exception.Message : "Ocurrió un error al procesar la petición",
+            string response = string.Format("ex:{0};{1};{2}",
                   exception.InnerException != null ? exception.InnerException.Message : exception.Message,
                    exception.ModuleName,
                    exception.FunctionName
@@ -140,72 +164,6 @@ namespace Opera.Acabus.Server.Core.Utils
         }
 
         /// <summary>
-        /// Envía una colección a través de <see cref="IAdaptiveMessage"/>.
-        /// </summary>
-        /// <typeparam name="T">Tipo de dato de la colección.</typeparam>
-        /// <param name="collection">Colección a enviar.</param>
-        /// <param name="args">Controlador de la petición.</param>
-        /// <param name="idItem">Identificador del campo utilizado para transmitir los elementos.</param>
-        /// <param name="serializer">Función serializadora.</param>
-        public static void SendCollection<T>(ICollection<T> collection, IAdaptiveMessageReceivedArgs args, uint idItem, Func<T, object> serializer)
-        {
-            if (collection == null)
-                throw new ArgumentNullException(nameof(collection));
-
-            if (args == null)
-                throw new ArgumentNullException(nameof(args));
-
-            if (serializer == null)
-                throw new ArgumentNullException(nameof(serializer));
-
-            if (!args.Data.IsEnumerable())
-                args.Data.SetAsEnumerable(collection.Count);
-
-            args.Data.SetPosition(-1);
-            args.Data.SetResponse(String.Empty, AdaptiveMessageResponseCode.PARTIAL_CONTENT);
-
-            args.Response();
-
-            while (args.Connection.Connected)
-            {
-                AdaptiveMessageSocketHelper.ReadBuffer(args.Connection, args.Data.Rules)?
-                    .CopyTo(args.Data);
-
-                switch (args.Data.GetEnumOp())
-                {
-                    case AdaptiveMessageEnumOp.NEXT:
-                        if (args.Data.GetPosition() < -1)
-                            args.Data.SetResponse("Operación no válida al recorrer la colección",
-                                AdaptiveMessageResponseCode.BAD_REQUEST);
-                        else if (args.Data.GetPosition() >= collection.Count)
-                            args.Data.Remove((int)idItem);
-                        else
-                        {
-                            args.Data.SetPosition(args.Data.GetPosition() + 1);
-                            args.Data[(int)idItem] = serializer(collection.ElementAt(args.Data.GetPosition()));
-                        }
-
-                        args.Response();
-                        break;
-
-                    case AdaptiveMessageEnumOp.RESET:
-                        args.Data.SetPosition(-1);
-                        args.Response();
-                        break;
-
-                    case (AdaptiveMessageEnumOp)(-1):
-                        args.Data.SetResponse("Operación no válida", AdaptiveMessageResponseCode.METHOD_NOT_ALLOWED);
-                        args.Response();
-                        break;
-
-                    default:
-                        Thread.Sleep(10);
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
         /// Valida la solicitud sea compatible con la función destino.
         /// </summary>
         /// <param name="message">Mensaje de petición.</param>
@@ -213,19 +171,7 @@ namespace Opera.Acabus.Server.Core.Utils
         /// <returns>Un valor true si la petición es compatible con la función.</returns>
         public static bool ValidateRequest(IAdaptiveMessage message, Type functionsClass)
         {
-            String funcName = message.GetFunctionName();
-
-            if (String.IsNullOrEmpty(funcName))
-                return false;
-
-            MethodInfo[] methods = functionsClass.GetMethods(BindingFlags.Static | BindingFlags.Public);
-            methods = methods.Where(x => x.Name == funcName).ToArray();
-
-            IEnumerator enumerator = methods.GetEnumerator();
-
-            MethodInfo method = null;
-
-            while (enumerator.MoveNext() && !ValidateMethod(message, method = enumerator.Current as MethodInfo)) ;
+            MethodInfo method = GetMethod(functionsClass, message);
 
             if (method is null)
                 return false;
