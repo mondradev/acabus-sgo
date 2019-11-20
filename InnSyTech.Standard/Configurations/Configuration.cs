@@ -109,7 +109,7 @@ namespace InnSyTech.Standard.Configuration
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                    Trace.TraceError(ex.Message);
                     return false;
                 }
                 finally
@@ -215,7 +215,7 @@ namespace InnSyTech.Standard.Configuration
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                    Trace.TraceError(ex.Message);
                     return false;
                 }
                 finally

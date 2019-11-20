@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -17,21 +16,12 @@ namespace InnSyTech.Standard.Gui
         /// </summary>
         /// <param name="dataSvg">Cadena SVG del icono.</param>
         /// <returns>Un componente que muestra el icono.</returns>
-        public static Viewbox CreateIcon(String dataSvg)
+        public static Viewbox CreateIcon(String dataSvg, Brush fill = null)
         {
-            Canvas canvas = new Canvas()
-            {
-                Width = 24,
-                Height = 24
-            };
-            canvas.Children.Add(new Path()
-            {
-                Data = Geometry.Parse(dataSvg),
-            });
-            (canvas.Children[0] as Path).SetBinding(Shape.FillProperty, new Binding("Foreground")
-            {
-                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(Control), 1)
-            });
+            Canvas canvas = new Canvas() { Width = 24, Height = 24 };
+
+            canvas.Children.Add(new Path() { Name = "icon", Data = Geometry.Parse(dataSvg), Fill = fill ?? canvas.TryFindResource("IdealForegroundColorBrush") as Brush });
+
             return new Viewbox()
             {
                 Child = canvas

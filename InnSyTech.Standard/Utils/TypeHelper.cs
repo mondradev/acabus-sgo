@@ -86,17 +86,17 @@ namespace InnSyTech.Standard.Utils
             }
             catch (ArgumentNullException ex)
             {
-                Trace.WriteLine($"No se han especificado los valores para el parametro: {ex.Message.JoinLines()}");
+                Trace.TraceError($"No se han especificado los valores para el parametro: {ex.Message}");
             }
             catch (IOException ex)
             {
-                Trace.WriteLine($"Error al cargar la DLL '{assemblyFile}", "ERROR");
-                Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                Trace.TraceError($"Error al cargar la DLL '{assemblyFile}");
+                Trace.TraceError(ex.Message);
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"Error al cargar el tipo '{typeName}'", "ERROR");
-                Trace.WriteLine(ex.Message.JoinLines(), "ERROR");
+                Trace.TraceError($"Error al cargar el tipo '{typeName}'");
+                Trace.TraceError(ex.Message);
             }
             return null;
         }

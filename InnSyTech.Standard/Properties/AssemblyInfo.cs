@@ -10,8 +10,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("InnSy Tech")]
 [assembly: AssemblyProduct("InnSyTech.Standard")]
-[assembly: AssemblyCopyright("Copyright © InnSy Tech 2017")]
-[assembly: AssemblyTrademark("InnSy Tech Standard")]
+[assembly: AssemblyCopyright("Copyright © InnSy Tech 2019")]
+[assembly: AssemblyTrademark("InnSy Tech StdLib")]
 [assembly: AssemblyCulture("")]
 
 // Si establece ComVisible en false, los tipos de este ensamblado no estarán visibles

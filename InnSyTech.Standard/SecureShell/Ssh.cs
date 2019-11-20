@@ -45,11 +45,11 @@ namespace InnSyTech.Standard.SecureShell
                     throw new IOException(String.Format("No hay comunicación con el host {0}", this.Host));
 
                 this._session.Connect();
-                Trace.WriteLine(String.Format("Conectado al host {0}, Tiempo: {1}", Host, DateTime.Now - initTime), "INFO");
+                Trace.TraceInformation(String.Format("Conectado al host {0}, Tiempo: {1}", Host, DateTime.Now - initTime));
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex.Message, "ERROR");
+                Trace.TraceError(ex.Message);
             }
         }
 
@@ -107,13 +107,13 @@ namespace InnSyTech.Standard.SecureShell
             // Tiempo inicial del envío de comando
             DateTime initTime = DateTime.Now;
 
-            Trace.WriteLine(String.Format("Enviando el comando al host {0}", Host), "INFO");
+            Trace.TraceInformation(String.Format("Enviando el comando al host {0}", Host));
 
             // Ejecución del comando en el equipo remoto
             var sshCommand = this._session.CreateCommand(command);
             sshCommand.Execute();
 
-            Trace.WriteLine(String.Format("Tiempo de espera de la respuesta: {0}", DateTime.Now - initTime), "DEBUG");
+            Trace.TraceInformation(String.Format("Tiempo de espera de la respuesta: {0}", DateTime.Now - initTime));
 
             // Obtenemos todos los resultados de la ejecución del comando
             String response = sshCommand.Result;

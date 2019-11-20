@@ -45,9 +45,9 @@ namespace InnSyTech.Standard.SecureShell
                 this._session.Downloading += (sender, args) => OnTransfer(args.Filename, args.Downloaded, args.Size);
                 this._session.Uploading += (sender, args) => OnTransfer(args.Filename, args.Uploaded, args.Size);
 
-                Trace.WriteLine(String.Format("Conectado al host {0}, Tiempo: {1}", Host, DateTime.Now - initTime), "INFO");
+                Trace.TraceInformation(String.Format("Conectado al host {0}, Tiempo: {1}", Host, DateTime.Now - initTime));
             }
-            catch (Exception ex) { Trace.WriteLine(ex.Message, "ERROR"); }
+            catch (Exception ex) { Trace.TraceError(ex.Message); }
         }
 
         /// <summary>

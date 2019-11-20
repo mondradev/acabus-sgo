@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace InnSyTech.Standard.Utils
 {
@@ -79,18 +78,10 @@ namespace InnSyTech.Standard.Utils
             var index = (int)(random.NextDouble() * count);
 
             if (index >= valids.Count())
-                return default(TData);
+                return default;
 
             return valids.ElementAt(index);
         }
-
-        /// <summary>
-        /// Elimina los saltos de linea en un texto.
-        /// </summary>
-        /// <param name="str">Texto a unificar lineas.</param>
-        /// <returns>Una cadena de una sola linea.</returns>
-        public static String JoinLines(this String str)
-            => Regex.Replace(str, "[\r\n\r]+", " ");
 
         /// <summary>
         /// Fusiona una instancia <see cref="IEnumerable{T}"/> de <see cref="IEnumerable{T}"/>
@@ -133,12 +124,122 @@ namespace InnSyTech.Standard.Utils
         /// </summary>
         /// <param name="src">Secuencia de datos origen.</param>
         /// <returns>Una cadena que representa a la cadena.</returns>
-        public static String ToTextPlain(this byte[] src)
+        public static String ToHex(this byte[] src)
         {
             StringBuilder builder = new StringBuilder();
             src.Select(x => x.ToString("x2")).ForEach(x => builder.Append(x));
 
             return builder.ToString();
         }
+
+        /// <summary>
+        /// Determina si un objeto es un valor numérico.
+        /// </summary>
+        /// <param name="src">Objecto a evaluarse</param>
+        /// <returns>Un valor true si es numérico</returns>
+        public static bool IsNumeric(this object src)
+        {
+            switch (Type.GetTypeCode(src?.GetType()))
+            {
+                default:
+
+                    return false;
+
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.UInt16:
+                case TypeCode.Int32:
+                case TypeCode.UInt32:
+                case TypeCode.Int64:
+                case TypeCode.UInt64:
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Decimal:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Determina si un objeto es un valor numérico entero.
+        /// </summary>
+        /// <param name="src">Objecto a evaluarse</param>
+        /// <returns>Un valor true si es numérico entero</returns>
+        public static bool IsInteger(this object src)
+        {
+            switch (Type.GetTypeCode(src?.GetType()))
+            {
+                default:
+
+                    return false;
+
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.UInt16:
+                case TypeCode.Int32:
+                case TypeCode.UInt32:
+                case TypeCode.Int64:
+                case TypeCode.UInt64:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Determina si un valor numerico está entre el rango especificado.
+        /// </summary>
+        /// <param name="value">Valor a comparar</param>
+        /// <param name="min">Limite inferior</param>
+        /// <param name="max">Limite superior</param>
+        /// <returns></returns>
+        public static bool Between(this int value, int min, int max)
+            => min <= value && value <= max;
+
+        /// <summary>
+        /// Determina si un valor numerico está entre el rango especificado.
+        /// </summary>
+        /// <param name="value">Valor a comparar</param>
+        /// <param name="min">Limite inferior</param>
+        /// <param name="max">Limite superior</param>
+        /// <returns></returns>
+        public static bool Between(this int value, uint min, uint max)
+            => min <= value && value <= max;
+
+        /// <summary>
+        /// Determina si un valor numerico está entre el rango especificado.
+        /// </summary>
+        /// <param name="value">Valor a comparar</param>
+        /// <param name="min">Limite inferior</param>
+        /// <param name="max">Limite superior</param>
+        /// <returns></returns>
+        public static bool Between(this int value, long min, long max)
+            => min <= value && value <= max;
+
+        /// <summary>
+        /// Determina si un valor numerico está entre el rango especificado.
+        /// </summary>
+        /// <param name="value">Valor a comparar</param>
+        /// <param name="min">Limite inferior</param>
+        /// <param name="max">Limite superior</param>
+        /// <returns></returns>
+        public static bool Between(this long value, long min, long max)
+            => min <= value && value <= max;
+
+        /// <summary>
+        /// Determina si un valor numerico está entre el rango especificado.
+        /// </summary>
+        /// <param name="value">Valor a comparar</param>
+        /// <param name="min">Limite inferior</param>
+        /// <param name="max">Limite superior</param>
+        /// <returns></returns>
+        public static bool Between(this ulong value, ulong min, ulong max)
+            => min <= value && value <= max;
+
+        /// <summary>
+        /// Indica si el valor especificado es nulo.
+        /// </summary>
+        /// <param name="value">Valor a validar</param>
+        /// <returns>Un valor true para un valor nulo</returns>
+        public static bool IsNull(this object value) => value == null;
     }
 }

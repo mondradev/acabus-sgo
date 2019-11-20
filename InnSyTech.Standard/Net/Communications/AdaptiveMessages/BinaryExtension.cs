@@ -16,7 +16,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="minLength">Longitud minima del vector.</param>
         /// <param name="padding">Caracter de relleno.</param>
         /// <returns>Un vector con la longitud alcanzada.</returns>
-        public static byte[] PadLeft(this byte[] src, int minLength, byte padding = 0x00)
+        public static byte[] PadLeft(this byte[] src, int minLength, byte padding = 0)
         {
             List<Byte> dest = new List<byte>(src);
 
@@ -33,7 +33,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="minLength">Longitud minima del vector.</param>
         /// <param name="padding">Caracter de relleno.</param>
         /// <returns>Un vector con la longitud alcanzada.</returns>
-        public static byte[] PadRight(this byte[] src, int minLength, byte padding = 0xFF)
+        public static byte[] PadRight(this byte[] src, int minLength, byte padding = 0)
         {
             List<Byte> dest = new List<byte>(src);
 
@@ -58,7 +58,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 dist = dist.TrimStart();
 
             while (dist.Length < width)
-                dist = dist.PadLeft(width);
+                dist = dist.PadLeft(width, padding);
 
             return dist;
         }
@@ -79,7 +79,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         }
 
         /// <summary>
-        /// Remueve todos los elementos al final del vector que sean igual a 0xFF.
+        /// Remueve todos los elementos al inicio del vector que sean igual a 0xFF.
         /// </summary>
         /// <param name="src">Vector unidimensional.</param>
         /// <returns>Vector sin los elementos 0xFF del final removidos.</returns>
@@ -92,5 +92,14 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
             return dest.ToArray();
         }
+
+        /// <summary>
+        /// Extrae un segmento del vector.
+        /// </summary>
+        /// <param name="src">Vector a cortar</param>
+        /// <param name="start">Posición inicial</param>
+        /// <param name="length">Longitud máxima del vector</param>
+        /// <returns>Un fragmento del vector.</returns>
+        public static byte[] Slice(this byte[] src, int start, int length) => src.Skip(start).Take(length).ToArray();
     }
 }

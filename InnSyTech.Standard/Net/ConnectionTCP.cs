@@ -19,7 +19,7 @@ namespace InnSyTech.Standard.Net
         public static Boolean IsAvaibleIP(String host)
         {
             short ping = SendToPing(host, 3);
-            Trace.WriteLine(String.Format("Eco al host {0}: {1} ms", host, ping), "DEBUG");
+            Trace.TraceInformation(String.Format("Eco al host {0}: {1} ms", host, ping));
             if (ping >= 0)
                 return true;
             return false;
