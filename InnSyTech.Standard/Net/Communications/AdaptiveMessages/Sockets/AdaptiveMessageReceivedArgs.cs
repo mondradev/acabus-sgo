@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 
 namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
@@ -57,8 +58,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <param name="response">Mensaje de respuesta.</param>
         public void Response(IAdaptiveMessage response)
         {
+            if (!Connection.Connected)
+                return;
+
             byte[] buffer = response.Serialize();
-            Connection?.Send(buffer);
+            int? sent = Connection?.Send(buffer);
+
+            Trace.TraceInformation($"Server: {sent} bytes enviados");
         }
 
         /// <summary>

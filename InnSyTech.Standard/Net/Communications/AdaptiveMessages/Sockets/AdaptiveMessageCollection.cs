@@ -8,12 +8,17 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
     /// Controla las enumeraciones que fluyen a través del canal de comunicación por <see cref="IAdaptiveMessage"/>
     /// </summary>
     /// <typeparam name="TResult">Tipo de dato que maneja la colección.</typeparam>
-    public sealed class AdaptiveMessageCollection<TResult> : IReadOnlyCollection<TResult>
+    public sealed class AdaptiveMessageCollection<TResult> : IReadOnlyCollection<TResult>, IDisposable
     {
         /// <summary>
         /// Enumerador de la colección.
         /// </summary>
         private readonly AdaptiveMessageEnumerator<TResult> _enumerator;
+
+        /// <summary>
+        /// Indica si fue liberada la conexión al servicio remoto.
+        /// </summary>
+        private bool _disposed;
 
         /// <summary>
         /// Crea una instancia de mensaje para transferir una colección.
@@ -23,10 +28,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <param name="converter">Función de conversión del contenido del mensaje a el tipo de dato <typeparamref name="TResult"/></param>
         internal AdaptiveMessageCollection(IAdaptiveMessage message, AdaptiveMessageRequest request, Func<IAdaptiveMessage, TResult> converter)
         {
-            if (!message.IsEnumerable())
-                throw new ArgumentOutOfRangeException(nameof(message),
-                    "El mensaje debe corresponder a una enumeración o colección de datos.");
-
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
@@ -39,14 +40,27 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         }
 
         /// <summary>
+        /// Obtiene la cantidad total de elementos de la colección a transmitir.
+        /// </summary>
+        public int Count => Message.GetCount();
+
+        /// <summary>
         /// Obtiene el mensaje la colección.
         /// </summary>
         public IAdaptiveMessage Message { get; }
 
         /// <summary>
-        /// Obtiene la cantidad total de elementos de la colección a transmitir.
+        /// Libera la conexión al servicio remoto.
         /// </summary>
-        public int Count => Message.GetEnumerableCount();
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+
+            _enumerator.Dispose();
+        }
 
         /// <summary>
         /// Obtiene el enumerador genérico de la colección.

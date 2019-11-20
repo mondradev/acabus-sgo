@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -15,14 +13,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
     public sealed class AdaptiveMessageServer : IDisposable
     {
         /// <summary>
-        /// Socket del servidor que escucha las peticiones.
+        /// Bloqueo de conexiones entrantes.
         /// </summary>
-        private readonly Socket _server;
-
-        /// <summary>
-        /// Lista de las tareas que gestionan las peticiones de los clientes.
-        /// </summary>
-        private readonly List<Task> _tasks;
+        private static readonly ManualResetEvent _lock = new ManualResetEvent(false);
 
         /// <summary>
         /// Indica si el servidor a liberado los recursos.
@@ -30,14 +23,16 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         private bool _disposed;
 
         /// <summary>
+        /// Socket del servidor que escucha las peticiones.
+        /// </summary>
+        private Socket _server;
+
+        /// <summary>
         /// Crea una nueva instancia especificando la composición de los mensajes.
         /// </summary>
         /// <param name="rules">Ubicación de las reglas de composición para los mensajes.</param>
         public AdaptiveMessageServer(String rulesPath)
         {
-            _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _tasks = new List<Task>();
-
             Rules = AdaptiveMessageRules.Load(rulesPath);
         }
 
@@ -109,14 +104,14 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
             if (!Started)
                 return;
 
+            _lock.Set();
+
             CancellationTokenSource.Cancel();
 
             if (_server.Connected)
                 _server.Shutdown(SocketShutdown.Both);
 
             _server.Close();
-
-            Task.WaitAll(_tasks.ToArray());
         }
 
         /// <summary>
@@ -130,28 +125,22 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
             if (Started)
                 return;
 
+            _server = new Socket(IPAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _server.Bind(new IPEndPoint(IPAddress, Port));
             _server.Listen(MaxConnections);
 
             Started = true;
 
-            while (true)
+            while (!CancellationTokenSource.IsCancellationRequested)
             {
                 try
                 {
-                    Thread.Sleep(10);
+                    _lock.Reset();
 
-                    if (CancellationTokenSource.IsCancellationRequested)
-                        break;
+                    _server.BeginAccept(new AsyncCallback(RequestHandle), _server);
 
-                    Socket client = _server.Accept();
-
-                    Accepted?.Invoke(this, new AdaptiveMessageAcceptedArgs(client));
-
-                    if (CancellationTokenSource.IsCancellationRequested)
-                        break;
-
-                    RequestHandler(client);
+                    if (!CancellationTokenSource.IsCancellationRequested)
+                        _lock.WaitOne();
                 }
                 catch (SocketException) { break; }
             }
@@ -160,54 +149,50 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         }
 
         /// <summary>
-        /// Genera un hilo para aislar la gestión de las peticiones realizadas por los clientes.
+        /// Acepta de forma asíncrona la conexión de un cliente remoto y procesa su petición.
         /// </summary>
-        /// <param name="connection">Cliente a gestionar.</param>
-        private void RequestHandler(Socket connection)
+        /// <param name="result">Resultado de la operación asíncrona.</param>
+        private void RequestHandle(IAsyncResult result)
         {
-            Task requestTask = Task.Run(() =>
+            _lock.Set();
+
+            Socket server = (Socket)result.AsyncState;
+            Socket remoteEndPoint = server.EndAccept(result);
+
+            Accepted?.Invoke(this, new AdaptiveMessageAcceptedArgs(remoteEndPoint));
+
+            if (CancellationTokenSource.IsCancellationRequested)
+                return;
+
+            Received?.Invoke(this, new AdaptiveMessageReceivedArgs(remoteEndPoint, Rules, AdaptiveMessageSocketHelper.ReadBuffer(remoteEndPoint)));
+
+            CheckStatus(remoteEndPoint);
+        }
+
+        /// <summary>
+        /// Verifica el estado de la conexión del cliente remoto.
+        /// </summary>
+        /// <param name="remoteEndPoint">Cliente remoto.</param>
+        private async void CheckStatus(Socket remoteEndPoint)
+        {
+            while (!CancellationTokenSource.IsCancellationRequested)
             {
-                try
+                if (!remoteEndPoint.Connected)
                 {
-                    while (true)
-                    {
-                        try
-                        {
-                            Thread.Sleep(10);
-
-                            if (CancellationTokenSource.IsCancellationRequested)
-                                break;
-
-                            if (connection.Available <= 0)
-                                continue;
-
-                            Byte[] buffer = new byte[connection.Available];
-
-                            int bytesTransferred = connection.Receive(buffer);
-
-                            if (bytesTransferred <= 0)
-                                continue;
-
-                            if (CancellationTokenSource.IsCancellationRequested)
-                                break;
-
-                            Received?.Invoke(this, new AdaptiveMessageReceivedArgs(connection, Rules, buffer));
-                        }
-                        catch (AdaptiveMessageDeserializeException ex)
-                        {
-                            Trace.WriteLine(ex.Message);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Trace.WriteLine(ex.Message);
+                    Disconnected?.Invoke(this, new AdaptiveMessageAcceptedArgs(remoteEndPoint));
+                    break;
                 }
 
-                Disconnected?.Invoke(this, new AdaptiveMessageAcceptedArgs(connection));
-            }, CancellationTokenSource.Token);
+                bool canReadAndWrite = remoteEndPoint.Poll(1000, SelectMode.SelectRead) && remoteEndPoint.Poll(1000, SelectMode.SelectWrite);
 
-            _tasks.Add(requestTask);
+                if (!canReadAndWrite || !remoteEndPoint.Connected)
+                {
+                    Disconnected?.Invoke(this, new AdaptiveMessageAcceptedArgs(remoteEndPoint));
+                    break;
+                }
+
+                await Task.Delay(2000, CancellationTokenSource.Token);
+            }
         }
     }
 }

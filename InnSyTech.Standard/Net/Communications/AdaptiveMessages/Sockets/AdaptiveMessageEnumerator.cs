@@ -56,7 +56,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <summary>
         /// Obtiene el mensaje de la colección.
         /// </summary>
-        public IAdaptiveMessage Message { get; }
+        public IAdaptiveMessage Message { get; private set; }
 
         /// <summary>
         /// Obtiene la instancia objeto del elemento de la posición actual en la colección.
@@ -73,8 +73,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
 
             _disposed = true;
 
-            if (_request.RemoteEndPoint.Connected)
-                _request.RemoteEndPoint.Close();
+            _request.RemoteEndPoint.Shutdown(SocketShutdown.Both);
+            _request.RemoteEndPoint.Disconnect(false);
+            _request.RemoteEndPoint.Close();
+            _request.RemoteEndPoint.Dispose();
         }
 
         /// <summary>
@@ -83,10 +85,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
         /// <returns>Un valor true si hay logró avanzar el recorrido en la colección.</returns>
         public bool MoveNext()
         {
-            if (Message.GetEnumerableCount() == 0 || !Message.IsEnumerable() || Message.GetResponseCode() != AdaptiveMessageResponseCode.PARTIAL_CONTENT)
+            if (Message.GetCount() == 0 || !Message.IsEnumerable())
                 return false;
 
-            Message.SetEnumOp(AdaptiveMessageEnumOp.NEXT);
+            Message.SetPosition(Message.GetPosition() + 1);
 
             if (!_request.RemoteEndPoint.Connected)
                 throw new SocketException((int)SocketError.NotConnected);
@@ -96,25 +98,24 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
             if (bytesTransferred <= 0)
                 return false;
 
-            Trace.WriteLine("Bytes enviados: " + bytesTransferred, "DEBUG");
+            Trace.TraceInformation("Bytes enviados: " + bytesTransferred);
 
-            AdaptiveMessageSocketHelper.ReadBuffer(_request.RemoteEndPoint, Message.Rules)?
-                .CopyTo(Message);
+            if (Message.GetPosition() >= Message.GetCount())
+                return false;
 
-            if (Message.GetResponseCode() != AdaptiveMessageResponseCode.PARTIAL_CONTENT)
-                throw new InvalidOperationException("No se recibió la respuesta esperada.");
+            Message = AdaptiveMessageSocketHelper.ReadMessage(_request.RemoteEndPoint, Message.Rules);
 
             if (!Message.IsEnumerable())
                 throw new InvalidOperationException("No se recibió un mensaje que represente una colección de datos.");
 
-            int count = Message.GetEnumerableCount();
+            int count = Message.GetCount();
 
             if (count == 0)
                 return false;
 
             _position = Message.GetPosition();
 
-            if (_position >= Message.GetEnumerableCount())
+            if (_position >= Message.GetCount() || _position < 0)
                 return false;
 
             return true;

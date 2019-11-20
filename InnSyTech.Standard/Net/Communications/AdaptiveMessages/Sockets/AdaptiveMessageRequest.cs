@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
             Port = port;
             IPAddress = ipAddress;
 
-            RemoteEndPoint = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            RemoteEndPoint = new Socket(IPAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
 
         /// <summary>
@@ -65,10 +66,12 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
 
                     int bytesTransferred = RemoteEndPoint.Send(message.Serialize());
 
+                    Trace.TraceInformation("Bytes enviados: " + bytesTransferred + " a " + RemoteEndPoint.RemoteEndPoint);
+
                     if (bytesTransferred <= 0)
                         throw new SocketException((int)SocketError.Interrupted);
 
-                    var response = AdaptiveMessageSocketHelper.ReadBuffer(RemoteEndPoint, Rules);
+                    var response = AdaptiveMessageSocketHelper.ReadMessage(RemoteEndPoint, Rules);
 
                     return response;
                 }
@@ -105,25 +108,21 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets
 
                    int bytesTransferred = RemoteEndPoint.Send(message.Serialize());
 
+                   Trace.TraceInformation("Bytes enviados: " + bytesTransferred + " a " + RemoteEndPoint.RemoteEndPoint);
+
                    if (bytesTransferred <= 0)
                        throw new SocketException((int)SocketError.Interrupted);
                    else
-                       AdaptiveMessageSocketHelper.ReadBuffer(RemoteEndPoint, Rules).CopyTo(message);
-
-                   if (!message.IsEnumerable() || message.GetResponseCode() != AdaptiveMessageResponseCode.PARTIAL_CONTENT)
-                       message.SetAsEnumerable(0);
+                       message = AdaptiveMessageSocketHelper.ReadMessage(RemoteEndPoint, Rules);
                }
                catch (SocketException ex)
                {
-                   message.SetResponse($"No se logró enviar la petición [Razón={ex.Message}]", AdaptiveMessageResponseCode.SERVICE_UNAVAILABLE);
-                   message.SetAsEnumerable(0);
+                   message.SetResponse(ex.Message, AdaptiveMessageResponseCode.SERVICE_UNAVAILABLE);
                }
                catch
                {
                    if (RemoteEndPoint.Connected)
                        RemoteEndPoint.Close();
-
-                   message.SetAsEnumerable(0);
                }
 
                return new AdaptiveMessageCollection<TResult>(message, this, converter);
