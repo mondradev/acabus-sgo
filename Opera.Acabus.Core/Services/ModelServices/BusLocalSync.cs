@@ -44,6 +44,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
             message[17] = bus.EconomicNumber;
             message[13] = bus.Route?.ID ?? 0;
             message.SetEnum(36, bus.Status);
+            message[14] = bus.ID;
         }
 
         /// <summary>

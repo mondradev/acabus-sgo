@@ -37,6 +37,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         protected override void ToMessage(Route route, IAdaptiveMessage message)
         {
             message[12] = route.RouteNumber;
+            message[14] = route.ID;
             message[17] = route.Name;
             message.SetEnum(13, route.Type);
 

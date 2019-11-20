@@ -4,7 +4,9 @@ using Opera.Acabus.Core.Services.ModelServices;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,12 +38,33 @@ namespace Opera.Acabus.Core.DataAccess
         static ServerContext()
         {
             int serverPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Push_Port") ?? 5501);
-            IPAddress serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("Push_IP") ?? "127.0.0.1");
+            IPAddress serverIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("IP") ?? "127.0.0.1");
 
             _entityLocalSyncs = new Dictionary<string, LocalSyncStatus>();
+
+            if (IsServer())
+                return;
+
             _pushService = new PushService<PushAcabus>(serverIP, serverPort);
 
             _pushService.Notified += OnNotify;
+        }
+
+        /// <summary>
+        /// Identifica si las peticiones son a un nodo remoto o a si mismo, para obtener la IP adecuada.
+        /// </summary>
+        /// <param name="ipAddress">Dirección IP a evaluar</param>
+        /// <returns>La IP más adecuada para las peticiones.</returns>
+        public static IPAddress GetAddress(IPAddress ipAddress)
+        {
+            var hostName = Dns.GetHostName();
+            var ipHost = Dns.GetHostEntry(hostName);
+            var listIP = ipHost.AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
+
+            if (listIP.Any(x => x.Equals(ipAddress)))
+                return IPAddress.Loopback;
+
+            return ipAddress;
         }
 
         /// <summary>
@@ -110,12 +133,31 @@ namespace Opera.Acabus.Core.DataAccess
                         }
                         catch (Exception reason)
                         {
-                            Trace.WriteLine($"Fallo al sincronizar [Entidad={localSync.EntityName}, Razón={reason.Message}]", "WARN");
-                            Thread.Sleep(30000);
+                            Trace.TraceWarning($"Fallo al sincronizar [Entidad={localSync.EntityName}, Razón={reason.Message}]");
+                            Thread.Sleep(10000);
                         }
                     }
                 }
             });
+        }
+
+        /// <summary>
+        /// Indentifica si el equipo actual es el mismo a donde se envían las peticiones remotas.
+        /// </summary>
+        /// <returns>Un valor de true si el servidor y el cliente son los mismos.</returns>
+        public static bool IsServer()
+        {
+            var server = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("IP") ?? "127.0.0.1");
+            var hostName = Dns.GetHostName();
+            var ipHost = Dns.GetHostEntry(hostName);
+            var listIP = ipHost.AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
+
+            listIP = listIP.Concat(new IPAddress[] { IPAddress.IPv6Loopback, IPAddress.Loopback });
+
+            if (listIP.Any(x => x.Equals(server)))
+                return true;
+
+            return false;
         }
 
         /// <summary>
@@ -144,7 +186,7 @@ namespace Opera.Acabus.Core.DataAccess
             }
             catch (Exception reason)
             {
-                Trace.WriteLine($"Fallo al notificar cambio [Entidad={push.EntityName}, Operación={push.Operation}, Razón={reason.Message}]", "WARN");
+                Trace.TraceError($"Fallo al notificar cambio [Entidad={push.EntityName}, Operación={push.Operation}, Razón={reason.Message}]");
             }
         }
 

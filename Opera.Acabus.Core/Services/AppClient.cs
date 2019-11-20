@@ -33,13 +33,8 @@ namespace Opera.Acabus.Core.Services
         {
             AppToken = AcabusDataContext.ConfigContext["App"]?.ToString("Token");
             ServerPort = (Int32)(AcabusDataContext.ConfigContext["Server"]?.ToInteger("Port") ?? 5500);
-            ServerIP = IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("IP") ?? "127.0.0.1");
+            ServerIP = ServerContext.GetAddress(IPAddress.Parse(AcabusDataContext.ConfigContext["Server"]?.ToString("IP") ?? "127.0.0.1"));
             RulesMsgPath = AcabusDataContext.ConfigContext["Message"]?.ToString("Rules");
-
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                HashRules = sha256.ComputeHash(File.ReadAllBytes(RulesMsgPath));
-            }
 
             _request = new AdaptiveMessageRequest(RulesMsgPath, ServerIP, ServerPort);
             _token = AcabusDataContext.ConfigContext["App"]?.ToString("DeviceKey");
@@ -49,11 +44,6 @@ namespace Opera.Acabus.Core.Services
         /// Obtiene el identificador de aplicación especificado en la configuración.
         /// </summary>
         public String AppToken { get; }
-
-        /// <summary>
-        /// Versión de las reglas de mensajes.
-        /// </summary>
-        public Byte[] HashRules { get; }
 
         /// <summary>
         /// Obtiene la ubicación de las reglas utilizada para generar los mensajes.
@@ -79,7 +69,6 @@ namespace Opera.Acabus.Core.Services
             IAdaptiveMessage message = _request.CreateMessage();
 
             message.SetAPIToken(Encoding.UTF8.GetBytes(AppToken));
-            message.SetHashRules(HashRules);
             message.SetDeviceToken(Encoding.UTF8.GetBytes(_token));
 
             return message;

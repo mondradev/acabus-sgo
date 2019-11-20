@@ -36,6 +36,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
         protected override void ToMessage(Staff staff, IAdaptiveMessage message)
         {
             message.SetEnum(12, staff.Area);
+            message[14] = staff.ID;
             message[17] = staff.Name;
         }
 

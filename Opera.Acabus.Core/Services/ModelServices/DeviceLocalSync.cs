@@ -44,10 +44,12 @@ namespace Opera.Acabus.Core.Services.ModelServices
             if (!String.IsNullOrEmpty(device.SerialNumber))
                 message[17] = device.SerialNumber;
 
-            message.SetEnum(14, device.Type);
+            message.SetEnum(12, device.Type);
+
             message[13] = device.Station?.ID ?? 0;
             message[36] = device.Bus?.ID ?? 0;
             message[18] = device.IPAddress.ToString();
+            message[14] = device.ID;
         }
 
         /// <summary>

@@ -144,7 +144,7 @@ namespace Opera.Acabus.Core.DataAccess
         /// <returns>Un valor true si el servicio está cargado.</returns>
         public static bool GetService(String moduleCodeName, out dynamic service)
         {
-            var serviceModule = _modulesLoaded.FirstOrDefault(m => m.CodeName.Equals(moduleCodeName));
+            var serviceModule = _modulesLoaded?.FirstOrDefault(m => m.CodeName.Equals(moduleCodeName));
             service = serviceModule;
 
             return service != null;

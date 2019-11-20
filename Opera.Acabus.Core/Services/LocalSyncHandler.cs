@@ -5,5 +5,5 @@
     /// </summary>
     /// <param name="sender">Instancia que ejecutó el evento.</param>
     /// <param name="args">Argumentos del evento.</param>
-    public delegate void LocalSyncHandler(object sender, LocalSyncArgs args);
+    public delegate void LocalSyncHandler(object sender, LocalSyncEventArgs args);
 }

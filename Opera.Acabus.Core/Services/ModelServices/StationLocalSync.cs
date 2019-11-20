@@ -44,6 +44,7 @@ namespace Opera.Acabus.Core.Services.ModelServices
             message[12] = station.StationNumber;
             message[17] = station.Name;
             message[13] = station.Route?.ID ?? 0;
+            message[14] = station.ID;
             message.SetBoolean(23, station.IsExternal);
 
             if (!String.IsNullOrEmpty(station.AssignedSection))

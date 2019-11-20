@@ -44,8 +44,8 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -85,7 +85,7 @@
     <Compile Include="Services\AppClient.cs" />
     <Compile Include="Services\EntityLocalSyncBase.cs" />
     <Compile Include="Services\IEntityLocalSync.cs" />
-    <Compile Include="Services\LocalSyncArgs.cs" />
+    <Compile Include="Services\LocalSyncEventArgs.cs" />
     <Compile Include="Services\LocalSyncException.cs" />
     <Compile Include="Services\LocalSyncHandler.cs" />
     <Compile Include="Services\LocalSyncOperation.cs" />

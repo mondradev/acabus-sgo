@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("InnSy Tech")]
 [assembly: AssemblyProduct("Opera.Acabus.Core")]
-[assembly: AssemblyCopyright("Copyright © InnSy Tech 2017")]
+[assembly: AssemblyCopyright("Copyright © InnSy Tech 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

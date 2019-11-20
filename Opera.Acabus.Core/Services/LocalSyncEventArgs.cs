@@ -3,14 +3,14 @@
     /// <summary>
     /// Clase no generica que representa los parametros utilizados durante un evento de la clase <see cref="EntityLocalSyncBase{T}"/>
     /// </summary>
-    public class LocalSyncArgs
+    public class LocalSyncEventArgs
     {
         /// <summary>
         /// Crea una nueva instancia.
         /// </summary>
         /// <param name="instance">Instancia que produce el evento.</param>
         /// <param name="operation">Operación que produce el evento.</param>
-        public LocalSyncArgs(object instance, LocalSyncOperation operation)
+        public LocalSyncEventArgs(object instance, LocalSyncOperation operation)
         {
             Value = instance;
             Operation = operation;

@@ -46,5 +46,27 @@ namespace Opera.Acabus.Core.Services
 
             return message.GetBytes((int)AcabusAdaptiveMessageFieldID.DeviceToken);
         }
+
+        /// <summary>
+        /// Obtiene la excepción origina por la última petición.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Una excepción de la última petición.</returns>
+        public static LocalSyncException GetException(this IAdaptiveMessage message)
+        {
+            string response = message.GetResponseMessage();
+
+            if (response.IndexOf("ex:") != 0)
+                if (message.GetResponseCode() == AdaptiveMessageResponseCode.SERVICE_UNAVAILABLE)
+                    return new LocalSyncException(response);
+                else
+                    return null;
+
+            response = response.Replace("ex:", string.Empty);
+
+            string[] parameters = response.Split(';');
+
+            return new LocalSyncException(parameters[0], parameters[1], parameters[2]);
+        }
     }
 }
