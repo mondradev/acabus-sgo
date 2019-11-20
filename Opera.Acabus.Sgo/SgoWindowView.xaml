@@ -16,14 +16,6 @@
     Height="auto" Width="auto"
     Style="{StaticResource BaseStyle}"
     Icon="AppIcon.ico">
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
     <materialDesign:DialogHost x:Name="_dialogHost" x:FieldModifier="private">
         <Grid Margin="0"  Background="{DynamicResource MaterialDesignPaper}">
             <Grid.RowDefinitions>
@@ -31,7 +23,18 @@
                 <RowDefinition Height="1*" />
             </Grid.RowDefinitions>
             <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" materialDesign:ShadowAssist.ShadowDepth="Depth2" VerticalAlignment="Stretch" Margin="0" Padding="8,0">
-                <DockPanel x:FieldModifier="private" x:Name="_mainToolBar" LastChildFill="False" />
+                <DockPanel x:FieldModifier="private" x:Name="_mainToolBar" LastChildFill="False">
+                    <materialDesign:PopupBox
+                            PlacementMode="BottomAndAlignRightEdges"
+                            Foreground="{StaticResource IdealForegroundColorBrush}"
+                            Margin="16" Name="System_Config_SGO" Width="24" Height="24"
+                            ToolTip="Configuraciones" StaysOpen="False" DockPanel.Dock="Right">
+                        <materialDesign:PopupBox.ToggleContent>
+                            <materialDesign:PackIcon Kind="DotsVertical" Foreground="{StaticResource IdealForegroundColorBrush}" Height="24" Width="24" />
+                        </materialDesign:PopupBox.ToggleContent>
+                        <StackPanel Orientation="Vertical" />
+                    </materialDesign:PopupBox>
+                </DockPanel>
             </materialDesign:ColorZone>
             <DockPanel VerticalAlignment="Stretch" Margin="0" Grid.Row="1" x:Name="_content" x:FieldModifier="private" />
             <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="_snackBar" x:FieldModifier="private" Grid.Row="1" MaxWidth="800" MinWidth="300" />

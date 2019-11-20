@@ -1,10 +1,9 @@
 ﻿using System.Reflection;
 using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
-// La información general de un ensamblado se controla mediante el siguiente 
+// La información general de un ensamblado se controla mediante el siguiente
 // conjunto de atributos. Cambie estos valores de atributo para modificar la información
 // asociada con un ensamblado.
 [assembly: AssemblyTitle("Sistema Gestor de Operaciones")]
@@ -12,12 +11,12 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("InnSy Tech")]
 [assembly: AssemblyProduct("Opera.Acabus.Sgo")]
-[assembly: AssemblyCopyright("Copyright © InnSy Tech 2017")]
+[assembly: AssemblyCopyright("Copyright © InnSy Tech 2019")]
 [assembly: AssemblyTrademark("Acabus SGO")]
 [assembly: AssemblyCulture("")]
 
-// Si establece ComVisible en false, los tipos de este ensamblado no estarán visibles 
-// para los componentes COM.  Si es necesario obtener acceso a un tipo en este ensamblado desde 
+// Si establece ComVisible en false, los tipos de este ensamblado no estarán visibles
+// para los componentes COM.  Si es necesario obtener acceso a un tipo en este ensamblado desde
 // COM, establezca el atributo ComVisible en true en este tipo.
 [assembly: ComVisible(false)]
 
@@ -30,7 +29,6 @@ using System.Windows;
 
 //[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
 
-
 [assembly: ThemeInfo(
     ResourceDictionaryLocation.None, //donde se encuentran los diccionarios de recursos específicos del tema
                                      //(se utiliza si no se encuentra ningún recurso en la página,
@@ -39,7 +37,6 @@ using System.Windows;
                                               //(se utiliza si no se encuentra ningún recurso en la página,
                                               // aplicación o diccionarios de recursos específicos del tema)
 )]
-
 
 // La información de versión de un ensamblado consta de los cuatro valores siguientes:
 //
@@ -54,4 +51,3 @@ using System.Windows;
 //[assembly: AssemblyVersion("3.2.1.23")]
 //[assembly: AssemblyFileVersion("3.2.1.23")]
 [assembly: NeutralResourcesLanguage("es-MX")]
-

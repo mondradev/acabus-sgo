@@ -19,22 +19,22 @@ namespace Opera.Acabus.Sgo
         /// <summary>
         /// Indica el tiempo de expiración de los mensajes notificados.
         /// </summary>
-        private readonly TimeSpan EXPIRE_MESSAGE_TIME = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _expireMessageTime = TimeSpan.FromMinutes(5);
 
         /// <summary>
         /// Una lista de mensajes que han sido mostrados mediante las notificaciones.
         /// </summary>
-        private Queue<ToastMessage> _messages = new Queue<ToastMessage>();
+        private readonly Queue<ToastMessage> _messages = new Queue<ToastMessage>();
 
         /// <summary>
         /// Monitor de los mensajes de notificaciones del monitor.
         /// </summary>
-        private Timer _notificationMessageMonitor;
+        private readonly Timer _notificationMessageMonitor;
 
         /// <summary>
         /// Contiene los mensajes de error omitidos en la aplicación.
         /// </summary>
-        private List<String> messageSkiped = new List<string>();
+        private readonly List<String> _messageSkiped = new List<string>();
 
         /// <summary>
         /// Crea una instancia de la ventana principal.
@@ -45,8 +45,9 @@ namespace Opera.Acabus.Sgo
             DataContext = new SgoWindowModelView(this);
 
             _dialogHost.SnackbarMessageQueue = _snackBar.MessageQueue;
-            _notificationMessageMonitor = new Timer(DropExpiredMessage, null, TimeSpan.Zero, EXPIRE_MESSAGE_TIME);
-            
+            _notificationMessageMonitor = new Timer(DropExpiredMessage, null, TimeSpan.Zero, _expireMessageTime);
+
+            Closed += CloseHandler;
         }
 
         /// <summary>
@@ -63,16 +64,16 @@ namespace Opera.Acabus.Sgo
         internal void AddMessage(String message, Action action = null, String actionName = "OCULTAR")
         {
             if (_messages.Any(m => m.Message == message)) return;
-            if (messageSkiped.Contains(message.ToUpper())) return;
+            if (_messageSkiped.Contains(message.ToUpper())) return;
 
-            action = action ?? (() => messageSkiped.Add(message.ToUpper()));
+            action ??= (() => _messageSkiped.Add(message.ToUpper()));
 
             Application.Current?.Invoke(() =>
             {
                 var mainWindow = Application.Current.MainWindow;
 
                 //if (mainWindow.IsActive && mainWindow.WindowState != WindowState.Minimized)
-                    _snackBar.MessageQueue.Enqueue(message.ToUpper(), actionName, action, true);
+                _snackBar.MessageQueue.Enqueue(message.ToUpper(), actionName, action, true);
                 /*else
                     SendToastNotification(message);*/
             });
@@ -100,35 +101,6 @@ namespace Opera.Acabus.Sgo
         }
 
         /// <summary>
-        /// Crea el botón de configuraciones del visor.
-        /// </summary>
-        internal void CreateSettingsButton()
-        {
-            if (_mainToolBar.FindChild<PopupBox>("System_Config_SGO") != null)
-                return;
-
-            var popup = new PopupBox
-            {
-                PlacementMode = PopupBoxPlacementMode.BottomAndAlignRightEdges,
-                ToolTip = "Configuraciones",
-                PopupContent = new StackPanel(),
-                Name = "System_Config_SGO",
-                Margin = new Thickness(16),
-                ToggleContent = new PackIcon
-                {
-                    Kind = PackIconKind.Settings,
-                    Height = 24,
-                    Width = 24,
-                    Margin = new Thickness(0)
-                }
-            };
-
-            DockPanel.SetDock(popup, Dock.Right);
-
-            _mainToolBar.Children.Add(popup);
-        }
-
-        /// <summary>
         /// Permite añadir un botón a la barra de herramientas.
         /// </summary>
         /// <param name="codeName">Nombre del componente o modulo.</param>
@@ -143,21 +115,39 @@ namespace Opera.Acabus.Sgo
                     if (((Button)item).Name == codeName)
                         throw new ArgumentException($"Ya existe un botón con el mismo nombre código '{codeName}'");
 
-            buttonContent.Height = 24;
-            buttonContent.Width = 24;
-            buttonContent.Margin = new Thickness(0);
+            StackPanel content = new StackPanel()
+            {
+                Height = 24,
+                Margin = new Thickness(0),
+                Orientation = Orientation.Horizontal
+            };
+
+            if (buttonContent != null)
+            {
+                buttonContent.Width = 24;
+                buttonContent.Height = 24;
+                buttonContent.Margin = new Thickness(0);
+
+                content.Children.Add(buttonContent);
+            }
+
+            content.Children.Add(new Label()
+            {
+                Content = tooltip,
+                Foreground = TryFindResource("IdealForegroundColorBrush") as Brush
+            });
 
             Button newButton = new Button()
             {
-                Content = buttonContent,
+                Content = content,
                 Command = command,
                 Name = codeName,
                 ToolTip = tooltip,
                 Style = TryFindResource("MaterialDesignToolButton") as Style,
                 Margin = new Thickness(16),
-                Padding = new Thickness(0),
-                Foreground = TryFindResource("IdealForegroundColorBrush") as Brush
+                Padding = new Thickness(0)
             };
+
             _mainToolBar.Children.Add(newButton);
         }
 
@@ -177,7 +167,7 @@ namespace Opera.Acabus.Sgo
         /// <param name="state">Estado del temporizador.</param>
         private void DropExpiredMessage(object state)
         {
-            while (_messages.Any(m => (DateTime.Now - m.TimeCreated) > EXPIRE_MESSAGE_TIME))
+            while (_messages.Any(m => (DateTime.Now - m.TimeCreated) > _expireMessageTime))
                 _messages.Dequeue();
         }
 
@@ -187,8 +177,12 @@ namespace Opera.Acabus.Sgo
         /// <param name="message">Mensaje a notificar.</param>
         private void SendToastNotification(string message)
         {
-
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        private void CloseHandler(object _, EventArgs __) => _notificationMessageMonitor.Dispose();
 
         /// <summary>
         /// Representa un mensaje de notificación.

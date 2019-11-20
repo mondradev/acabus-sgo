@@ -35,7 +35,7 @@ namespace Opera.Acabus.Core.DataAccess
             _resourcesDirectory = Path.Combine(Environment.CurrentDirectory, "Resources");
 
             string[] commands = Environment.GetCommandLineArgs();
-            string configFile = Path.Combine(_resourcesDirectory, "app.conf");
+            string configFile = Path.Combine(_resourcesDirectory, "Opera.Acabus.Config.conf");
 
             if (commands.Length > 0)
             {

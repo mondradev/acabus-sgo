@@ -22,24 +22,14 @@ namespace Opera.Acabus.Sgo
     public sealed class SgoWindowModelView : NotifyPropertyChanged
     {
         /// <summary>
-        /// Campo que provee a la propiedad 'Instance'.
-        /// </summary>
-        private static SgoWindowModelView _instance;
-
-        /// <summary>
-        /// Indica si está activa el botón de configuración.
-        /// </summary>
-        private bool _configurationAvailable;
-
-        /// <summary>
         /// Lista de todos los módulos cargados en el visor.
         /// </summary>
-        private List<IModuleInfo> _modules;
+        private readonly List<IModuleInfo> _modules;
 
         /// <summary>
         /// Instancia de la vista de la ventana principal.
         /// </summary>
-        private SgoWindowView _view;
+        private readonly SgoWindowView _view;
 
         /// <summary>
         /// Crea una instancia del modelo de la vista de la ventana principal.
@@ -47,11 +37,11 @@ namespace Opera.Acabus.Sgo
         /// <param name="view">Ventana principal.</param>
         public SgoWindowModelView(SgoWindowView view)
         {
-            if (_instance != null)
+            if (Instance != null)
                 return;
 
             _view = view;
-            _instance = this;
+            Instance = this;
             _modules = AcabusDataContext.ModulesLoaded;
 
             Dispatcher.CloseDialogCommand = DialogHost.CloseDialogCommand;
@@ -89,7 +79,11 @@ namespace Opera.Acabus.Sgo
                 });
             };
 
+            if (!Directory.Exists("Logs"))
+                Directory.CreateDirectory("Logs");
+
             Trace.Listeners.Add(new TraceListenerImp());
+
             Trace.AutoFlush = true;
             Trace.UseGlobalLock = true;
 
@@ -99,7 +93,7 @@ namespace Opera.Acabus.Sgo
         /// <summary>
         /// Obtiene el valor de esta propiedad.
         /// </summary>
-        public static SgoWindowModelView Instance => _instance;
+        public static SgoWindowModelView Instance { get; private set; }
 
         /// <summary>
         /// Obtiene una lista de los módulos cargados en el visor.
@@ -146,6 +140,7 @@ namespace Opera.Acabus.Sgo
                 if (moduleGui.ModuleType == ModuleType.VIEWER)
                 {
                     UserControl moduleView = null;
+
                     _view.CreateToolButton(moduleInfo.CodeName, new Command(delegate
                     {
                         if (moduleView == null)
@@ -159,13 +154,6 @@ namespace Opera.Acabus.Sgo
 
                 if (moduleGui.ModuleType == ModuleType.CONFIGURATION)
                 {
-                    if (!_configurationAvailable)
-                    {
-                        _view.CreateSettingsButton();
-
-                        _configurationAvailable = true;
-                    }
-
                     UserControl moduleView = null;
 
                     _view.AddSetting(moduleInfo.Name, new Command(delegate
@@ -226,12 +214,21 @@ namespace Opera.Acabus.Sgo
             /// <param name="message">Mensaje a escribir.</param>
             public override void WriteLine(string message)
             {
+                File.AppendAllText(String.Format("Logs/oasgo.{0:yyMMdd}.log", DateTime.Now), String.Format("{0:yyyy-MM-dd HH:mm:ss} {1}\n\n", DateTime.Now, message));
+
                 if (Instance == null) return;
 
                 String[] messageData = message.Split(new Char[] { ':' }, 2);
                 if (messageData.Length > 0 && messageData[0] == "NOTIFY")
                     Instance?._view.AddMessage(messageData[1].ToUpper());
             }
+
+            /// <summary>
+            ///
+            /// </summary>
+            /// <param name="message"></param>
+            public override void Fail(string message)
+                => WriteLine(message);
         }
     }
 }

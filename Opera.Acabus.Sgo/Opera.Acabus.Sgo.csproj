@@ -56,25 +56,29 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net462\ControlzEx.dll</HintPath>
+    </Reference>
     <Reference Include="Dragablz, Version=0.0.3.203, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dragablz.0.0.3.203\lib\net45\Dragablz.dll</HintPath>
     </Reference>
-    <Reference Include="MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net45\MahApps.Metro.dll</HintPath>
+    <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net47\MahApps.Metro.dll</HintPath>
     </Reference>
-    <Reference Include="MaterialDesignColors, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialDesignColors.1.1.2\lib\net45\MaterialDesignColors.dll</HintPath>
+    <Reference Include="MaterialDesignColors, Version=1.2.0.325, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignColors.1.2.0\lib\net45\MaterialDesignColors.dll</HintPath>
     </Reference>
-    <Reference Include="MaterialDesignThemes.MahApps, Version=0.0.11.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialDesignThemes.MahApps.0.0.11\lib\net45\MaterialDesignThemes.MahApps.dll</HintPath>
+    <Reference Include="MaterialDesignThemes.MahApps, Version=0.1.0.325, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignThemes.MahApps.0.1.0\lib\net45\MaterialDesignThemes.MahApps.dll</HintPath>
     </Reference>
-    <Reference Include="MaterialDesignThemes.Wpf, Version=2.4.1.1101, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialDesignThemes.2.4.1.1101\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
+    <Reference Include="MaterialDesignThemes.Wpf, Version=2.6.0.325, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignThemes.2.6.0\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Windows.Interactivity.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -136,20 +140,17 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="Resources\app_dev.conf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\app.conf">
+    <None Include="Resources\Opera.Acabus.Config.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Resources\MessageRulesDefault.json">
+    <None Include="Resources\Opera.Acabus.MessageDefinition.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\opera.acabus.data.db">
+    <None Include="Resources\Opera.Acabus.Data.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -174,6 +175,10 @@
     <ProjectReference Include="..\Opera.Acabus.Core\Opera.Acabus.Core.csproj">
       <Project>{5870b3e0-a665-4014-94d1-4ed21ceb442f}</Project>
       <Name>Opera.Acabus.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Opera.Acabus.Server.Config\Opera.Acabus.Server.Config.csproj">
+      <Project>{7356cb0a-7391-4c03-95dc-fe1a646da31f}</Project>
+      <Name>Opera.Acabus.Server.Config</Name>
     </ProjectReference>
     <ProjectReference Include="..\Opera.Acabus.Server.Core\Opera.Acabus.Server.Core.csproj">
       <Project>{ef04233d-7433-4650-9b15-608811df7439}</Project>
@@ -210,6 +215,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Logs\" />
     <Folder Include="Modules\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

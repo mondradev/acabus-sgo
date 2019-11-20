@@ -1,0 +1,190 @@
+﻿[
+  {
+    "ID": 11,
+    "MaxLength": 32,
+    "Type": 2
+  },
+  {
+    "ID": 12,
+    "MaxLength": 4,
+    "Type": 0
+  },
+  {
+    "ID": 13,
+    "MaxLength": 4,
+    "Type": 0
+  },
+  {
+    "ID": 14,
+    "MaxLength": 8,
+    "Type": 0
+  },
+  {
+    "ID": 15,
+    "MaxLength": 16,
+    "Type": 0
+  },
+  {
+    "ID": 16,
+    "MaxLength": 20,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 17,
+    "MaxLength": 50,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 18,
+    "MaxLength": 100,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 19,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 20,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 21,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 22,
+    "MaxLength": 1,
+    "Type": 2
+  },
+  {
+    "ID": 23,
+    "MaxLength": 1,
+    "Type": 2
+  },
+  {
+    "ID": 24,
+    "MaxLength": 1,
+    "Type": 2
+  },
+  {
+    "ID": 25,
+    "MaxLength": 8,
+    "Type": 0
+  },
+  {
+    "ID": 26,
+    "MaxLength": 6,
+    "Type": 0
+  },
+  {
+    "ID": 27,
+    "MaxLength": 6,
+    "Type": 0
+  },
+  {
+    "ID": 28,
+    "MaxLength": 6,
+    "Type": 0
+  },
+  {
+    "ID": 29,
+    "MaxLength": 14,
+    "Type": 0
+  },
+  {
+    "ID": 30,
+    "MaxLength": 14,
+    "Type": 0
+  },
+  {
+    "ID": 31,
+    "MaxLength": 14,
+    "Type": 0
+  },
+  {
+    "ID": 36,
+    "MaxLength": 4,
+    "IsVarLength": true,
+    "Type": 0
+  },
+  {
+    "ID": 37,
+    "MaxLength": 6,
+    "IsVarLength": true,
+    "Type": 0
+  },
+  {
+    "ID": 38,
+    "MaxLength": 10,
+    "IsVarLength": true,
+    "Type": 0
+  },
+  {
+    "ID": 39,
+    "MaxLength": 18,
+    "IsVarLength": true,
+    "Type": 0
+  },
+  {
+    "ID": 40,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 41,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 42,
+    "MaxLength": 255,
+    "IsVarLength": true,
+    "Type": 1
+  },
+  {
+    "ID": 59,
+    "MaxLength": 32,
+    "Type": 2
+  },
+  {
+    "ID": 60,
+    "MaxLength": 64,
+    "IsVarLength": true,
+    "Type": 2
+  },
+  {
+    "ID": 61,
+    "MaxLength": 128,
+    "IsVarLength": true,
+    "Type": 2
+  },
+  {
+    "ID": 62,
+    "MaxLength": 256,
+    "IsVarLength": true,
+    "Type": 2
+  },
+  {
+    "ID": 63,
+    "MaxLength": 512,
+    "IsVarLength": true,
+    "Type": 2
+  },
+  {
+    "ID": 64,
+    "MaxLength": 1024,
+    "IsVarLength": true,
+    "Type": 2
+  }
+]
