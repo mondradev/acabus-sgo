@@ -37,7 +37,7 @@ namespace Opera.Acabus.Server.Config.ViewModels
         /// <summary>
         /// Obtiene el nombre del servicio principal del servidor.
         /// </summary>
-        public String ServiceName { get; } = "SGO Server v0.1";
+        public String ServiceName => String.Format("SGO Server {0}", typeof(ServerCoreViewModel).Assembly.GetName().Version);
 
         /// <summary>
         /// Obtiene el estado actual del servicio principal del servidor.

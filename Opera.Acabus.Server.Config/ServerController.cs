@@ -2,7 +2,6 @@
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages;
 using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Sockets;
 using InnSyTech.Standard.Net.Notifications.Push;
-using InnSyTech.Standard.Utils;
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Services;
 using Opera.Acabus.Server.Core;
@@ -15,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Opera.Acabus.Server.Config
@@ -82,6 +80,12 @@ namespace Opera.Acabus.Server.Config
         public static bool Running => _msgServer.Started;
 
         /// <summary>
+        /// Obtiene los módulos de servicios registrados actualmente.
+        /// </summary>
+        public static List<IServiceModule> GetServerModules()
+            => _modules;
+
+        /// <summary>
         /// Inicia el proceso del servidor.
         /// </summary>
         public static void Start() => Task.Run(() =>
@@ -89,6 +93,8 @@ namespace Opera.Acabus.Server.Config
             _msgServer.Startup();
             _notifier.Start();
             StatusChanged?.Invoke(_msgServer, _msgServer.Started ? ServiceStatus.ON : ServiceStatus.OFF);
+
+            Trace.TraceInformation("Server is started");
         }, _msgServer.CancellationTokenSource.Token);
 
         /// <summary>
@@ -109,7 +115,7 @@ namespace Opera.Acabus.Server.Config
         {
             IPEndPoint ipClient = e.Connection.RemoteEndPoint as IPEndPoint;
 
-            Trace.WriteLine(String.Format("Cliente aceptado [IP={0}]", ipClient.Address.ToString()));
+            Trace.TraceInformation(String.Format("Cliente aceptado [IP={0}]", ipClient));
         }
 
         /// <summary>
@@ -121,7 +127,7 @@ namespace Opera.Acabus.Server.Config
         {
             IPEndPoint ipClient = e.Connection.RemoteEndPoint as IPEndPoint;
 
-            Trace.WriteLine(String.Format("Cliente desconectado [IP={0}]", ipClient.Address.ToString()));
+            Trace.TraceInformation(String.Format("Cliente desconectado [IP={0}]\n\n", ipClient));
         }
 
         /// <summary>
@@ -133,6 +139,8 @@ namespace Opera.Acabus.Server.Config
 
             if (modulesToLoad is null)
                 return;
+
+            _modules.Add(new ServerCoreFunctions());
 
             foreach (var module in modulesToLoad)
             {
@@ -160,12 +168,6 @@ namespace Opera.Acabus.Server.Config
         }
 
         /// <summary>
-        /// Obtiene los módulos de servicios registrados actualmente.
-        /// </summary>
-        public static List<IServiceModule> GetServerModules()
-            => _modules;
-
-        /// <summary>
         /// Evalua si la sesión es valida.
         /// </summary>
         /// <param name="message">Mensaje recibido del cliente.</param>
@@ -174,29 +176,51 @@ namespace Opera.Acabus.Server.Config
         {
             /***
              *  1, FieldType.Binary, 32, true, "Token de aplicación"
-                2, FieldType.Text, 20, true, "Hash de las reglas"
                 11, FIeldType.Binary, 32, true, "Token de equipo"
             */
 
-            if (!message.HasAPIToken() || !message.HasHashRules() || !message.HasDeviceToken())
+            if (!message.HasAPIToken() || !message.HasDeviceToken())
                 return false;
 
             if (!ValidateToken(message.GetAPIToken()))
                 return false;
 
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                String hashRules = sha256.ComputeHash(File.ReadAllBytes(AcabusDataContext.ConfigContext.Read("Message")?.ToString("Rules"))).ToTextPlain();
-                String HashRulesClients = message.GetHashRules().ToTextPlain();
-
-                if (!hashRules.Equals(HashRulesClients))
-                    return false;
-            }
-
             if (!ValidateTokenDevice(message.GetDeviceToken()))
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Procesa o redirecciona a otros módulos las peticiones recibidas por el servidor.
+        /// </summary>
+        /// <param name="message">Mensaje recibido del cliente.</param>
+        private static void ProcessRequest(IAdaptiveMessageReceivedArgs e)
+        {
+            IAdaptiveMessage message = e.Data;
+
+            try
+            {
+                if (!message.HasFunctionName())
+                    throw new ServiceException("No se especificó la función a llamar", AdaptiveMessageResponseCode.BAD_REQUEST, "Processor", "Server");
+
+                String modName = message.GetModuleName() ?? "Server Core";
+                IServiceModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
+
+                if (module is null)
+                    throw new ServiceException(String.Format("El módulo especificado no existe [Módulo={0}, Función={1}]",
+                        AdaptiveMessageResponseCode.BAD_REQUEST, modName, message.GetFunctionName()), "Processor", "Server");
+
+                module.Request(e);
+            }
+            catch (ServiceException ex)
+            {
+                e.SendException(ex);
+            }
+            catch (Exception ex)
+            {
+                e.SendException(new ServiceException("Processor", "Server", ex));
+            }
         }
 
         /// <summary>
@@ -223,45 +247,13 @@ namespace Opera.Acabus.Server.Config
         }
 
         /// <summary>
-        /// Procesa o redirecciona a otros módulos las peticiones recibidas por el servidor.
-        /// </summary>
-        /// <param name="message">Mensaje recibido del cliente.</param>
-        private static void ProcessRequest(IAdaptiveMessageReceivedArgs e)
-        {
-            try
-            {
-                IAdaptiveMessage message = e.Data;
-
-                if (!message.HasFunctionName())
-                    throw new ServiceException("No se especificó la función a llamar", AdaptiveMessageResponseCode.BAD_REQUEST, "Processor", "Server");
-
-                String modName = message.GetModuleName() ?? "Server Core";
-                IServiceModule module = _modules.FirstOrDefault(x => x.ServiceName.Equals(modName));
-
-                if (module is null)
-                    throw new ServiceException(String.Format("El módulo especificado no existe [Módulo={0}, Función={1}]",
-                        AdaptiveMessageResponseCode.BAD_REQUEST, modName, message.GetFunctionName()), "Processor", "Server");
-
-                module.Request(e);
-            }
-            catch (ServiceException ex)
-            {
-                e.SendException(ex);
-            }
-            catch (Exception ex)
-            {
-                e.SendException(new ServiceException("Processor", "Server", ex));
-            }
-        }
-
-        /// <summary>
         /// Valida el token de aplicación.
         /// </summary>
         /// <param name="token">Token de aplicación.</param>
         /// <returns>Un valor true si el token es valido.</returns>
         private static bool ValidateToken(byte[] token)
         {
-            return true;
+            return token != null;
         }
 
         /// <summary>
@@ -271,7 +263,7 @@ namespace Opera.Acabus.Server.Config
         /// <returns>Un valor true si el token es valido.</returns>
         private static bool ValidateTokenDevice(byte[] token)
         {
-            return true;
+            return token != null;
         }
     }
 }

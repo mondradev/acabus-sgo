@@ -40,8 +40,11 @@ namespace Opera.Acabus.Server.Config
             if (String.IsNullOrEmpty(economicNumber))
                 throw new ServiceException("Número económico no especificado", AdaptiveMessageResponseCode.NOT_ACCEPTABLE, nameof(CreateBus), ServiceName);
 
-            if (AcabusDataContext.AllBuses.Where(b => b.EconomicNumber == economicNumber).ToList().Any())
+            if (AcabusDataContext.AllBuses.Any(b => b.EconomicNumber == economicNumber))
                 throw new ServiceException("El número económico especificado ya existe", AdaptiveMessageResponseCode.CONFLICT, nameof(CreateBus), ServiceName);
+
+            if (id > 0 && AcabusDataContext.AllBuses.Any(b => b.ID == id))
+                throw new ServiceException("Ya existe un autobus con el identificador especificado", AdaptiveMessageResponseCode.CONFLICT, nameof(CreateBus), ServiceName);
 
             Bus bus = new Bus(id, economicNumber)
             {
@@ -52,7 +55,7 @@ namespace Opera.Acabus.Server.Config
 
             bool created = AcabusDataContext.DbContext.Create(bus);
 
-            if (!created)
+            if (!created || bus.ID <= 0)
                 throw new ServiceException("No se logró crear la instancia de autobús", nameof(CreateBus), ServiceName);
 
             args.Data.SetResponse(String.Empty, AdaptiveMessageResponseCode.CREATED);
@@ -81,6 +84,9 @@ namespace Opera.Acabus.Server.Config
             if (!String.IsNullOrEmpty(serialNumber) && AcabusDataContext.AllDevices.FirstOrDefault(d => d.SerialNumber == serialNumber) != null)
                 throw new ServiceException("Ya existe un equipo con ese número de serie.", AdaptiveMessageResponseCode.CONFLICT, nameof(CreateDevice), ServiceName);
 
+            if (id > 0 && AcabusDataContext.AllDevices.FirstOrDefault(d => d.ID == id) != null)
+                throw new ServiceException("Ya existe un equipo con el identificador especificado", AdaptiveMessageResponseCode.CONFLICT, nameof(CreateDevice), ServiceName);
+
             IPAddress.TryParse(ipAddress, out IPAddress address);
 
             Device device = new Device(id, serialNumber, type)
@@ -92,7 +98,7 @@ namespace Opera.Acabus.Server.Config
 
             bool created = AcabusDataContext.DbContext.Create(device);
 
-            if (!created)
+            if (!created || device.ID <= 0)
                 throw new ServiceException("No se logró crear la instancia del equipo", nameof(CreateDevice), ServiceName);
 
             args.Data.SetResponse(string.Empty, AdaptiveMessageResponseCode.CREATED);
@@ -121,11 +127,14 @@ namespace Opera.Acabus.Server.Config
             if (AcabusDataContext.AllRoutes.FirstOrDefault(r => r.Type == type && r.RouteNumber == number) != null)
                 throw new ServiceException("Ya existe una ruta igual", AdaptiveMessageResponseCode.CONFLICT, nameof(CreateRoute), ServiceName);
 
+            if (id > 0 && AcabusDataContext.AllRoutes.FirstOrDefault(r => r.ID == id) != null)
+                throw new ServiceException("Ya existe una ruta con el identificador especificado", AdaptiveMessageResponseCode.CONFLICT, nameof(CreateRoute), ServiceName);
+
             Route route = new Route(id, number, type) { Name = name, AssignedSection = assignedSection };
 
             bool created = AcabusDataContext.DbContext.Create(route);
 
-            if (!created)
+            if (!created || route.ID <= 0)
                 throw new ServiceException("No se logró crear la instancia de la ruta", nameof(CreateRoute), ServiceName);
 
             args.Data.SetResponse(string.Empty, AdaptiveMessageResponseCode.CREATED);
@@ -152,7 +161,7 @@ namespace Opera.Acabus.Server.Config
 
             bool created = AcabusDataContext.DbContext.Create(staff);
 
-            if (!created)
+            if (!created || staff.ID <= 0)
                 throw new ServiceException("No se logró crear la instancia de empleado", nameof(CreateStaff), ServiceName);
 
             args.Data.SetResponse(string.Empty, AdaptiveMessageResponseCode.CREATED);
@@ -183,6 +192,9 @@ namespace Opera.Acabus.Server.Config
             if (String.IsNullOrEmpty(name))
                 throw new ServiceException("No se especificó el nombre de la estación", AdaptiveMessageResponseCode.BAD_REQUEST, nameof(CreateStation), ServiceName);
 
+            if (id > 0 && AcabusDataContext.AllStations.FirstOrDefault(s => s.ID == id) != null)
+                throw new ServiceException("Ya existe una estación con el identificador especificado", AdaptiveMessageResponseCode.CONFLICT, nameof(CreateStation), ServiceName);
+
             Station station = new Station(id, number)
             {
                 Name = name,
@@ -193,7 +205,7 @@ namespace Opera.Acabus.Server.Config
 
             bool created = AcabusDataContext.DbContext.Create(station);
 
-            if (!created)
+            if (!created || station.ID <= 0)
                 throw new ServiceException("No se logró crear la instancia de estación", nameof(CreateStation), ServiceName);
 
             args.Data.SetResponse(string.Empty, AdaptiveMessageResponseCode.CREATED);
@@ -212,16 +224,15 @@ namespace Opera.Acabus.Server.Config
         {
             Bus bus = AcabusDataContext.AllBuses.FirstOrDefault(x => x.ID == id);
 
-            if (bus == null)
-                throw new ServiceException(String.Format("El autobús [ID={0}] especificado no existe", id),
-                    AdaptiveMessageResponseCode.BAD_REQUEST, nameof(DeleteBus), ServiceName);
+            if (bus != null)
+            {
+                bus.SetAsDeleted();
 
-            bus.SetAsDeleted();
+                bool deleted = AcabusDataContext.DbContext.Update(bus);
 
-            bool deleted = AcabusDataContext.DbContext.Update(bus);
-
-            if (!deleted)
-                throw new ServiceException("No se logró eliminar el autobús [NoEconómico=" + bus.EconomicNumber + "]", nameof(DeleteBus), ServiceName);
+                if (!deleted)
+                    throw new ServiceException("No se logró eliminar el autobús [NoEconómico=" + bus.EconomicNumber + "]", nameof(DeleteBus), ServiceName);
+            }
 
             ServerNotify.Notify(new PushAcabus(nameof(Bus), id, LocalSyncOperation.DELETE));
             args.Data.SetResponse(String.Empty, AdaptiveMessageResponseCode.OK);
@@ -236,16 +247,15 @@ namespace Opera.Acabus.Server.Config
         {
             Device device = AcabusDataContext.AllDevices.FirstOrDefault(x => x.ID == id);
 
-            if (device == null)
-                throw new ServiceException(String.Format("El equipo [ID={0}] especificado no existe", id),
-                    AdaptiveMessageResponseCode.BAD_REQUEST, nameof(DeleteDevice), ServiceName);
+            if (device != null)
+            {
+                device.SetAsDeleted();
 
-            device.SetAsDeleted();
+                bool deleted = AcabusDataContext.DbContext.Update(device);
 
-            bool deleted = AcabusDataContext.DbContext.Update(device);
-
-            if (!deleted)
-                throw new ServiceException(String.Format("No se logró eliminar el equipo [Serie={0}, Tipo={1}]", device.SerialNumber, device.Type.TranslateToSpanish()), nameof(DeleteDevice), ServiceName);
+                if (!deleted)
+                    throw new ServiceException(String.Format("No se logró eliminar el equipo [Serie={0}, Tipo={1}]", device.SerialNumber, device.Type.TranslateToSpanish()), nameof(DeleteDevice), ServiceName);
+            }
 
             ServerNotify.Notify(new PushAcabus(nameof(Device), id, LocalSyncOperation.DELETE));
             args.Data.SetResponse(string.Empty, AdaptiveMessageResponseCode.OK);
@@ -260,16 +270,15 @@ namespace Opera.Acabus.Server.Config
         {
             Route route = AcabusDataContext.AllRoutes.FirstOrDefault(x => x.ID == id);
 
-            if (route == null)
-                throw new ServiceException(String.Format("La ruta [ID={0}] especificada no existe", id),
-                    AdaptiveMessageResponseCode.BAD_REQUEST, nameof(DeleteRoute), ServiceName);
+            if (route != null)
+            {
+                route.SetAsDeleted();
 
-            route.SetAsDeleted();
+                bool deleted = AcabusDataContext.DbContext.Update(route);
 
-            bool deleted = AcabusDataContext.DbContext.Update(route);
-
-            if (!deleted)
-                throw new ServiceException(String.Format("No se logró eliminar la ruta [Nombre={0}]", route.Name), nameof(DeleteRoute), ServiceName);
+                if (!deleted)
+                    throw new ServiceException(String.Format("No se logró eliminar la ruta [Nombre={0}]", route.Name), nameof(DeleteRoute), ServiceName);
+            }
 
             ServerNotify.Notify(new PushAcabus(nameof(Route), id, LocalSyncOperation.DELETE));
             args.Data.SetResponse(string.Empty, AdaptiveMessageResponseCode.OK);
@@ -284,16 +293,15 @@ namespace Opera.Acabus.Server.Config
         {
             Staff staff = AcabusDataContext.AllStaff.FirstOrDefault(x => x.ID == id);
 
-            if (staff == null)
-                throw new ServiceException(String.Format("El empleado [ID={0}] especificado no existe", id),
-                    AdaptiveMessageResponseCode.BAD_REQUEST, nameof(DeleteStaff), ServiceName);
+            if (staff != null)
+            {
+                staff.SetAsDeleted();
 
-            staff.SetAsDeleted();
+                bool deleted = AcabusDataContext.DbContext.Update(staff);
 
-            bool deleted = AcabusDataContext.DbContext.Update(staff);
-
-            if (!deleted)
-                throw new ServiceException(String.Format("No se logró eliminar al empleado [Nombre={0}]", staff.Name), nameof(DeleteStaff), ServiceName);
+                if (!deleted)
+                    throw new ServiceException(String.Format("No se logró eliminar al empleado [Nombre={0}]", staff.Name), nameof(DeleteStaff), ServiceName);
+            }
 
             ServerNotify.Notify(new PushAcabus(nameof(Staff), id, LocalSyncOperation.DELETE));
             args.Data.SetResponse(string.Empty, AdaptiveMessageResponseCode.OK);
@@ -308,16 +316,15 @@ namespace Opera.Acabus.Server.Config
         {
             Station station = AcabusDataContext.AllStations.FirstOrDefault(x => x.ID == id);
 
-            if (station == null)
-                throw new ServiceException(String.Format("La estación [ID={0}] especificada no existe", id),
-                    AdaptiveMessageResponseCode.BAD_REQUEST, nameof(DeleteStation), ServiceName);
+            if (station != null)
+            {
+                station.SetAsDeleted();
 
-            station.SetAsDeleted();
+                bool deleted = AcabusDataContext.DbContext.Update(station);
 
-            bool deleted = AcabusDataContext.DbContext.Update(station);
-
-            if (!deleted)
-                throw new ServiceException(String.Format("No se logró eliminar a la estación [Nombre={0}]", station.Name), nameof(DeleteStation), ServiceName);
+                if (!deleted)
+                    throw new ServiceException(String.Format("No se logró eliminar a la estación [Nombre={0}]", station.Name), nameof(DeleteStation), ServiceName);
+            }
 
             ServerNotify.Notify(new PushAcabus(nameof(Station), id, LocalSyncOperation.DELETE));
             args.Data.SetResponse(String.Empty, AdaptiveMessageResponseCode.OK);
@@ -336,7 +343,7 @@ namespace Opera.Acabus.Server.Config
                 .Where(x => x.ModifyTime > lastDownLoad)
                 .OrderBy(x => x.ModifyTime);
 
-            ServerHelper.SendCollection(busQuery.ToList(), args, 61, (b) => b.Serialize());
+            AdaptiveMessageSocketHelper.SendCollection(busQuery.ToList(), args, (b, message) => message[61] = b.Serialize());
         }
 
         /// <summary>
@@ -353,7 +360,7 @@ namespace Opera.Acabus.Server.Config
                 .Where(x => x.ModifyTime > lastDownLoad)
                 .OrderBy(x => x.ModifyTime);
 
-            ServerHelper.SendCollection(deviceQuery.ToList(), args, 61, (d) => d.Serialize());
+            AdaptiveMessageSocketHelper.SendCollection(deviceQuery.ToList(), args, (d, message) => message[61] = d.Serialize());
         }
 
         /// <summary>
@@ -369,7 +376,7 @@ namespace Opera.Acabus.Server.Config
                 .Where(x => x.ModifyTime > lastDownLoad)
                 .OrderBy(x => x.ModifyTime);
 
-            ServerHelper.SendCollection(routeQuery.ToList(), args, 61, (r) => r.Serialize());
+            AdaptiveMessageSocketHelper.SendCollection(routeQuery.ToList(), args, (r, message) => message[61] = r.Serialize());
         }
 
         /// <summary>
@@ -385,7 +392,7 @@ namespace Opera.Acabus.Server.Config
                 .Where(x => x.ModifyTime > lastDownLoad)
                 .OrderBy(x => x.ModifyTime);
 
-            ServerHelper.SendCollection(staffQuery.ToList(), args, 61, (s) => s.Serialize());
+            AdaptiveMessageSocketHelper.SendCollection(staffQuery.ToList(), args, (s, message) => message[61] = s.Serialize());
         }
 
         /// <summary>
@@ -401,7 +408,7 @@ namespace Opera.Acabus.Server.Config
                 .Where(x => x.ModifyTime > lastDownLoad)
                 .OrderBy(x => x.ModifyTime);
 
-            ServerHelper.SendCollection(stationQuery.ToList(), args, 61, (s) => s.Serialize());
+            AdaptiveMessageSocketHelper.SendCollection(stationQuery.ToList(), args, (s, message) => message[61] = s.Serialize());
         }
 
         /// <summary>
