@@ -137,7 +137,7 @@ namespace InnSyTech.Standard.Database
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
+                Trace.WriteLine(ex.Message, "ERROR");
                 return false;
             }
         }
@@ -170,7 +170,7 @@ namespace InnSyTech.Standard.Database
                     if (transaction != null)
                         transaction.Rollback();
 
-                    Trace.WriteLine((ex.Message + ex.StackTrace).JoinLines(), "ERROR");
+                    Trace.TraceError(ex.Message);
 
                     return false;
                 }
@@ -217,7 +217,7 @@ namespace InnSyTech.Standard.Database
                     command.Parameters.Add(parameter);
                     command.Prepare();
 
-                    Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+                    Trace.TraceInformation($"Ejecutando: {command.CommandText}");
 
                     command.ExecuteNonQuery();
 
@@ -230,7 +230,7 @@ namespace InnSyTech.Standard.Database
                     if (transaction != null)
                         transaction.Rollback();
 
-                    Trace.WriteLine((ex.Message + ex.StackTrace).JoinLines(), "ERROR");
+                    Trace.TraceError(ex.Message);
 
                     return false;
                 }
@@ -305,7 +305,7 @@ namespace InnSyTech.Standard.Database
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
+                Trace.TraceError(ex.Message);
                 return false;
             }
         }
@@ -354,7 +354,7 @@ namespace InnSyTech.Standard.Database
                     if (transaction != null)
                         transaction.Rollback();
 
-                    Trace.WriteLine((ex.Message + ex.StackTrace).JoinLines(), "ERROR");
+                    Trace.TraceError(ex.Message);
 
                     return false;
                 }
@@ -429,7 +429,7 @@ namespace InnSyTech.Standard.Database
             command.Prepare();
             command.CommandText = statement.ToString();
 
-            Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+            Trace.TraceInformation($"Ejecutando: {command.CommandText}");
 
             command.ExecuteNonQuery();
 
@@ -489,7 +489,7 @@ namespace InnSyTech.Standard.Database
             command.Prepare();
             command.CommandText = statement.ToString();
 
-            Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+            Trace.TraceInformation($"Ejecutando: {command.CommandText}");
 
             command.ExecuteNonQuery();
         }

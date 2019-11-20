@@ -162,7 +162,7 @@ namespace InnSyTech.Standard.Database.Linq
                 {
                     command.CommandText = GetQueryText(expression, out DbStatementDefinition definition);
 
-                    Trace.WriteLine($"Ejecutando: {command.CommandText}", "DEBUG");
+                    Trace.TraceInformation($"Ejecutando: {command.CommandText}");
 
                     DbDataReader reader = command.ExecuteReader();
 
@@ -175,7 +175,7 @@ namespace InnSyTech.Standard.Database.Linq
                     if (transaction != null)
                         transaction.Rollback();
 
-                    Trace.WriteLine((ex.Message + ex.StackTrace).JoinLines(), "ERROR");
+                    Trace.TraceInformation(ex.Message);
 
                     return null;
                 }

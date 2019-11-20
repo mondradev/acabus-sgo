@@ -237,7 +237,9 @@ namespace InnSyTech.Standard.Database.Linq
                 case "First":
                     _statementDefinition.IsEnumerable = false;
                     _statementDefinition.CountToTake = 1;
+
                     Visit(m.Arguments.First());
+
                     if (m.Arguments.Count > 1)
                     {
                         if (_statementDefinition.Filters.Count == 0)
@@ -259,17 +261,48 @@ namespace InnSyTech.Standard.Database.Linq
                     Visit(m.Arguments.First());
                     break;
 
-                case "Contains":
-                    break;
+                case "Count":
+                    _statementDefinition.IsCountFunc = true;
+                    _statementDefinition.IsEnumerable = false;
+                    _statementDefinition.CountToTake = 1;
 
-                case "GroupBy":
+                    Visit(m.Arguments.First());
+
+                    if (m.Arguments.Count > 1)
+                    {
+                        if (_statementDefinition.Filters.Count == 0)
+                            _statement.Append(" WHERE ");
+                        else
+                            _statement.Append(" AND ");
+
+                        _selectedList = _statementDefinition.Filters;
+
+                        Visit((StripQuotes(m.Arguments.Last()) as LambdaExpression).Body);
+                    }
                     break;
 
                 case "Any":
+                    _statementDefinition.IsEnumerable = false;
+                    _statementDefinition.CountToTake = 1;
+                    _statementDefinition.IsAnyFunc = true;
+
+                    Visit(m.Arguments.First());
+
+                    if (m.Arguments.Count > 1)
+                    {
+                        if (_statementDefinition.Filters.Count == 0)
+                            _statement.Append(" WHERE ");
+                        else
+                            _statement.Append(" AND ");
+
+                        _selectedList = _statementDefinition.Filters;
+
+                        Visit((StripQuotes(m.Arguments.Last()) as LambdaExpression).Body);
+                    }
                     break;
 
                 default:
-                    break;
+                    throw new NotSupportedException($"La función [{m.Method.Name}] aún no es soportada por la librería.");
             }
             return m;
         }
@@ -380,9 +413,14 @@ namespace InnSyTech.Standard.Database.Linq
             foreach (var label in _fieldLabels)
                 _statement.Replace(label.First().ToString(), GetAlias((label.Last() as DbFieldDefinition).OwnerEntity));
 
-            _statement
-                .Replace(", {{fields}}", "")
-                .Replace(" {{entities}}", "");
+            if (_statementDefinition.IsCountFunc)
+                _statement.Replace("{{fields}}", "COUNT(*)");
+            else if (_statementDefinition.IsAnyFunc)
+                _statement.Replace("{{fields}}", "COUNT(*) > 0");
+            else
+                _statement.Replace(", {{fields}}", "");
+
+            _statement.Replace(" {{entities}}", "");
         }
 
         private int ProcessEntity(int count, DbEntityDefinition entity)
@@ -392,10 +430,13 @@ namespace InnSyTech.Standard.Database.Linq
 
             entity.Alias = String.Format("T{0}", count++);
 
-            foreach (var dbFields in DbHelper.GetFields(entity.EntityType).Where(f => String.IsNullOrEmpty(f.ForeignKeyName)))
-                fieldsString.AppendFormat("{1}.{0} {1}_{0}, ", dbFields.Name, entity.Alias);
+            if (!_statementDefinition.IsCountFunc && !_statementDefinition.IsAnyFunc)
+            {
+                foreach (var dbFields in DbHelper.GetFields(entity.EntityType).Where(f => String.IsNullOrEmpty(f.ForeignKeyName)))
+                    fieldsString.AppendFormat("{1}.{0} {1}_{0}, ", dbFields.Name, entity.Alias);
 
-            _statement.Replace("{{fields}}", String.Format("{0}{1}", fieldsString.ToString(), "{{fields}}"));
+                _statement.Replace("{{fields}}", String.Format("{0}{1}", fieldsString.ToString(), "{{fields}}"));
+            }
 
             if (entity.Alias.Equals("T0"))
                 _statement.Replace("{{entities}}", String.Format("{0} T0 {1}", entityName, "{{entities}}"));

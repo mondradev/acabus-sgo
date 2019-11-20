@@ -24,9 +24,10 @@ namespace InnSyTech.Standard.Database.Linq
         {
             var list = Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType)) as IList;
             var readItem = 0;
+
             while (reader.Read())
             {
-                object instance = DbHelper.ToInstance(definition.Entities.First().EntityType, reader, definition.Entities.First(), definition.ReferenceDepth);
+                object instance = elementType.IsPrimitive ? Convert.ChangeType(reader.GetValue(0), elementType) : DbHelper.ToInstance(definition.Entities.First().EntityType, reader, definition.Entities.First(), definition.ReferenceDepth);
 
                 if (definition.Select != null)
                     instance = definition.Select.DynamicInvoke(instance);

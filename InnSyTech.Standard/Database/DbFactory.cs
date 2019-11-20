@@ -42,8 +42,7 @@ namespace InnSyTech.Standard.Database
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("Error a inicializar el controlador de base de datos.", "ERROR");
-                Trace.WriteLine(ex.PrintMessage().JoinLines(), "ERROR");
+                Trace.TraceError("Error a inicializar el controlador de base de datos: {0}", ex.Message);
                 return null;
             }
         }
