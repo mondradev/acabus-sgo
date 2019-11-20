@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using InnSyTech.Standard.Utils;
+using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
 {
     /// <summary>
-    /// Provee de un convertidor de campos tipo <see cref="FieldDefinition.FieldType.Numeric"/> para
+    /// Provee de un convertidor de campos tipo <see cref="FieldType.Numeric"/> para
     /// mensajes adaptativos. El convetidor utiliza valores enteros sin signos.
     /// </summary>
     internal class NumericSerializer : IAdaptiveSerializer
@@ -38,33 +36,16 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
             if (src.Length == 0)
                 throw new ArgumentException("El vector no contiene elementos", nameof(src));
 
-            ulong length = (ulong)src.Length;
             byte[] dest = src;
-            ulong value = 0;
+            byte[] buff = dest.Slice(0, definition.MaxLength);
 
-            if (definition.IsVarLength)
-            {
-                int lvarSize = GetNumberLvarSize(definition);
-                byte[] lengthVar = dest.Take(lvarSize).ToArray();
+            src = dest.Slice(definition.MaxLength, dest.Length - definition.MaxLength);
 
-                length = BCDToUInt64(lengthVar);
+            int length = RealSize(definition.MaxLength);
 
-                dest = dest.Skip(lvarSize).Take((int)length).ToArray();
+            buff = buff.Slice(0, length);
 
-                value = BCDToUInt64(dest);
-
-                src = src.Skip(lvarSize + ((int)length)).ToArray();
-
-                return new Field(definition.ID, value);
-            }
-
-            dest = dest.Take(definition.MaxLength).ToArray();
-
-            value = BCDToUInt64(dest);
-
-            src = src.Skip(definition.MaxLength).ToArray();
-
-            return new Field(definition.ID, value);
+            return new Field(GetNumeric(buff, length), definition);
         }
 
         /// <summary>
@@ -96,96 +77,129 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers
             if (src.ID != definition.ID)
                 throw new InvalidOperationException("No es posible utilizar la definición para este campo. Los ID no coinciden");
 
-            UInt64 value = Convert.ToUInt64(src.Value);
+            if (!Validate(src.Value, definition))
+                throw new ArgumentOutOfRangeException("El tipo de campo FieldType.Numeric no es compatible con valores no numéricos o con punto decimal, utilice campo tipo FieldType.Text o FieldType.Binary");
 
-            if (definition.IsVarLength)
+            int length = definition.MaxLength;
+
+            byte[] buffer = GetBytes(src.Value);
+
+            return buffer.Slice(0, length).PadRight(length);
+        }
+
+        /// <summary>
+        /// Obtiene una cadena que representa al valor numérico del campo.
+        /// </summary>
+        /// <param name="value">Valor del campo.</param>
+        /// <param name="definition">Caracteristicas del campo.</param>
+        public string ToString(object value, FieldDefinition definition)
+            => Validate(value, definition) ? value.ToString() : "(NOT SUPPORT)";
+
+        /// <summary>
+        /// Determina si un valor es compatible con el campo especificado por la definición.
+        /// </summary>
+        /// <param name="value">Valor a validar.</param>
+        /// <param name="definition">Definición del campo.</param>
+        public bool Validate(object value, FieldDefinition definition)
+        {
+            if (definition.Type != FieldType.Numeric)
+                throw new InvalidOperationException("El tipo de campo no es FieldType.Numeric");
+
+            if (!value.IsInteger())
+                return false;
+
+            if (Type.GetTypeCode(value.GetType()) == TypeCode.UInt64)
             {
-                int lvarSize = ToBCD((UInt64)definition.MaxLength).Length;
-                int maxLength = (definition.MaxLength - lvarSize) * 2;
-                byte[] body = ToBCD(value);
+                ulong number = Convert.ToUInt64(value);
 
-                return BitConverter.GetBytes(body.Length).Reverse().ToArray().Resize(lvarSize).Concat(body).ToArray();
+                if (number <= Convert.ToUInt64(sbyte.MaxValue) && definition.MaxLength >= 1)
+                    return true;
+                if (number <= Convert.ToUInt64(short.MaxValue) && definition.MaxLength >= 2)
+                    return true;
+                if (number <= Convert.ToUInt64(int.MaxValue) && definition.MaxLength >= 4)
+                    return true;
+                if (number <= Convert.ToUInt64(long.MaxValue) && definition.MaxLength >= 8)
+                    return true;
+
+                if (number.Between(byte.MinValue, byte.MaxValue) && definition.MaxLength >= 1)
+                    return true;
+                if (number.Between(ushort.MinValue, ushort.MaxValue) && definition.MaxLength >= 2)
+                    return true;
+                if (number.Between(uint.MinValue, uint.MaxValue) && definition.MaxLength >= 4)
+                    return true;
+
+                if (number.Between(ulong.MinValue, ulong.MaxValue) && definition.MaxLength >= 8)
+                    return true;
+            }
+            else
+            {
+                long number = Convert.ToInt64(value);
+
+                if (number.Between(sbyte.MinValue, sbyte.MaxValue) && definition.MaxLength >= 1)
+                    return true;
+                if (number.Between(short.MinValue, short.MaxValue) && definition.MaxLength >= 2)
+                    return true;
+                if (number.Between(int.MinValue, int.MaxValue) && definition.MaxLength >= 4)
+                    return true;
+                if (number.Between(long.MinValue, long.MaxValue) && definition.MaxLength >= 8)
+                    return true;
+
+                if (number.Between(byte.MinValue, byte.MaxValue) && definition.MaxLength >= 1)
+                    return true;
+                if (number.Between(ushort.MinValue, ushort.MaxValue) && definition.MaxLength >= 2)
+                    return true;
+                if (number.Between(uint.MinValue, uint.MaxValue) && definition.MaxLength >= 4)
+                    return true;
             }
 
-            value = BCDResize(value, definition.MaxLength * 2);
-
-            return ToBCD(value, definition.MaxLength * 2);
+            return false;
         }
 
         /// <summary>
-        /// Re-ajusta la cantidad de caracteres que conforman al número haciendolo más pequeño en
-        /// caso de necesitarlo.
+        /// Obtiene el valor numérico de la secuencia de bytes.
         /// </summary>
-        /// <param name="number">Número a reajustar.</param>
-        /// <param name="maxSize">Tamaño máximo de caracteres del valor númerico.</param>
-        /// <returns>Un nuevo valor númerico.</returns>
-        private ulong BCDResize(ulong number, int maxSize)
+        /// <param name="buff">Secuencia de bytes.</param>
+        /// <param name="maxLength">Longitud máxima de la secuencia.</param>
+        private static object GetNumeric(byte[] buff, int maxLength)
         {
-            List<Byte> dest = new List<byte>();
+            if (maxLength >= 8)
+                return BitConverter.ToUInt64(buff.PadRight(8), 0);
+            if (maxLength >= 4)
+                return BitConverter.ToUInt32(buff.PadRight(4), 0);
+            if (maxLength >= 2)
+                return BitConverter.ToUInt16(buff.PadRight(2), 0);
+            if (maxLength == 1)
+                return buff.First();
 
-            string numberText = number.ToString();
-
-            if (numberText.Length > maxSize)
-                numberText = numberText.Substring(0, maxSize);
-
-            return UInt64.Parse(numberText);
+            throw new OverflowException("No se puede obtener el valor numerico de una secuencia vacía.");
         }
 
         /// <summary>
-        /// Realiza la conversión de un vector de bytes en un valor numérico tomando los datos como BCD.
+        ///  Obtiene los bytes del valor numérico.
         /// </summary>
-        /// <param name="lengthVar">Vector de bytes origen.</param>
-        /// <returns>Valor numérico obtenido del vector.</returns>
-        private UInt64 BCDToUInt64(byte[] lengthVar)
+        /// <param name="value">Valor numérico</param>
+        /// <returns>Una secuencia de bytes</returns>
+        private static byte[] GetBytes(object value)
         {
-            string hexa = BitConverter.ToString(lengthVar).Replace("-", "");
-
-            if (!Regex.IsMatch(hexa, "[0-9]"))
-                throw new ArgumentOutOfRangeException(nameof(lengthVar),
-                    "Los valores del vector de bytes solo pueden estar conformados por números del 0 al 9");
-
-            return UInt64.Parse(hexa);
+            if (Type.GetTypeCode(value?.GetType()) == TypeCode.UInt64)
+                return BitConverter.GetBytes(Convert.ToUInt64(value));
+            else
+                return BitConverter.GetBytes(Convert.ToInt64(value));
         }
 
         /// <summary>
-        /// Obtiene el tamaño de indicador del tamaño del campo.
+        /// Obtiene el tamaño de un tipo de dato numérico.
         /// </summary>
-        /// <param name="definition">Caracteristicas que definen al campo.</param>
-        /// <returns>Tamaño del LVar.</returns>
-        private int GetNumberLvarSize(FieldDefinition definition)
+        /// <param name="length">Longitud de buffer.</param>
+        /// <returns>Longitud real del buffer.</returns>
+        private static int RealSize(int length)
         {
-            if (!definition.IsVarLength)
-                return definition.MaxLength;
+            if (length >= 8) return 8;
+            if (length >= 4) return 4;
+            if (length >= 2) return 2;
+            if (length >= 1) return 1;
 
-            int length = definition.MaxLength.ToString().Length;
-            length = (length % 2) + length;
-
-            return length / 2;
-        }
-
-        /// <summary>
-        /// Realiza la conversión de un valor numérico a un vector de bytes almacenando los datos en
-        /// formato BCD.
-        /// </summary>
-        /// <param name="number">Número a convertir en formato BCD.</param>
-        /// <param name="width">Longitud minima del vector.</param>
-        /// <param name="padding">Caracter de relleno.</param>
-        /// <returns>Un vector que representa al número especificado.</returns>
-        private byte[] ToBCD(UInt64 number, int width = 2, char padding = '0')
-        {
-            List<Byte> dest = new List<byte>();
-
-            width = width > number.ToString().Length ? width : number.ToString().Length;
-
-            if (width % 2 != 0)
-                width += 1;
-
-            string numberText = number.ToString().PadLeft(width, padding);
-
-            for (int i = 0; i < numberText.Length; i += 2)
-                dest.Add(Byte.Parse(numberText.Substring(i, 1) + numberText.Substring(i + 1, 1), NumberStyles.AllowHexSpecifier));
-
-            return dest.ToArray();
+            throw new OverflowException("El tamaño no puede ser 0");
         }
     }
 }
