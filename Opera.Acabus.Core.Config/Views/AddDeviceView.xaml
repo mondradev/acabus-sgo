@@ -3,25 +3,23 @@
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ViewModels="clr-namespace:Opera.Acabus.Core.Config.ViewModels"
     xmlns:converters="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
     xmlns:gui="clr-namespace:Opera.Acabus.Core.Gui;assembly=Opera.Acabus.Core.Gui"
-    x:Class="Opera.Acabus.Core.Config.Views.AddDeviceView"
-             mc:Ignorable="d">
+    x:Class="Opera.Acabus.Core.Config.Views.AddDeviceView" Tag="">
     <UserControl.Resources>
         <converters:DeviceTypeSpanishConverter x:Key="DeviceTypeConverter" />
     </UserControl.Resources>
     <UserControl.DataContext>
         <ViewModels:AddDeviceViewModel />
     </UserControl.DataContext>
-    <Grid Margin="0" Width="500">
+    <Grid Margin="0" Width="500" Tag="Form">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Margin="16,24,16,0" TextWrapping="Wrap" Text="Nuevo equipo" FontSize="20" d:LayoutOverrides="Height" />
+        <TextBlock Margin="16,24,16,0" TextWrapping="Wrap" Text="Nuevo equipo" FontSize="20" />
         <Grid Margin="16" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -43,7 +41,7 @@
             <ComboBox  Grid.Row="8" materialDesign:HintAssist.Hint="Estación asignada"  Margin="0" VerticalAlignment="Top" ItemsSource="{Binding Stations}" SelectedItem="{Binding SelectedStation, ValidatesOnDataErrors=True}" IsEditable="True" />
             <ComboBox materialDesign:HintAssist.Hint="Vehículo asignado" VerticalAlignment="Top" Grid.Row="10" ItemsSource="{Binding Buses}" SelectedItem="{Binding SelectedBus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"  IsEditable="True" />
         </Grid>
-        <StackPanel Margin="0,2,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.ColumnSpan="2" d:LayoutOverrides="Height">
+        <StackPanel Margin="0,2,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.ColumnSpan="2">
             <Button Command="{x:Static gui:Dispatcher.CloseDialogCommand}" ToolTip="Descartar" Height="Auto" HorizontalContentAlignment="Left"
                                 HorizontalAlignment="Right" Margin="8" Style="{DynamicResource MaterialDesignFlatButton}" MinHeight="36" Content="DESCARTAR">
             </Button>

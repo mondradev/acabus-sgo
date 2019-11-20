@@ -2,6 +2,7 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -215,11 +216,16 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 };
 
                 if (ServerContext.GetLocalSync("Device").Create(ref device))
+                {
                     Dispatcher.SendMessageToGUI($"Equipo {device} agregado correctamente.");
+                    Dispatcher.CloseDialog(true);
+
+                    return;
+                }
             }
             catch (Exception reason)
             {
-                Dispatcher.SendMessageToGUI("Fallo al guardar el equipo, razón: " + reason.Message);
+                Dispatcher.SendMessageToGUI("Fallo al guardar el equipo, razón: " + (reason is LocalSyncException ? (reason as LocalSyncException).Error : reason.Message));
             }
 
             Dispatcher.CloseDialog();

@@ -2,6 +2,7 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,8 +75,6 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 case nameof(FullName):
                     if (String.IsNullOrEmpty(FullName))
                         AddError(nameof(FullName), "Especifique un nombre válido.");
-                    else if (AcabusDataContext.AllStaff.Where(s => s.Name == FullName).Count() > 0)
-                        AddError(nameof(FullName), "Existe una persona con el mismo nombre");
                     break;
 
                 case nameof(SelectedArea):
@@ -103,6 +102,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
         {
             try
             {
+                if (AcabusDataContext.AllStaff.Count(s => s.Name == FullName) > 0)
+                {
+                    AddError(nameof(FullName), "Existe una persona con el mismo nombre");
+                    return;
+                }
+
                 object staff = new Staff()
                 {
                     Area = SelectedArea.Value,
@@ -110,11 +115,16 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 };
 
                 if (ServerContext.GetLocalSync("Staff").Create(ref staff))
+                {
                     Dispatcher.SendMessageToGUI($"Empleado {staff} agregado correctamente.");
+                    Dispatcher.CloseDialog(true);
+
+                    return;
+                }
             }
             catch (Exception reason)
             {
-                Dispatcher.SendMessageToGUI("Fallo al guardar el empleado, razón: " + reason.Message);
+                Dispatcher.SendMessageToGUI("Fallo al guardar el empleado, razón: " + (reason is LocalSyncException ? (reason as LocalSyncException).Error : reason.Message));
             }
 
             Dispatcher.CloseDialog();

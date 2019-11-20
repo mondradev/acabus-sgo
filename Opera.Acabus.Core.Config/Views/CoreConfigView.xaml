@@ -8,8 +8,7 @@
     xmlns:ViewModels="clr-namespace:Opera.Acabus.Core.Config.ViewModels"
     xmlns:converters="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-    x:Class="Opera.Acabus.Core.Config.Views.CoreConfigView"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="279.2">
+    x:Class="Opera.Acabus.Core.Config.Views.CoreConfigView">
     <UserControl.Resources>
         <converters:BusStatusSpanishConverter x:Key="BusStatusSpanishConverter" />
     </UserControl.Resources>
@@ -22,7 +21,7 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
-        <dragablz:TabablzControl Background="{Binding Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}">
+        <dragablz:TabablzControl>
             <TabItem>
                 <TabItem.Header>
                     <TextBlock Text="EQUIPOS" Foreground="{DynamicResource IdealForegroundColorBrush}" FontWeight="Medium" Width="100" TextAlignment="Center" Cursor="Hand" />
@@ -121,16 +120,23 @@
         <md:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
             IsEnabled="{Binding IsActive}"
             PlacementMode="TopAndAlignCentres"
+            Foreground="{StaticResource IdealForegroundColorBrush}"
             Margin="0,0,16,16" ToggleCheckedContentCommand="{Binding ShowAddDeviceCommand}"
             ToolTip="Añadir equipo" Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" PopupMode="MouseOver" Grid.RowSpan="4">
+
+            <md:PopupBox.ToggleContent>
+                <md:PackIcon Kind="Plus" Width="24" Height="24" Foreground="{StaticResource IdealForegroundColorBrush}" />
+            </md:PopupBox.ToggleContent>
+
             <md:PopupBox.ToggleCheckedContent>
-                <md:PackIcon Kind="GlassStange" Width="24" Height="24" />
+                <md:PackIcon Kind="GlassStange" Width="24" Height="24" Foreground="{StaticResource IdealForegroundColorBrush}" />
             </md:PopupBox.ToggleCheckedContent>
+
             <StackPanel>
-                <Button ToolTip="Sincronizar catálogos"  Command="{Binding SyncCommand}" BorderBrush="White" Background="White">
+                <Button ToolTip="Sincronizar catálogos" BorderBrush="White" Background="White">
                     <md:PackIcon Kind="Sync" Width="24" Height="24" />
                 </Button>
-                <Button ToolTip="Sincronizar asignación"  Command="{Binding SyncBusReassingCommand}" BorderBrush="White" Background="White">
+                <Button ToolTip="Sincronizar asignación" BorderBrush="White" Background="White">
                     <md:PackIcon Kind="MapMarkerRadius" Width="24" Height="24" />
                 </Button>
                 <Button ToolTip="Reasignar vehículos (Manual)"  Command="{Binding BusReassingCommand}" BorderBrush="White" Background="White">

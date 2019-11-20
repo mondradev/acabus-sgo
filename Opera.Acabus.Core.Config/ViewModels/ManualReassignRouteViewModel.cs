@@ -33,12 +33,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
         private Route _selectedRoute;
 
         /// <summary>
+        /// Indica si se requiere actualizar la vista.
+        /// </summary>
+        private bool _requireRefresh;
+
+        /// <summary>
         /// Crea una instancia nueva de <see cref="ManualReassignRouteViewModel"/>.
         /// </summary>
         public ManualReassignRouteViewModel()
         {
             ReassignRouteCommand = new Command(ReassignRoute, CanReassignRoute);
-            DoneCommand = Dispatcher.CloseDialogCommand;
+            DoneCommand = new Command((_) => Dispatcher.CloseDialogCommand.Execute(_requireRefresh));
 
             DiscartCommand = new Command(parameter =>
             {
@@ -167,6 +172,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         private void ReassignRoute(object obj)
         {
             var economicNumbers = Regex.Matches(EconomicNumbers.ToUpper(), "A[APC]{1}-[0-9]{3}");
+
             foreach (var item in economicNumbers)
             {
                 Bus bus = Buses.FirstOrDefault(vehicle => vehicle.EconomicNumber == item.ToString());
@@ -177,9 +183,13 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     return;
                 }
             }
+
             SelectedRoute = null;
             EconomicNumbers = String.Empty;
             OnPropertyChanged(nameof(Buses));
+
+            if (!_requireRefresh)
+                _requireRefresh = true;
         }
     }
 }

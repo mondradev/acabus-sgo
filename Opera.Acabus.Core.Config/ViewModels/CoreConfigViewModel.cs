@@ -68,17 +68,17 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 });
             });
 
-            BusReassingCommand = new Command(parameter => Dispatcher.RequestShowDialog(new ManualReassignRouteView(), p => RefreshBus()));
+            BusReassingCommand = new Command(parameter => Dispatcher.RequestShowDialog(new ManualReassignRouteView(), p => { if (p != null && (bool)p) RefreshBus(); }));
 
-            ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), p => RefreshDevice()));
+            ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), p => { if (p != null && (bool)p) RefreshDevice(); }));
 
             ShowAddStationCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStationView(), p => RefreshStation()));
 
             ShowAddRouteCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddRouteView(), p => RefreshRoutes()));
 
-            ShowAddBusCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddBusView(), p => RefreshBus()));
+            ShowAddBusCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddBusView(), p => { if (p != null && (bool)p) RefreshBus(); }));
 
-            ShowAddStaffCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStaffView(), p => RefreshStaff()));
+            ShowAddStaffCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStaffView(), p => { if (p != null && (bool)p) RefreshStaff(); }));
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     catch (Exception ex)
                     {
                         if (ex is KeyNotFoundException || ex is FormatException)
-                            Trace.WriteLine("La consulta para la descarga de los autobuses debe devolver los campos {id: ulong, type: ushort, economicnumber: string, idroute: ulong}", "ERROR");
+                            Trace.TraceError("La consulta para la descarga de los autobuses debe devolver los campos {id: ulong, type: ushort, economicnumber: string, idroute: ulong}");
                         throw ex;
                     }
 
@@ -268,7 +268,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
                 return true;
             }
-            catch (Exception ex) { Trace.WriteLine(ex.PrintMessage().JoinLines()); return false; }
+            catch (Exception ex) { Trace.TraceError(ex.Message); return false; }
         }
 
         /// <summary>
@@ -321,7 +321,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     catch (Exception ex)
                     {
                         if (ex is KeyNotFoundException || ex is FormatException)
-                            Trace.WriteLine("La consulta para la descarga de los equipos debe devolver los campos {id: ulong, serial: string, idstation: ulong, idbus: ulong, type: string}", "ERROR");
+                            Trace.TraceError("La consulta para la descarga de los equipos debe devolver los campos {id: ulong, serial: string, idstation: ulong, idbus: ulong, type: string}");
                         throw ex;
                     }
 
@@ -357,7 +357,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
                 return true;
             }
-            catch (Exception ex) { Trace.WriteLine(ex.PrintMessage().JoinLines()); return false; }
+            catch (Exception ex) { Trace.TraceError(ex.Message); return false; }
         }
 
         /// <summary>
@@ -402,7 +402,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     catch (Exception ex)
                     {
                         if (ex is KeyNotFoundException || ex is FormatException)
-                            Trace.WriteLine("La consulta para la descarga de los equipos debe devolver los campos {id: ulong, name: string, number: ushort, type: string}", "ERROR");
+                            Trace.TraceError("La consulta para la descarga de los equipos debe devolver los campos {id: ulong, name: string, number: ushort, type: string}");
                         throw ex;
                     }
                     Route route = new Route(id, number, type)
@@ -416,7 +416,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
                 return true;
             }
-            catch (Exception ex) { Trace.WriteLine(ex.PrintMessage().JoinLines()); return false; }
+            catch (Exception ex) { Trace.TraceError(ex.Message); return false; }
         }
 
         /// <summary>
@@ -463,7 +463,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                     catch (Exception ex)
                     {
                         if (ex is KeyNotFoundException || ex is FormatException)
-                            Trace.WriteLine("La consulta para la descarga de las estaciones debe devolver los campos {id: ulong, name: string, number: ushort, idroute: ulong}", "ERROR");
+                            Trace.TraceError("La consulta para la descarga de las estaciones debe devolver los campos {id: ulong, name: string, number: ushort, idroute: ulong}");
                         throw ex;
                     }
 
@@ -493,7 +493,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 }
                 return true;
             }
-            catch (Exception ex) { Trace.WriteLine(ex.PrintMessage().JoinLines()); return false; }
+            catch (Exception ex) { Trace.TraceError(ex.Message); return false; }
         }
 
         /// <summary>
@@ -504,7 +504,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
             /// Lectura desde la base de datos.
 
             AllDevices = AcabusDataContext.AllDevices.LoadReference(1).Where(d => d.Active).ToList();
-            AllBuses = AcabusDataContext.AllBuses.LoadReference(1).Where(b => b.Active).ToList();
+            AllBuses = AcabusDataContext.AllBuses.LoadReference(1).Where(b => b.Active).OrderBy(v => v.EconomicNumber).ToList();
             AllStations = AcabusDataContext.AllStations.LoadReference(1).Where(s => s.Active).ToList();
             AllRoutes = AcabusDataContext.AllRoutes.LoadReference(1).Where(r => r.Active).ToList();
             AllStaff = AcabusDataContext.AllStaff.Where(s => s.Active == true && s.Name != "SISTEMA").ToList();
@@ -536,7 +536,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de autobuses.
         /// </summary>
-        private void RefreshBus(object sender = null, LocalSyncArgs args = null)
+        private void RefreshBus(object sender = null, LocalSyncEventArgs args = null)
         {
             IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
@@ -563,7 +563,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de equipos.
         /// </summary>
-        private void RefreshDevice(object sender = null, LocalSyncArgs args = null)
+        private void RefreshDevice(object sender = null, LocalSyncEventArgs args = null)
         {
             IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
@@ -592,7 +592,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de rutas.
         /// </summary>
-        private void RefreshRoutes(object sender = null, LocalSyncArgs args = null)
+        private void RefreshRoutes(object sender = null, LocalSyncEventArgs args = null)
         {
             IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
@@ -620,7 +620,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de personal.
         /// </summary>
-        private void RefreshStaff(object sender = null, LocalSyncArgs args = null)
+        private void RefreshStaff(object sender = null, LocalSyncEventArgs args = null)
         {
             IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });
@@ -639,7 +639,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Actualiza la tabla de estaciones.
         /// </summary>
-        private void RefreshStation(object sender = null, LocalSyncArgs args = null)
+        private void RefreshStation(object sender = null, LocalSyncEventArgs args = null)
         {
             IsActive = false;
             Application.Current.Dispatcher.Invoke(() => { OnPropertyChanged(nameof(IsActive)); });

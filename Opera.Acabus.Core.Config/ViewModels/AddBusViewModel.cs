@@ -2,6 +2,7 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -167,11 +168,16 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 };
 
                 if (ServerContext.GetLocalSync("Bus").Create(ref bus))
+                {
                     Dispatcher.SendMessageToGUI($"Autobús {bus} agregado correctamente.");
+                    Dispatcher.CloseDialog(true);
+
+                    return;
+                }
             }
             catch (Exception reason)
             {
-                Dispatcher.SendMessageToGUI("Fallo al guardar el autobús, razón: " + reason.Message);
+                Dispatcher.SendMessageToGUI("Fallo al guardar el autobús, razón: " + (reason is LocalSyncException ? (reason as LocalSyncException).Error : reason.Message));
             }
 
             Dispatcher.CloseDialog();

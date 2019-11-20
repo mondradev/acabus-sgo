@@ -2,6 +2,7 @@
 using Opera.Acabus.Core.DataAccess;
 using Opera.Acabus.Core.Gui;
 using Opera.Acabus.Core.Models;
+using Opera.Acabus.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -210,7 +211,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
             }
             catch (Exception reason)
             {
-                Dispatcher.SendMessageToGUI("Fallo al guardar la estación, razón: " + reason.Message);
+                Dispatcher.SendMessageToGUI("Fallo al guardar la estación, razón: " + (reason is LocalSyncException ? (reason as LocalSyncException).Error : reason.Message));
             }
 
             Dispatcher.CloseDialog();
