@@ -6,14 +6,11 @@
     public enum AdaptiveMessageFieldID
     {
         APIToken = 1,
-        HashRules,
         ResponseCode,
         ResponseMessage,
         ModuleName,
         FunctionName,
-        IsEnumerable,
-        EnumerableCount,
-        CurrentPosition,
-        EnumerableOperation
+        Count,
+        Position
     }
 }

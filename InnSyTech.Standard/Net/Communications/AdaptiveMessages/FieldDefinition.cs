@@ -1,4 +1,7 @@
-﻿namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
+﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers;
+using System;
+
+namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 {
     /// <summary>
     /// Representa un conjunto de caracteristicas que permiten definir el tipo de campo a manipular.
@@ -6,12 +9,16 @@
     /// <code>
     ///     {
     ///         ID: 21,
-    ///         Length: 20,
     ///         MaxLength: 50,
     ///         IsVarLength: true,
-    ///         Type: { Numeric, Text, Binary }
+    ///         Type: 2
     ///     }
     /// </code>
+    /// <seealso cref="FieldType"/>
+    /// <seealso cref="IAdaptiveMessage"/>
+    /// <seealso cref="AdaptiveMessageRules"/>
+    /// <seealso cref="AdaptiveMessageResponseCode"/>
+    /// <seealso cref="AdaptiveMessageFieldID"/>
     /// </summary>
     public sealed class FieldDefinition
     {
@@ -22,21 +29,15 @@
         /// <param name="type"> Tipo de campo. </param>
         /// <param name="maxLength"> Longitud máxima del campo. </param>
         /// <param name="isVarLength"> Indicador si el campo es de longitud variable. </param>
-        /// <param name="description"> Descripción del campo. </param>
-        public FieldDefinition(int id, FieldType type, int maxLength, bool isVarLength = false, string description = null)
+        /// <param name="serializer">Serializador del campo.</param>
+        public FieldDefinition(int id, FieldType type, int maxLength, bool isVarLength = false, IAdaptiveSerializer serializer = null)
         {
             ID = id;
             Type = type;
             MaxLength = maxLength;
             IsVarLength = isVarLength;
-            Length = maxLength;
-            Description = description;
+            Serializer = serializer;
         }
-
-        /// <summary>
-        /// Obtiene la descripción del campo.
-        /// </summary>
-        public string Description { get; }
 
         /// <summary>
         /// Obtiene el identificador del campo.
@@ -49,18 +50,32 @@
         public bool IsVarLength { get; }
 
         /// <summary>
-        /// Obtiene o establece la longitud actual del campo en bytes.
-        /// </summary>
-        public int Length { get; internal set; }
-
-        /// <summary>
         /// Obtiene la longitud máxima del campo en bytes.
         /// </summary>
         public int MaxLength { get; }
 
         /// <summary>
+        /// Serializador del campo.
+        /// </summary>
+        public IAdaptiveSerializer Serializer { get; }
+
+        /// <summary>
         /// Obtiene el tipo de campo <seealso cref="FieldType" />.
         /// </summary>
         public FieldType Type { get; }
+
+        /// <summary>
+        /// Obtiene una cadena que representa al valor del campo en función del serializador.
+        /// </summary>
+        /// <param name="value">Valor del campo.</param>
+        public string ToString(object value)
+            => Serializer.ToString(value, this);
+
+        /// <summary>
+        /// Determina si el valor es compatible con el campo definido en función del serializador.
+        /// </summary>
+        /// <param name="value">Valor a validar.</param>
+        public bool Validate(object value)
+            => Serializer.Validate(value, this);
     }
 }

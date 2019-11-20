@@ -3,8 +3,8 @@
 namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 {
     /// <summary>
-    /// Representa la estructura de un campo contenido en los mensajes adaptativos <seealso
-    /// cref="AdaptiveMessage" />. El campo está compuesto por un identificador que lo diferencia dentro del
+    /// Representa la estructura de un campo contenido en los mensajes adaptativos <see
+    /// cref="IAdaptiveMessage" />. El campo está compuesto por un identificador que lo diferencia dentro del
     /// mensaje y su valor almacenado.
     /// </summary>
     public sealed class Field
@@ -17,13 +17,20 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Crea un campo nuevo especificando su identificador y el valor que representa.
         /// </summary>
-        /// <param name="id"> Identificador del campo. </param>
         /// <param name="value"> Valor del campo. </param>
-        public Field(int id, object value)
+        /// <param name="definition">Definición del tipo de campo</param>
+        public Field(object value, FieldDefinition definition)
         {
-            ID = id;
-            Value = value;
+            Definition = definition ?? throw new ArgumentNullException(nameof(definition), "La definición del campo no puede ser un valor nulo");
+            ID = definition.ID;
+
+            Value = Definition.Validate(value) ? value : throw new ArgumentNullException("value", "El campo no es compatible con el valor.");
         }
+
+        /// <summary>i
+        /// Obtiene la definición del campo.
+        /// </summary>
+        public FieldDefinition Definition { get; }
 
         /// <summary>
         /// Obtiene el identificador del campo. Este valor lo permite diferenciar dentro del mensaje.
@@ -39,9 +46,8 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </exception>
         public object Value {
             get => _value;
-            set {
-                _value = value ?? throw new ArgumentNullException("value", "El campo no puede ser asignado con un valor nulo.");
-            }
+            set => _value = Definition.Validate(value) ? value
+                : throw new ArgumentNullException("value", "El campo no es compatible con el valor.");
         }
 
         /// <summary>
@@ -49,6 +55,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <returns>Un cadena que representa al campo.</returns>
         public override string ToString()
-            => String.Format("Field{{ID={0}, Value={1}}}", ID, Value);
+            => string.Format("Field[ID={0}, Value={1}, Type={2}]", ID, Definition.ToString(Value), Definition.Type.ToString());
     }
 }

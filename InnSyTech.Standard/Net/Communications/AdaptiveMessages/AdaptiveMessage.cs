@@ -1,4 +1,5 @@
 ﻿using InnSyTech.Standard.Net.Communications.AdaptiveMessages.Serializers;
+using InnSyTech.Standard.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,12 +19,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Lista de campos.
         /// </summary>
-        private readonly List<Field> _fields;
-
-        /// <summary>
-        /// Reglas de composición del mensaje.
-        /// </summary>
-        private readonly AdaptiveMessageRules _messageRules;
+        private readonly SortedSet<Field> _fields;
 
         /// <summary>
         /// Crea una instancia nueva de un mensaje.
@@ -31,10 +27,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="rules">Reglas de composición del mensaje.</param>
         public AdaptiveMessage(AdaptiveMessageRules rules)
         {
-            _fields = new List<Field>();
-            _messageRules = rules ?? new AdaptiveMessageRules();
+            _fields = new SortedSet<Field>(new FieldComparer());
+            Rules = rules ?? new AdaptiveMessageRules();
 
-            _messageRules.IsReadOnly = true;
+            Rules.IsReadOnly = true;
         }
 
         /// <summary>
@@ -50,7 +46,12 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <summary>
         /// Obtiene las reglas con las que se creó el mensaje.
         /// </summary>
-        public AdaptiveMessageRules Rules => _messageRules;
+        public AdaptiveMessageRules Rules { get; }
+
+        /// <summary>
+        /// Obtiene el tamaño en bytes del mensaje.
+        /// </summary>
+        public int Size => Serialize().Length;
 
         /// <summary>
         /// Obtiene, establece o agrega el valor del campo con el ID especificado.
@@ -58,13 +59,8 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="id">ID del campo a manipular.</param>
         /// <returns>El valor del campo.</returns>
         public object this[int id] {
-            get => _fields.FirstOrDefault(x => x.ID == id)?.Value;
-            set {
-                if (_fields.Any(x => x.ID == id))
-                    _fields.FirstOrDefault(x => x.ID == id).Value = value;
-                else
-                    Add(id, value);
-            }
+            get => GetValue<object>(id, null);
+            set => Add(id, value);
         }
 
         /// <summary>
@@ -83,6 +79,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 throw new AdaptiveMessageDeserializeException("El vector debe contener al menos 8 elementos que correspondan al cabecera del mensaje", src);
 
             UInt64 headerRead = BitConverter.ToUInt64(src.Take(8)?.Reverse().ToArray(), 0);
+
             byte[] body = src.Skip(8)?.ToArray();
 
             if (headerRead == 0)
@@ -91,6 +88,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             AdaptiveMessage message = new AdaptiveMessage(rules ?? new AdaptiveMessageRules());
 
             int index = 0;
+            IList<int> fieldsID = new List<int>();
 
             while (headerRead > 1)
             {
@@ -98,16 +96,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 headerRead /= 2;
 
                 if (res == 1)
-                    message.Add(index + 1, new object());
-
+                    fieldsID.Add(index + 1);
                 index++;
             }
 
-            message.Add(index + 1, new object());
+            fieldsID.Add(index + 1);
 
-            Processor(message, body, rules);
-
-            return message;
+            return DeserializeBody(message, body, fieldsID);
         }
 
         /// <summary>
@@ -120,7 +115,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// El campo ya existe o no se encuentra en la definición del mensaje.
         /// </exception>
         public void Add(int id, object value)
-            => _fields.Add(new Field(id, value));
+            => Add(new Field(value, Rules[id]));
 
         /// <summary>
         /// Agrega campos al mensaje. Este campo deberá estar incluido en las reglas del mensaje
@@ -132,24 +127,13 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </exception>
         public void Add(Field field)
         {
-            if (_fields.Any(x => x.ID == field.ID))
-                throw new ArgumentException("El ID ya existe en el mensaje actual");
-
-            if (!_messageRules.Any(x => x.ID == field.ID))
+            if (Rules[field.ID].IsNull())
                 throw new ArgumentException($"El campo: {field.ID} no está definido para el mensaje.");
 
-            if (_fields.Count == 0)
+            if (this[field.ID].IsNull())
                 _fields.Add(field);
             else
-            {
-                Field minID = _fields.Where(x => x.ID > field.ID).Aggregate((x1, x2) => x1.ID < x2.ID ? x1 : x2);
-                int minIDIndex = _fields.IndexOf(minID);
-
-                if (minIDIndex == -1)
-                    _fields.Add(field);
-                else
-                    _fields.Insert(minIDIndex, field);
-            }
+                _fields.First(x => x.ID == field.ID).Value = field.Value;
         }
 
         /// <summary>
@@ -164,10 +148,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="item">Campo a a buscar.</param>
         /// <returns>Un valor true si el campo con el ID y valor coincide dentro del mensaje.</returns>
         public bool Contains(Field item)
-            => _fields.Any(x => x.ID == item.ID && x.Value == item.Value);
+            => IsSet(item.ID) && GetValue<object>(item.ID) == item.Value;
 
         /// <summary>
-        /// Copia los campos del mensaje dentro un vector de <see cref="Field"/> a partir del indice especificado.
+        /// Copia los campos del mensaje dentro un vector de <see cref="Field"/> a partir del indice especificado ordenados por ID de forma ascendente.
         /// </summary>
         /// <param name="array">Vector destino de la colección.</param>
         /// <param name="arrayIndex">Indice de partida del copiado.</param>
@@ -179,7 +163,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// </summary>
         /// <returns>Un enumerador de iteración.</returns>
         public IEnumerator<Field> GetEnumerator()
-                    => _fields.OrderBy(x => x.ID).GetEnumerator();
+                    => _fields.GetEnumerator();
 
         /// <summary>
         /// Devuelve un enumerador no genérico que recorre en iteración al mensaje.
@@ -202,8 +186,8 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <returns>Valor convertido del campo.</returns>
         public TResult GetValue<TResult>(int id, Func<object, TResult> converter = null)
         {
-            if (!_fields.Any(x => x.ID == id))
-                throw new ArgumentException($"No existe el campo con el identificador ID: {id}");
+            if (!IsSet(id))
+                return default;
 
             if (converter == null)
                 return (TResult)_fields.First(x => x.ID == id).Value;
@@ -225,9 +209,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="id">ID del campo a quitar.</param>
         /// <returns>Un valor true en caso de remover el campo.</returns>
         public bool Remove(int id)
-                    => _fields.Any(x => x.ID == id)
-                ? _fields.Remove(_fields.First(x => x.ID == id))
-                : false;
+                    => IsSet(id) ? _fields.RemoveWhere(x => x.ID == id) > 0 : false;
 
         /// <summary>
         /// Quita la primera aparición del campo que coincide con el ID y el valor especificado.
@@ -235,9 +217,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="field">Campo a quitar.</param>
         /// <returns>Un valor true en caso de remover el campo.</returns>
         public bool Remove(Field field)
-            => _fields.Any(x => x.ID == field.ID && field.Value == x.Value)
-                ? _fields.Remove(_fields.First(x => x.ID == field.ID && field.Value == x.Value))
-                : false;
+            => Remove(field.ID);
 
         /// <summary>
         /// Convierte el mensaje en una secuencia de bytes para ser transmitido o almacenado.
@@ -251,8 +231,8 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
             foreach (Field field in this)
             {
-                FieldDefinition definition = _messageRules.FirstOrDefault(x => x.ID == field.ID);
-                IAdaptiveSerializer serializer = GetSerializer(definition);
+                FieldDefinition definition = field.Definition;
+                IAdaptiveSerializer serializer = definition.Serializer;
 
                 header += (ulong)Math.Pow(2, definition.ID - 1);
                 body = body.Concat(serializer.Serialize(field, definition)).ToArray();
@@ -274,37 +254,16 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         {
             value = default;
 
-            if (!_fields.Any(x => x.ID == id))
+            if (!IsSet(id))
                 return false;
 
             try
             {
                 value = GetValue(id, converter);
+
                 return true;
             }
             catch { return false; }
-        }
-
-        /// <summary>
-        /// Identifica y obtiene el serializador especificado en la definición.
-        /// </summary>
-        /// <param name="definition">Definición del campo.</param>
-        /// <returns>Un serializador adaptativo.</returns>
-        private static IAdaptiveSerializer GetSerializer(FieldDefinition definition)
-        {
-            if (definition == null)
-                return null;
-
-            return definition.Type switch
-            {
-                FieldType.Numeric => new NumericSerializer(),
-
-                FieldType.Text => new TextSerializer(),
-
-                FieldType.Binary => new BinarySerializer(),
-
-                _ => throw new AdaptiveMessageDeserializeException("El tipo de campo no es válido para la conversión"),
-            };
         }
 
         /// <summary>
@@ -314,25 +273,29 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="message">Mensaje a decodificar.</param>
         /// <param name="body">Secuencia de bytes que contiene los valores de los campos.</param>
         /// <param name="rules">Reglas de composición del mensaje.</param>
-        private static void Processor(AdaptiveMessage message, byte[] body, AdaptiveMessageRules rules)
+        private static AdaptiveMessage DeserializeBody(AdaptiveMessage message, byte[] body, IList<int> fieldsID)
         {
             try
             {
-                foreach (var field in message)
+                foreach (var field in fieldsID)
                 {
-                    FieldDefinition definition = rules.FirstOrDefault(x => x.ID == field.ID);
+                    FieldDefinition definition = message.Rules.Any(f => f.ID == field) ? message.Rules[field] : null;
 
                     if (definition == null)
                         continue;
 
-                    IAdaptiveSerializer converter = GetSerializer(definition);
+                    IAdaptiveSerializer converter = definition.Serializer;
 
-                    field.Value = converter.Deserialize(ref body, definition)?.Value;
+                    var value = converter.Deserialize(ref body, definition)?.Value;
+
+                    message.Add(new Field(value, definition));
                 }
+
+                return message;
             }
             catch (Exception ex)
             {
-                throw new AdaptiveMessageDeserializeException("No se logró generar el mensaje desde los datos recibidos", ex);
+                throw new AdaptiveMessageDeserializeException("Mensaje corrompido, no es posible leer", ex);
             }
         }
 
@@ -340,8 +303,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// Representa en una cadena a la instancia actual.
         /// </summary>
         /// <returns>Una cadena Hex que representa al mensaje.</returns>
-        public override string ToString()
-            => BitConverter.ToString(Serialize()).Replace("-", "");
+        public override string ToString() => Serialize().ToHex();
 
         /// <summary>
         /// Copia el contenido del mensaje a otra instancia, sobreescribiendo los campos utilizados.
@@ -350,7 +312,15 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         public void CopyTo(IAdaptiveMessage dest)
         {
             foreach (Field field in this)
-                dest[field.ID] = dest[field.ID];
+                dest[field.ID] = this[field.ID];
+        }
+
+        /// <summary>
+        /// Estructura que define como se comparan los campos en una lista ordenada.
+        /// </summary>
+        private class FieldComparer : IComparer<Field>
+        {
+            public int Compare(Field x, Field y) => x.ID.CompareTo(y.ID);
         }
     }
 }

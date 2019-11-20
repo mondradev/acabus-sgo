@@ -70,6 +70,11 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         AdaptiveMessageRules Rules { get; }
 
         /// <summary>
+        /// Obtiene el tamaño en bytes del mensaje.
+        /// </summary>
+        int Size { get; }
+
+        /// <summary>
         /// Copia el contenido del mensaje a otra instancia, sobreescribiendo los campos utilizados.
         /// </summary>
         /// <param name="message">Mensaje destino.</param>

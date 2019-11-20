@@ -42,7 +42,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         }
 
         /// <summary>
-        /// Obtiene el valor del campo Byte especificado. El campo deberá ser del tipo <see cref="FieldDefinition.FieldType.Binary"/>.
+        /// Obtiene el valor del campo Byte especificado. El campo deberá ser del tipo <see cref="FieldType.Binary"/>.
         /// </summary>
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
@@ -56,6 +56,19 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 return default;
 
             return src[id] as byte[];
+        }
+
+        /// <summary>
+        /// Obtiene la cantidad de elementos de la enumeración.
+        /// </summary>
+        /// <param name="message">Mensaje adaptativo.</param>
+        /// <returns>Cantidad de elementos de la colección.</returns>
+        public static int GetCount(this IAdaptiveMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return message.GetInt32((int)AdaptiveMessageFieldID.Count);
         }
 
         /// <summary>
@@ -95,39 +108,10 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (!src.IsSet(id))
                 return default;
 
-            if (src.TryGetValue(id, out int value, x => Convert.ToInt32(x)))
-                return (T)Convert.ChangeType(value, typeof(T).GetEnumUnderlyingType());
+            if (src.TryGetValue(id, out T value, x => (T)Enum.Parse(typeof(T), x.ToString(), true)))
+                return value;
 
             throw new FormatException("No se logró realizar la conversión a " + typeof(T).Name);
-        }
-
-        /// <summary>
-        /// Obtiene la cantidad de elementos de la enumeración.
-        /// </summary>
-        /// <param name="message">Mensaje adaptativo.</param>
-        /// <returns>Cantidad de elementos de la colección.</returns>
-        public static int GetEnumerableCount(this IAdaptiveMessage message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return message.GetInt32((int)AdaptiveMessageFieldID.EnumerableCount);
-        }
-
-        /// <summary>
-        /// Obtiene la operación a realizar en la enumeración.
-        /// </summary>
-        /// <param name="message">Mensaje adaptativo.</param>
-        /// <returns>Operación a efecturar.</returns>
-        public static AdaptiveMessageEnumOp GetEnumOp(this IAdaptiveMessage message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            if (message.IsEnumerable())
-                return (AdaptiveMessageEnumOp)message[(int)AdaptiveMessageFieldID.EnumerableOperation];
-
-            return (AdaptiveMessageEnumOp)(-1);
         }
 
         /// <summary>
@@ -144,19 +128,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         }
 
         /// <summary>
-        /// Obtiene el hash de las reglas de mensajes.
-        /// </summary>
-        /// <param name="message">Mensaje adaptativo.</param>
-        /// <returns>Hash de las reglas de mensajes.</returns>
-        public static byte[] GetHashRules(this IAdaptiveMessage message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return message.GetBytes((int)AdaptiveMessageFieldID.HashRules);
-        }
-
-        /// <summary>
         /// Obtiene el valor Int16 del campo especificado.
         /// </summary>
         /// <param name="src">Mensaje origen.</param>
@@ -170,7 +141,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (!src.IsSet(id))
                 return default;
 
-            if (src.TryGetValue(id, out Int16 value, x => Convert.ToInt16(x)))
+            if (src.TryGetValue(id, out short value, x => ConvertTo(x, 2, BitConverter.ToInt16)))
                 return value;
 
             throw new FormatException("No se logró realizar la conversión a Int16");
@@ -190,7 +161,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (!src.IsSet(id))
                 return default;
 
-            if (src.TryGetValue(id, out Int32 value, x => Convert.ToInt32(x)))
+            if (src.TryGetValue(id, out int value, x => ConvertTo(x, 4, BitConverter.ToInt32)))
                 return value;
 
             throw new FormatException("No se logró realizar la conversión a Int32");
@@ -202,7 +173,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         /// <param name="src">Mensaje origen.</param>
         /// <param name="id">Identificador del campo.</param>
         /// <returns>El valor del campo.</returns>
-        public static Int64 GetInt64(this IAdaptiveMessage src, int id)
+        public static long GetInt64(this IAdaptiveMessage src, int id)
         {
             if (src == null)
                 throw new ArgumentNullException(nameof(src));
@@ -210,7 +181,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (!src.IsSet(id))
                 return default;
 
-            if (src.TryGetValue(id, out Int64 value, x => Convert.ToInt64(x)))
+            if (src.TryGetValue(id, out long value, x => ConvertTo(x, 8, BitConverter.ToInt64)))
                 return value;
 
             throw new FormatException("No se logró realizar la conversión a Int64");
@@ -241,7 +212,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (!message.IsEnumerable())
                 return -1;
 
-            return message.GetInt32((int)AdaptiveMessageFieldID.CurrentPosition);
+            return message.GetInt32((int)AdaptiveMessageFieldID.Position);
         }
 
         /// <summary>
@@ -333,7 +304,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (!src.IsSet(id))
                 return default;
 
-            if (src.TryGetValue(id, out UInt16 value, x => Convert.ToUInt16(x)))
+            if (src.TryGetValue(id, out UInt16 value, x => ConvertTo(x, 2, BitConverter.ToUInt16)))
                 return value;
 
             throw new FormatException("No se logró realizar la conversión a UInt16");
@@ -353,7 +324,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (!src.IsSet(id))
                 return default;
 
-            if (src.TryGetValue(id, out UInt32 value, x => Convert.ToUInt32(x)))
+            if (src.TryGetValue(id, out UInt32 value, x => ConvertTo(x, 4, BitConverter.ToUInt32)))
                 return value;
 
             throw new FormatException("No se logró realizar la conversión a UInt32");
@@ -373,7 +344,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (!src.IsSet(id))
                 return default;
 
-            if (src.TryGetValue(id, out UInt64 value, x => Convert.ToUInt64(x)))
+            if (src.TryGetValue(id, out UInt64 value, x => ConvertTo(x, 8, BitConverter.ToUInt64)))
                 return value;
 
             throw new FormatException("No se logró realizar la conversión a UInt64");
@@ -405,19 +376,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         }
 
         /// <summary>
-        /// Indica si tiene el campo de HashRules activo.
-        /// </summary>
-        /// <param name="message">Mensaje adaptivo.</param>
-        /// <returns>Un valor true si tiene el campo activo.</returns>
-        public static Boolean HasHashRules(this IAdaptiveMessage message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return message.IsSet((int)AdaptiveMessageFieldID.HashRules);
-        }
-
-        /// <summary>
         /// Indica si tiene el campo de nombre del módulo activo.
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
@@ -439,7 +397,8 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            return message.IsSet((int)AdaptiveMessageFieldID.IsEnumerable);
+            return message.IsSet((int)AdaptiveMessageFieldID.ResponseCode)
+                && message.GetResponseCode() == AdaptiveMessageResponseCode.PARTIAL_CONTENT;
         }
 
         /// <summary>
@@ -465,9 +424,9 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            message[(int)AdaptiveMessageFieldID.IsEnumerable] = BitConverter.GetBytes(true);
-            message[(int)AdaptiveMessageFieldID.EnumerableCount] = count;
-            message[(int)AdaptiveMessageFieldID.CurrentPosition] = 0;
+            message[(int)AdaptiveMessageFieldID.ResponseCode] = AdaptiveMessageResponseCode.PARTIAL_CONTENT;
+            message[(int)AdaptiveMessageFieldID.Count] = count;
+            message[(int)AdaptiveMessageFieldID.Position] = -1;
         }
 
         /// <summary>
@@ -497,7 +456,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
 
             String dateTimeText = String.Format("{0}{1:00}{2:00}{3:00}{4:00}{5:00}", value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second);
 
-            src[id] = dateTimeText;
+            src[id] = ulong.Parse(dateTimeText);
         }
 
         /// <summary>
@@ -515,20 +474,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
         }
 
         /// <summary>
-        /// Establece la operación a realizar en la enumeración.
-        /// </summary>
-        /// <param name="message">Mensaje adaptativo.</param>
-        /// <param name="op">Operación a realizar.</param>
-        public static void SetEnumOp(this IAdaptiveMessage message, AdaptiveMessageEnumOp op)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            if (message.IsEnumerable())
-                message[(int)AdaptiveMessageFieldID.EnumerableOperation] = op;
-        }
-
-        /// <summary>
         /// Establece el nombre de la función en el mensaje.
         /// </summary>
         /// <param name="message">Mensaje adaptativo.</param>
@@ -539,19 +484,6 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 throw new ArgumentNullException(nameof(message));
 
             message[(int)AdaptiveMessageFieldID.FunctionName] = functionName;
-        }
-
-        /// <summary>
-        /// Establece el hash de las reglas utilizadas por el sistema de mensajes.
-        /// </summary>
-        /// <param name="message">Mensaje adaptativo.</param>
-        /// <param name="hashRules">Hash de las reglas de mensajes.</param>
-        public static void SetHashRules(this IAdaptiveMessage message, byte[] hashRules)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            message[(int)AdaptiveMessageFieldID.HashRules] = hashRules;
         }
 
         /// <summary>
@@ -578,7 +510,7 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
                 throw new ArgumentNullException(nameof(message));
 
             if (message.IsEnumerable())
-                message[(int)AdaptiveMessageFieldID.CurrentPosition] = position;
+                message[(int)AdaptiveMessageFieldID.Position] = position;
         }
 
         /// <summary>
@@ -592,8 +524,12 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            message[(int)AdaptiveMessageFieldID.ResponseMessage] = response;
             message[(int)AdaptiveMessageFieldID.ResponseCode] = code;
+
+            if (String.IsNullOrEmpty(response))
+                message.Remove((int)AdaptiveMessageFieldID.ResponseMessage);
+            else
+                message[(int)AdaptiveMessageFieldID.ResponseMessage] = response;
         }
 
         /// <summary>
@@ -610,6 +546,28 @@ namespace InnSyTech.Standard.Net.Communications.AdaptiveMessages
             String timeSpanText = String.Format("{0}{1}{2}", value.Hours, value.Minutes, value.Seconds);
 
             src[id] = timeSpanText;
+        }
+
+        /// <summary>
+        /// Realiza la conversión de valor numéricos.
+        /// </summary>
+        /// <typeparam name="T">Tipo de valor destino.</typeparam>
+        /// <param name="value">Valor numérico a convertir.</param>
+        /// <param name="memSize">Tamaño de la memoria del tipo de dato.</param>
+        /// <param name="bitConverterFn">Función convertidora.</param>
+        private static T ConvertTo<T>(object value, int memSize, Func<byte[], int, T> bitConverterFn)
+        {
+            if (!value.IsInteger())
+                throw new ArgumentException("El valor a convertir debe ser del tipo numérico");
+
+            byte[] buffer;
+
+            if (Type.GetTypeCode(value.GetType()) == TypeCode.UInt64)
+                buffer = BitConverter.GetBytes(Convert.ToUInt64(value));
+            else
+                buffer = BitConverter.GetBytes(Convert.ToInt64(value));
+
+            return bitConverterFn(buffer.PadRight(memSize), 0);
         }
     }
 }
