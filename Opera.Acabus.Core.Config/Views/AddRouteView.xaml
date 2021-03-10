@@ -5,7 +5,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Opera.Acabus.Core.Config.ViewModels"
              xmlns:c="clr-namespace:Opera.Acabus.Core.Gui.Converters;assembly=Opera.Acabus.Core.Gui"
-             xmlns:g="clr-namespace:Opera.Acabus.Core.Gui;assembly=Opera.Acabus.Core.Gui" Tag="">
+             xmlns:g="clr-namespace:Opera.Acabus.Core.Gui;assembly=Opera.Acabus.Core.Gui">
     <UserControl.DataContext>
         <vm:AddRouteViewModel />
     </UserControl.DataContext>
@@ -33,7 +33,7 @@
                 <RowDefinition Height="24" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBox md:HintAssist.Hint="ID Ruta" Margin="0" VerticalAlignment="Top" Grid.Row="0" Text="{Binding IDLIn}" />
+            <TextBox md:HintAssist.Hint="ID Ruta" Margin="0" VerticalAlignment="Top" Grid.Row="0" Text="{Binding IDLin}" />
             <TextBox md:HintAssist.Hint="Número de la ruta" Margin="0" VerticalAlignment="Top" Grid.Row="2" Text="{Binding RouteNumber}" />
             <TextBox md:HintAssist.Hint="Descripción" Margin="0" VerticalAlignment="Top" Grid.Row="4" Text="{Binding Name}" />
             <ComboBox  Grid.Row="6" md:HintAssist.Hint="Tipo de ruta"  Margin="0" VerticalAlignment="Top"

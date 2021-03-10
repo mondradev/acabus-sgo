@@ -173,7 +173,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 };
 
                 if (ServerContext.GetLocalSync("Route").Create(ref route))
+                {
                     Dispatcher.SendMessageToGUI($"Ruta {route} agregada correctamente.");
+                    Dispatcher.CloseDialog(true);
+
+                    return;
+                }
             }
             catch (Exception reason)
             {

@@ -72,9 +72,9 @@ namespace Opera.Acabus.Core.Config.ViewModels
 
             ShowAddDeviceCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddDeviceView(), p => { if (p != null && (bool)p) RefreshDevice(); }));
 
-            ShowAddStationCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStationView(), p => RefreshStation()));
+            ShowAddStationCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddStationView(), p => { if (p != null && (bool)p) RefreshStation(); }));
 
-            ShowAddRouteCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddRouteView(), p => RefreshRoutes()));
+            ShowAddRouteCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddRouteView(), p => { if (p != null && (bool)p) RefreshRoutes(); }));
 
             ShowAddBusCommand = new Command(parameter => Dispatcher.RequestShowDialog(new AddBusView(), p => { if (p != null && (bool)p) RefreshBus(); }));
 

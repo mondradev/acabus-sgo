@@ -109,9 +109,10 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de las rutas disponibles.
         /// </summary>
-        public IEnumerable<Route> Routes => AcabusDataContext.AllRoutes
-            .Where(x => x.Type == RouteType.TRUNK)
-            .OrderBy(x => x.RouteNumber);
+        public List<Route> Routes { get; } = AcabusDataContext.AllRoutes
+            .Where(x => x.Type == RouteType.TRUNK && x.Active)
+            .OrderBy(x => x.RouteNumber)
+            .ToList();
 
         /// <summary>
         /// Obtiene o establece la ruta seleccionada.
@@ -164,7 +165,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 case nameof(SelectedRoute):
                     if (SelectedRoute == null)
                         AddError(nameof(SelectedRoute), "Especifique la ruta a la que pertenece la estación.");
-                    else if (!Routes.ToList().Any(x => x.ID == SelectedRoute.ID))
+                    else if (!Routes.Any(x => x.ID == SelectedRoute.ID))
                         AddError(nameof(SelectedRoute), "Especifique una ruta válida.");
                     break;
 
@@ -198,7 +199,7 @@ namespace Opera.Acabus.Core.Config.ViewModels
         {
             try
             {
-                object station = new Station(IDEst, UInt16.Parse(StationNumber))
+                object station = new Station(IDEst, ushort.Parse(StationNumber))
                 {
                     Name = Name,
                     IsExternal = IsExternal,
@@ -207,7 +208,12 @@ namespace Opera.Acabus.Core.Config.ViewModels
                 };
 
                 if (ServerContext.GetLocalSync("Station").Create(ref station))
+                {
                     Dispatcher.SendMessageToGUI($"Estación {station} agregado correctamente.");
+                    Dispatcher.CloseDialog(true);
+
+                    return;
+                }
             }
             catch (Exception reason)
             {

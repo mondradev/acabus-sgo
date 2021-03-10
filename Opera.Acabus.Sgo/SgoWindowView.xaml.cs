@@ -93,11 +93,17 @@ namespace Opera.Acabus.Sgo
             if (settingPopup == null)
                 return;
 
+            var about = (settingPopup.PopupContent as StackPanel).Children[(settingPopup.PopupContent as StackPanel).Children.Count - 1];
+
+            (settingPopup.PopupContent as StackPanel).Children.Remove(about);
+
             (settingPopup.PopupContent as StackPanel).Children.Add(new Button
             {
                 Content = description,
                 Command = command
             });
+
+            (settingPopup.PopupContent as StackPanel).Children.Add(about);
         }
 
         /// <summary>

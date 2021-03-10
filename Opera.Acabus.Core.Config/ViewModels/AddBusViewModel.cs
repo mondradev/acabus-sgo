@@ -83,8 +83,10 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de las rutas para asignar.
         /// </summary>
-        public IEnumerable<Route> Routes
-            => AcabusDataContext.AllRoutes.ToList().OrderBy(x => x.Type).ThenBy(x => x.RouteNumber);
+        public IEnumerable<Route> Routes { get; } = AcabusDataContext.AllRoutes
+            .OrderBy(x => x.Type)
+            .ThenBy(x => x.RouteNumber)
+            .ToList();
 
         /// <summary>
         /// Obtiene o establece el tipo de la unidad. <seealso cref="BusType"/>.

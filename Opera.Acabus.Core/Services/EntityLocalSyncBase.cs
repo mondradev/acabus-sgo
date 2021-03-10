@@ -231,15 +231,20 @@ namespace Opera.Acabus.Core.Services
 
                 if (exists)
                 {
-                    downloaded = LocalContext.Update(instance);
+                    if (LocalContext.Read<T>().Any(i => i.ID == instance.ID && i.ModifyTime < instance.ModifyTime))
+                    {
+                        downloaded = LocalContext.Update(instance);
 
-                    if (downloaded)
-                        if (instance.Active)
-                            Updated?.Invoke(this, new LocalSyncEventArgs(instance, LocalSyncOperation.UPDATE));
+                        if (downloaded)
+                            if (instance.Active)
+                                Updated?.Invoke(this, new LocalSyncEventArgs(instance, LocalSyncOperation.UPDATE));
+                            else
+                                Deleted?.Invoke(this, new LocalSyncEventArgs(instance, LocalSyncOperation.DELETE));
                         else
-                            Deleted?.Invoke(this, new LocalSyncEventArgs(instance, LocalSyncOperation.DELETE));
+                            throw new InvalidOperationException("No se logró actualizar de forma local");
+                    }
                     else
-                        throw new InvalidOperationException("No se logró actualizar de forma local");
+                        downloaded = true;
                 }
                 else
                 {
@@ -324,13 +329,18 @@ namespace Opera.Acabus.Core.Services
 
                     if (exists)
                     {
-                        createdOrUpdated = LocalContext.Update(item);
+                        if (LocalContext.Read<T>().Any(i => i.ID == item.ID && i.ModifyTime < item.ModifyTime))
+                        {
+                            createdOrUpdated = LocalContext.Update(item);
 
-                        if (createdOrUpdated)
-                            if (item.Active)
-                                Updated?.Invoke(this, new LocalSyncEventArgs(item, LocalSyncOperation.UPDATE));
-                            else
-                                Deleted?.Invoke(this, new LocalSyncEventArgs(item, LocalSyncOperation.DELETE));
+                            if (createdOrUpdated)
+                                if (item.Active)
+                                    Updated?.Invoke(this, new LocalSyncEventArgs(item, LocalSyncOperation.UPDATE));
+                                else
+                                    Deleted?.Invoke(this, new LocalSyncEventArgs(item, LocalSyncOperation.DELETE));
+                        }
+                        else
+                            createdOrUpdated = true;
                     }
                     else
                     {

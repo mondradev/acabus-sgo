@@ -62,7 +62,10 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de los autobuses disponibles.
         /// </summary>
-        public IEnumerable<Bus> Buses => AcabusDataContext.AllBuses.OrderBy(vehicle => vehicle.EconomicNumber);
+        public IEnumerable<Bus> Buses { get; } = AcabusDataContext.AllBuses
+            .Where(vehicle => vehicle.Active)
+            .OrderBy(vehicle => vehicle.EconomicNumber)
+            .ToList();
 
         /// <summary>
         /// Obtiene una lista de los tipos de equipos disponibles.
@@ -139,7 +142,10 @@ namespace Opera.Acabus.Core.Config.ViewModels
         /// <summary>
         /// Obtiene una lista de las estaciones disponibles.
         /// </summary>
-        public IEnumerable<Station> Stations => AcabusDataContext.AllStations.OrderBy(station => station.StationNumber);
+        public IEnumerable<Station> Stations { get; } = AcabusDataContext.AllStations
+            .Where(station => station.Active)
+            .OrderBy(station => station.StationNumber)
+            .ToList();
 
         /// <summary>
         /// Determina si los campos del formulario está correctamente llenos.
